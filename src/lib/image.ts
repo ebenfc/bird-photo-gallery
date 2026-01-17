@@ -6,7 +6,7 @@ import { uploadToStorage } from "./supabase";
 export interface ProcessedImage {
   filename: string;
   thumbnailFilename: string;
-  originalDateTaken: string | null;
+  originalDateTaken: Date | null;
 }
 
 export async function processUploadedImage(
@@ -18,11 +18,11 @@ export async function processUploadedImage(
   const thumbnailFilename = `${id}_thumb${ext}`;
 
   // Extract EXIF before any processing
-  let originalDateTaken: string | null = null;
+  let originalDateTaken: Date | null = null;
   try {
     const exifData = await exifr.parse(buffer);
     if (exifData?.DateTimeOriginal) {
-      originalDateTaken = new Date(exifData.DateTimeOriginal).toISOString();
+      originalDateTaken = new Date(exifData.DateTimeOriginal);
     }
   } catch {
     // EXIF extraction failed, continue without date
