@@ -19,6 +19,9 @@ export async function uploadToStorage(
 
   const uploadUrl = `${supabaseUrl}/storage/v1/object/${BUCKET_NAME}/${path}`;
 
+  // Convert Buffer to Uint8Array for fetch compatibility
+  const uint8Array = new Uint8Array(buffer);
+
   let response: Response;
   try {
     response = await fetch(uploadUrl, {
@@ -28,7 +31,7 @@ export async function uploadToStorage(
         "Content-Type": contentType,
         "x-upsert": "true",
       },
-      body: buffer,
+      body: uint8Array,
     });
   } catch (fetchError) {
     const errorMessage = fetchError instanceof Error ? fetchError.message : String(fetchError);
