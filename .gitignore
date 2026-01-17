@@ -39,3 +39,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Database (local SQLite)
+/data/
+*.db
+*.sqlite
+
+# Uploaded photos (local development only)
+/public/uploads/originals/
+/public/uploads/thumbnails/
+
+# Keep upload directory structure
+!/public/uploads/.gitkeep

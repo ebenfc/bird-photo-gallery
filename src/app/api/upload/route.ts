@@ -1,0 +1,64 @@
+import { NextRequest, NextResponse } from "next/server";
+import { validateApiKey, unauthorizedResponse } from "@/lib/auth";
+import { processUploadedImage } from "@/lib/image";
+import { db } from "@/db";
+import { photos } from "@/db/schema";
+
+// POST /api/upload - Upload a photo (iOS Shortcut endpoint)
+export async function POST(request: NextRequest) {
+  // Validate API key
+  if (!validateApiKey(request)) {
+    return unauthorizedResponse();
+  }
+
+  try {
+    const formData = await request.formData();
+    const photo = formData.get("photo") as File | null;
+    const speciesId = formData.get("speciesId") as string | null;
+    const notes = formData.get("notes") as string | null;
+
+    if (!photo) {
+      return NextResponse.json({ error: "No photo provided" }, { status: 400 });
+    }
+
+    // Validate file type
+    const validTypes = ["image/jpeg", "image/jpg", "image/heic", "image/heif", "image/png"];
+    if (!validTypes.includes(photo.type.toLowerCase())) {
+      return NextResponse.json(
+        { error: "Invalid file type. Supported: JPEG, HEIC, PNG" },
+        { status: 400 }
+      );
+    }
+
+    // Process image (convert to JPEG, generate thumbnail, extract EXIF)
+    const buffer = Buffer.from(await photo.arrayBuffer());
+    const processed = await processUploadedImage(buffer);
+
+    // Save to database
+    const result = await db
+      .insert(photos)
+      .values({
+        speciesId: speciesId ? parseInt(speciesId) : null,
+        filename: processed.filename,
+        thumbnailFilename: processed.thumbnailFilename,
+        originalDateTaken: processed.originalDateTaken,
+        notes: notes?.trim() || null,
+      })
+      .returning();
+
+    return NextResponse.json({
+      success: true,
+      photoId: result[0].id,
+      needsSpecies: !speciesId,
+      message: speciesId
+        ? "Photo uploaded successfully"
+        : "Photo uploaded - species assignment needed",
+    });
+  } catch (error) {
+    console.error("Error uploading photo:", error);
+    return NextResponse.json(
+      { error: "Failed to upload photo" },
+      { status: 500 }
+    );
+  }
+}

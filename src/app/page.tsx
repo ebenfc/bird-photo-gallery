@@ -1,65 +1,237 @@
-import Image from "next/image";
+"use client";
+
+import { Suspense, useState, useEffect, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Photo, Species, PhotosResponse, SpeciesResponse } from "@/types";
+import PhotoGrid from "@/components/gallery/PhotoGrid";
+import PhotoModal from "@/components/gallery/PhotoModal";
+import GalleryFilters from "@/components/gallery/GalleryFilters";
+import SpeciesAssignModal from "@/components/species/SpeciesAssignModal";
+
+function GalleryContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [species, setSpecies] = useState<Species[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
+  const [photoToAssign, setPhotoToAssign] = useState<Photo | null>(null);
+
+  // Get filter state from URL
+  const selectedSpecies = searchParams.get("species")
+    ? parseInt(searchParams.get("species")!)
+    : null;
+  const showFavoritesOnly = searchParams.get("favorites") === "true";
+
+  // Update URL with filter state
+  const updateFilters = useCallback(
+    (newSpecies: number | null, newFavorites: boolean) => {
+      const params = new URLSearchParams();
+      if (newSpecies) params.set("species", newSpecies.toString());
+      if (newFavorites) params.set("favorites", "true");
+      const queryString = params.toString();
+      router.push(queryString ? `/?${queryString}` : "/");
+    },
+    [router]
+  );
+
+  const fetchPhotos = useCallback(async () => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (selectedSpecies) params.set("speciesId", selectedSpecies.toString());
+    if (showFavoritesOnly) params.set("favorites", "true");
+
+    try {
+      const res = await fetch(`/api/photos?${params.toString()}`);
+      const data: PhotosResponse = await res.json();
+      setPhotos(data.photos);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedSpecies, showFavoritesOnly]);
+
+  const fetchSpecies = async () => {
+    try {
+      const res = await fetch("/api/species");
+      const data: SpeciesResponse = await res.json();
+      setSpecies(data.species);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Fetch species list
+  useEffect(() => {
+    fetchSpecies();
+  }, []);
+
+  // Fetch photos based on filters
+  useEffect(() => {
+    fetchPhotos();
+  }, [fetchPhotos]);
+
+  // Handle favorite toggle
+  const handleFavoriteToggle = async (id: number, isFavorite: boolean) => {
+    try {
+      await fetch(`/api/photos/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isFavorite }),
+      });
+
+      // Update local state
+      setPhotos((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, isFavorite } : p))
+      );
+      if (selectedPhoto?.id === id) {
+        setSelectedPhoto((prev) => (prev ? { ...prev, isFavorite } : null));
+      }
+    } catch (err) {
+      console.error("Failed to update favorite:", err);
+    }
+  };
+
+  // Handle species assignment
+  const handleAssignSpecies = async (photoId: number, speciesId: number) => {
+    await fetch(`/api/photos/${photoId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ speciesId }),
+    });
+
+    // Refresh photos and species
+    await Promise.all([fetchPhotos(), fetchSpecies()]);
+
+    // Update selected photo if it was the one being assigned
+    if (selectedPhoto?.id === photoId) {
+      const updatedSpecies = species.find((s) => s.id === speciesId);
+      if (updatedSpecies) {
+        setSelectedPhoto((prev) =>
+          prev
+            ? {
+                ...prev,
+                species: {
+                  id: updatedSpecies.id,
+                  commonName: updatedSpecies.commonName,
+                  scientificName: updatedSpecies.scientificName,
+                },
+              }
+            : null
+        );
+      }
+    }
+
+    setPhotoToAssign(null);
+  };
+
+  const handleCreateAndAssign = async (
+    photoId: number,
+    speciesData: { commonName: string; scientificName?: string }
+  ) => {
+    // Create species
+    const createRes = await fetch("/api/species", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(speciesData),
+    });
+    const { species: newSpecies } = await createRes.json();
+
+    // Assign to photo
+    await handleAssignSpecies(photoId, newSpecies.id);
+  };
+
+  // Photo navigation in modal
+  const handleNavigate = (direction: "prev" | "next") => {
+    if (!selectedPhoto) return;
+    const currentIndex = photos.findIndex((p) => p.id === selectedPhoto.id);
+    const newIndex = direction === "prev" ? currentIndex - 1 : currentIndex + 1;
+    if (newIndex >= 0 && newIndex < photos.length) {
+      setSelectedPhoto(photos[newIndex]);
+    }
+  };
+
+  const canNavigate = selectedPhoto
+    ? {
+        prev: photos.findIndex((p) => p.id === selectedPhoto.id) > 0,
+        next:
+          photos.findIndex((p) => p.id === selectedPhoto.id) < photos.length - 1,
+      }
+    : { prev: false, next: false };
+
+  const handleChangeSpecies = (photo: Photo) => {
+    setPhotoToAssign(photo);
+  };
+
+  return (
+    <div className="pnw-texture min-h-screen">
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-2xl font-bold text-[var(--forest-900)]">Photo Gallery</h1>
+        <span className="text-sm text-[var(--mist-500)] px-3 py-1 bg-[var(--moss-50)] rounded-full">
+          {photos.length} photo{photos.length !== 1 ? "s" : ""}
+        </span>
+      </div>
+
+      <GalleryFilters
+        species={species}
+        selectedSpecies={selectedSpecies}
+        showFavoritesOnly={showFavoritesOnly}
+        onSpeciesChange={(id) => updateFilters(id, showFavoritesOnly)}
+        onFavoritesChange={(value) => updateFilters(selectedSpecies, value)}
+      />
+
+      <PhotoGrid
+        photos={photos}
+        onPhotoClick={setSelectedPhoto}
+        loading={loading}
+      />
+
+      <PhotoModal
+        photo={selectedPhoto}
+        onClose={() => setSelectedPhoto(null)}
+        onFavoriteToggle={handleFavoriteToggle}
+        onNavigate={handleNavigate}
+        canNavigate={canNavigate}
+        onChangeSpecies={handleChangeSpecies}
+      />
+
+      <SpeciesAssignModal
+        photo={photoToAssign}
+        species={species}
+        onClose={() => setPhotoToAssign(null)}
+        onAssign={handleAssignSpecies}
+        onCreateAndAssign={handleCreateAndAssign}
+      />
+    </div>
+  );
+}
+
+function GalleryLoading() {
+  return (
+    <div className="pnw-texture min-h-screen">
+      <div className="flex items-center justify-between mb-8">
+        <div className="h-8 w-40 bg-gradient-to-r from-[var(--moss-100)] to-[var(--mist-100)] rounded-xl animate-pulse" />
+        <div className="h-6 w-24 bg-gradient-to-r from-[var(--moss-50)] to-[var(--mist-50)] rounded-full animate-pulse" />
+      </div>
+      <div className="h-10 w-64 bg-gradient-to-r from-[var(--moss-50)] to-[var(--mist-50)] rounded-xl animate-pulse mb-6" />
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div
+            key={i}
+            className="aspect-square bg-gradient-to-br from-[var(--moss-50)] to-[var(--mist-50)] rounded-2xl animate-pulse"
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <Suspense fallback={<GalleryLoading />}>
+      <GalleryContent />
+    </Suspense>
   );
 }
