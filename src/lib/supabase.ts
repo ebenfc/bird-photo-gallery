@@ -1,54 +1,67 @@
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
-
 // Storage bucket name
 export const BUCKET_NAME = "bird-photos";
 
-// Lazy-load Supabase client to avoid build-time errors
-let supabaseClient: SupabaseClient | null = null;
-
-function getSupabase() {
-  if (!supabaseClient) {
-    const supabaseUrl = process.env.SUPABASE_URL!;
-    const supabaseKey = process.env.SUPABASE_ANON_KEY!;
-    supabaseClient = createClient(supabaseUrl, supabaseKey);
-  }
-  return supabaseClient;
-}
-
 /**
- * Upload a file to Supabase Storage
+ * Upload a file to Supabase Storage using native fetch API
+ * This avoids potential bundling issues with the Supabase SDK
  */
 export async function uploadToStorage(
   buffer: Buffer,
   path: string,
   contentType: string = "image/jpeg"
 ): Promise<string> {
-  const supabase = getSupabase();
-  const { error } = await supabase.storage
-    .from(BUCKET_NAME)
-    .upload(path, buffer, {
-      contentType,
-      upsert: true,
-    });
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
-  if (error) {
-    throw new Error(`Failed to upload to Supabase: ${error.message}`);
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error("Missing SUPABASE_URL or SUPABASE_ANON_KEY environment variables");
+  }
+
+  const uploadUrl = `${supabaseUrl}/storage/v1/object/${BUCKET_NAME}/${path}`;
+
+  const response = await fetch(uploadUrl, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${supabaseKey}`,
+      "Content-Type": contentType,
+      "x-upsert": "true",
+    },
+    body: buffer,
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to upload to Supabase: ${response.status} ${errorText}`);
   }
 
   // Return public URL
-  const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(path);
-  return data.publicUrl;
+  return `${supabaseUrl}/storage/v1/object/public/${BUCKET_NAME}/${path}`;
 }
 
 /**
- * Delete a file from Supabase Storage
+ * Delete a file from Supabase Storage using native fetch API
  */
 export async function deleteFromStorage(path: string): Promise<void> {
-  const supabase = getSupabase();
-  const { error } = await supabase.storage.from(BUCKET_NAME).remove([path]);
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
-  if (error) {
-    console.error(`Failed to delete from Supabase: ${error.message}`);
+  if (!supabaseUrl || !supabaseKey) {
+    console.error("Missing SUPABASE_URL or SUPABASE_ANON_KEY environment variables");
+    return;
+  }
+
+  const deleteUrl = `${supabaseUrl}/storage/v1/object/${BUCKET_NAME}/${path}`;
+
+  const response = await fetch(deleteUrl, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${supabaseKey}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`Failed to delete from Supabase: ${response.status} ${errorText}`);
   }
 }
 
@@ -56,7 +69,9 @@ export async function deleteFromStorage(path: string): Promise<void> {
  * Get public URL for a file in storage
  */
 export function getPublicUrl(path: string): string {
-  const supabase = getSupabase();
-  const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(path);
-  return data.publicUrl;
+  const supabaseUrl = process.env.SUPABASE_URL;
+  if (!supabaseUrl) {
+    return `/storage/${path}`;
+  }
+  return `${supabaseUrl}/storage/v1/object/public/${BUCKET_NAME}/${path}`;
 }
