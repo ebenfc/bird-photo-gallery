@@ -19,19 +19,26 @@ export async function uploadToStorage(
 
   const uploadUrl = `${supabaseUrl}/storage/v1/object/${BUCKET_NAME}/${path}`;
 
-  const response = await fetch(uploadUrl, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${supabaseKey}`,
-      "Content-Type": contentType,
-      "x-upsert": "true",
-    },
-    body: buffer,
-  });
+  let response: Response;
+  try {
+    response = await fetch(uploadUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${supabaseKey}`,
+        "Content-Type": contentType,
+        "x-upsert": "true",
+      },
+      body: buffer,
+    });
+  } catch (fetchError) {
+    const errorMessage = fetchError instanceof Error ? fetchError.message : String(fetchError);
+    const errorStack = fetchError instanceof Error ? fetchError.stack : '';
+    throw new Error(`Fetch failed to ${uploadUrl}: ${errorMessage} | Stack: ${errorStack}`);
+  }
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Failed to upload to Supabase: ${response.status} ${errorText}`);
+    throw new Error(`Supabase returned error: ${response.status} ${errorText}`);
   }
 
   // Return public URL
