@@ -55,9 +55,10 @@ export async function POST(request: NextRequest) {
         : "Photo uploaded - species assignment needed",
     });
   } catch (error) {
-    console.error("Error uploading photo:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("Error uploading photo:", errorMessage, error);
     return NextResponse.json(
-      { error: "Failed to upload photo" },
+      { error: "Failed to upload photo", details: errorMessage },
       { status: 500 }
     );
   }
