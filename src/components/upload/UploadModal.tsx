@@ -6,7 +6,6 @@ import { Species, Rarity } from "@/types";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
-import RarityBadge from "@/components/ui/RarityBadge";
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -63,6 +62,7 @@ export default function UploadModal({
     setNewSpeciesName("");
     setNewScientificName("");
     setNewRarity("common");
+    setIsDragging(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -132,6 +132,32 @@ export default function UploadModal({
     setStep("preview");
   }, []);
 
+  const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      processFile(file);
+    }
+  }, [processFile]);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processFile(file);
+    }
+  }, [processFile]);
+
   const handleCreateSpecies = async () => {
     if (!newSpeciesName.trim()) {
       setError("Species name is required");
@@ -157,11 +183,7 @@ export default function UploadModal({
       }
 
       const { species: newSpecies } = await res.json();
-
-      // Notify parent to refresh species list
       onSpeciesCreated();
-
-      // Select the newly created species
       setSelectedSpeciesId(newSpecies.id.toString());
       setShowNewSpeciesForm(false);
       setNewSpeciesName("");
@@ -270,26 +292,28 @@ export default function UploadModal({
   const handleViewPhoto = () => {
     onUploadComplete();
     handleClose();
-    // The gallery will refresh and show the new photo
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-gradient-to-b from-[var(--forest-950)]/80 to-[var(--mist-900)]/70 backdrop-blur-sm"
+        className="absolute inset-0 bg-gradient-to-b from-[var(--forest-950)]/85 to-[var(--mist-900)]/75 backdrop-blur-md"
         onClick={step === "uploading" ? undefined : handleClose}
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col border border-[var(--mist-100)]">
+      <div className="relative bg-white rounded-[var(--radius-2xl)] shadow-[var(--shadow-2xl)] w-full max-w-lg max-h-[90vh]
+        overflow-hidden flex flex-col border border-[var(--mist-100)]
+        animate-fade-in-scale">
         {/* Top accent border */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[var(--forest-600)] via-[var(--moss-500)] to-[var(--forest-600)]" />
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[var(--forest-500)] via-[var(--moss-400)] to-[var(--forest-500)]
+          rounded-t-[var(--radius-2xl)]" />
 
         {/* Header */}
-        <div className="p-4 border-b border-[var(--mist-100)] bg-gradient-to-r from-[var(--moss-50)] to-[var(--mist-50)]">
+        <div className="p-5 border-b border-[var(--border)] bg-gradient-to-r from-[var(--moss-50)] to-[var(--mist-50)]">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-[var(--forest-900)]">
               {step === "select" && "Upload Photos"}
@@ -300,7 +324,10 @@ export default function UploadModal({
             {step !== "uploading" && (
               <button
                 onClick={handleClose}
-                className="p-2 text-[var(--mist-400)] hover:text-[var(--mist-600)] hover:bg-white/50 rounded-xl transition-all"
+                className="p-2.5 text-[var(--mist-400)] hover:text-[var(--mist-600)]
+                  hover:bg-white/70 rounded-[var(--radius-lg)]
+                  transition-all duration-[var(--timing-fast)]
+                  active:scale-90"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -311,10 +338,10 @@ export default function UploadModal({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-auto p-4">
+        <div className="flex-1 overflow-auto p-5">
           {/* Step: Select File */}
           {step === "select" && (
-            <div className="text-center py-8">
+            <div className="text-center py-6">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -326,28 +353,49 @@ export default function UploadModal({
 
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-[var(--moss-300)] rounded-2xl p-8 cursor-pointer hover:border-[var(--moss-500)] hover:bg-[var(--moss-50)] transition-all"
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`border-2 border-dashed rounded-[var(--radius-xl)] p-10 cursor-pointer
+                  transition-all duration-[var(--timing-fast)]
+                  ${isDragging
+                    ? "border-[var(--moss-500)] bg-[var(--moss-50)] scale-[1.02]"
+                    : "border-[var(--moss-300)] hover:border-[var(--moss-500)] hover:bg-[var(--moss-50)]"
+                  }`}
               >
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[var(--moss-100)] to-[var(--forest-100)] flex items-center justify-center">
-                  <svg className="w-8 h-8 text-[var(--forest-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                <div className={`w-20 h-20 mx-auto mb-5 rounded-full
+                  bg-gradient-to-br from-[var(--moss-100)] to-[var(--forest-100)]
+                  flex items-center justify-center
+                  shadow-[var(--shadow-sm)]
+                  transition-transform duration-[var(--timing-fast)]
+                  ${isDragging ? "scale-110 animate-gentle-bounce" : ""}`}>
+                  <svg className="w-10 h-10 text-[var(--forest-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
                 <h3 className="text-lg font-medium text-[var(--forest-800)] mb-2">
                   Select Photos
                 </h3>
-                <p className="text-sm text-[var(--mist-500)]">
+                <p className="text-sm text-[var(--mist-500)] mb-1">
                   Tap to choose from your photo library
                 </p>
                 <p className="text-xs text-[var(--mist-400)] mt-2">
                   Select multiple photos at once. Supports JPEG, PNG, and HEIC.
                 </p>
+                <div className="mt-4 flex items-center justify-center gap-2 text-xs text-[var(--mist-400)]">
+                  <span className="px-2 py-1 bg-[var(--mist-100)] rounded-full">JPEG</span>
+                  <span className="px-2 py-1 bg-[var(--mist-100)] rounded-full">PNG</span>
+                  <span className="px-2 py-1 bg-[var(--mist-100)] rounded-full">HEIC</span>
+                </div>
               </div>
 
               {error && (
-                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl">
-                  <p className="text-sm text-red-600">{error}</p>
+                <div className="mt-4 p-3.5 bg-red-50 border border-red-200 rounded-[var(--radius-lg)]
+                  animate-fade-in">
+                  <p className="text-sm text-red-600 font-medium">{error}</p>
                 </div>
               )}
             </div>
@@ -498,7 +546,13 @@ export default function UploadModal({
                   </Select>
                   <button
                     onClick={() => setShowNewSpeciesForm(true)}
-                    className="w-full flex items-center justify-center gap-2 p-2 text-sm text-[var(--forest-700)] border border-dashed border-[var(--moss-200)] rounded-xl hover:border-[var(--moss-400)] hover:bg-[var(--moss-50)] transition-all"
+                    className="w-full flex items-center justify-center gap-2 p-3
+                      text-sm font-semibold text-[var(--forest-700)]
+                      border-2 border-dashed border-[var(--moss-200)]
+                      rounded-[var(--radius-lg)]
+                      hover:border-[var(--moss-400)] hover:bg-[var(--moss-50)]
+                      transition-all duration-[var(--timing-fast)]
+                      active:scale-[0.98]"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -508,12 +562,15 @@ export default function UploadModal({
                 </div>
               ) : (
                 /* New Species Form */
-                <div className="space-y-3 p-3 bg-[var(--moss-50)] rounded-xl border border-[var(--moss-200)]">
+                <div className="space-y-3 p-4 bg-gradient-to-br from-[var(--moss-50)] to-[var(--mist-50)]
+                  rounded-[var(--radius-xl)] border border-[var(--moss-200)]
+                  shadow-[var(--shadow-sm)] animate-fade-in">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-[var(--forest-700)]">New Species</span>
+                    <span className="text-sm font-bold text-[var(--forest-700)]">New Species</span>
                     <button
                       onClick={() => setShowNewSpeciesForm(false)}
-                      className="text-xs text-[var(--mist-500)] hover:text-[var(--mist-700)]"
+                      className="text-xs font-medium text-[var(--mist-500)] hover:text-[var(--mist-700)]
+                        transition-colors"
                     >
                       Cancel
                     </button>
@@ -529,7 +586,7 @@ export default function UploadModal({
                     onChange={(e) => setNewScientificName(e.target.value)}
                   />
                   <div>
-                    <label className="block text-xs font-medium text-[var(--mist-600)] mb-1.5">
+                    <label className="block text-xs font-semibold text-[var(--mist-600)] mb-2">
                       Rarity
                     </label>
                     <div className="flex gap-2">
@@ -538,15 +595,18 @@ export default function UploadModal({
                           key={r}
                           type="button"
                           onClick={() => setNewRarity(r)}
-                          className={`flex-1 px-2 py-1.5 rounded-lg border text-xs font-medium transition-all ${
-                            newRarity === r
+                          className={`flex-1 px-3 py-2 rounded-[var(--radius-md)] border-2
+                            text-xs font-semibold
+                            transition-all duration-[var(--timing-fast)]
+                            active:scale-95
+                            ${newRarity === r
                               ? r === "common"
-                                ? "bg-slate-100 border-slate-300 text-slate-700"
+                                ? "bg-[var(--mist-100)] border-[var(--mist-300)] text-[var(--mist-700)]"
                                 : r === "uncommon"
-                                ? "bg-amber-50 border-amber-300 text-amber-700"
-                                : "bg-red-50 border-red-300 text-red-700"
-                              : "bg-white border-[var(--mist-200)] text-[var(--mist-500)]"
-                          }`}
+                                ? "bg-gradient-to-br from-[var(--amber-50)] to-[var(--amber-100)] border-[var(--amber-300)] text-[var(--amber-700)]"
+                                : "bg-gradient-to-br from-red-50 to-rose-100 border-red-300 text-red-700"
+                              : "bg-white border-[var(--mist-200)] text-[var(--mist-500)] hover:border-[var(--mist-300)]"
+                            }`}
                         >
                           {r.charAt(0).toUpperCase() + r.slice(1)}
                         </button>
@@ -587,16 +647,21 @@ export default function UploadModal({
                   }}
                   placeholder="Add details about this sighting..."
                   rows={2}
-                  className="block w-full px-3 py-2 border border-[var(--mist-200)] rounded-xl text-sm
+                  className="block w-full px-4 py-3 border-2 border-[var(--mist-200)]
+                    rounded-[var(--radius-lg)] text-sm
                     bg-white text-[var(--foreground)] placeholder-[var(--mist-400)]
-                    focus:outline-none focus:ring-2 focus:ring-[var(--moss-400)] focus:border-[var(--moss-400)]
-                    hover:border-[var(--mist-300)] transition-colors resize-none"
+                    shadow-[var(--shadow-inset-sm)]
+                    focus:outline-none focus:border-[var(--moss-400)]
+                    focus:shadow-[var(--shadow-moss),var(--shadow-inset-sm)]
+                    hover:border-[var(--mist-300)]
+                    transition-all duration-[var(--timing-fast)] resize-none"
                 />
               </div>
 
               {error && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
-                  <p className="text-sm text-red-600">{error}</p>
+                <div className="p-3.5 bg-red-50 border border-red-200 rounded-[var(--radius-lg)]
+                  animate-fade-in">
+                  <p className="text-sm text-red-600 font-medium">{error}</p>
                 </div>
               )}
             </div>
@@ -604,10 +669,15 @@ export default function UploadModal({
 
           {/* Step: Uploading */}
           {step === "uploading" && (
-            <div className="text-center py-8">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[var(--moss-100)] to-[var(--forest-100)] flex items-center justify-center">
-                <svg className="w-8 h-8 text-[var(--forest-600)] animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            <div className="text-center py-10 animate-fade-in">
+              <div className="w-20 h-20 mx-auto mb-5 rounded-full
+                bg-gradient-to-br from-[var(--moss-100)] to-[var(--forest-100)]
+                flex items-center justify-center
+                shadow-[var(--shadow-sm)]">
+                {/* Animated bird icon */}
+                <svg className="w-10 h-10 text-[var(--forest-600)] animate-bird-hop" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M21.5 8.5c-.5-.5-1.5-.5-2.5 0L15 12l-3-1-4.5 2.5c-1.5 1-2 2.5-1.5 4l1 2.5 1.5-1 2-1.5 3 .5 2-1.5 4-4c1-1 1-2.5 0-3.5l-2.5-2z" />
+                  <circle cx="18" cy="7" r="1.5" />
                 </svg>
               </div>
               <h3 className="text-lg font-medium text-[var(--forest-800)] mb-4">
@@ -660,10 +730,14 @@ export default function UploadModal({
 
           {/* Step: Success */}
           {step === "success" && (
-            <div className="text-center py-8">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[var(--moss-100)] to-[var(--forest-100)] flex items-center justify-center">
-                <svg className="w-8 h-8 text-[var(--forest-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <div className="text-center py-10 animate-fade-in">
+              <div className="w-20 h-20 mx-auto mb-5 rounded-full
+                bg-gradient-to-br from-[var(--moss-100)] to-[var(--forest-100)]
+                flex items-center justify-center
+                shadow-[var(--shadow-moss)]
+                animate-fade-in-scale">
+                <svg className="w-10 h-10 text-[var(--moss-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
               <h3 className="text-lg font-medium text-[var(--forest-800)] mb-2">
@@ -694,7 +768,7 @@ export default function UploadModal({
 
         {/* Footer */}
         {step === "preview" && (
-          <div className="p-4 border-t border-[var(--mist-100)] bg-[var(--mist-50)]">
+          <div className="p-5 border-t border-[var(--border)] bg-[var(--mist-50)]">
             <div className="flex gap-3">
               <Button variant="secondary" onClick={handleClose} className="flex-1">
                 Cancel

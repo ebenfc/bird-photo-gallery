@@ -1,74 +1,130 @@
 @import "tailwindcss";
 
 :root {
-  /* Pacific Northwest Color Palette */
+  /* Modern Nature-Inspired Color Palette */
 
-  /* Primary - Deep Forest Green */
-  --forest-50: #e8f5e9;
-  --forest-100: #c8e6c9;
-  --forest-200: #a5d6a7;
-  --forest-300: #81c784;
-  --forest-400: #66bb6a;
-  --forest-500: #4caf50;
-  --forest-600: #43a047;
-  --forest-700: #388e3c;
-  --forest-800: #2e7d32;
-  --forest-900: #1b5e20;
-  --forest-950: #2C5F2D;
+  /* Primary - Emerald Green (sophisticated, modern) */
+  --forest-50: #ecfdf5;
+  --forest-100: #d1fae5;
+  --forest-200: #a7f3d0;
+  --forest-300: #6ee7b7;
+  --forest-400: #34d399;
+  --forest-500: #10b981;
+  --forest-600: #059669;
+  --forest-700: #047857;
+  --forest-800: #065f46;
+  --forest-900: #064e3b;
+  --forest-950: #022c22;
 
-  /* Secondary - Misty Gray Blue */
-  --mist-50: #eceff1;
-  --mist-100: #cfd8dc;
-  --mist-200: #b0bec5;
-  --mist-300: #90a4ae;
-  --mist-400: #78909c;
-  --mist-500: #607d8b;
-  --mist-600: #546e7a;
-  --mist-700: #455a64;
-  --mist-800: #37474f;
-  --mist-900: #263238;
+  /* Secondary - Cool Slate (modern, neutral) */
+  --mist-50: #f8fafc;
+  --mist-100: #f1f5f9;
+  --mist-200: #e2e8f0;
+  --mist-300: #cbd5e1;
+  --mist-400: #94a3b8;
+  --mist-500: #64748b;
+  --mist-600: #475569;
+  --mist-700: #334155;
+  --mist-800: #1e293b;
+  --mist-900: #0f172a;
 
-  /* Accent - Moss Green */
-  --moss-50: #f1f8e9;
-  --moss-100: #dcedc8;
-  --moss-200: #c5e1a5;
-  --moss-300: #aed581;
-  --moss-400: #9ccc65;
-  --moss-500: #8bc34a;
-  --moss-600: #7cb342;
-  --moss-700: #689f38;
-  --moss-800: #558b2f;
-  --moss-900: #33691e;
+  /* Accent - Teal (fresh, modern) */
+  --moss-50: #f0fdfa;
+  --moss-100: #ccfbf1;
+  --moss-200: #99f6e4;
+  --moss-300: #5eead4;
+  --moss-400: #2dd4bf;
+  --moss-500: #14b8a6;
+  --moss-600: #0d9488;
+  --moss-700: #0f766e;
+  --moss-800: #115e59;
+  --moss-900: #134e4a;
 
-  /* Warm Accent - Bark Brown */
-  --bark-50: #efebe9;
-  --bark-100: #d7ccc8;
-  --bark-200: #bcaaa4;
-  --bark-300: #a1887f;
-  --bark-400: #8d6e63;
-  --bark-500: #795548;
-  --bark-600: #6d4c41;
-  --bark-700: #5d4037;
-  --bark-800: #4e342e;
-  --bark-900: #3e2723;
+  /* Warm Accent - Stone (earthy neutral) */
+  --bark-50: #fafaf9;
+  --bark-100: #f5f5f4;
+  --bark-200: #e7e5e4;
+  --bark-300: #d6d3d1;
+  --bark-400: #a8a29e;
+  --bark-500: #78716c;
+  --bark-600: #57534e;
+  --bark-700: #44403c;
+  --bark-800: #292524;
+  --bark-900: #1c1917;
 
-  /* Sky Blue - Mountain Lakes */
-  --sky-50: #e3f2fd;
-  --sky-100: #bbdefb;
-  --sky-200: #90caf9;
-  --sky-300: #64b5f6;
-  --sky-400: #42a5f5;
-  --sky-500: #2196f3;
-  --sky-600: #1e88e5;
-  --sky-700: #1976d2;
-  --sky-800: #1565c0;
-  --sky-900: #0d47a1;
+  /* Sky Blue - Info/Links */
+  --sky-50: #f0f9ff;
+  --sky-100: #e0f2fe;
+  --sky-200: #bae6fd;
+  --sky-300: #7dd3fc;
+  --sky-400: #38bdf8;
+  --sky-500: #0ea5e9;
+  --sky-600: #0284c7;
+  --sky-700: #0369a1;
+  --sky-800: #075985;
+  --sky-900: #0c4a6e;
 
-  /* Base colors */
-  --background: #fafaf8;
-  --foreground: #1a1a1a;
+  /* Amber - Only for rare badges (not text) */
+  --amber-50: #fffbeb;
+  --amber-100: #fef3c7;
+  --amber-200: #fde68a;
+  --amber-300: #fcd34d;
+  --amber-400: #fbbf24;
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --amber-700: #b45309;
+  --amber-800: #92400e;
+  --amber-900: #78350f;
+
+  /* Base colors - clean, modern */
+  --background: #fafafa;
+  --background-warm: #f5f5f5;
+  --foreground: #18181b;
+  --foreground-muted: #52525b;
   --card-bg: #ffffff;
-  --border: #e5e7eb;
+  --border: #e4e4e7;
+  --border-light: #f4f4f5;
+
+  /* === ELEVATION / SHADOW SYSTEM === */
+  /* Modern, subtle shadows with emerald undertones */
+  --shadow-xs: 0 1px 2px rgba(6, 95, 70, 0.04);
+  --shadow-sm: 0 2px 4px rgba(6, 95, 70, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 12px rgba(6, 95, 70, 0.07), 0 2px 4px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 8px 24px rgba(6, 95, 70, 0.09), 0 4px 8px rgba(0, 0, 0, 0.03);
+  --shadow-xl: 0 16px 40px rgba(6, 95, 70, 0.11), 0 8px 16px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 24px 56px rgba(6, 95, 70, 0.13), 0 12px 24px rgba(0, 0, 0, 0.05);
+
+  /* Colored shadows for specific elements (using new teal/emerald) */
+  --shadow-moss: 0 4px 16px rgba(20, 184, 166, 0.18);
+  --shadow-moss-lg: 0 8px 24px rgba(20, 184, 166, 0.22);
+  --shadow-forest: 0 4px 16px rgba(16, 185, 129, 0.16);
+  --shadow-amber: 0 4px 16px rgba(245, 158, 11, 0.20);
+
+  /* Inset shadows for tactile feel */
+  --shadow-inset-sm: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-inset-md: inset 0 2px 4px rgba(0, 0, 0, 0.08);
+
+  /* === ANIMATION TIMING === */
+  --timing-instant: 100ms;
+  --timing-fast: 200ms;
+  --timing-normal: 300ms;
+  --timing-slow: 500ms;
+  --timing-lazy: 800ms;
+
+  /* === EASING CURVES === */
+  --ease-natural: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* === BORDER RADIUS - Organic, river-stone inspired === */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
 }
 
 @theme inline {
@@ -135,23 +191,311 @@
   --color-sky-900: var(--sky-900);
 }
 
+/* === BASE STYLES === */
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* Warm text colors */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--forest-950);
+  letter-spacing: -0.01em;
+}
+
+/* === REDUCED MOTION === */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* === TEXTURE OVERLAYS === */
 /* Subtle texture overlay for organic feel */
 .pnw-texture {
+  position: relative;
   background-image:
-    radial-gradient(ellipse at 20% 80%, rgba(124, 179, 66, 0.03) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(96, 125, 139, 0.03) 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 10%, rgba(124, 179, 66, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(139, 195, 74, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(93, 115, 125, 0.02) 0%, transparent 70%);
+}
+
+/* Warm paper-like background */
+.paper-texture {
+  background:
+    linear-gradient(180deg, var(--background) 0%, var(--background-warm) 100%);
 }
 
 /* Mountain silhouette decoration */
 .mountain-bg {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 100' preserveAspectRatio='none'%3E%3Cpath fill='%232C5F2D' fill-opacity='0.05' d='M0,100 L0,60 L200,40 L400,70 L600,30 L800,55 L1000,25 L1200,50 L1440,35 L1440,100 Z'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 100' preserveAspectRatio='none'%3E%3Cpath fill='%232C5F2D' fill-opacity='0.04' d='M0,100 L0,60 L200,40 L400,70 L600,30 L800,55 L1000,25 L1200,50 L1440,35 L1440,100 Z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: bottom;
   background-size: 100% 80px;
+}
+
+/* Topographic pattern (very subtle) */
+.topo-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 10c22 0 40 18 40 40s-18 40-40 40-40-18-40-40 18-40 40-40z' fill='none' stroke='%232C5F2D' stroke-opacity='0.02' stroke-width='1'/%3E%3Cpath d='M50 20c16.5 0 30 13.5 30 30s-13.5 30-30 30-30-13.5-30-30 13.5-30 30-30z' fill='none' stroke='%232C5F2D' stroke-opacity='0.02' stroke-width='1'/%3E%3Cpath d='M50 30c11 0 20 9 20 20s-9 20-20 20-20-9-20-20 9-20 20-20z' fill='none' stroke='%232C5F2D' stroke-opacity='0.02' stroke-width='1'/%3E%3C/svg%3E");
+}
+
+/* === ANIMATION KEYFRAMES === */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes gentleBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes heartBeat {
+  0% { transform: scale(1); }
+  14% { transform: scale(1.15); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.15); }
+  70% { transform: scale(1); }
+}
+
+@keyframes checkmark {
+  0% {
+    stroke-dashoffset: 24;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes birdHop {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-8px) rotate(-3deg); }
+  50% { transform: translateY(0) rotate(0deg); }
+  75% { transform: translateY(-4px) rotate(3deg); }
+}
+
+/* === ANIMATION UTILITY CLASSES === */
+.animate-fade-in {
+  animation: fadeIn var(--timing-normal) var(--ease-natural);
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp var(--timing-normal) var(--ease-out-expo);
+}
+
+.animate-fade-in-scale {
+  animation: fadeInScale var(--timing-normal) var(--ease-spring);
+}
+
+.animate-slide-in-right {
+  animation: slideInRight var(--timing-normal) var(--ease-out-expo);
+}
+
+.animate-gentle-bounce {
+  animation: gentleBounce 2s var(--ease-natural) infinite;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s var(--ease-natural) infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--mist-100) 0%,
+    var(--mist-50) 50%,
+    var(--mist-100) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.animate-heart-beat {
+  animation: heartBeat 1s var(--ease-natural);
+}
+
+.animate-float {
+  animation: float 3s var(--ease-natural) infinite;
+}
+
+.animate-bird-hop {
+  animation: birdHop 1.5s var(--ease-bounce) infinite;
+}
+
+/* Stagger delay utilities for grid animations */
+.stagger-1 { animation-delay: 50ms; }
+.stagger-2 { animation-delay: 100ms; }
+.stagger-3 { animation-delay: 150ms; }
+.stagger-4 { animation-delay: 200ms; }
+.stagger-5 { animation-delay: 250ms; }
+.stagger-6 { animation-delay: 300ms; }
+.stagger-7 { animation-delay: 350ms; }
+.stagger-8 { animation-delay: 400ms; }
+
+/* === INTERACTIVE STATES === */
+/* Button press effect */
+.press-effect {
+  transition: transform var(--timing-fast) var(--ease-bounce),
+              box-shadow var(--timing-fast) var(--ease-natural);
+}
+
+.press-effect:active {
+  transform: scale(0.96);
+}
+
+/* Lift effect on hover */
+.lift-on-hover {
+  transition: transform var(--timing-fast) var(--ease-natural),
+              box-shadow var(--timing-fast) var(--ease-natural);
+}
+
+.lift-on-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Glow effect */
+.glow-on-hover {
+  transition: box-shadow var(--timing-fast) var(--ease-natural);
+}
+
+.glow-on-hover:hover {
+  box-shadow: var(--shadow-moss);
+}
+
+/* Card hover effect */
+.card-interactive {
+  transition: transform var(--timing-fast) var(--ease-natural),
+              box-shadow var(--timing-fast) var(--ease-natural),
+              border-color var(--timing-fast) var(--ease-natural);
+}
+
+.card-interactive:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Focus ring */
+.focus-ring {
+  outline: none;
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--moss-500);
+  outline-offset: 2px;
+}
+
+/* === SKELETON LOADING === */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--mist-100) 0%,
+    var(--mist-50) 40%,
+    var(--mist-50) 60%,
+    var(--mist-100) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-md);
+}
+
+/* === SCROLLBAR STYLING === */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--mist-100);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--mist-300);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--mist-400);
+}
+
+/* === SELECTION STYLING === */
+::selection {
+  background: var(--moss-200);
+  color: var(--forest-950);
+}
+
+/* === TOAST / NOTIFICATION STYLES === */
+.toast-enter {
+  animation: fadeInUp var(--timing-normal) var(--ease-spring);
+}
+
+.toast-exit {
+  animation: fadeInUp var(--timing-normal) var(--ease-natural) reverse;
+}
+
+/* Success glow */
+.success-glow {
+  box-shadow: 0 0 0 3px rgba(124, 179, 66, 0.15), var(--shadow-md);
+}
+
+/* Error glow */
+.error-glow {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15), var(--shadow-md);
 }
