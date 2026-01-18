@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
         thumbnailFilename: photos.thumbnailFilename,
         uploadDate: photos.uploadDate,
         originalDateTaken: photos.originalDateTaken,
+        dateTakenSource: photos.dateTakenSource,
         isFavorite: photos.isFavorite,
         notes: photos.notes,
         speciesId: photos.speciesId,
@@ -62,6 +63,7 @@ export async function GET(request: NextRequest) {
       originalUrl: getOriginalUrl(photo.filename),
       uploadDate: photo.uploadDate,
       originalDateTaken: photo.originalDateTaken,
+      dateTakenSource: photo.dateTakenSource,
       isFavorite: photo.isFavorite,
       notes: photo.notes,
       species: photo.speciesId

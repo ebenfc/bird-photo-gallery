@@ -24,6 +24,7 @@ export const photos = pgTable("photos", {
     .notNull()
     .defaultNow(),
   originalDateTaken: timestamp("original_date_taken", { withTimezone: true }),
+  dateTakenSource: text("date_taken_source").notNull().default("exif"), // 'exif' or 'manual'
   isFavorite: boolean("is_favorite").notNull().default(false),
   notes: text("notes"),
 });

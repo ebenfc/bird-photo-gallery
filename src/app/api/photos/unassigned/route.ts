@@ -29,6 +29,7 @@ export async function GET() {
       originalUrl: getOriginalUrl(photo.filename),
       uploadDate: photo.uploadDate,
       originalDateTaken: photo.originalDateTaken,
+      dateTakenSource: photo.dateTakenSource,
       isFavorite: photo.isFavorite,
       notes: photo.notes,
       species: null,

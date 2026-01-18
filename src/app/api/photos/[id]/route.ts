@@ -29,6 +29,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         thumbnailFilename: photos.thumbnailFilename,
         uploadDate: photos.uploadDate,
         originalDateTaken: photos.originalDateTaken,
+        dateTakenSource: photos.dateTakenSource,
         isFavorite: photos.isFavorite,
         notes: photos.notes,
         speciesId: photos.speciesId,
@@ -54,6 +55,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         originalUrl: getOriginalUrl(photo.filename),
         uploadDate: photo.uploadDate,
         originalDateTaken: photo.originalDateTaken,
+        dateTakenSource: photo.dateTakenSource,
         isFavorite: photo.isFavorite,
         notes: photo.notes,
         species: photo.speciesId
@@ -86,7 +88,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     const body = await request.json();
-    const { speciesId, isFavorite, notes } = body;
+    const { speciesId, isFavorite, notes, originalDateTaken } = body;
 
     const updateData: Record<string, unknown> = {};
     if (speciesId !== undefined) {
@@ -97,6 +99,27 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
     if (notes !== undefined) {
       updateData.notes = notes?.trim() || null;
+    }
+    if (originalDateTaken !== undefined) {
+      if (originalDateTaken === null) {
+        updateData.originalDateTaken = null;
+        updateData.dateTakenSource = "manual";
+      } else {
+        const parsedDate = new Date(originalDateTaken);
+        if (isNaN(parsedDate.getTime())) {
+          return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
+        }
+        // Validate date is not in the future
+        if (parsedDate > new Date()) {
+          return NextResponse.json({ error: "Date cannot be in the future" }, { status: 400 });
+        }
+        // Validate date is not before 1900
+        if (parsedDate.getFullYear() < 1900) {
+          return NextResponse.json({ error: "Date cannot be before 1900" }, { status: 400 });
+        }
+        updateData.originalDateTaken = parsedDate;
+        updateData.dateTakenSource = "manual";
+      }
     }
 
     if (Object.keys(updateData).length === 0) {

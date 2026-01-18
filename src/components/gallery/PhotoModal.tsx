@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Photo } from "@/types";
@@ -12,6 +12,7 @@ interface PhotoModalProps {
   onNavigate?: (direction: "prev" | "next") => void;
   canNavigate?: { prev: boolean; next: boolean };
   onChangeSpecies?: (photo: Photo) => void;
+  onDateChange?: (id: number, date: string | null) => Promise<void>;
 }
 
 export default function PhotoModal({
@@ -21,7 +22,18 @@ export default function PhotoModal({
   onNavigate,
   canNavigate = { prev: false, next: false },
   onChangeSpecies,
+  onDateChange,
 }: PhotoModalProps) {
+  const [isEditingDate, setIsEditingDate] = useState(false);
+  const [editDateValue, setEditDateValue] = useState("");
+  const [isSavingDate, setIsSavingDate] = useState(false);
+
+  // Reset edit state when photo changes
+  useEffect(() => {
+    setIsEditingDate(false);
+    setEditDateValue("");
+  }, [photo?.id]);
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -243,18 +255,83 @@ export default function PhotoModal({
               </span>
             </div>
 
-            {photo.originalDateTaken && (
-              <div className="flex items-center gap-2 p-3 bg-[var(--mist-50)] rounded-xl">
+            <div className="p-3 bg-[var(--mist-50)] rounded-xl">
+              <div className="flex items-center gap-2">
                 <svg className="w-4 h-4 text-[var(--mist-500)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
                 <span className="text-[var(--mist-500)]">Taken:</span>
-                <span className="text-[var(--forest-800)] font-medium">
-                  {formatDate(photo.originalDateTaken)}
-                </span>
+                {isEditingDate ? (
+                  <div className="flex items-center gap-2 flex-1">
+                    <input
+                      type="date"
+                      value={editDateValue}
+                      onChange={(e) => setEditDateValue(e.target.value)}
+                      className="flex-1 px-2 py-1 text-sm border border-[var(--mist-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--moss-400)] focus:border-transparent"
+                      max={new Date().toISOString().split('T')[0]}
+                      min="1900-01-01"
+                    />
+                    <button
+                      onClick={async () => {
+                        if (onDateChange && photo) {
+                          setIsSavingDate(true);
+                          try {
+                            await onDateChange(photo.id, editDateValue || null);
+                            setIsEditingDate(false);
+                          } finally {
+                            setIsSavingDate(false);
+                          }
+                        }
+                      }}
+                      disabled={isSavingDate}
+                      className="p-1 text-[var(--moss-600)] hover:text-[var(--moss-700)] disabled:opacity-50"
+                      title="Save"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => setIsEditingDate(false)}
+                      className="p-1 text-[var(--mist-400)] hover:text-[var(--mist-600)]"
+                      title="Cancel"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <span className="text-[var(--forest-800)] font-medium flex-1">
+                      {photo.originalDateTaken ? formatDate(photo.originalDateTaken) : "Not set"}
+                    </span>
+                    {onDateChange && (
+                      <button
+                        onClick={() => {
+                          setEditDateValue(
+                            photo.originalDateTaken
+                              ? new Date(photo.originalDateTaken).toISOString().split('T')[0]
+                              : ""
+                          );
+                          setIsEditingDate(true);
+                        }}
+                        className="p-1 text-[var(--moss-500)] hover:text-[var(--moss-700)] transition-colors"
+                        title="Edit date"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                      </button>
+                    )}
+                  </>
+                )}
               </div>
-            )}
+              {photo.dateTakenSource === "manual" && !isEditingDate && (
+                <p className="text-xs text-[var(--mist-400)] mt-1 ml-6">Manually set</p>
+              )}
+            </div>
 
             {photo.notes && (
               <div className="p-3 bg-[var(--bark-50)] rounded-xl">

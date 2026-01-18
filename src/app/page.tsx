@@ -165,6 +165,33 @@ function GalleryContent() {
     setPhotoToAssign(photo);
   };
 
+  // Handle date change
+  const handleDateChange = async (id: number, date: string | null) => {
+    try {
+      await fetch(`/api/photos/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ originalDateTaken: date }),
+      });
+
+      // Update local state
+      setPhotos((prev) =>
+        prev.map((p) =>
+          p.id === id
+            ? { ...p, originalDateTaken: date, dateTakenSource: "manual" as const }
+            : p
+        )
+      );
+      if (selectedPhoto?.id === id) {
+        setSelectedPhoto((prev) =>
+          prev ? { ...prev, originalDateTaken: date, dateTakenSource: "manual" as const } : null
+        );
+      }
+    } catch (err) {
+      console.error("Failed to update date:", err);
+    }
+  };
+
   return (
     <div className="pnw-texture min-h-screen">
       <div className="flex items-center justify-between mb-8">
@@ -195,6 +222,7 @@ function GalleryContent() {
         onNavigate={handleNavigate}
         canNavigate={canNavigate}
         onChangeSpecies={handleChangeSpecies}
+        onDateChange={handleDateChange}
       />
 
       <SpeciesAssignModal

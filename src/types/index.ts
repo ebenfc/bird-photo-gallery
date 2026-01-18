@@ -19,6 +19,7 @@ export interface Photo {
   originalUrl: string;
   uploadDate: string;
   originalDateTaken: string | null;
+  dateTakenSource: "exif" | "manual";
   isFavorite: boolean;
   notes: string | null;
   species: {
