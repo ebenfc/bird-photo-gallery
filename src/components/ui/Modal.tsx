@@ -47,20 +47,28 @@ export default function Modal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop with forest mist effect */}
+      {/* Backdrop with elegant blur */}
       <div
-        className="absolute inset-0 bg-gradient-to-b from-[var(--forest-950)]/80 to-[var(--mist-900)]/70 backdrop-blur-sm"
+        className="absolute inset-0 bg-gradient-to-b from-[var(--forest-950)]/85 to-[var(--mist-900)]/75 backdrop-blur-md animate-fade-in"
         onClick={onClose}
       />
 
-      {/* Modal container */}
+      {/* Modal container with elegant entrance */}
       <div
-        className={`relative bg-white rounded-2xl shadow-2xl w-full ${sizes[size]} max-h-[90vh] overflow-auto
-          border border-[var(--mist-100)]`}
+        className={`
+          relative bg-white rounded-[var(--radius-2xl)] w-full ${sizes[size]} max-h-[90vh] overflow-hidden
+          shadow-[var(--shadow-2xl)]
+          border border-[var(--mist-100)]
+          animate-fade-in-scale
+        `}
       >
-        {/* Subtle top border accent */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[var(--forest-600)] via-[var(--moss-500)] to-[var(--forest-600)] rounded-t-2xl" />
-        {children}
+        {/* Elegant top border accent with gradient */}
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[var(--forest-500)] via-[var(--moss-400)] to-[var(--forest-500)] rounded-t-[var(--radius-2xl)]" />
+
+        {/* Content wrapper with subtle inner shadow */}
+        <div className="overflow-auto max-h-[90vh]">
+          {children}
+        </div>
       </div>
     </div>
   );
