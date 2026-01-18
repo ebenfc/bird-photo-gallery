@@ -261,6 +261,22 @@ function GalleryContent() {
     }
   };
 
+  // Handle set cover photo
+  const handleSetCoverPhoto = async (photoId: number, speciesId: number) => {
+    try {
+      await fetch(`/api/species/${speciesId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ coverPhotoId: photoId }),
+      });
+
+      // Refresh species to get updated cover photos
+      await fetchSpecies();
+    } catch (err) {
+      console.error("Failed to set cover photo:", err);
+    }
+  };
+
   return (
     <div className="pnw-texture min-h-screen pb-24 sm:pb-0">
       <div className="flex items-center justify-between mb-5 sm:mb-8">
@@ -316,6 +332,7 @@ function GalleryContent() {
         onDateChange={handleDateChange}
         onNotesChange={handleNotesChange}
         onDelete={handleDelete}
+        onSetCoverPhoto={handleSetCoverPhoto}
       />
 
       <SpeciesAssignModal
