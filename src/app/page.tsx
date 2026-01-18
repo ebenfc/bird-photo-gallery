@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect, useCallback } from "react";
+import { Suspense, useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Photo, Species, PhotosResponse, SpeciesResponse, Rarity } from "@/types";
 import PhotoGrid from "@/components/gallery/PhotoGrid";
@@ -27,16 +27,18 @@ function GalleryContent() {
     return "recent_upload";
   });
 
-  // Get filter state from URL
+  // Get filter state from URL (memoized to prevent infinite loops)
   const selectedSpecies = searchParams.get("species")
     ? parseInt(searchParams.get("species")!)
     : null;
   const showFavoritesOnly = searchParams.get("favorites") === "true";
-  const selectedRarities: Rarity[] = searchParams.get("rarity")
-    ? (searchParams.get("rarity")!.split(",").filter((r) =>
-        ["common", "uncommon", "rare"].includes(r)
-      ) as Rarity[])
-    : [];
+  const rarityParam = searchParams.get("rarity");
+  const selectedRarities: Rarity[] = useMemo(() => {
+    if (!rarityParam) return [];
+    return rarityParam.split(",").filter((r) =>
+      ["common", "uncommon", "rare"].includes(r)
+    ) as Rarity[];
+  }, [rarityParam]);
 
   // Update URL with filter state
   const updateFilters = useCallback(
