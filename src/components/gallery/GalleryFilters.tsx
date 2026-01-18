@@ -25,43 +25,10 @@ const sortOptions = [
 const rarityOptions: {
   value: Rarity;
   label: string;
-  shortLabel: string;
-  bgColor: string;
-  activeBg: string;
-  textColor: string;
-  activeText: string;
-  borderColor: string;
 }[] = [
-  {
-    value: "common",
-    label: "Common",
-    shortLabel: "Com",
-    bgColor: "bg-white",
-    activeBg: "bg-[var(--mist-100)]",
-    textColor: "text-[var(--mist-500)]",
-    activeText: "text-[var(--mist-700)]",
-    borderColor: "border-[var(--mist-300)]",
-  },
-  {
-    value: "uncommon",
-    label: "Uncommon",
-    shortLabel: "Unc",
-    bgColor: "bg-white",
-    activeBg: "bg-gradient-to-br from-[var(--amber-50)] to-[var(--amber-100)]",
-    textColor: "text-[var(--mist-500)]",
-    activeText: "text-[var(--amber-700)]",
-    borderColor: "border-[var(--amber-300)]",
-  },
-  {
-    value: "rare",
-    label: "Rare",
-    shortLabel: "Rare",
-    bgColor: "bg-white",
-    activeBg: "bg-gradient-to-br from-red-50 to-rose-100",
-    textColor: "text-[var(--mist-500)]",
-    activeText: "text-red-700",
-    borderColor: "border-red-300",
-  },
+  { value: "common", label: "Common" },
+  { value: "uncommon", label: "Uncommon" },
+  { value: "rare", label: "Rare" },
 ];
 
 export default function GalleryFilters({
@@ -77,11 +44,12 @@ export default function GalleryFilters({
 }: GalleryFiltersProps) {
   const hasFilters = selectedSpecies !== null || showFavoritesOnly || selectedRarities.length > 0;
 
-  const toggleRarity = (rarity: Rarity) => {
+  // Single-select: clicking a rarity toggles it (deselects if already selected, or selects it exclusively)
+  const selectRarity = (rarity: Rarity) => {
     if (selectedRarities.includes(rarity)) {
-      onRarityChange(selectedRarities.filter((r) => r !== rarity));
+      onRarityChange([]);
     } else {
-      onRarityChange([...selectedRarities, rarity]);
+      onRarityChange([rarity]);
     }
   };
 
@@ -145,25 +113,24 @@ export default function GalleryFilters({
           <span className="hidden xs:inline">Favorites</span>
         </button>
 
-        {/* Rarity filter pills */}
+        {/* Rarity filter pills - single select with unified teal/emerald palette */}
         {rarityOptions.map((opt) => {
           const isSelected = selectedRarities.includes(opt.value);
           return (
             <button
               key={opt.value}
-              onClick={() => toggleRarity(opt.value)}
+              onClick={() => selectRarity(opt.value)}
               className={`px-4 py-2 text-sm font-semibold
                 rounded-[var(--radius-full)] border-2
                 shadow-[var(--shadow-xs)]
                 transition-all duration-[var(--timing-fast)]
                 active:scale-95
                 ${isSelected
-                  ? `${opt.activeBg} ${opt.activeText} ${opt.borderColor} shadow-[var(--shadow-sm)]`
-                  : `${opt.bgColor} ${opt.textColor} border-[var(--mist-200)] hover:border-[var(--mist-300)] hover:shadow-[var(--shadow-sm)]`
+                  ? "bg-gradient-to-b from-[var(--moss-500)] to-[var(--moss-600)] text-white border-[var(--moss-600)] shadow-[var(--shadow-moss)]"
+                  : "bg-white text-[var(--mist-500)] border-[var(--mist-200)] hover:border-[var(--moss-300)] hover:text-[var(--forest-700)] hover:shadow-[var(--shadow-sm)]"
                 }`}
             >
-              <span className="sm:hidden">{opt.shortLabel}</span>
-              <span className="hidden sm:inline">{opt.label}</span>
+              {opt.label}
             </button>
           );
         })}
