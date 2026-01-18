@@ -78,12 +78,12 @@ export default function PhotoCard({
         </div>
       )}
 
-      {/* Unassigned indicator with playful style */}
+      {/* Unassigned indicator with modern style */}
       {!photo.species && (
         <div className="absolute top-2.5 left-2.5
-          bg-gradient-to-r from-[var(--amber-400)] to-[var(--amber-500)]
+          bg-gradient-to-r from-[var(--mist-400)] to-[var(--mist-500)]
           text-white text-xs font-bold px-3 py-1.5
-          rounded-full shadow-[var(--shadow-amber)]
+          rounded-full shadow-[var(--shadow-md)]
           transition-transform duration-[var(--timing-fast)]
           group-hover:scale-105">
           Unassigned

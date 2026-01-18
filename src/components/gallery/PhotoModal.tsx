@@ -201,14 +201,14 @@ export default function PhotoModal({
                 </>
               ) : (
                 <div>
-                  <h2 className="text-xl font-bold text-[var(--amber-600)]">
+                  <h2 className="text-xl font-bold text-[var(--mist-500)] italic">
                     Species Unassigned
                   </h2>
                   {onChangeSpecies ? (
                     <button
                       onClick={() => onChangeSpecies(photo)}
-                      className="text-sm text-[var(--amber-600)] hover:text-[var(--amber-700)]
-                        underline underline-offset-2 transition-colors"
+                      className="text-sm text-[var(--moss-600)] hover:text-[var(--moss-700)]
+                        underline underline-offset-2 transition-colors font-medium"
                     >
                       Assign species
                     </button>
@@ -216,8 +216,8 @@ export default function PhotoModal({
                     <Link
                       href="/inbox"
                       onClick={onClose}
-                      className="text-sm text-[var(--amber-600)] hover:text-[var(--amber-700)]
-                        underline underline-offset-2 transition-colors"
+                      className="text-sm text-[var(--moss-600)] hover:text-[var(--moss-700)]
+                        underline underline-offset-2 transition-colors font-medium"
                     >
                       Assign species
                     </Link>
