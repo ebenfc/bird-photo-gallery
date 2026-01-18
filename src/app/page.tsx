@@ -62,9 +62,10 @@ function GalleryContent() {
     try {
       const res = await fetch(`/api/photos?${params.toString()}`);
       const data: PhotosResponse = await res.json();
-      setPhotos(data.photos);
+      setPhotos(data.photos || []);
     } catch (err) {
       console.error(err);
+      setPhotos([]);
     } finally {
       setLoading(false);
     }
@@ -82,9 +83,10 @@ function GalleryContent() {
     try {
       const res = await fetch("/api/species");
       const data: SpeciesResponse = await res.json();
-      setSpecies(data.species);
+      setSpecies(data.species || []);
     } catch (err) {
       console.error(err);
+      setSpecies([]);
     }
   };
 
