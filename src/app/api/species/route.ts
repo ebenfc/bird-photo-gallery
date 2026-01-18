@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
         description: species.description,
         rarity: species.rarity,
         createdAt: species.createdAt,
+        coverPhotoId: species.coverPhotoId,
         photoCount: sql<number>`count(${photos.id})`.as("photo_count"),
       })
       .from(species)
@@ -42,9 +43,24 @@ export async function GET(request: NextRequest) {
       .groupBy(species.id)
       .orderBy(...getOrderBy());
 
-    // Get latest photo thumbnail for each species
+    // Get cover photo and latest photo thumbnail for each species
     const speciesWithThumbnails = await Promise.all(
       result.map(async (s) => {
+        // Get cover photo if set
+        let coverPhoto = null;
+        if (s.coverPhotoId) {
+          const cover = await db
+            .select({
+              id: photos.id,
+              thumbnailFilename: photos.thumbnailFilename,
+            })
+            .from(photos)
+            .where(eq(photos.id, s.coverPhotoId))
+            .limit(1);
+          coverPhoto = cover[0] || null;
+        }
+
+        // Get latest photo as fallback
         const latestPhoto = await db
           .select({
             id: photos.id,
@@ -57,6 +73,7 @@ export async function GET(request: NextRequest) {
 
         return {
           ...s,
+          coverPhoto,
           latestPhoto: latestPhoto[0] || null,
         };
       })

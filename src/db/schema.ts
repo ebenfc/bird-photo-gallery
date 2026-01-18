@@ -11,6 +11,7 @@ export const species = pgTable("species", {
   scientificName: text("scientific_name"),
   description: text("description"),
   rarity: text("rarity").notNull().default("common"), // 'common', 'uncommon', 'rare'
+  coverPhotoId: integer("cover_photo_id"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

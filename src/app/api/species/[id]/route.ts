@@ -59,9 +59,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     const body = await request.json();
-    const { commonName, scientificName, description, rarity } = body;
+    const { commonName, scientificName, description, rarity, coverPhotoId } = body;
 
-    const updateData: Record<string, string | null> = {};
+    const updateData: Record<string, string | number | null> = {};
     if (commonName !== undefined) {
       if (!commonName || typeof commonName !== "string") {
         return NextResponse.json(
@@ -85,6 +85,30 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         );
       }
       updateData.rarity = rarity;
+    }
+    if (coverPhotoId !== undefined) {
+      // Validate that the photo exists and belongs to this species
+      if (coverPhotoId !== null) {
+        const photo = await db
+          .select({ id: photos.id, speciesId: photos.speciesId })
+          .from(photos)
+          .where(eq(photos.id, coverPhotoId))
+          .limit(1);
+
+        if (photo.length === 0) {
+          return NextResponse.json(
+            { error: "Photo not found" },
+            { status: 404 }
+          );
+        }
+        if (photo[0].speciesId !== speciesId) {
+          return NextResponse.json(
+            { error: "Photo does not belong to this species" },
+            { status: 400 }
+          );
+        }
+      }
+      updateData.coverPhotoId = coverPhotoId;
     }
 
     if (Object.keys(updateData).length === 0) {

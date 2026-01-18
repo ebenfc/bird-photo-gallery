@@ -8,6 +8,11 @@ export interface Species {
   rarity: Rarity;
   createdAt: string;
   photoCount?: number;
+  coverPhotoId?: number | null;
+  coverPhoto?: {
+    id: number;
+    thumbnailFilename: string;
+  } | null;
   latestPhoto?: {
     id: number;
     thumbnailFilename: string;

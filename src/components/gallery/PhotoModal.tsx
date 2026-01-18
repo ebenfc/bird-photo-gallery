@@ -15,6 +15,7 @@ interface PhotoModalProps {
   onDateChange?: (id: number, date: string | null) => Promise<void>;
   onNotesChange?: (id: number, notes: string | null) => Promise<void>;
   onDelete?: (id: number) => Promise<void>;
+  onSetCoverPhoto?: (photoId: number, speciesId: number) => Promise<void>;
 }
 
 export default function PhotoModal({
@@ -27,6 +28,7 @@ export default function PhotoModal({
   onDateChange,
   onNotesChange,
   onDelete,
+  onSetCoverPhoto,
 }: PhotoModalProps) {
   const [isEditingDate, setIsEditingDate] = useState(false);
   const [editDateValue, setEditDateValue] = useState("");
@@ -38,6 +40,11 @@ export default function PhotoModal({
   const [isDeleting, setIsDeleting] = useState(false);
   const [justFavorited, setJustFavorited] = useState(false);
 
+  // Mobile UX states
+  const [isDetailsExpanded, setIsDetailsExpanded] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isSettingCover, setIsSettingCover] = useState(false);
+
   // Reset edit state when photo changes
   useEffect(() => {
     setIsEditingDate(false);
@@ -46,19 +53,26 @@ export default function PhotoModal({
     setEditNotesValue("");
     setShowDeleteConfirm(false);
     setJustFavorited(false);
+    setIsFullscreen(false);
   }, [photo?.id]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onClose();
+        if (isFullscreen) {
+          setIsFullscreen(false);
+        } else {
+          onClose();
+        }
       } else if (e.key === "ArrowLeft" && onNavigate && canNavigate.prev) {
         onNavigate("prev");
       } else if (e.key === "ArrowRight" && onNavigate && canNavigate.next) {
         onNavigate("next");
+      } else if (e.key === "f") {
+        setIsFullscreen(prev => !prev);
       }
     },
-    [onClose, onNavigate, canNavigate]
+    [onClose, onNavigate, canNavigate, isFullscreen]
   );
 
   useEffect(() => {
@@ -82,6 +96,16 @@ export default function PhotoModal({
     }
   };
 
+  const handleSetCoverPhoto = async () => {
+    if (!photo || !photo.species || !onSetCoverPhoto) return;
+    setIsSettingCover(true);
+    try {
+      await onSetCoverPhoto(photo.id, photo.species.id);
+    } finally {
+      setIsSettingCover(false);
+    }
+  };
+
   if (!photo) return null;
 
   const formatDate = (dateStr: string) => {
@@ -92,6 +116,56 @@ export default function PhotoModal({
     });
   };
 
+  // Fullscreen mode - just the photo
+  if (isFullscreen) {
+    return (
+      <div
+        className="fixed inset-0 z-50 bg-black flex items-center justify-center cursor-pointer"
+        onClick={() => setIsFullscreen(false)}
+      >
+        <Image
+          src={photo.originalUrl}
+          alt={photo.species?.commonName || "Bird photo"}
+          fill
+          className="object-contain"
+          sizes="100vw"
+          priority
+        />
+        {/* Subtle hint to exit */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2
+          bg-black/50 text-white/70 text-sm rounded-full backdrop-blur-sm
+          animate-fade-in">
+          Tap anywhere to exit fullscreen
+        </div>
+        {/* Navigation in fullscreen */}
+        {onNavigate && canNavigate.prev && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onNavigate("prev"); }}
+            className="absolute left-4 top-1/2 -translate-y-1/2 p-3
+              bg-black/30 backdrop-blur-sm rounded-full text-white/80
+              hover:bg-black/50 transition-all"
+          >
+            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+        )}
+        {onNavigate && canNavigate.next && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onNavigate("next"); }}
+            className="absolute right-4 top-1/2 -translate-y-1/2 p-3
+              bg-black/30 backdrop-blur-sm rounded-full text-white/80
+              hover:bg-black/50 transition-all"
+          >
+            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex animate-fade-in">
       {/* Backdrop with blur */}
@@ -100,28 +174,55 @@ export default function PhotoModal({
         onClick={onClose}
       />
 
-      {/* Content */}
+      {/* Content - different layout for mobile vs desktop */}
       <div className="relative flex flex-col lg:flex-row w-full h-full animate-fade-in-scale">
         {/* Image container */}
-        <div className="flex-1 flex items-center justify-center p-4 lg:p-8 relative">
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 z-20 p-3 bg-white/10 backdrop-blur-md rounded-full
-              text-white/80 hover:text-white hover:bg-white/20
-              shadow-[var(--shadow-lg)]
-              transition-all duration-[var(--timing-fast)]
-              hover:scale-105 active:scale-95"
-          >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+        <div
+          className={`flex-1 flex items-center justify-center p-4 lg:p-8 relative transition-all duration-300
+            ${!isDetailsExpanded ? "lg:flex-1" : ""}`}
+          onClick={() => {
+            // On mobile, tapping the image area toggles fullscreen
+            if (window.innerWidth < 1024) {
+              setIsFullscreen(true);
+            }
+          }}
+        >
+          {/* Top controls bar */}
+          <div className="absolute top-4 left-4 right-4 z-20 flex justify-between items-center">
+            {/* Close button */}
+            <button
+              onClick={(e) => { e.stopPropagation(); onClose(); }}
+              className="p-3 bg-white/10 backdrop-blur-md rounded-full
+                text-white/80 hover:text-white hover:bg-white/20
+                shadow-[var(--shadow-lg)]
+                transition-all duration-[var(--timing-fast)]
+                hover:scale-105 active:scale-95"
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Fullscreen button (desktop) */}
+            <button
+              onClick={(e) => { e.stopPropagation(); setIsFullscreen(true); }}
+              className="hidden lg:flex p-3 bg-white/10 backdrop-blur-md rounded-full
+                text-white/80 hover:text-white hover:bg-white/20
+                shadow-[var(--shadow-lg)]
+                transition-all duration-[var(--timing-fast)]
+                hover:scale-105 active:scale-95"
+              title="Fullscreen (F)"
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+              </svg>
+            </button>
+          </div>
 
           {/* Navigation arrows */}
           {onNavigate && canNavigate.prev && (
             <button
-              onClick={() => onNavigate("prev")}
+              onClick={(e) => { e.stopPropagation(); onNavigate("prev"); }}
               className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-3.5
                 bg-white/10 backdrop-blur-md rounded-full
                 text-white/80 hover:text-white hover:bg-white/20
@@ -136,7 +237,7 @@ export default function PhotoModal({
           )}
           {onNavigate && canNavigate.next && (
             <button
-              onClick={() => onNavigate("next")}
+              onClick={(e) => { e.stopPropagation(); onNavigate("next"); }}
               className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-3.5
                 bg-white/10 backdrop-blur-md rounded-full
                 text-white/80 hover:text-white hover:bg-white/20
@@ -150,33 +251,140 @@ export default function PhotoModal({
             </button>
           )}
 
-          <div className="relative w-full h-full max-w-4xl max-h-[80vh]">
+          {/* Tap hint for mobile */}
+          <div className="lg:hidden absolute bottom-4 left-1/2 -translate-x-1/2 z-10
+            px-4 py-2 bg-black/40 text-white/70 text-xs rounded-full backdrop-blur-sm">
+            Tap photo for fullscreen
+          </div>
+
+          <div className="relative w-full h-full max-w-4xl max-h-[50vh] lg:max-h-[80vh]">
             <Image
               src={photo.originalUrl}
               alt={photo.species?.commonName || "Bird photo"}
               fill
-              className="object-contain"
+              className="object-contain cursor-pointer lg:cursor-default"
               sizes="(max-width: 1024px) 100vw, 80vw"
               priority
             />
           </div>
         </div>
 
-        {/* Sidebar */}
-        <div className="lg:w-[340px] bg-white lg:rounded-l-[var(--radius-2xl)] p-6 overflow-auto
-          shadow-[var(--shadow-2xl)] animate-slide-in-right">
-          {/* Close button for mobile (in sidebar) */}
+        {/* Mobile: Collapsible details panel */}
+        <div className={`lg:hidden bg-white rounded-t-[var(--radius-2xl)] shadow-[var(--shadow-2xl)]
+          transition-all duration-300 ease-out overflow-hidden
+          ${isDetailsExpanded ? "max-h-[50vh]" : "max-h-20"}`}>
+          {/* Collapse/Expand handle */}
           <button
-            onClick={onClose}
-            className="lg:hidden absolute top-2 right-2 p-2.5 text-[var(--mist-400)]
-              hover:text-[var(--mist-600)] hover:bg-[var(--mist-50)]
-              rounded-full transition-all duration-[var(--timing-fast)]"
+            onClick={() => setIsDetailsExpanded(!isDetailsExpanded)}
+            className="w-full p-4 flex items-center justify-between border-b border-[var(--border)]"
           >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <div className="flex items-center gap-3">
+              <h2 className="font-bold text-[var(--forest-900)]">
+                {photo.species?.commonName || "Species Unassigned"}
+              </h2>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleFavorite(); }}
+                className={`p-1.5 rounded-full ${justFavorited ? "animate-heart-beat" : ""}`}
+              >
+                <svg
+                  className={`w-5 h-5 ${photo.isFavorite ? "text-red-500 fill-current" : "text-[var(--mist-300)]"}`}
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={photo.isFavorite ? 0 : 2}
+                  fill={photo.isFavorite ? "currentColor" : "none"}
+                >
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                </svg>
+              </button>
+            </div>
+            <svg
+              className={`w-5 h-5 text-[var(--mist-400)] transition-transform duration-300
+                ${isDetailsExpanded ? "rotate-180" : ""}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
             </svg>
           </button>
 
+          {/* Expandable content */}
+          <div className="p-4 overflow-auto max-h-[calc(50vh-5rem)]">
+            {/* Quick actions row */}
+            <div className="flex gap-2 mb-4">
+              {onChangeSpecies && (
+                <button
+                  onClick={() => onChangeSpecies(photo)}
+                  className="flex-1 px-3 py-2 text-sm font-medium text-[var(--moss-600)]
+                    bg-[var(--moss-50)] rounded-[var(--radius-md)]
+                    active:scale-95 transition-all"
+                >
+                  {photo.species ? "Change" : "Assign"} Species
+                </button>
+              )}
+              {photo.species && onSetCoverPhoto && (
+                <button
+                  onClick={handleSetCoverPhoto}
+                  disabled={isSettingCover}
+                  className="flex-1 px-3 py-2 text-sm font-medium text-[var(--forest-600)]
+                    bg-[var(--forest-50)] rounded-[var(--radius-md)]
+                    active:scale-95 transition-all disabled:opacity-50"
+                >
+                  {isSettingCover ? "Setting..." : "Set as Cover"}
+                </button>
+              )}
+            </div>
+
+            {/* Compact info cards */}
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <div className="p-3 bg-[var(--moss-50)] rounded-[var(--radius-md)]">
+                <span className="text-xs text-[var(--mist-500)] uppercase">Uploaded</span>
+                <p className="text-sm font-semibold text-[var(--forest-800)]">
+                  {formatDate(photo.uploadDate)}
+                </p>
+              </div>
+              <div className="p-3 bg-[var(--mist-50)] rounded-[var(--radius-md)]">
+                <span className="text-xs text-[var(--mist-500)] uppercase">Taken</span>
+                <p className="text-sm font-semibold text-[var(--forest-800)]">
+                  {photo.originalDateTaken ? formatDate(photo.originalDateTaken) : "Not set"}
+                </p>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex gap-2">
+              <a
+                href={photo.originalUrl}
+                download
+                target="_blank"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3
+                  text-sm font-semibold text-[var(--forest-700)]
+                  bg-white border-2 border-[var(--mist-200)]
+                  rounded-[var(--radius-lg)] active:scale-95 transition-all"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download
+              </a>
+              {onDelete && (
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="px-4 py-3 text-red-600 bg-white border-2 border-red-200
+                    rounded-[var(--radius-lg)] active:scale-95 transition-all"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop: Full sidebar */}
+        <div className="hidden lg:block lg:w-[340px] bg-white lg:rounded-l-[var(--radius-2xl)] p-6 overflow-auto
+          shadow-[var(--shadow-2xl)] animate-slide-in-right">
           <div className="flex items-start justify-between mb-5">
             <div className="flex-1">
               {photo.species ? (
@@ -250,6 +458,21 @@ export default function PhotoModal({
             <p className="text-[var(--mist-600)] text-sm mb-5 leading-relaxed">
               {photo.species.description}
             </p>
+          )}
+
+          {/* Set as cover photo button */}
+          {photo.species && onSetCoverPhoto && (
+            <button
+              onClick={handleSetCoverPhoto}
+              disabled={isSettingCover}
+              className="w-full mb-4 px-4 py-2.5 text-sm font-medium text-[var(--forest-600)]
+                bg-gradient-to-br from-[var(--forest-50)] to-[var(--moss-50)]
+                border border-[var(--forest-200)] rounded-[var(--radius-lg)]
+                hover:border-[var(--forest-300)] hover:shadow-[var(--shadow-sm)]
+                active:scale-[0.98] transition-all disabled:opacity-50"
+            >
+              {isSettingCover ? "Setting cover photo..." : "Set as species cover photo"}
+            </button>
           )}
 
           <div className="space-y-3">
