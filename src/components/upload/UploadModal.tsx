@@ -318,7 +318,7 @@ export default function UploadModal({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*,.heic"
+                accept="image/jpeg,image/png,image/heic,image/heif,.heic,.heif"
                 multiple
                 onChange={handleFileSelect}
                 className="hidden"
