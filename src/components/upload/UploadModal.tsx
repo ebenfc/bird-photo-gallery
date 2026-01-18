@@ -38,6 +38,7 @@ export default function UploadModal({
   const [sameSpeciesForAll, setSameSpeciesForAll] = useState(true);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [individualPhotoData, setIndividualPhotoData] = useState<{ speciesId: string; notes: string }[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
 
   // New species form state
   const [showNewSpeciesForm, setShowNewSpeciesForm] = useState(false);
@@ -132,13 +133,6 @@ export default function UploadModal({
     setStep("preview");
   }, []);
 
-  const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      processFile(file);
-    }
-  }, [processFile]);
-
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
@@ -152,11 +146,18 @@ export default function UploadModal({
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      processFile(file);
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      // Create a synthetic event-like object for handleFileSelect
+      const input = fileInputRef.current;
+      if (input) {
+        const dataTransfer = new DataTransfer();
+        files.forEach(f => dataTransfer.items.add(f));
+        input.files = dataTransfer.files;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      }
     }
-  }, [processFile]);
+  }, []);
 
   const handleCreateSpecies = async () => {
     if (!newSpeciesName.trim()) {
