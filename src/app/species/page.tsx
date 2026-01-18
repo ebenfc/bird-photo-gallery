@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Species, SpeciesResponse } from "@/types";
+import { Species, SpeciesResponse, Rarity } from "@/types";
 import SpeciesCard from "@/components/species/SpeciesCard";
 import SpeciesForm from "@/components/species/SpeciesForm";
 import Button from "@/components/ui/Button";
@@ -32,6 +32,7 @@ export default function SpeciesDirectory() {
     commonName: string;
     scientificName?: string;
     description?: string;
+    rarity?: Rarity;
   }) => {
     const res = await fetch("/api/species", {
       method: "POST",
@@ -51,6 +52,7 @@ export default function SpeciesDirectory() {
     commonName: string;
     scientificName?: string;
     description?: string;
+    rarity?: Rarity;
   }) => {
     if (!editingSpecies) return;
 
@@ -176,6 +178,7 @@ export default function SpeciesDirectory() {
                 commonName: editingSpecies.commonName,
                 scientificName: editingSpecies.scientificName || undefined,
                 description: editingSpecies.description || undefined,
+                rarity: editingSpecies.rarity,
               }
             : undefined
         }

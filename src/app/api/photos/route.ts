@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { photos, species } from "@/db/schema";
-import { eq, desc, asc, and, sql } from "drizzle-orm";
+import { photos, species, Rarity } from "@/db/schema";
+import { eq, desc, asc, and, sql, inArray } from "drizzle-orm";
 import { getThumbnailUrl, getOriginalUrl } from "@/lib/storage";
 
 type SortOption = "recent_upload" | "oldest_upload" | "species_alpha" | "recent_taken";
+const VALID_RARITIES: Rarity[] = ["common", "uncommon", "rare"];
 
 // GET /api/photos - List photos with optional filtering
 export async function GET(request: NextRequest) {
@@ -12,10 +13,16 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const speciesId = searchParams.get("speciesId");
     const favorites = searchParams.get("favorites");
+    const rarityParam = searchParams.get("rarity"); // comma-separated: "rare" or "uncommon,rare"
     const sort = (searchParams.get("sort") || "recent_upload") as SortOption;
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "50");
     const offset = (page - 1) * limit;
+
+    // Parse rarity filter
+    const rarityFilter: Rarity[] = rarityParam
+      ? (rarityParam.split(",").filter((r) => VALID_RARITIES.includes(r as Rarity)) as Rarity[])
+      : [];
 
     // Build sort order
     const getOrderBy = () => {
@@ -39,6 +46,9 @@ export async function GET(request: NextRequest) {
     }
     if (favorites === "true") {
       conditions.push(eq(photos.isFavorite, true));
+    }
+    if (rarityFilter.length > 0) {
+      conditions.push(inArray(species.rarity, rarityFilter));
     }
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -64,6 +74,7 @@ export async function GET(request: NextRequest) {
         speciesId: photos.speciesId,
         speciesCommonName: species.commonName,
         speciesScientificName: species.scientificName,
+        speciesRarity: species.rarity,
       })
       .from(photos)
       .leftJoin(species, eq(photos.speciesId, species.id))
@@ -89,6 +100,7 @@ export async function GET(request: NextRequest) {
             id: photo.speciesId,
             commonName: photo.speciesCommonName,
             scientificName: photo.speciesScientificName,
+            rarity: photo.speciesRarity as Rarity,
           }
         : null,
     }));

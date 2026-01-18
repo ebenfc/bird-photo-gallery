@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Rarity } from "@/types";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
@@ -12,12 +13,14 @@ interface SpeciesFormProps {
     commonName: string;
     scientificName?: string;
     description?: string;
+    rarity?: Rarity;
   }) => Promise<void>;
   onDelete?: () => Promise<void>;
   initialData?: {
     commonName: string;
     scientificName?: string;
     description?: string;
+    rarity?: Rarity;
   };
   title?: string;
   photoCount?: number;
@@ -35,6 +38,7 @@ export default function SpeciesForm({
   const [commonName, setCommonName] = useState("");
   const [scientificName, setScientificName] = useState("");
   const [description, setDescription] = useState("");
+  const [rarity, setRarity] = useState<Rarity>("common");
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -46,6 +50,7 @@ export default function SpeciesForm({
       setCommonName(initialData?.commonName || "");
       setScientificName(initialData?.scientificName || "");
       setDescription(initialData?.description || "");
+      setRarity(initialData?.rarity || "common");
       setError("");
     }
   }, [isOpen, initialData]);
@@ -65,6 +70,7 @@ export default function SpeciesForm({
         commonName: commonName.trim(),
         scientificName: scientificName.trim() || undefined,
         description: description.trim() || undefined,
+        rarity,
       });
       onClose();
     } catch (err) {
@@ -79,6 +85,7 @@ export default function SpeciesForm({
     setCommonName("");
     setScientificName("");
     setDescription("");
+    setRarity("common");
     setError("");
     setShowDeleteConfirm(false);
     onClose();
@@ -154,6 +161,32 @@ export default function SpeciesForm({
                 focus:outline-none focus:ring-2 focus:ring-[var(--moss-400)] focus:border-[var(--moss-400)]
                 hover:border-[var(--mist-300)] transition-colors text-sm resize-none"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--mist-700)] mb-1.5">
+              Rarity
+            </label>
+            <div className="flex gap-2">
+              {(["common", "uncommon", "rare"] as const).map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => setRarity(r)}
+                  className={`flex-1 px-3 py-2 rounded-xl border text-sm font-medium transition-all ${
+                    rarity === r
+                      ? r === "common"
+                        ? "bg-slate-100 border-slate-300 text-slate-700"
+                        : r === "uncommon"
+                        ? "bg-amber-50 border-amber-300 text-amber-700"
+                        : "bg-red-50 border-red-300 text-red-700"
+                      : "bg-white border-[var(--mist-200)] text-[var(--mist-500)] hover:border-[var(--mist-300)]"
+                  }`}
+                >
+                  {r.charAt(0).toUpperCase() + r.slice(1)}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 

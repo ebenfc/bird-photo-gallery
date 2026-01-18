@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Species } from "@/types";
+import RarityBadge from "@/components/ui/RarityBadge";
 
 interface SpeciesCardProps {
   species: Species;
@@ -93,7 +94,8 @@ export default function SpeciesCard({ species, onEdit }: SpeciesCardProps) {
           )}
         </div>
 
-        <div className="mt-3 flex items-center gap-1.5 text-sm text-[var(--mist-600)]">
+        <div className="mt-3 flex items-center gap-2 text-sm text-[var(--mist-600)]">
+          <RarityBadge rarity={species.rarity} size="sm" />
           <div className="flex items-center gap-1 px-2 py-1 bg-[var(--moss-50)] rounded-full">
             <svg
               className="w-4 h-4 text-[var(--moss-600)]"

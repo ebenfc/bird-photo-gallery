@@ -2,11 +2,13 @@
 
 import { Suspense, useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Photo, Species, PhotosResponse, SpeciesResponse } from "@/types";
+import { Photo, Species, PhotosResponse, SpeciesResponse, Rarity } from "@/types";
 import PhotoGrid from "@/components/gallery/PhotoGrid";
 import PhotoModal from "@/components/gallery/PhotoModal";
 import GalleryFilters from "@/components/gallery/GalleryFilters";
 import SpeciesAssignModal from "@/components/species/SpeciesAssignModal";
+import UploadModal from "@/components/upload/UploadModal";
+import Button from "@/components/ui/Button";
 
 function GalleryContent() {
   const router = useRouter();
@@ -17,6 +19,7 @@ function GalleryContent() {
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [photoToAssign, setPhotoToAssign] = useState<Photo | null>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const [sortOption, setSortOption] = useState<string>(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("gallerySortPreference") || "recent_upload";
@@ -29,13 +32,19 @@ function GalleryContent() {
     ? parseInt(searchParams.get("species")!)
     : null;
   const showFavoritesOnly = searchParams.get("favorites") === "true";
+  const selectedRarities: Rarity[] = searchParams.get("rarity")
+    ? (searchParams.get("rarity")!.split(",").filter((r) =>
+        ["common", "uncommon", "rare"].includes(r)
+      ) as Rarity[])
+    : [];
 
   // Update URL with filter state
   const updateFilters = useCallback(
-    (newSpecies: number | null, newFavorites: boolean) => {
+    (newSpecies: number | null, newFavorites: boolean, newRarities: Rarity[]) => {
       const params = new URLSearchParams();
       if (newSpecies) params.set("species", newSpecies.toString());
       if (newFavorites) params.set("favorites", "true");
+      if (newRarities.length > 0) params.set("rarity", newRarities.join(","));
       const queryString = params.toString();
       router.push(queryString ? `/?${queryString}` : "/");
     },
@@ -47,6 +56,7 @@ function GalleryContent() {
     const params = new URLSearchParams();
     if (selectedSpecies) params.set("speciesId", selectedSpecies.toString());
     if (showFavoritesOnly) params.set("favorites", "true");
+    if (selectedRarities.length > 0) params.set("rarity", selectedRarities.join(","));
     params.set("sort", sortOption);
 
     try {
@@ -58,7 +68,7 @@ function GalleryContent() {
     } finally {
       setLoading(false);
     }
-  }, [selectedSpecies, showFavoritesOnly, sortOption]);
+  }, [selectedSpecies, showFavoritesOnly, selectedRarities, sortOption]);
 
   // Handle sort change
   const handleSortChange = (newSort: string) => {
@@ -132,6 +142,7 @@ function GalleryContent() {
                   id: updatedSpecies.id,
                   commonName: updatedSpecies.commonName,
                   scientificName: updatedSpecies.scientificName,
+                  rarity: updatedSpecies.rarity,
                 },
               }
             : null
@@ -144,7 +155,7 @@ function GalleryContent() {
 
   const handleCreateAndAssign = async (
     photoId: number,
-    speciesData: { commonName: string; scientificName?: string }
+    speciesData: { commonName: string; scientificName?: string; rarity?: Rarity }
   ) => {
     // Create species
     const createRes = await fetch("/api/species", {
@@ -247,21 +258,32 @@ function GalleryContent() {
   };
 
   return (
-    <div className="pnw-texture min-h-screen">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-[var(--forest-900)]">Photo Gallery</h1>
-        <span className="text-sm text-[var(--mist-500)] px-3 py-1 bg-[var(--moss-50)] rounded-full">
-          {photos.length} photo{photos.length !== 1 ? "s" : ""}
-        </span>
+    <div className="pnw-texture min-h-screen pb-20 sm:pb-0">
+      <div className="flex items-center justify-between mb-4 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl font-bold text-[var(--forest-900)]">Photo Gallery</h1>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <span className="text-xs sm:text-sm text-[var(--mist-500)] px-2 sm:px-3 py-1 bg-[var(--moss-50)] rounded-full">
+            {photos.length} photo{photos.length !== 1 ? "s" : ""}
+          </span>
+          {/* Upload button - hidden on mobile, FAB shown instead */}
+          <Button onClick={() => setShowUploadModal(true)} className="hidden sm:flex">
+            <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Upload
+          </Button>
+        </div>
       </div>
 
       <GalleryFilters
         species={species}
         selectedSpecies={selectedSpecies}
         showFavoritesOnly={showFavoritesOnly}
+        selectedRarities={selectedRarities}
         sortOption={sortOption}
-        onSpeciesChange={(id) => updateFilters(id, showFavoritesOnly)}
-        onFavoritesChange={(value) => updateFilters(selectedSpecies, value)}
+        onSpeciesChange={(id) => updateFilters(id, showFavoritesOnly, selectedRarities)}
+        onFavoritesChange={(value) => updateFilters(selectedSpecies, value, selectedRarities)}
+        onRarityChange={(rarities) => updateFilters(selectedSpecies, showFavoritesOnly, rarities)}
         onSortChange={handleSortChange}
       />
 
@@ -291,6 +313,28 @@ function GalleryContent() {
         onAssign={handleAssignSpecies}
         onCreateAndAssign={handleCreateAndAssign}
       />
+
+      <UploadModal
+        isOpen={showUploadModal}
+        onClose={() => setShowUploadModal(false)}
+        species={species}
+        onUploadComplete={() => {
+          fetchPhotos();
+          fetchSpecies();
+        }}
+        onSpeciesCreated={fetchSpecies}
+      />
+
+      {/* Floating Action Button for mobile */}
+      <button
+        onClick={() => setShowUploadModal(true)}
+        className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-[var(--forest-600)] to-[var(--moss-600)] text-white rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center justify-center sm:hidden z-40"
+        aria-label="Upload photo"
+      >
+        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        </svg>
+      </button>
     </div>
   );
 }

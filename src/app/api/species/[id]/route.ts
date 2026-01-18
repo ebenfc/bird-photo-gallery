@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { species, photos } from "@/db/schema";
+import { species, photos, Rarity } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
+
+const VALID_RARITIES: Rarity[] = ["common", "uncommon", "rare"];
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -23,6 +25,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         commonName: species.commonName,
         scientificName: species.scientificName,
         description: species.description,
+        rarity: species.rarity,
         createdAt: species.createdAt,
         photoCount: sql<number>`count(${photos.id})`.as("photo_count"),
       })
@@ -56,7 +59,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     const body = await request.json();
-    const { commonName, scientificName, description } = body;
+    const { commonName, scientificName, description, rarity } = body;
 
     const updateData: Record<string, string | null> = {};
     if (commonName !== undefined) {
@@ -73,6 +76,15 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
     if (description !== undefined) {
       updateData.description = description?.trim() || null;
+    }
+    if (rarity !== undefined) {
+      if (!VALID_RARITIES.includes(rarity)) {
+        return NextResponse.json(
+          { error: "Invalid rarity value. Must be 'common', 'uncommon', or 'rare'" },
+          { status: 400 }
+        );
+      }
+      updateData.rarity = rarity;
     }
 
     if (Object.keys(updateData).length === 0) {

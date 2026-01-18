@@ -1,8 +1,11 @@
+export type Rarity = "common" | "uncommon" | "rare";
+
 export interface Species {
   id: number;
   commonName: string;
   scientificName: string | null;
   description: string | null;
+  rarity: Rarity;
   createdAt: string;
   photoCount?: number;
   latestPhoto?: {
@@ -27,6 +30,7 @@ export interface Photo {
     commonName: string;
     scientificName: string | null;
     description?: string | null;
+    rarity: Rarity;
   } | null;
 }
 

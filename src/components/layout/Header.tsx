@@ -37,6 +37,7 @@ function BirdIcon({ className }: { className?: string }) {
 export default function Header() {
   const pathname = usePathname();
   const [unassignedCount, setUnassignedCount] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const fetchUnassignedCount = async () => {
@@ -56,33 +57,68 @@ export default function Header() {
     return () => clearInterval(interval);
   }, []);
 
-  const navItems: Array<{ href: string; label: string; badge?: number }> = [
-    { href: "/", label: "Gallery" },
-    { href: "/inbox", label: "Inbox", badge: unassignedCount },
-    { href: "/species", label: "Species" },
-    { href: "/favorites", label: "Favorites" },
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
+  const navItems: Array<{ href: string; label: string; badge?: number; icon: React.ReactNode }> = [
+    {
+      href: "/",
+      label: "Gallery",
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      ),
+    },
+    {
+      href: "/inbox",
+      label: "Inbox",
+      badge: unassignedCount,
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+        </svg>
+      ),
+    },
+    {
+      href: "/species",
+      label: "Species",
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        </svg>
+      ),
+    },
+    {
+      href: "/favorites",
+      label: "Favorites",
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+      ),
+    },
   ];
 
   return (
     <header className="bg-gradient-to-r from-[var(--forest-950)] to-[var(--forest-800)] sticky top-0 z-50 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <Link href="/" className="flex items-center gap-3 group">
+        <div className="flex justify-between items-center h-14 sm:h-16">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 group">
             <div className="relative">
-              <EvergreenIcon className="w-7 h-7 text-[var(--moss-400)] group-hover:text-[var(--moss-300)] transition-colors" />
-              <BirdIcon className="w-4 h-4 text-white absolute -right-1 top-0 opacity-80" />
+              <EvergreenIcon className="w-6 h-6 sm:w-7 sm:h-7 text-[var(--moss-400)] group-hover:text-[var(--moss-300)] transition-colors" />
+              <BirdIcon className="w-3 h-3 sm:w-4 sm:h-4 text-white absolute -right-0.5 -top-0.5 sm:-right-1 sm:top-0 opacity-80" />
             </div>
-            <div className="flex flex-col">
-              <span className="font-semibold text-lg text-white leading-tight">
-                Bird Gallery
-              </span>
-              <span className="text-[10px] text-[var(--moss-300)] uppercase tracking-wider hidden sm:block">
-                Pacific Northwest
-              </span>
-            </div>
+            <span className="font-semibold text-base sm:text-lg text-white">
+              Bird Gallery
+            </span>
           </Link>
 
-          <nav className="flex gap-1">
+          {/* Desktop Navigation */}
+          <nav className="hidden sm:flex gap-1">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
               const hasBadge = item.badge !== undefined && item.badge > 0;
@@ -113,10 +149,59 @@ export default function Header() {
               );
             })}
           </nav>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="sm:hidden p-2 -mr-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? (
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
         </div>
       </div>
 
-      {/* Subtle mountain silhouette at bottom of header */}
+      {/* Mobile Navigation Menu */}
+      {mobileMenuOpen && (
+        <div className="sm:hidden border-t border-white/10">
+          <nav className="px-4 py-3 space-y-1">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href;
+              const hasBadge = item.badge !== undefined && item.badge > 0;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-3 px-3 py-3 rounded-xl text-base font-medium transition-all ${
+                    isActive
+                      ? "bg-white/20 text-white"
+                      : "text-[var(--moss-200)] hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  {item.icon}
+                  <span className="flex-1">{item.label}</span>
+                  {hasBadge && (
+                    <span className="min-w-[24px] h-6 flex items-center justify-center px-2 text-sm font-bold rounded-full bg-[var(--moss-500)] text-white">
+                      {item.badge}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+      )}
+
+      {/* Subtle accent bar at bottom of header */}
       <div className="h-1 bg-gradient-to-r from-[var(--moss-600)] via-[var(--forest-700)] to-[var(--moss-600)]" />
     </header>
   );

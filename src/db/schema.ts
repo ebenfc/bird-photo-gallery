@@ -1,12 +1,16 @@
 import { pgTable, text, integer, boolean, serial, timestamp } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
+// Rarity type for species
+export type Rarity = "common" | "uncommon" | "rare";
+
 // Bird Species Table
 export const species = pgTable("species", {
   id: serial("id").primaryKey(),
   commonName: text("common_name").notNull(),
   scientificName: text("scientific_name"),
   description: text("description"),
+  rarity: text("rarity").notNull().default("common"), // 'common', 'uncommon', 'rare'
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

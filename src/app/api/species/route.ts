@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { species, photos } from "@/db/schema";
-import { eq, sql, desc, asc } from "drizzle-orm";
+import { species, photos, Rarity } from "@/db/schema";
+import { eq, sql, desc, asc, inArray } from "drizzle-orm";
 
 type SpeciesSortOption = "alpha" | "photo_count" | "recent_added" | "recent_taken";
+const VALID_RARITIES: Rarity[] = ["common", "uncommon", "rare"];
 
 // GET /api/species - List all species with photo counts
 export async function GET(request: NextRequest) {
@@ -32,6 +33,7 @@ export async function GET(request: NextRequest) {
         commonName: species.commonName,
         scientificName: species.scientificName,
         description: species.description,
+        rarity: species.rarity,
         createdAt: species.createdAt,
         photoCount: sql<number>`count(${photos.id})`.as("photo_count"),
       })
@@ -74,7 +76,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { commonName, scientificName, description } = body;
+    const { commonName, scientificName, description, rarity } = body;
 
     if (!commonName || typeof commonName !== "string") {
       return NextResponse.json(
@@ -83,12 +85,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate rarity if provided
+    const validatedRarity: Rarity = rarity && VALID_RARITIES.includes(rarity)
+      ? rarity
+      : "common";
+
     const result = await db
       .insert(species)
       .values({
         commonName: commonName.trim(),
         scientificName: scientificName?.trim() || null,
         description: description?.trim() || null,
+        rarity: validatedRarity,
       })
       .returning();
 

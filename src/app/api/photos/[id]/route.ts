@@ -36,6 +36,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         speciesCommonName: species.commonName,
         speciesScientificName: species.scientificName,
         speciesDescription: species.description,
+        speciesRarity: species.rarity,
       })
       .from(photos)
       .leftJoin(species, eq(photos.speciesId, species.id))
@@ -64,6 +65,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
               commonName: photo.speciesCommonName,
               scientificName: photo.speciesScientificName,
               description: photo.speciesDescription,
+              rarity: photo.speciesRarity,
             }
           : null,
       },
