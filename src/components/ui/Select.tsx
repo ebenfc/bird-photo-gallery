@@ -8,13 +8,13 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 const Select = forwardRef<HTMLSelectElement, SelectProps>(
   ({ className = "", label, error, children, ...props }, ref) => {
     return (
-      <div className="w-full">
+      <div className={className || "w-full"}>
         {label && (
           <label className="block text-sm font-semibold text-[var(--forest-800)] mb-2">
             {label}
           </label>
         )}
-        <div className="relative">
+        <div className="relative inline-flex w-full">
           <select
             ref={ref}
             className={`
@@ -29,7 +29,6 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
               hover:border-[var(--mist-300)] hover:shadow-[var(--shadow-md)]
               text-base font-medium
               ${error ? "border-red-400 focus:border-red-400 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.15)]" : ""}
-              ${className}
             `}
             {...props}
           >

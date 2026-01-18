@@ -271,6 +271,11 @@ function GalleryContent() {
           <span className="text-xs sm:text-sm font-semibold text-[var(--forest-700)] px-3 sm:px-4 py-1.5
             bg-gradient-to-br from-[var(--moss-50)] to-[var(--forest-50)]
             rounded-full shadow-[var(--shadow-xs)] ring-1 ring-[var(--border)]">
+            {species.filter(s => s.photoCount && s.photoCount > 0).length} species
+          </span>
+          <span className="text-xs sm:text-sm font-semibold text-[var(--forest-700)] px-3 sm:px-4 py-1.5
+            bg-gradient-to-br from-[var(--moss-50)] to-[var(--forest-50)]
+            rounded-full shadow-[var(--shadow-xs)] ring-1 ring-[var(--border)]">
             {photos.length} photo{photos.length !== 1 ? "s" : ""}
           </span>
           {/* Upload button - hidden on mobile, FAB shown instead */}
