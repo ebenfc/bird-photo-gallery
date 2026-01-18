@@ -26,12 +26,18 @@ export default function UploadModal({
 }: UploadModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState<UploadStep>("select");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [selectedSpeciesId, setSelectedSpeciesId] = useState<string>("");
   const [notes, setNotes] = useState("");
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadProgress, setUploadProgress] = useState<{ [key: number]: number }>({});
   const [error, setError] = useState<string | null>(null);
+  const [uploadedPhotoIds, setUploadedPhotoIds] = useState<number[]>([]);
+
+  // Batch upload mode state
+  const [sameSpeciesForAll, setSameSpeciesForAll] = useState(true);
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [individualPhotoData, setIndividualPhotoData] = useState<{ speciesId: string; notes: string }[]>([]);
   const [isDragging, setIsDragging] = useState(false);
 
   // New species form state
@@ -43,12 +49,16 @@ export default function UploadModal({
 
   const resetModal = useCallback(() => {
     setStep("select");
-    setSelectedFile(null);
-    setPreviewUrl(null);
+    setSelectedFiles([]);
+    setPreviewUrls([]);
     setSelectedSpeciesId("");
     setNotes("");
-    setUploadProgress(0);
+    setUploadProgress({});
     setError(null);
+    setUploadedPhotoIds([]);
+    setSameSpeciesForAll(true);
+    setCurrentPhotoIndex(0);
+    setIndividualPhotoData([]);
     setShowNewSpeciesForm(false);
     setNewSpeciesName("");
     setNewScientificName("");
@@ -64,38 +74,64 @@ export default function UploadModal({
     onClose();
   }, [resetModal, onClose]);
 
-  const processFile = useCallback((file: File) => {
-    // Validate file type
+  const generatePreview = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target?.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleFileSelect = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) return;
+
+    // Validate each file
     const validTypes = ["image/jpeg", "image/jpg", "image/heic", "image/heif", "image/png"];
-    if (!validTypes.includes(file.type.toLowerCase()) && !file.name.toLowerCase().endsWith(".heic")) {
-      setError("Please select an image file (JPEG, PNG, or HEIC)");
+    const validFiles: File[] = [];
+    const errors: string[] = [];
+
+    for (const file of files) {
+      if (!validTypes.includes(file.type.toLowerCase()) && !file.name.toLowerCase().endsWith(".heic")) {
+        errors.push(`${file.name} is not a supported image file`);
+        continue;
+      }
+      if (file.size > 20 * 1024 * 1024) {
+        errors.push(`${file.name} exceeds 20MB limit`);
+        continue;
+      }
+      validFiles.push(file);
+    }
+
+    if (validFiles.length === 0) {
+      setError(errors.join(". "));
       return;
     }
 
-    // Validate file size (max 20MB)
-    if (file.size > 20 * 1024 * 1024) {
-      setError("Image must be less than 20MB");
-      return;
+    // Show warning if some files were invalid
+    if (errors.length > 0) {
+      console.warn("Some files were skipped:", errors);
     }
 
     setError(null);
-    setSelectedFile(file);
+    setSelectedFiles(validFiles);
 
-    // Generate preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreviewUrl(e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
+    // Generate previews for all files
+    try {
+      const previews = await Promise.all(validFiles.map(generatePreview));
+      setPreviewUrls(previews);
+    } catch {
+      setError("Failed to generate previews");
+      return;
+    }
+
+    // Initialize individual photo data
+    setIndividualPhotoData(validFiles.map(() => ({ speciesId: "", notes: "" })));
+    setCurrentPhotoIndex(0);
+
     setStep("preview");
   }, []);
-
-  const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      processFile(file);
-    }
-  }, [processFile]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -110,11 +146,18 @@ export default function UploadModal({
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      processFile(file);
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      // Create a synthetic event-like object for handleFileSelect
+      const input = fileInputRef.current;
+      if (input) {
+        const dataTransfer = new DataTransfer();
+        files.forEach(f => dataTransfer.items.add(f));
+        input.files = dataTransfer.files;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      }
     }
-  }, [processFile]);
+  }, []);
 
   const handleCreateSpecies = async () => {
     if (!newSpeciesName.trim()) {
@@ -155,57 +198,89 @@ export default function UploadModal({
     }
   };
 
-  const handleUpload = async () => {
-    if (!selectedFile) return;
+  const uploadSingleFile = (
+    file: File,
+    speciesId: string,
+    fileNotes: string,
+    index: number
+  ): Promise<number> => {
+    return new Promise((resolve, reject) => {
+      const formData = new FormData();
+      formData.append("photo", file);
+      if (speciesId) {
+        formData.append("speciesId", speciesId);
+      }
+      if (fileNotes.trim()) {
+        formData.append("notes", fileNotes.trim());
+      }
 
-    setStep("uploading");
-    setUploadProgress(0);
-    setError(null);
-
-    const formData = new FormData();
-    formData.append("photo", selectedFile);
-    if (selectedSpeciesId) {
-      formData.append("speciesId", selectedSpeciesId);
-    }
-    if (notes.trim()) {
-      formData.append("notes", notes.trim());
-    }
-
-    try {
       const xhr = new XMLHttpRequest();
 
-      await new Promise<void>((resolve, reject) => {
-        xhr.upload.addEventListener("progress", (e) => {
-          if (e.lengthComputable) {
-            const percentComplete = Math.round((e.loaded / e.total) * 100);
-            setUploadProgress(percentComplete);
-          }
-        });
-
-        xhr.addEventListener("load", () => {
-          if (xhr.status === 200) {
-            setStep("success");
-            resolve();
-          } else {
-            try {
-              const errorData = JSON.parse(xhr.responseText);
-              reject(new Error(errorData.error || "Upload failed"));
-            } catch {
-              reject(new Error("Upload failed"));
-            }
-          }
-        });
-
-        xhr.addEventListener("error", () => {
-          reject(new Error("Network error. Please check your connection."));
-        });
-
-        xhr.open("POST", "/api/upload/browser");
-        xhr.send(formData);
+      xhr.upload.addEventListener("progress", (e) => {
+        if (e.lengthComputable) {
+          const percentComplete = Math.round((e.loaded / e.total) * 100);
+          setUploadProgress((prev) => ({ ...prev, [index]: percentComplete }));
+        }
       });
+
+      xhr.addEventListener("load", () => {
+        if (xhr.status === 200) {
+          const result = JSON.parse(xhr.responseText);
+          setUploadProgress((prev) => ({ ...prev, [index]: 100 }));
+          resolve(result.photoId);
+        } else {
+          try {
+            const errorData = JSON.parse(xhr.responseText);
+            reject(new Error(errorData.error || `Upload failed for ${file.name}`));
+          } catch {
+            reject(new Error(`Upload failed for ${file.name}`));
+          }
+        }
+      });
+
+      xhr.addEventListener("error", () => {
+        reject(new Error(`Network error uploading ${file.name}`));
+      });
+
+      xhr.open("POST", "/api/upload/browser");
+      xhr.send(formData);
+    });
+  };
+
+  const handleUpload = async () => {
+    if (selectedFiles.length === 0) return;
+
+    setStep("uploading");
+    setUploadProgress({});
+    setError(null);
+
+    // Initialize progress for all files
+    const initialProgress: { [key: number]: number } = {};
+    selectedFiles.forEach((_, index) => {
+      initialProgress[index] = 0;
+    });
+    setUploadProgress(initialProgress);
+
+    try {
+      const uploadPromises = selectedFiles.map((file, index) => {
+        let fileSpeciesId = selectedSpeciesId;
+        let fileNotes = notes;
+
+        // Use individual data if not using same species for all
+        if (!sameSpeciesForAll && individualPhotoData[index]) {
+          fileSpeciesId = individualPhotoData[index].speciesId;
+          fileNotes = individualPhotoData[index].notes;
+        }
+
+        return uploadSingleFile(file, fileSpeciesId, fileNotes, index);
+      });
+
+      const photoIds = await Promise.all(uploadPromises);
+      setUploadedPhotoIds(photoIds);
+      setStep("success");
     } catch (err) {
       console.error("Upload error:", err);
-      setError(err instanceof Error ? err.message : "Upload failed. Please try again.");
+      setError(err instanceof Error ? err.message : "Some uploads failed. Please try again.");
       setStep("preview");
     }
   };
@@ -241,9 +316,9 @@ export default function UploadModal({
         {/* Header */}
         <div className="p-5 border-b border-[var(--border)] bg-gradient-to-r from-[var(--moss-50)] to-[var(--mist-50)]">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-[var(--forest-900)]">
-              {step === "select" && "Upload Photo"}
-              {step === "preview" && "Photo Details"}
+            <h2 className="text-lg font-semibold text-[var(--forest-900)]">
+              {step === "select" && "Upload Photos"}
+              {step === "preview" && (selectedFiles.length > 1 ? `Upload ${selectedFiles.length} Photos` : "Photo Details")}
               {step === "uploading" && "Uploading..."}
               {step === "success" && "Upload Complete"}
             </h2>
@@ -271,8 +346,8 @@ export default function UploadModal({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*,.heic"
-                capture="environment"
+                accept="image/jpeg,image/png,image/heic,image/heif,.heic,.heif"
+                multiple
                 onChange={handleFileSelect}
                 className="hidden"
               />
@@ -302,14 +377,14 @@ export default function UploadModal({
                       d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-bold text-[var(--forest-800)] mb-2">
-                  Select a Photo
+                <h3 className="text-lg font-medium text-[var(--forest-800)] mb-2">
+                  Select Photos
                 </h3>
                 <p className="text-sm text-[var(--mist-500)] mb-1">
                   Tap to choose from your photo library
                 </p>
-                <p className="text-xs text-[var(--mist-400)]">
-                  or drag and drop here
+                <p className="text-xs text-[var(--mist-400)] mt-2">
+                  Select multiple photos at once. Supports JPEG, PNG, and HEIC.
                 </p>
                 <div className="mt-4 flex items-center justify-center gap-2 text-xs text-[var(--mist-400)]">
                   <span className="px-2 py-1 bg-[var(--mist-100)] rounded-full">JPEG</span>
@@ -328,36 +403,138 @@ export default function UploadModal({
           )}
 
           {/* Step: Preview & Form */}
-          {step === "preview" && previewUrl && (
-            <div className="space-y-5 animate-fade-in">
-              {/* Photo Preview */}
-              <div className="relative w-full aspect-[4/3] rounded-[var(--radius-xl)] overflow-hidden
-                bg-gradient-to-br from-[var(--mist-50)] to-[var(--moss-50)]
-                shadow-[var(--shadow-md)] ring-1 ring-[var(--border)]">
-                <Image
-                  src={previewUrl}
-                  alt="Preview"
-                  fill
-                  className="object-contain"
-                />
-              </div>
+          {step === "preview" && previewUrls.length > 0 && (
+            <div className="space-y-4">
+              {/* Photo Thumbnails - Multiple Photos */}
+              {selectedFiles.length > 1 ? (
+                <div className="space-y-3">
+                  {/* Thumbnail strip */}
+                  <div className="flex gap-2 overflow-x-auto pb-2">
+                    {previewUrls.map((url, index) => (
+                      <div
+                        key={index}
+                        onClick={() => !sameSpeciesForAll && setCurrentPhotoIndex(index)}
+                        className={`relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden cursor-pointer transition-all ${
+                          !sameSpeciesForAll && currentPhotoIndex === index
+                            ? "ring-2 ring-[var(--forest-500)] ring-offset-2"
+                            : "hover:opacity-80"
+                        }`}
+                      >
+                        <Image
+                          src={url}
+                          alt={`Photo ${index + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center py-0.5">
+                          {index + 1}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-[var(--mist-500)] text-center">
+                    {selectedFiles.length} photos selected (
+                    {(selectedFiles.reduce((acc, f) => acc + f.size, 0) / 1024 / 1024).toFixed(1)} MB total)
+                  </p>
+                </div>
+              ) : (
+                /* Single Photo Preview */
+                <>
+                  <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-[var(--mist-50)]">
+                    <Image
+                      src={previewUrls[0]}
+                      alt="Preview"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                  {selectedFiles[0] && (
+                    <p className="text-xs text-[var(--mist-500)] text-center">
+                      {selectedFiles[0].name} ({(selectedFiles[0].size / 1024 / 1024).toFixed(1)} MB)
+                    </p>
+                  )}
+                </>
+              )}
 
-              {/* File info */}
-              {selectedFile && (
-                <p className="text-xs text-[var(--mist-500)] text-center font-medium">
-                  {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(1)} MB)
-                </p>
+              {/* Assignment Mode Toggle - Only for multiple photos */}
+              {selectedFiles.length > 1 && (
+                <div className="flex gap-2 p-1 bg-[var(--mist-50)] rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => setSameSpeciesForAll(true)}
+                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+                      sameSpeciesForAll
+                        ? "bg-white text-[var(--forest-700)] shadow-sm"
+                        : "text-[var(--mist-500)] hover:text-[var(--mist-700)]"
+                    }`}
+                  >
+                    Same for all
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSameSpeciesForAll(false)}
+                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+                      !sameSpeciesForAll
+                        ? "bg-white text-[var(--forest-700)] shadow-sm"
+                        : "text-[var(--mist-500)] hover:text-[var(--mist-700)]"
+                    }`}
+                  >
+                    Assign individually
+                  </button>
+                </div>
+              )}
+
+              {/* Individual Photo Navigation */}
+              {selectedFiles.length > 1 && !sameSpeciesForAll && (
+                <div className="flex items-center justify-between p-3 bg-[var(--moss-50)] rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPhotoIndex((i) => Math.max(0, i - 1))}
+                    disabled={currentPhotoIndex === 0}
+                    className="p-1 text-[var(--forest-600)] disabled:text-[var(--mist-300)] hover:bg-white/50 rounded-lg transition-all"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <span className="text-sm font-medium text-[var(--forest-700)]">
+                    Photo {currentPhotoIndex + 1} of {selectedFiles.length}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPhotoIndex((i) => Math.min(selectedFiles.length - 1, i + 1))}
+                    disabled={currentPhotoIndex === selectedFiles.length - 1}
+                    className="p-1 text-[var(--forest-600)] disabled:text-[var(--mist-300)] hover:bg-white/50 rounded-lg transition-all"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
               )}
 
               {/* Species Selection */}
               {!showNewSpeciesForm ? (
-                <div className="space-y-2.5">
-                  <label className="block text-sm font-semibold text-[var(--forest-700)]">
-                    Species (optional)
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-[var(--forest-700)]">
+                    Species {selectedFiles.length > 1 && sameSpeciesForAll ? "(applies to all)" : ""} (optional)
                   </label>
                   <Select
-                    value={selectedSpeciesId}
-                    onChange={(e) => setSelectedSpeciesId(e.target.value)}
+                    value={sameSpeciesForAll ? selectedSpeciesId : (individualPhotoData[currentPhotoIndex]?.speciesId || "")}
+                    onChange={(e) => {
+                      if (sameSpeciesForAll) {
+                        setSelectedSpeciesId(e.target.value);
+                      } else {
+                        setIndividualPhotoData((prev) => {
+                          const updated = [...prev];
+                          updated[currentPhotoIndex] = {
+                            ...updated[currentPhotoIndex],
+                            speciesId: e.target.value,
+                          };
+                          return updated;
+                        });
+                      }
+                    }}
                   >
                     <option value="">Select species...</option>
                     {species
@@ -450,12 +627,25 @@ export default function UploadModal({
 
               {/* Notes */}
               <div>
-                <label className="block text-sm font-semibold text-[var(--forest-700)] mb-2">
-                  Notes (optional)
+                <label className="block text-sm font-medium text-[var(--forest-700)] mb-1.5">
+                  Notes {selectedFiles.length > 1 && sameSpeciesForAll ? "(applies to all)" : ""} (optional)
                 </label>
                 <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
+                  value={sameSpeciesForAll ? notes : (individualPhotoData[currentPhotoIndex]?.notes || "")}
+                  onChange={(e) => {
+                    if (sameSpeciesForAll) {
+                      setNotes(e.target.value);
+                    } else {
+                      setIndividualPhotoData((prev) => {
+                        const updated = [...prev];
+                        updated[currentPhotoIndex] = {
+                          ...updated[currentPhotoIndex],
+                          notes: e.target.value,
+                        };
+                        return updated;
+                      });
+                    }
+                  }}
                   placeholder="Add details about this sighting..."
                   rows={2}
                   className="block w-full px-4 py-3 border-2 border-[var(--mist-200)]
@@ -491,20 +681,51 @@ export default function UploadModal({
                   <circle cx="18" cy="7" r="1.5" />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-[var(--forest-800)] mb-5">
-                Uploading your photo...
+              <h3 className="text-lg font-medium text-[var(--forest-800)] mb-4">
+                Uploading {selectedFiles.length === 1 ? "photo" : `${selectedFiles.length} photos`}...
               </h3>
 
-              {/* Progress bar */}
-              <div className="w-full bg-[var(--mist-100)] rounded-full h-3 mb-3
-                shadow-[var(--shadow-inset-sm)] overflow-hidden">
-                <div
-                  className="bg-gradient-to-r from-[var(--forest-500)] to-[var(--moss-500)] h-3
-                    rounded-full transition-all duration-300"
-                  style={{ width: `${uploadProgress}%` }}
-                />
+              {/* Progress bars for each file */}
+              <div className="space-y-3">
+                {selectedFiles.map((file, index) => {
+                  const progress = uploadProgress[index] || 0;
+                  const isComplete = progress === 100;
+                  return (
+                    <div key={index} className="text-left">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-[var(--mist-600)] truncate max-w-[70%]">
+                          {selectedFiles.length > 1 ? `Photo ${index + 1}` : file.name}
+                        </span>
+                        <span className="text-xs text-[var(--mist-500)] flex items-center gap-1">
+                          {progress}%
+                          {isComplete && (
+                            <svg className="w-3 h-3 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </span>
+                      </div>
+                      <div className="w-full bg-[var(--mist-100)] rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full transition-all duration-300 ${
+                            isComplete
+                              ? "bg-green-500"
+                              : "bg-gradient-to-r from-[var(--forest-500)] to-[var(--moss-500)]"
+                          }`}
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              <p className="text-sm font-semibold text-[var(--mist-500)]">{uploadProgress}%</p>
+
+              {/* Overall progress for batch */}
+              {selectedFiles.length > 1 && (
+                <p className="text-sm text-[var(--mist-500)] mt-4">
+                  {Object.values(uploadProgress).filter(p => p === 100).length} of {selectedFiles.length} complete
+                </p>
+              )}
             </div>
           )}
 
@@ -520,17 +741,23 @@ export default function UploadModal({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-[var(--forest-800)] mb-2">
-                Beautiful shot!
+              <h3 className="text-lg font-medium text-[var(--forest-800)] mb-2">
+                {uploadedPhotoIds.length === 1
+                  ? "Photo uploaded successfully!"
+                  : `${uploadedPhotoIds.length} photos uploaded successfully!`}
               </h3>
-              <p className="text-sm text-[var(--mist-500)] mb-7">
-                {selectedSpeciesId
-                  ? "Your photo has been added to the gallery."
-                  : "You can assign a species later from the gallery."}
+              <p className="text-sm text-[var(--mist-500)] mb-6">
+                {uploadedPhotoIds.length === 1
+                  ? selectedSpeciesId
+                    ? "Your photo has been added to the gallery."
+                    : "You can assign a species later from the gallery."
+                  : sameSpeciesForAll && selectedSpeciesId
+                    ? "Your photos have been added to the gallery."
+                    : "You can assign species later from the gallery."}
               </p>
               <div className="flex gap-3 justify-center">
                 <Button variant="secondary" onClick={handleUploadAnother}>
-                  Upload Another
+                  Upload More
                 </Button>
                 <Button onClick={handleViewPhoto}>
                   View Gallery
@@ -548,7 +775,7 @@ export default function UploadModal({
                 Cancel
               </Button>
               <Button onClick={handleUpload} className="flex-1">
-                Upload Photo
+                {selectedFiles.length === 1 ? "Upload Photo" : `Upload ${selectedFiles.length} Photos`}
               </Button>
             </div>
           </div>
