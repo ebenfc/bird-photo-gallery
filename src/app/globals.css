@@ -1,70 +1,70 @@
 @import "tailwindcss";
 
 :root {
-  /* Pacific Northwest Color Palette */
+  /* Modern Nature-Inspired Color Palette */
 
-  /* Primary - Deep Forest Green */
-  --forest-50: #e8f5e9;
-  --forest-100: #c8e6c9;
-  --forest-200: #a5d6a7;
-  --forest-300: #81c784;
-  --forest-400: #66bb6a;
-  --forest-500: #4caf50;
-  --forest-600: #43a047;
-  --forest-700: #388e3c;
-  --forest-800: #2e7d32;
-  --forest-900: #1b5e20;
-  --forest-950: #2C5F2D;
+  /* Primary - Emerald Green (sophisticated, modern) */
+  --forest-50: #ecfdf5;
+  --forest-100: #d1fae5;
+  --forest-200: #a7f3d0;
+  --forest-300: #6ee7b7;
+  --forest-400: #34d399;
+  --forest-500: #10b981;
+  --forest-600: #059669;
+  --forest-700: #047857;
+  --forest-800: #065f46;
+  --forest-900: #064e3b;
+  --forest-950: #022c22;
 
-  /* Secondary - Misty Gray Blue (warmed up) */
-  --mist-50: #f5f7f8;
-  --mist-100: #e8ecee;
-  --mist-200: #c5cdd2;
-  --mist-300: #9eadb5;
-  --mist-400: #788d98;
-  --mist-500: #5d737d;
-  --mist-600: #4d6069;
-  --mist-700: #424f56;
-  --mist-800: #3a4348;
-  --mist-900: #2f3639;
+  /* Secondary - Cool Slate (modern, neutral) */
+  --mist-50: #f8fafc;
+  --mist-100: #f1f5f9;
+  --mist-200: #e2e8f0;
+  --mist-300: #cbd5e1;
+  --mist-400: #94a3b8;
+  --mist-500: #64748b;
+  --mist-600: #475569;
+  --mist-700: #334155;
+  --mist-800: #1e293b;
+  --mist-900: #0f172a;
 
-  /* Accent - Moss Green (more vibrant) */
-  --moss-50: #f4f9e8;
-  --moss-100: #e5f2c8;
-  --moss-200: #d1e89e;
-  --moss-300: #b8db70;
-  --moss-400: #9fcf4a;
-  --moss-500: #8bc34a;
-  --moss-600: #7cb342;
-  --moss-700: #689f38;
-  --moss-800: #558b2f;
-  --moss-900: #33691e;
+  /* Accent - Teal (fresh, modern) */
+  --moss-50: #f0fdfa;
+  --moss-100: #ccfbf1;
+  --moss-200: #99f6e4;
+  --moss-300: #5eead4;
+  --moss-400: #2dd4bf;
+  --moss-500: #14b8a6;
+  --moss-600: #0d9488;
+  --moss-700: #0f766e;
+  --moss-800: #115e59;
+  --moss-900: #134e4a;
 
-  /* Warm Accent - Bark Brown */
-  --bark-50: #f7f3f1;
-  --bark-100: #ebe3df;
-  --bark-200: #d5c5bc;
-  --bark-300: #b9a194;
-  --bark-400: #9d8070;
-  --bark-500: #86695a;
-  --bark-600: #74574b;
-  --bark-700: #5f4740;
-  --bark-800: #503c37;
-  --bark-900: #3e2e2a;
+  /* Warm Accent - Stone (earthy neutral) */
+  --bark-50: #fafaf9;
+  --bark-100: #f5f5f4;
+  --bark-200: #e7e5e4;
+  --bark-300: #d6d3d1;
+  --bark-400: #a8a29e;
+  --bark-500: #78716c;
+  --bark-600: #57534e;
+  --bark-700: #44403c;
+  --bark-800: #292524;
+  --bark-900: #1c1917;
 
-  /* Sky Blue - Mountain Lakes */
-  --sky-50: #e3f2fd;
-  --sky-100: #bbdefb;
-  --sky-200: #90caf9;
-  --sky-300: #64b5f6;
-  --sky-400: #42a5f5;
-  --sky-500: #2196f3;
-  --sky-600: #1e88e5;
-  --sky-700: #1976d2;
-  --sky-800: #1565c0;
-  --sky-900: #0d47a1;
+  /* Sky Blue - Info/Links */
+  --sky-50: #f0f9ff;
+  --sky-100: #e0f2fe;
+  --sky-200: #bae6fd;
+  --sky-300: #7dd3fc;
+  --sky-400: #38bdf8;
+  --sky-500: #0ea5e9;
+  --sky-600: #0284c7;
+  --sky-700: #0369a1;
+  --sky-800: #075985;
+  --sky-900: #0c4a6e;
 
-  /* Amber/Gold - Rare bird accent */
+  /* Amber - Only for rare badges (not text) */
   --amber-50: #fffbeb;
   --amber-100: #fef3c7;
   --amber-200: #fde68a;
@@ -76,29 +76,29 @@
   --amber-800: #92400e;
   --amber-900: #78350f;
 
-  /* Base colors - warmer */
-  --background: #faf9f7;
-  --background-warm: #f8f6f3;
-  --foreground: #2c3e3f;
-  --foreground-muted: #4a5b5c;
+  /* Base colors - clean, modern */
+  --background: #fafafa;
+  --background-warm: #f5f5f5;
+  --foreground: #18181b;
+  --foreground-muted: #52525b;
   --card-bg: #ffffff;
-  --border: #e8e4df;
-  --border-light: #f0ede8;
+  --border: #e4e4e7;
+  --border-light: #f4f4f5;
 
   /* === ELEVATION / SHADOW SYSTEM === */
-  /* Inspired by forest canopy layers */
-  --shadow-xs: 0 1px 2px rgba(44, 95, 45, 0.04);
-  --shadow-sm: 0 2px 4px rgba(44, 95, 45, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 12px rgba(44, 95, 45, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 8px 24px rgba(44, 95, 45, 0.10), 0 4px 8px rgba(0, 0, 0, 0.04);
-  --shadow-xl: 0 16px 40px rgba(44, 95, 45, 0.12), 0 8px 16px rgba(0, 0, 0, 0.04);
-  --shadow-2xl: 0 24px 56px rgba(44, 95, 45, 0.14), 0 12px 24px rgba(0, 0, 0, 0.06);
+  /* Modern, subtle shadows with emerald undertones */
+  --shadow-xs: 0 1px 2px rgba(6, 95, 70, 0.04);
+  --shadow-sm: 0 2px 4px rgba(6, 95, 70, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 12px rgba(6, 95, 70, 0.07), 0 2px 4px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 8px 24px rgba(6, 95, 70, 0.09), 0 4px 8px rgba(0, 0, 0, 0.03);
+  --shadow-xl: 0 16px 40px rgba(6, 95, 70, 0.11), 0 8px 16px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 24px 56px rgba(6, 95, 70, 0.13), 0 12px 24px rgba(0, 0, 0, 0.05);
 
-  /* Colored shadows for specific elements */
-  --shadow-moss: 0 4px 16px rgba(124, 179, 66, 0.20);
-  --shadow-moss-lg: 0 8px 24px rgba(124, 179, 66, 0.25);
-  --shadow-forest: 0 4px 16px rgba(44, 95, 45, 0.18);
-  --shadow-amber: 0 4px 16px rgba(245, 158, 11, 0.25);
+  /* Colored shadows for specific elements (using new teal/emerald) */
+  --shadow-moss: 0 4px 16px rgba(20, 184, 166, 0.18);
+  --shadow-moss-lg: 0 8px 24px rgba(20, 184, 166, 0.22);
+  --shadow-forest: 0 4px 16px rgba(16, 185, 129, 0.16);
+  --shadow-amber: 0 4px 16px rgba(245, 158, 11, 0.20);
 
   /* Inset shadows for tactile feel */
   --shadow-inset-sm: inset 0 1px 2px rgba(0, 0, 0, 0.06);

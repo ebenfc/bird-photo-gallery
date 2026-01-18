@@ -169,7 +169,7 @@ export default function InboxPage() {
                     Assign Species
                   </span>
                 </div>
-                <div className="absolute top-2 left-2 bg-gradient-to-r from-amber-500 to-amber-400 text-white text-xs font-medium px-2.5 py-1 rounded-full shadow-sm">
+                <div className="absolute top-2 left-2 bg-gradient-to-r from-[var(--moss-500)] to-[var(--moss-400)] text-white text-xs font-medium px-2.5 py-1 rounded-full shadow-[var(--shadow-sm)]">
                   #{index + 1}
                 </div>
               </button>
