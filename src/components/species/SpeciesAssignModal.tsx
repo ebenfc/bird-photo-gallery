@@ -9,6 +9,7 @@ import Input from "@/components/ui/Input";
 interface SpeciesAssignModalProps {
   photo: Photo | null;
   species: Species[];
+  isOpen: boolean;
   onClose: () => void;
   onAssign: (photoId: number, speciesId: number) => Promise<void>;
   onCreateAndAssign: (
@@ -23,6 +24,7 @@ interface SpeciesAssignModalProps {
 export default function SpeciesAssignModal({
   photo,
   species,
+  isOpen,
   onClose,
   onAssign,
   onCreateAndAssign,
@@ -36,7 +38,7 @@ export default function SpeciesAssignModal({
   const [newScientificName, setNewScientificName] = useState("");
   const [loading, setLoading] = useState(false);
 
-  if (!photo) return null;
+  if (!isOpen || !photo) return null;
 
   const filteredSpecies = species.filter(
     (s) =>

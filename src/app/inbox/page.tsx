@@ -195,6 +195,7 @@ export default function InboxPage() {
       <SpeciesAssignModal
         photo={currentPhoto}
         species={species}
+        isOpen={showAssignModal}
         onClose={() => setShowAssignModal(false)}
         onAssign={handleAssign}
         onCreateAndAssign={handleCreateAndAssign}

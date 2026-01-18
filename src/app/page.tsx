@@ -200,6 +200,7 @@ function GalleryContent() {
       <SpeciesAssignModal
         photo={photoToAssign}
         species={species}
+        isOpen={photoToAssign !== null}
         onClose={() => setPhotoToAssign(null)}
         onAssign={handleAssignSpecies}
         onCreateAndAssign={handleCreateAndAssign}
