@@ -8,16 +8,27 @@ interface GalleryFiltersProps {
   species: Species[];
   selectedSpecies: number | null;
   showFavoritesOnly: boolean;
+  sortOption: string;
   onSpeciesChange: (id: number | null) => void;
   onFavoritesChange: (value: boolean) => void;
+  onSortChange: (sort: string) => void;
 }
+
+const sortOptions = [
+  { value: "recent_upload", label: "Most Recent" },
+  { value: "oldest_upload", label: "Oldest First" },
+  { value: "species_alpha", label: "Species A-Z" },
+  { value: "recent_taken", label: "Recently Photographed" },
+];
 
 export default function GalleryFilters({
   species,
   selectedSpecies,
   showFavoritesOnly,
+  sortOption,
   onSpeciesChange,
   onFavoritesChange,
+  onSortChange,
 }: GalleryFiltersProps) {
   const hasFilters = selectedSpecies !== null || showFavoritesOnly;
 
@@ -34,6 +45,18 @@ export default function GalleryFilters({
         {species.map((s) => (
           <option key={s.id} value={s.id}>
             {s.commonName} ({s.photoCount || 0})
+          </option>
+        ))}
+      </Select>
+
+      <Select
+        value={sortOption}
+        onChange={(e) => onSortChange(e.target.value)}
+        className="w-48"
+      >
+        {sortOptions.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            Sort: {opt.label}
           </option>
         ))}
       </Select>

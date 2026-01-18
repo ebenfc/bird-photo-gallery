@@ -13,6 +13,8 @@ interface PhotoModalProps {
   canNavigate?: { prev: boolean; next: boolean };
   onChangeSpecies?: (photo: Photo) => void;
   onDateChange?: (id: number, date: string | null) => Promise<void>;
+  onNotesChange?: (id: number, notes: string | null) => Promise<void>;
+  onDelete?: (id: number) => Promise<void>;
 }
 
 export default function PhotoModal({
@@ -23,15 +25,25 @@ export default function PhotoModal({
   canNavigate = { prev: false, next: false },
   onChangeSpecies,
   onDateChange,
+  onNotesChange,
+  onDelete,
 }: PhotoModalProps) {
   const [isEditingDate, setIsEditingDate] = useState(false);
   const [editDateValue, setEditDateValue] = useState("");
   const [isSavingDate, setIsSavingDate] = useState(false);
+  const [isEditingNotes, setIsEditingNotes] = useState(false);
+  const [editNotesValue, setEditNotesValue] = useState("");
+  const [isSavingNotes, setIsSavingNotes] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Reset edit state when photo changes
   useEffect(() => {
     setIsEditingDate(false);
     setEditDateValue("");
+    setIsEditingNotes(false);
+    setEditNotesValue("");
+    setShowDeleteConfirm(false);
   }, [photo?.id]);
 
   const handleKeyDown = useCallback(
@@ -333,22 +345,78 @@ export default function PhotoModal({
               )}
             </div>
 
-            {photo.notes && (
-              <div className="p-3 bg-[var(--bark-50)] rounded-xl">
-                <div className="flex items-center gap-2 mb-2">
+            {/* Notes Section - Editable */}
+            <div className="p-3 bg-[var(--bark-50)] rounded-xl">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
                   <svg className="w-4 h-4 text-[var(--bark-500)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   <span className="text-[var(--bark-600)] text-xs font-medium uppercase tracking-wider">Notes</span>
                 </div>
-                <p className="text-[var(--forest-800)]">
-                  {photo.notes}
-                </p>
+                {onNotesChange && !isEditingNotes && (
+                  <button
+                    onClick={() => {
+                      setEditNotesValue(photo.notes || "");
+                      setIsEditingNotes(true);
+                    }}
+                    className="p-1 text-[var(--bark-400)] hover:text-[var(--bark-600)] transition-colors"
+                    title="Edit notes"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </button>
+                )}
               </div>
-            )}
+              {isEditingNotes ? (
+                <div className="space-y-2">
+                  <textarea
+                    value={editNotesValue}
+                    onChange={(e) => setEditNotesValue(e.target.value.slice(0, 500))}
+                    placeholder="Add notes about this sighting..."
+                    className="w-full px-3 py-2 text-sm border border-[var(--mist-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--moss-400)] focus:border-transparent resize-none"
+                    rows={3}
+                    maxLength={500}
+                  />
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-[var(--mist-400)]">{editNotesValue.length}/500</span>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setIsEditingNotes(false)}
+                        className="px-3 py-1 text-sm text-[var(--mist-500)] hover:text-[var(--mist-700)] transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (onNotesChange && photo) {
+                            setIsSavingNotes(true);
+                            try {
+                              await onNotesChange(photo.id, editNotesValue.trim() || null);
+                              setIsEditingNotes(false);
+                            } finally {
+                              setIsSavingNotes(false);
+                            }
+                          }
+                        }}
+                        disabled={isSavingNotes}
+                        className="px-3 py-1 text-sm bg-[var(--moss-500)] text-white rounded-lg hover:bg-[var(--moss-600)] disabled:opacity-50 transition-colors"
+                      >
+                        {isSavingNotes ? "Saving..." : "Save"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-[var(--forest-800)] text-sm">
+                  {photo.notes || <span className="text-[var(--mist-400)] italic">No notes added</span>}
+                </p>
+              )}
+            </div>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-[var(--mist-100)]">
+          <div className="mt-6 pt-4 border-t border-[var(--mist-100)] space-y-3">
             <a
               href={photo.originalUrl}
               download
@@ -360,9 +428,76 @@ export default function PhotoModal({
               </svg>
               Download Original
             </a>
+
+            {/* Delete Button */}
+            {onDelete && (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-xl hover:bg-red-50 hover:border-red-300 transition-all"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Delete Photo
+              </button>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="absolute inset-0 z-60 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowDeleteConfirm(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-[var(--forest-900)]">Delete this photo?</h3>
+            </div>
+
+            <div className="mb-6 text-sm text-[var(--mist-600)]">
+              <p className="mb-2">This will permanently delete:</p>
+              <ul className="list-disc list-inside space-y-1 text-[var(--forest-800)]">
+                <li>Photo of {photo.species?.commonName || "Unknown species"}</li>
+                {photo.originalDateTaken && (
+                  <li>Taken on {formatDate(photo.originalDateTaken)}</li>
+                )}
+              </ul>
+              <p className="mt-3 font-medium text-red-600">This action cannot be undone.</p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 px-4 py-2.5 text-sm font-medium text-[var(--forest-700)] bg-white border border-[var(--mist-200)] rounded-xl hover:bg-[var(--mist-50)] transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (onDelete && photo) {
+                    setIsDeleting(true);
+                    try {
+                      await onDelete(photo.id);
+                      setShowDeleteConfirm(false);
+                    } finally {
+                      setIsDeleting(false);
+                    }
+                  }
+                }}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-red-600 rounded-xl hover:bg-red-700 disabled:opacity-50 transition-all"
+              >
+                {isDeleting ? "Deleting..." : "Delete Photo"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

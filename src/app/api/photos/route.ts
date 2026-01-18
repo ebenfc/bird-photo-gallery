@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { photos, species } from "@/db/schema";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, asc, and, sql } from "drizzle-orm";
 import { getThumbnailUrl, getOriginalUrl } from "@/lib/storage";
+
+type SortOption = "recent_upload" | "oldest_upload" | "species_alpha" | "recent_taken";
 
 // GET /api/photos - List photos with optional filtering
 export async function GET(request: NextRequest) {
@@ -10,9 +12,25 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const speciesId = searchParams.get("speciesId");
     const favorites = searchParams.get("favorites");
+    const sort = (searchParams.get("sort") || "recent_upload") as SortOption;
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "50");
     const offset = (page - 1) * limit;
+
+    // Build sort order
+    const getOrderBy = () => {
+      switch (sort) {
+        case "oldest_upload":
+          return [asc(photos.uploadDate), asc(photos.id)];
+        case "species_alpha":
+          return [asc(species.commonName), desc(photos.uploadDate)];
+        case "recent_taken":
+          return [sql`${photos.originalDateTaken} DESC NULLS LAST`, desc(photos.uploadDate)];
+        case "recent_upload":
+        default:
+          return [desc(photos.uploadDate), desc(photos.id)];
+      }
+    };
 
     // Build where conditions
     const conditions = [];
@@ -50,7 +68,7 @@ export async function GET(request: NextRequest) {
       .from(photos)
       .leftJoin(species, eq(photos.speciesId, species.id))
       .where(whereClause)
-      .orderBy(desc(photos.uploadDate))
+      .orderBy(...getOrderBy())
       .limit(limit)
       .offset(offset);
 

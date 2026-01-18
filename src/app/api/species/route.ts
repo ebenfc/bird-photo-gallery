@@ -1,11 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { species, photos } from "@/db/schema";
-import { eq, sql, desc } from "drizzle-orm";
+import { eq, sql, desc, asc } from "drizzle-orm";
+
+type SpeciesSortOption = "alpha" | "photo_count" | "recent_added" | "recent_taken";
 
 // GET /api/species - List all species with photo counts
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const searchParams = request.nextUrl.searchParams;
+    const sort = (searchParams.get("sort") || "alpha") as SpeciesSortOption;
+
+    // Build sort order
+    const getOrderBy = () => {
+      switch (sort) {
+        case "photo_count":
+          return [desc(sql`count(${photos.id})`), asc(species.commonName)];
+        case "recent_added":
+          return [desc(species.createdAt), asc(species.commonName)];
+        case "recent_taken":
+          return [desc(sql`max(${photos.originalDateTaken})`), asc(species.commonName)];
+        case "alpha":
+        default:
+          return [asc(species.commonName)];
+      }
+    };
+
     const result = await db
       .select({
         id: species.id,
@@ -18,7 +38,7 @@ export async function GET() {
       .from(species)
       .leftJoin(photos, eq(photos.speciesId, species.id))
       .groupBy(species.id)
-      .orderBy(species.commonName);
+      .orderBy(...getOrderBy());
 
     // Get latest photo thumbnail for each species
     const speciesWithThumbnails = await Promise.all(

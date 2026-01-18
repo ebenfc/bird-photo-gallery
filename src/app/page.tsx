@@ -17,6 +17,12 @@ function GalleryContent() {
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [photoToAssign, setPhotoToAssign] = useState<Photo | null>(null);
+  const [sortOption, setSortOption] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("gallerySortPreference") || "recent_upload";
+    }
+    return "recent_upload";
+  });
 
   // Get filter state from URL
   const selectedSpecies = searchParams.get("species")
@@ -41,6 +47,7 @@ function GalleryContent() {
     const params = new URLSearchParams();
     if (selectedSpecies) params.set("speciesId", selectedSpecies.toString());
     if (showFavoritesOnly) params.set("favorites", "true");
+    params.set("sort", sortOption);
 
     try {
       const res = await fetch(`/api/photos?${params.toString()}`);
@@ -51,7 +58,15 @@ function GalleryContent() {
     } finally {
       setLoading(false);
     }
-  }, [selectedSpecies, showFavoritesOnly]);
+  }, [selectedSpecies, showFavoritesOnly, sortOption]);
+
+  // Handle sort change
+  const handleSortChange = (newSort: string) => {
+    setSortOption(newSort);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("gallerySortPreference", newSort);
+    }
+  };
 
   const fetchSpecies = async () => {
     try {
@@ -192,6 +207,45 @@ function GalleryContent() {
     }
   };
 
+  // Handle notes change
+  const handleNotesChange = async (id: number, notes: string | null) => {
+    try {
+      await fetch(`/api/photos/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notes }),
+      });
+
+      // Update local state
+      setPhotos((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, notes } : p))
+      );
+      if (selectedPhoto?.id === id) {
+        setSelectedPhoto((prev) => (prev ? { ...prev, notes } : null));
+      }
+    } catch (err) {
+      console.error("Failed to update notes:", err);
+    }
+  };
+
+  // Handle photo delete
+  const handleDelete = async (id: number) => {
+    try {
+      await fetch(`/api/photos/${id}`, {
+        method: "DELETE",
+      });
+
+      // Remove from local state
+      setPhotos((prev) => prev.filter((p) => p.id !== id));
+      setSelectedPhoto(null);
+
+      // Refresh species counts
+      await fetchSpecies();
+    } catch (err) {
+      console.error("Failed to delete photo:", err);
+    }
+  };
+
   return (
     <div className="pnw-texture min-h-screen">
       <div className="flex items-center justify-between mb-8">
@@ -205,8 +259,10 @@ function GalleryContent() {
         species={species}
         selectedSpecies={selectedSpecies}
         showFavoritesOnly={showFavoritesOnly}
+        sortOption={sortOption}
         onSpeciesChange={(id) => updateFilters(id, showFavoritesOnly)}
         onFavoritesChange={(value) => updateFilters(selectedSpecies, value)}
+        onSortChange={handleSortChange}
       />
 
       <PhotoGrid
@@ -223,6 +279,8 @@ function GalleryContent() {
         canNavigate={canNavigate}
         onChangeSpecies={handleChangeSpecies}
         onDateChange={handleDateChange}
+        onNotesChange={handleNotesChange}
+        onDelete={handleDelete}
       />
 
       <SpeciesAssignModal
