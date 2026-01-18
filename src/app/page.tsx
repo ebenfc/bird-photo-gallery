@@ -262,11 +262,15 @@ function GalleryContent() {
   };
 
   return (
-    <div className="pnw-texture min-h-screen pb-20 sm:pb-0">
-      <div className="flex items-center justify-between mb-4 sm:mb-8">
-        <h1 className="text-xl sm:text-2xl font-bold text-[var(--forest-900)]">Photo Gallery</h1>
+    <div className="pnw-texture min-h-screen pb-24 sm:pb-0">
+      <div className="flex items-center justify-between mb-5 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[var(--forest-900)] tracking-tight">
+          Photo Gallery
+        </h1>
         <div className="flex items-center gap-2 sm:gap-3">
-          <span className="text-xs sm:text-sm text-[var(--mist-500)] px-2 sm:px-3 py-1 bg-[var(--moss-50)] rounded-full">
+          <span className="text-xs sm:text-sm font-semibold text-[var(--forest-700)] px-3 sm:px-4 py-1.5
+            bg-gradient-to-br from-[var(--moss-50)] to-[var(--forest-50)]
+            rounded-full shadow-[var(--shadow-xs)] ring-1 ring-[var(--border)]">
             {photos.length} photo{photos.length !== 1 ? "s" : ""}
           </span>
           {/* Upload button - hidden on mobile, FAB shown instead */}
@@ -332,11 +336,19 @@ function GalleryContent() {
       {/* Floating Action Button for mobile */}
       <button
         onClick={() => setShowUploadModal(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-[var(--forest-600)] to-[var(--moss-600)] text-white rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center justify-center sm:hidden z-40"
+        className="fixed bottom-6 right-6 w-16 h-16
+          bg-gradient-to-br from-[var(--moss-500)] to-[var(--forest-600)]
+          text-white rounded-full
+          shadow-[var(--shadow-moss-lg)]
+          hover:shadow-[0_12px_32px_rgba(124,179,66,0.35)]
+          hover:scale-110 hover:-translate-y-1
+          active:scale-95
+          transition-all duration-[var(--timing-fast)]
+          flex items-center justify-center sm:hidden z-40"
         aria-label="Upload photo"
       >
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
         </svg>
       </button>
     </div>
@@ -347,15 +359,19 @@ function GalleryLoading() {
   return (
     <div className="pnw-texture min-h-screen">
       <div className="flex items-center justify-between mb-8">
-        <div className="h-8 w-40 bg-gradient-to-r from-[var(--moss-100)] to-[var(--mist-100)] rounded-xl animate-pulse" />
-        <div className="h-6 w-24 bg-gradient-to-r from-[var(--moss-50)] to-[var(--mist-50)] rounded-full animate-pulse" />
+        <div className="h-9 w-44 skeleton" />
+        <div className="h-8 w-28 skeleton rounded-full" />
       </div>
-      <div className="h-10 w-64 bg-gradient-to-r from-[var(--moss-50)] to-[var(--mist-50)] rounded-xl animate-pulse mb-6" />
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="flex gap-3 mb-6">
+        <div className="h-12 w-48 skeleton" />
+        <div className="h-12 w-48 skeleton" />
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
         {Array.from({ length: 12 }).map((_, i) => (
           <div
             key={i}
-            className="aspect-square bg-gradient-to-br from-[var(--moss-50)] to-[var(--mist-50)] rounded-2xl animate-pulse"
+            className="aspect-square rounded-[var(--radius-xl)] skeleton"
+            style={{ animationDelay: `${i * 50}ms` }}
           />
         ))}
       </div>

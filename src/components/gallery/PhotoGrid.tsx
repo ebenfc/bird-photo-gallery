@@ -22,7 +22,8 @@ export default function PhotoGrid({
         {Array.from({ length: 12 }).map((_, i) => (
           <div
             key={i}
-            className="aspect-square bg-gray-200 rounded-lg animate-pulse"
+            className="aspect-square rounded-[var(--radius-xl)] skeleton"
+            style={{ animationDelay: `${i * 50}ms` }}
           />
         ))}
       </div>
@@ -31,26 +32,38 @@ export default function PhotoGrid({
 
   if (photos.length === 0) {
     return (
-      <div className="text-center py-16">
-        <div className="text-6xl mb-4">📷</div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
+      <div className="text-center py-20 animate-fade-in">
+        {/* Friendly bird illustration */}
+        <div className="relative w-24 h-24 mx-auto mb-6">
+          <div className="absolute inset-0 bg-gradient-to-br from-[var(--moss-100)] to-[var(--mist-100)] rounded-full" />
+          <svg
+            className="absolute inset-0 w-full h-full p-5 text-[var(--forest-600)] animate-bird-hop"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
+            <path d="M21.5 8.5c-.5-.5-1.5-.5-2.5 0L15 12l-3-1-4.5 2.5c-1.5 1-2 2.5-1.5 4l1 2.5 1.5-1 2-1.5 3 .5 2-1.5 4-4c1-1 1-2.5 0-3.5l-2.5-2z" />
+            <circle cx="18" cy="7" r="1.5" />
+          </svg>
+        </div>
+        <h3 className="text-xl font-bold text-[var(--forest-900)] mb-2">
           No photos yet
         </h3>
-        <p className="text-gray-500">
-          Upload photos from your iPhone using the iOS Shortcut
+        <p className="text-[var(--mist-500)] text-base max-w-sm mx-auto">
+          Time to go birding! Upload your first sighting to get started.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-      {photos.map((photo) => (
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+      {photos.map((photo, index) => (
         <PhotoCard
           key={photo.id}
           photo={photo}
           onClick={() => onPhotoClick(photo)}
           showSpecies={showSpecies}
+          index={index}
         />
       ))}
     </div>

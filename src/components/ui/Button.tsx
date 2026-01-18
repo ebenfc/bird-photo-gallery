@@ -7,24 +7,56 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className = "", variant = "primary", size = "md", ...props }, ref) => {
-    const baseStyles =
-      "inline-flex items-center justify-center font-medium rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md active:scale-[0.98]";
+    const baseStyles = `
+      inline-flex items-center justify-center font-semibold
+      rounded-[var(--radius-xl)]
+      transition-all duration-[var(--timing-fast)]
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+      disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none
+      active:scale-[0.96] active:shadow-sm
+      motion-reduce:transition-none motion-reduce:active:scale-100
+    `;
 
     const variants = {
-      primary:
-        "bg-gradient-to-b from-[var(--forest-700)] to-[var(--forest-800)] text-white hover:from-[var(--forest-600)] hover:to-[var(--forest-700)] focus:ring-[var(--forest-500)]",
-      secondary:
-        "bg-white text-[var(--forest-800)] border border-[var(--mist-200)] hover:bg-[var(--moss-50)] hover:border-[var(--moss-300)] focus:ring-[var(--moss-400)]",
-      ghost:
-        "text-[var(--mist-600)] hover:text-[var(--forest-700)] hover:bg-[var(--moss-50)] focus:ring-[var(--moss-400)] shadow-none hover:shadow-none",
-      danger:
-        "bg-gradient-to-b from-red-500 to-red-600 text-white hover:from-red-400 hover:to-red-500 focus:ring-red-500",
+      primary: `
+        bg-gradient-to-b from-[var(--moss-500)] to-[var(--moss-600)]
+        text-white font-semibold
+        shadow-[var(--shadow-md)]
+        hover:from-[var(--moss-400)] hover:to-[var(--moss-500)]
+        hover:shadow-[var(--shadow-moss-lg)] hover:-translate-y-0.5
+        focus-visible:ring-[var(--moss-400)]
+        active:from-[var(--moss-600)] active:to-[var(--moss-700)]
+      `,
+      secondary: `
+        bg-white text-[var(--forest-800)] font-medium
+        border-2 border-[var(--mist-200)]
+        shadow-[var(--shadow-sm)]
+        hover:bg-[var(--moss-50)] hover:border-[var(--moss-300)]
+        hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5
+        focus-visible:ring-[var(--moss-400)]
+        active:bg-[var(--moss-100)] active:border-[var(--moss-400)]
+      `,
+      ghost: `
+        text-[var(--mist-600)] font-medium
+        hover:text-[var(--forest-700)] hover:bg-[var(--moss-50)]
+        focus-visible:ring-[var(--moss-400)]
+        active:bg-[var(--moss-100)]
+      `,
+      danger: `
+        bg-gradient-to-b from-red-500 to-red-600
+        text-white font-semibold
+        shadow-[var(--shadow-md)]
+        hover:from-red-400 hover:to-red-500
+        hover:shadow-[0_4px_16px_rgba(239,68,68,0.25)] hover:-translate-y-0.5
+        focus-visible:ring-red-400
+        active:from-red-600 active:to-red-700
+      `,
     };
 
     const sizes = {
-      sm: "px-3 py-1.5 text-sm",
-      md: "px-4 py-2 text-sm",
-      lg: "px-6 py-3 text-base",
+      sm: "px-4 py-2 text-sm min-h-[36px]",
+      md: "px-5 py-2.5 text-sm min-h-[44px]",
+      lg: "px-7 py-3.5 text-base min-h-[52px]",
     };
 
     return (
