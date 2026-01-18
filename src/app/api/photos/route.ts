@@ -53,11 +53,17 @@ export async function GET(request: NextRequest) {
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    // Get total count
-    const countResult = await db
+    // Get total count (need JOIN if filtering by rarity)
+    const countQuery = db
       .select({ count: sql<number>`count(*)` })
-      .from(photos)
-      .where(whereClause);
+      .from(photos);
+
+    // Add join if rarity filter is active
+    const countWithJoin = rarityFilter.length > 0
+      ? countQuery.leftJoin(species, eq(photos.speciesId, species.id))
+      : countQuery;
+
+    const countResult = await countWithJoin.where(whereClause);
     const total = countResult[0].count;
 
     // Get photos with species info
