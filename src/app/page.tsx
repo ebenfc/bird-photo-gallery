@@ -262,18 +262,26 @@ function GalleryContent() {
   };
 
   // Handle set cover photo
-  const handleSetCoverPhoto = async (photoId: number, speciesId: number) => {
+  const handleSetCoverPhoto = async (photoId: number, speciesId: number): Promise<boolean> => {
     try {
-      await fetch(`/api/species/${speciesId}`, {
+      const res = await fetch(`/api/species/${speciesId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ coverPhotoId: photoId }),
       });
 
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Failed to set cover photo:", errorData.error);
+        return false;
+      }
+
       // Refresh species to get updated cover photos
       await fetchSpecies();
+      return true;
     } catch (err) {
       console.error("Failed to set cover photo:", err);
+      return false;
     }
   };
 
