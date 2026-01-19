@@ -15,7 +15,7 @@ interface PhotoModalProps {
   onDateChange?: (id: number, date: string | null) => Promise<void>;
   onNotesChange?: (id: number, notes: string | null) => Promise<void>;
   onDelete?: (id: number) => Promise<void>;
-  onSetCoverPhoto?: (photoId: number, speciesId: number) => Promise<void>;
+  onSetCoverPhoto?: (photoId: number, speciesId: number) => Promise<boolean>;
 }
 
 export default function PhotoModal({
@@ -44,6 +44,9 @@ export default function PhotoModal({
   const [isDetailsExpanded, setIsDetailsExpanded] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isSettingCover, setIsSettingCover] = useState(false);
+  const [coverPhotoSet, setCoverPhotoSet] = useState(false);
+  const [showFullscreenUI, setShowFullscreenUI] = useState(false);
+  const [fullscreenUITimer, setFullscreenUITimer] = useState<NodeJS.Timeout | null>(null);
 
   // Reset edit state when photo changes
   useEffect(() => {
@@ -54,7 +57,51 @@ export default function PhotoModal({
     setShowDeleteConfirm(false);
     setJustFavorited(false);
     setIsFullscreen(false);
+    setShowFullscreenUI(false);
+    setCoverPhotoSet(false);
+    if (fullscreenUITimer) {
+      clearTimeout(fullscreenUITimer);
+      setFullscreenUITimer(null);
+    }
   }, [photo?.id]);
+
+  // Clear fullscreen UI timer on unmount
+  useEffect(() => {
+    return () => {
+      if (fullscreenUITimer) {
+        clearTimeout(fullscreenUITimer);
+      }
+    };
+  }, [fullscreenUITimer]);
+
+  // Function to show fullscreen UI with auto-hide
+  const showUITemporarily = useCallback(() => {
+    setShowFullscreenUI(true);
+    if (fullscreenUITimer) {
+      clearTimeout(fullscreenUITimer);
+    }
+    const timer = setTimeout(() => {
+      setShowFullscreenUI(false);
+      setFullscreenUITimer(null);
+    }, 3000);
+    setFullscreenUITimer(timer);
+  }, [fullscreenUITimer]);
+
+  // Handle fullscreen tap to toggle UI
+  const handleFullscreenTap = useCallback(() => {
+    if (showFullscreenUI) {
+      // UI is visible, hide it and exit fullscreen
+      setShowFullscreenUI(false);
+      if (fullscreenUITimer) {
+        clearTimeout(fullscreenUITimer);
+        setFullscreenUITimer(null);
+      }
+      setIsFullscreen(false);
+    } else {
+      // UI is hidden, show it temporarily
+      showUITemporarily();
+    }
+  }, [showFullscreenUI, fullscreenUITimer, showUITemporarily]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -99,8 +146,14 @@ export default function PhotoModal({
   const handleSetCoverPhoto = async () => {
     if (!photo || !photo.species || !onSetCoverPhoto) return;
     setIsSettingCover(true);
+    setCoverPhotoSet(false);
     try {
-      await onSetCoverPhoto(photo.id, photo.species.id);
+      const success = await onSetCoverPhoto(photo.id, photo.species.id);
+      if (success) {
+        setCoverPhotoSet(true);
+        // Auto-hide success message after 3 seconds
+        setTimeout(() => setCoverPhotoSet(false), 3000);
+      }
     } finally {
       setIsSettingCover(false);
     }
@@ -121,7 +174,7 @@ export default function PhotoModal({
     return (
       <div
         className="fixed inset-0 z-50 bg-black flex items-center justify-center cursor-pointer"
-        onClick={() => setIsFullscreen(false)}
+        onClick={handleFullscreenTap}
       >
         <Image
           src={photo.originalUrl}
@@ -131,36 +184,41 @@ export default function PhotoModal({
           sizes="100vw"
           priority
         />
-        {/* Subtle hint to exit */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2
-          bg-black/50 text-white/70 text-sm rounded-full backdrop-blur-sm
-          animate-fade-in">
-          Tap anywhere to exit fullscreen
-        </div>
-        {/* Navigation in fullscreen */}
-        {onNavigate && canNavigate.prev && (
-          <button
-            onClick={(e) => { e.stopPropagation(); onNavigate("prev"); }}
-            className="absolute left-4 top-1/2 -translate-y-1/2 p-3
-              bg-black/30 backdrop-blur-sm rounded-full text-white/80
-              hover:bg-black/50 transition-all"
-          >
-            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-        )}
-        {onNavigate && canNavigate.next && (
-          <button
-            onClick={(e) => { e.stopPropagation(); onNavigate("next"); }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 p-3
-              bg-black/30 backdrop-blur-sm rounded-full text-white/80
-              hover:bg-black/50 transition-all"
-          >
-            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+        {/* UI elements - only shown when showFullscreenUI is true */}
+        {showFullscreenUI && (
+          <>
+            {/* Subtle hint to exit */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2
+              bg-black/50 text-white/70 text-sm rounded-full backdrop-blur-sm
+              animate-fade-in">
+              Tap anywhere to exit fullscreen
+            </div>
+            {/* Navigation in fullscreen */}
+            {onNavigate && canNavigate.prev && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onNavigate("prev"); showUITemporarily(); }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 p-3
+                  bg-black/30 backdrop-blur-sm rounded-full text-white/80
+                  hover:bg-black/50 transition-all animate-fade-in"
+              >
+                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            )}
+            {onNavigate && canNavigate.next && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onNavigate("next"); showUITemporarily(); }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-3
+                  bg-black/30 backdrop-blur-sm rounded-full text-white/80
+                  hover:bg-black/50 transition-all animate-fade-in"
+              >
+                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            )}
+          </>
         )}
       </div>
     );
@@ -325,12 +383,14 @@ export default function PhotoModal({
               {photo.species && onSetCoverPhoto && (
                 <button
                   onClick={handleSetCoverPhoto}
-                  disabled={isSettingCover}
-                  className="flex-1 px-3 py-2 text-sm font-medium text-[var(--forest-600)]
-                    bg-[var(--forest-50)] rounded-[var(--radius-md)]
-                    active:scale-95 transition-all disabled:opacity-50"
+                  disabled={isSettingCover || coverPhotoSet}
+                  className={`flex-1 px-3 py-2 text-sm font-medium rounded-[var(--radius-md)]
+                    active:scale-95 transition-all disabled:opacity-50
+                    ${coverPhotoSet
+                      ? "text-[var(--moss-600)] bg-[var(--moss-100)]"
+                      : "text-[var(--forest-600)] bg-[var(--forest-50)]"}`}
                 >
-                  {isSettingCover ? "Setting..." : "Set as Cover"}
+                  {isSettingCover ? "Setting..." : coverPhotoSet ? "Cover Set!" : "Set as Cover"}
                 </button>
               )}
             </div>
@@ -464,14 +524,16 @@ export default function PhotoModal({
           {photo.species && onSetCoverPhoto && (
             <button
               onClick={handleSetCoverPhoto}
-              disabled={isSettingCover}
-              className="w-full mb-4 px-4 py-2.5 text-sm font-medium text-[var(--forest-600)]
-                bg-gradient-to-br from-[var(--forest-50)] to-[var(--moss-50)]
-                border border-[var(--forest-200)] rounded-[var(--radius-lg)]
-                hover:border-[var(--forest-300)] hover:shadow-[var(--shadow-sm)]
-                active:scale-[0.98] transition-all disabled:opacity-50"
+              disabled={isSettingCover || coverPhotoSet}
+              className={`w-full mb-4 px-4 py-2.5 text-sm font-medium
+                border rounded-[var(--radius-lg)]
+                hover:shadow-[var(--shadow-sm)]
+                active:scale-[0.98] transition-all disabled:opacity-50
+                ${coverPhotoSet
+                  ? "text-[var(--moss-600)] bg-gradient-to-br from-[var(--moss-100)] to-[var(--moss-50)] border-[var(--moss-300)]"
+                  : "text-[var(--forest-600)] bg-gradient-to-br from-[var(--forest-50)] to-[var(--moss-50)] border-[var(--forest-200)] hover:border-[var(--forest-300)]"}`}
             >
-              {isSettingCover ? "Setting cover photo..." : "Set as species cover photo"}
+              {isSettingCover ? "Setting cover photo..." : coverPhotoSet ? "Cover photo set!" : "Set as species cover photo"}
             </button>
           )}
 
