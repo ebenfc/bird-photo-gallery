@@ -47,6 +47,7 @@ export default function PhotoModal({
   const [coverPhotoSet, setCoverPhotoSet] = useState(false);
   const [showFullscreenUI, setShowFullscreenUI] = useState(false);
   const [fullscreenUITimer, setFullscreenUITimer] = useState<NodeJS.Timeout | null>(null);
+  const [showOverflowMenu, setShowOverflowMenu] = useState(false);
 
   // Reset edit state when photo changes
   useEffect(() => {
@@ -59,6 +60,7 @@ export default function PhotoModal({
     setIsFullscreen(false);
     setShowFullscreenUI(false);
     setCoverPhotoSet(false);
+    setShowOverflowMenu(false);
     if (fullscreenUITimer) {
       clearTimeout(fullscreenUITimer);
       setFullscreenUITimer(null);
@@ -355,15 +357,59 @@ export default function PhotoModal({
                 </svg>
               </button>
             </div>
-            <svg
-              className={`w-5 h-5 text-[var(--mist-400)] transition-transform duration-300
-                ${isDetailsExpanded ? "rotate-180" : ""}`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-            </svg>
+            <div className="flex items-center gap-2">
+              {/* Overflow menu button */}
+              {onDelete && (
+                <div className="relative">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setShowOverflowMenu(!showOverflowMenu); }}
+                    className="p-2 text-[var(--mist-400)] hover:text-[var(--forest-700)]
+                      hover:bg-[var(--mist-50)] rounded-full transition-all"
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <circle cx="12" cy="5" r="2" />
+                      <circle cx="12" cy="12" r="2" />
+                      <circle cx="12" cy="19" r="2" />
+                    </svg>
+                  </button>
+                  {/* Dropdown menu */}
+                  {showOverflowMenu && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-10"
+                        onClick={(e) => { e.stopPropagation(); setShowOverflowMenu(false); }}
+                      />
+                      <div className="absolute right-0 top-full mt-1 z-20 bg-white rounded-[var(--radius-lg)]
+                        shadow-[var(--shadow-lg)] border border-[var(--border)] py-1 min-w-[140px]">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowOverflowMenu(false);
+                            setShowDeleteConfirm(true);
+                          }}
+                          className="w-full px-4 py-2.5 text-left text-sm text-red-600
+                            hover:bg-red-50 flex items-center gap-2"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          Delete Photo
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+              <svg
+                className={`w-5 h-5 text-[var(--mist-400)] transition-transform duration-300
+                  ${isDetailsExpanded ? "rotate-180" : ""}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+              </svg>
+            </div>
           </button>
 
           {/* Expandable content */}
@@ -395,7 +441,7 @@ export default function PhotoModal({
               )}
             </div>
 
-            {/* Compact info cards */}
+            {/* Date info cards */}
             <div className="grid grid-cols-2 gap-2 mb-4">
               <div className="p-3 bg-[var(--moss-50)] rounded-[var(--radius-md)]">
                 <span className="text-xs text-[var(--mist-500)] uppercase">Uploaded</span>
@@ -411,19 +457,14 @@ export default function PhotoModal({
               </div>
             </div>
 
-            {/* Delete button */}
-            {onDelete && (
-              <button
-                onClick={() => setShowDeleteConfirm(true)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3
-                  text-sm font-semibold text-red-600 bg-white border-2 border-red-200
-                  rounded-[var(--radius-lg)] active:scale-95 transition-all"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                Delete Photo
-              </button>
+            {/* Notes section */}
+            {photo.notes && (
+              <div className="p-3 bg-[var(--bark-50)] rounded-[var(--radius-md)]">
+                <span className="text-xs text-[var(--bark-500)] uppercase font-medium">Notes</span>
+                <p className="text-sm text-[var(--forest-800)] mt-1 leading-relaxed">
+                  {photo.notes}
+                </p>
+              </div>
             )}
           </div>
         </div>
@@ -708,23 +749,18 @@ export default function PhotoModal({
             </div>
           </div>
 
-          {/* Delete Button */}
+          {/* Delete link - subtle placement */}
           {onDelete && (
-            <div className="mt-6 pt-5 border-t border-[var(--border)]">
+            <div className="mt-6 pt-4 border-t border-[var(--border)]">
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className="flex items-center justify-center gap-2.5 w-full px-4 py-3
-                  text-sm font-semibold text-red-600
-                  bg-white border-2 border-red-200
-                  rounded-[var(--radius-lg)] shadow-[var(--shadow-sm)]
-                  hover:bg-red-50 hover:border-red-300
-                  hover:-translate-y-0.5
-                  active:scale-[0.98] transition-all duration-[var(--timing-fast)]"
+                className="text-sm text-[var(--mist-400)] hover:text-red-500
+                  transition-colors flex items-center gap-1.5"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
-                Delete Photo
+                Delete photo
               </button>
             </div>
           )}
