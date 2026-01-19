@@ -107,8 +107,12 @@ export default function Header() {
       sticky top-0 z-50 shadow-[var(--shadow-lg)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14 sm:h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 sm:gap-3 group">
+          {/* Logo - with proper touch target for mobile */}
+          <Link
+            href="/"
+            className="flex items-center gap-2 sm:gap-3 group -ml-2 pl-2 pr-3 py-2
+              active:opacity-80 transition-opacity"
+          >
             <div className="relative transition-transform duration-[var(--timing-fast)] group-hover:scale-105">
               <EvergreenIcon className="w-7 h-7 sm:w-8 sm:h-8 text-[var(--moss-400)]
                 group-hover:text-[var(--moss-300)] transition-colors duration-[var(--timing-fast)]" />

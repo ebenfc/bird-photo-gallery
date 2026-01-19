@@ -61,7 +61,15 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const body = await request.json();
     const { commonName, scientificName, description, rarity, coverPhotoId } = body;
 
-    const updateData: Record<string, string | number | null> = {};
+    // Build update object with proper typing for Drizzle
+    const updateData: Partial<{
+      commonName: string;
+      scientificName: string | null;
+      description: string | null;
+      rarity: string;
+      coverPhotoId: number | null;
+    }> = {};
+
     if (commonName !== undefined) {
       if (!commonName || typeof commonName !== "string") {
         return NextResponse.json(
