@@ -514,6 +514,13 @@ export default function PhotoModal({
 
           {/* Expandable content */}
           <div className="p-4 overflow-auto max-h-[calc(50vh-5rem)]">
+            {/* Species description - mobile */}
+            {photo.species?.description && (
+              <p className="text-sm text-[var(--mist-600)] mb-4 leading-relaxed">
+                {photo.species.description}
+              </p>
+            )}
+
             {/* Haikubox detection stats - mobile */}
             {detection && detection.yearlyCount > 0 && (
               <div className="mb-4 p-3 bg-gradient-to-br from-[var(--sky-50)] to-[var(--moss-50)]

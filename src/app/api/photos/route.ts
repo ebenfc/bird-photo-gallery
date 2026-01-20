@@ -80,6 +80,7 @@ export async function GET(request: NextRequest) {
         speciesId: photos.speciesId,
         speciesCommonName: species.commonName,
         speciesScientificName: species.scientificName,
+        speciesDescription: species.description,
         speciesRarity: species.rarity,
       })
       .from(photos)
@@ -106,6 +107,7 @@ export async function GET(request: NextRequest) {
             id: photo.speciesId,
             commonName: photo.speciesCommonName,
             scientificName: photo.speciesScientificName,
+            description: photo.speciesDescription,
             rarity: photo.speciesRarity as Rarity,
           }
         : null,
