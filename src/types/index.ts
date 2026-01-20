@@ -11,11 +11,11 @@ export interface Species {
   coverPhotoId?: number | null;
   coverPhoto?: {
     id: number;
-    thumbnailFilename: string;
+    thumbnailUrl: string;
   } | null;
   latestPhoto?: {
     id: number;
-    thumbnailFilename: string;
+    thumbnailUrl: string;
   } | null;
   // Haikubox detection data (populated when available)
   haikuboxYearlyCount?: number | null;

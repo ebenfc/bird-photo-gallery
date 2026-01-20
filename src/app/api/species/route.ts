@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { species, photos, haikuboxDetections, Rarity } from "@/db/schema";
 import { eq, sql, desc, asc, and } from "drizzle-orm";
+import { getThumbnailUrl } from "@/lib/storage";
 
 type SpeciesSortOption = "alpha" | "photo_count" | "recent_added" | "recent_taken";
 const VALID_RARITIES: Rarity[] = ["common", "uncommon", "rare"];
@@ -58,11 +59,16 @@ export async function GET(request: NextRequest) {
             .from(photos)
             .where(eq(photos.id, s.coverPhotoId))
             .limit(1);
-          coverPhoto = cover[0] || null;
+          if (cover[0]) {
+            coverPhoto = {
+              id: cover[0].id,
+              thumbnailUrl: getThumbnailUrl(cover[0].thumbnailFilename),
+            };
+          }
         }
 
         // Get latest photo as fallback
-        const latestPhoto = await db
+        const latestPhotoResult = await db
           .select({
             id: photos.id,
             thumbnailFilename: photos.thumbnailFilename,
@@ -71,6 +77,13 @@ export async function GET(request: NextRequest) {
           .where(eq(photos.speciesId, s.id))
           .orderBy(desc(photos.uploadDate))
           .limit(1);
+
+        const latestPhoto = latestPhotoResult[0]
+          ? {
+              id: latestPhotoResult[0].id,
+              thumbnailUrl: getThumbnailUrl(latestPhotoResult[0].thumbnailFilename),
+            }
+          : null;
 
         // Get Haikubox detection data for this species
         const detection = await db
@@ -90,7 +103,7 @@ export async function GET(request: NextRequest) {
         return {
           ...s,
           coverPhoto,
-          latestPhoto: latestPhoto[0] || null,
+          latestPhoto,
           haikuboxYearlyCount: detection[0]?.yearlyCount || null,
           haikuboxLastHeard: detection[0]?.lastHeardAt || null,
         };

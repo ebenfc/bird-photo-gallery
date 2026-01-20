@@ -202,7 +202,7 @@ export default function SpeciesAssignModal({
                           {s.latestPhoto ? (
                             <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 ring-1 ring-[var(--sky-200)]">
                               <Image
-                                src={`/uploads/thumbnails/${s.latestPhoto.thumbnailFilename}`}
+                                src={s.latestPhoto.thumbnailUrl}
                                 alt={s.commonName}
                                 fill
                                 className="object-cover"
@@ -272,7 +272,7 @@ export default function SpeciesAssignModal({
                       {s.latestPhoto ? (
                         <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 ring-1 ring-[var(--mist-100)]">
                           <Image
-                            src={`/uploads/thumbnails/${s.latestPhoto.thumbnailFilename}`}
+                            src={s.latestPhoto.thumbnailUrl}
                             alt={s.commonName}
                             fill
                             className="object-cover"

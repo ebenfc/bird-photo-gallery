@@ -15,9 +15,7 @@ interface SpeciesCardProps {
 export default function SpeciesCard({ species, onEdit, index = 0 }: SpeciesCardProps) {
   // Use cover photo if set, otherwise fall back to latest photo
   const displayPhoto = species.coverPhoto || species.latestPhoto;
-  const thumbnailUrl = displayPhoto
-    ? `/uploads/thumbnails/${displayPhoto.thumbnailFilename}`
-    : null;
+  const thumbnailUrl = displayPhoto?.thumbnailUrl || null;
 
   const animationDelay = Math.min(index * 50, 400);
 
