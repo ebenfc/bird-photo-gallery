@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { haikuboxDetections, species } from "@/db/schema";
-import { eq, desc, sql, isNull } from "drizzle-orm";
+import { eq, desc, sql, isNull, or, ilike } from "drizzle-orm";
+import { normalizeCommonName } from "@/lib/haikubox";
 
 // GET /api/haikubox/detections - Query cached detection data
 export async function GET(request: NextRequest) {
@@ -10,6 +11,35 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "50");
     const recentOnly = searchParams.get("recent") === "true";
     const unmatchedOnly = searchParams.get("unmatched") === "true";
+    const speciesName = searchParams.get("species");
+
+    // If looking up by species name, do a more targeted query
+    if (speciesName) {
+      const normalizedSearch = normalizeCommonName(speciesName);
+
+      // Find detection matching the species name (case-insensitive, apostrophe-normalized)
+      const allDetections = await db
+        .select({
+          id: haikuboxDetections.id,
+          speciesCommonName: haikuboxDetections.speciesCommonName,
+          yearlyCount: haikuboxDetections.yearlyCount,
+          lastHeardAt: haikuboxDetections.lastHeardAt,
+          dataYear: haikuboxDetections.dataYear,
+          matchedSpeciesId: haikuboxDetections.speciesId,
+          matchedSpeciesName: species.commonName,
+        })
+        .from(haikuboxDetections)
+        .leftJoin(species, eq(haikuboxDetections.speciesId, species.id));
+
+      // Filter with normalized comparison
+      const matchedDetections = allDetections.filter((d) => {
+        const normalizedDetection = normalizeCommonName(d.speciesCommonName);
+        const normalizedMatched = d.matchedSpeciesName ? normalizeCommonName(d.matchedSpeciesName) : null;
+        return normalizedDetection === normalizedSearch || normalizedMatched === normalizedSearch;
+      });
+
+      return NextResponse.json({ detections: matchedDetections });
+    }
 
     // Base query with species join
     let detections = await db

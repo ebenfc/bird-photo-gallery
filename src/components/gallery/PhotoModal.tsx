@@ -3,7 +3,7 @@
 import { useEffect, useCallback, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Photo } from "@/types";
+import { Photo, HaikuboxDetection } from "@/types";
 
 interface PhotoModalProps {
   photo: Photo | null;
@@ -49,6 +49,10 @@ export default function PhotoModal({
   const [fullscreenUITimer, setFullscreenUITimer] = useState<NodeJS.Timeout | null>(null);
   const [showOverflowMenu, setShowOverflowMenu] = useState(false);
 
+  // Haikubox detection data
+  const [detection, setDetection] = useState<HaikuboxDetection | null>(null);
+  const [detectionLoading, setDetectionLoading] = useState(false);
+
   // Reset edit state when photo changes
   useEffect(() => {
     setIsEditingDate(false);
@@ -61,11 +65,42 @@ export default function PhotoModal({
     setShowFullscreenUI(false);
     setCoverPhotoSet(false);
     setShowOverflowMenu(false);
+    setDetection(null);
     if (fullscreenUITimer) {
       clearTimeout(fullscreenUITimer);
       setFullscreenUITimer(null);
     }
   }, [photo?.id]);
+
+  // Fetch Haikubox detection data for the species
+  useEffect(() => {
+    const fetchDetection = async () => {
+      if (!photo?.species?.commonName) {
+        setDetection(null);
+        return;
+      }
+
+      setDetectionLoading(true);
+      try {
+        const res = await fetch(`/api/haikubox/detections?species=${encodeURIComponent(photo.species.commonName)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.detections && data.detections.length > 0) {
+            setDetection(data.detections[0]);
+          } else {
+            setDetection(null);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch detection:", err);
+        setDetection(null);
+      } finally {
+        setDetectionLoading(false);
+      }
+    };
+
+    fetchDetection();
+  }, [photo?.species?.commonName]);
 
   // Clear fullscreen UI timer on unmount
   useEffect(() => {
@@ -169,6 +204,28 @@ export default function PhotoModal({
       month: "long",
       day: "numeric",
     });
+  };
+
+  const formatCount = (count: number): string => {
+    if (count >= 1000) {
+      return `${(count / 1000).toFixed(1).replace(/\.0$/, "")}k`;
+    }
+    return count.toLocaleString();
+  };
+
+  const getRelativeTime = (dateString: string | null): string => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffHours < 1) return "Just now";
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return date.toLocaleDateString();
   };
 
   // Fullscreen mode - just the photo
@@ -450,6 +507,44 @@ export default function PhotoModal({
 
           {/* Expandable content */}
           <div className="p-4 overflow-auto max-h-[calc(50vh-5rem)]">
+            {/* Haikubox detection stats - mobile */}
+            {detection && detection.yearlyCount > 0 && (
+              <div className="mb-4 p-3 bg-gradient-to-br from-[var(--sky-50)] to-[var(--moss-50)]
+                rounded-[var(--radius-md)] border border-[var(--sky-100)]">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <svg
+                      className="w-4 h-4 text-[var(--sky-600)]"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+                      />
+                    </svg>
+                    <span className="text-xs font-semibold text-[var(--forest-800)]">Heard on Property</span>
+                  </div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-lg font-bold text-[var(--sky-700)]">
+                      {formatCount(detection.yearlyCount)}x
+                    </span>
+                    <span className="text-xs text-[var(--mist-500)]">
+                      in {detection.dataYear}
+                    </span>
+                  </div>
+                </div>
+                {detection.lastHeardAt && (
+                  <p className="text-xs text-[var(--mist-500)] mt-1 text-right">
+                    Last: {getRelativeTime(detection.lastHeardAt)}
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Date info cards */}
             <div className="grid grid-cols-2 gap-2 mb-4">
               <div className="p-3 bg-[var(--moss-50)] rounded-[var(--radius-md)]">
@@ -554,6 +649,44 @@ export default function PhotoModal({
             <p className="text-[var(--mist-600)] text-sm mb-5 leading-relaxed">
               {photo.species.description}
             </p>
+          )}
+
+          {/* Haikubox detection stats */}
+          {detection && detection.yearlyCount > 0 && (
+            <div className="mb-4 p-4 bg-gradient-to-br from-[var(--sky-50)] to-[var(--moss-50)]
+              rounded-[var(--radius-lg)] border border-[var(--sky-100)]">
+              <div className="flex items-center gap-2 mb-2">
+                <svg
+                  className="w-5 h-5 text-[var(--sky-600)]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+                  />
+                </svg>
+                <span className="text-sm font-semibold text-[var(--forest-800)]">
+                  Heard on Property
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold text-[var(--sky-700)]">
+                  {formatCount(detection.yearlyCount)}
+                </span>
+                <span className="text-sm text-[var(--mist-500)]">
+                  times in {detection.dataYear}
+                </span>
+              </div>
+              {detection.lastHeardAt && (
+                <p className="text-xs text-[var(--mist-500)] mt-1">
+                  Last heard: {getRelativeTime(detection.lastHeardAt)}
+                </p>
+              )}
+            </div>
           )}
 
           {/* Set as cover photo button */}
