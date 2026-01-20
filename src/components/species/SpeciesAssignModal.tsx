@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { Photo, Species, Rarity } from "@/types";
+import { Photo, Species, Rarity, HaikuboxDetection } from "@/types";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import RarityBadge from "@/components/ui/RarityBadge";
+import HeardBadge from "@/components/ui/HeardBadge";
 
 interface SpeciesAssignModalProps {
   photo: Photo | null;
@@ -39,6 +40,37 @@ export default function SpeciesAssignModal({
   const [newScientificName, setNewScientificName] = useState("");
   const [newRarity, setNewRarity] = useState<Rarity>("common");
   const [loading, setLoading] = useState(false);
+  const [recentDetections, setRecentDetections] = useState<HaikuboxDetection[]>([]);
+
+  // Fetch recent detections when modal opens
+  useEffect(() => {
+    const fetchRecent = async () => {
+      try {
+        const res = await fetch("/api/haikubox/detections?recent=true&limit=15");
+        if (res.ok) {
+          const data = await res.json();
+          setRecentDetections(data.detections || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch recent detections:", err);
+      }
+    };
+    if (isOpen) {
+      fetchRecent();
+    }
+  }, [isOpen]);
+
+  // Filter species that were recently heard
+  const recentlyHeardSpecies = useMemo(() => {
+    return species.filter((s) =>
+      recentDetections.some((d) => d.matchedSpeciesId === s.id)
+    );
+  }, [species, recentDetections]);
+
+  // Get detection data for a species
+  const getDetectionForSpecies = (speciesId: number) => {
+    return recentDetections.find((d) => d.matchedSpeciesId === speciesId);
+  };
 
   if (!isOpen || !photo) return null;
 
@@ -137,6 +169,89 @@ export default function SpeciesAssignModal({
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
+
+              {/* Recently Heard Section */}
+              {recentlyHeardSpecies.length > 0 && !searchQuery && (
+                <div className="mb-4">
+                  <h4 className="text-xs font-medium text-[var(--sky-600)] uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                    <svg
+                      className="w-3.5 h-3.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+                      />
+                    </svg>
+                    Recently Heard
+                  </h4>
+                  <div className="space-y-2">
+                    {recentlyHeardSpecies.map((s) => {
+                      const detection = getDetectionForSpecies(s.id);
+                      return (
+                        <button
+                          key={`recent-${s.id}`}
+                          onClick={() => handleAssign(s.id)}
+                          disabled={loading}
+                          className="w-full flex items-center gap-3 p-3 rounded-xl border border-[var(--sky-200)] bg-[var(--sky-50)]/50 hover:border-[var(--sky-400)] hover:bg-[var(--sky-50)] transition-all text-left disabled:opacity-50"
+                        >
+                          {s.latestPhoto ? (
+                            <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 ring-1 ring-[var(--sky-200)]">
+                              <Image
+                                src={`/uploads/thumbnails/${s.latestPhoto.thumbnailFilename}`}
+                                alt={s.commonName}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[var(--sky-100)] to-[var(--mist-50)] flex items-center justify-center flex-shrink-0">
+                              <svg
+                                className="w-6 h-6 text-[var(--sky-400)]"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={1.5}
+                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                />
+                              </svg>
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium text-[var(--forest-900)] truncate">
+                                {s.commonName}
+                              </p>
+                              <RarityBadge rarity={s.rarity} size="sm" />
+                            </div>
+                            {s.scientificName && (
+                              <p className="text-sm text-[var(--mist-500)] italic truncate">
+                                {s.scientificName}
+                              </p>
+                            )}
+                          </div>
+                          {detection && (
+                            <HeardBadge
+                              count={detection.yearlyCount}
+                              lastHeard={detection.lastHeardAt}
+                              size="sm"
+                            />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="border-t border-[var(--mist-100)] my-4" />
+                </div>
+              )}
 
               {/* Species list */}
               <div className="space-y-2 mb-4">

@@ -46,8 +46,47 @@ export const photosRelations = relations(photos, ({ one }) => ({
   }),
 }));
 
+// Haikubox Detections Table - Stores synced bird detection data from Haikubox
+export const haikuboxDetections = pgTable("haikubox_detections", {
+  id: serial("id").primaryKey(),
+  speciesCommonName: text("species_common_name").notNull(),
+  speciesId: integer("species_id").references(() => species.id, {
+    onDelete: "set null",
+  }),
+  yearlyCount: integer("yearly_count").notNull().default(0),
+  lastHeardAt: timestamp("last_heard_at", { withTimezone: true }),
+  dataYear: integer("data_year").notNull(),
+  syncedAt: timestamp("synced_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// Haikubox Sync Log Table - Tracks sync history for monitoring
+export const haikuboxSyncLog = pgTable("haikubox_sync_log", {
+  id: serial("id").primaryKey(),
+  syncType: text("sync_type").notNull(), // 'yearly' | 'daily' | 'recent'
+  status: text("status").notNull(), // 'success' | 'error'
+  recordsProcessed: integer("records_processed").default(0),
+  errorMessage: text("error_message"),
+  syncedAt: timestamp("synced_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// Haikubox Relations
+export const haikuboxDetectionsRelations = relations(haikuboxDetections, ({ one }) => ({
+  species: one(species, {
+    fields: [haikuboxDetections.speciesId],
+    references: [species.id],
+  }),
+}));
+
 // Type exports
 export type Species = typeof species.$inferSelect;
 export type NewSpecies = typeof species.$inferInsert;
 export type Photo = typeof photos.$inferSelect;
 export type NewPhoto = typeof photos.$inferInsert;
+export type HaikuboxDetection = typeof haikuboxDetections.$inferSelect;
+export type NewHaikuboxDetection = typeof haikuboxDetections.$inferInsert;
+export type HaikuboxSyncLog = typeof haikuboxSyncLog.$inferSelect;
+export type NewHaikuboxSyncLog = typeof haikuboxSyncLog.$inferInsert;

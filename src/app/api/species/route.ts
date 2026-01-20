@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { species, photos, Rarity } from "@/db/schema";
-import { eq, sql, desc, asc, inArray } from "drizzle-orm";
+import { species, photos, haikuboxDetections, Rarity } from "@/db/schema";
+import { eq, sql, desc, asc, and } from "drizzle-orm";
 
 type SpeciesSortOption = "alpha" | "photo_count" | "recent_added" | "recent_taken";
 const VALID_RARITIES: Rarity[] = ["common", "uncommon", "rare"];
@@ -43,6 +43,7 @@ export async function GET(request: NextRequest) {
       .groupBy(species.id)
       .orderBy(...getOrderBy());
 
+<<<<<<< HEAD
     // Get cover photo and latest photo thumbnail for each species
     const speciesWithThumbnails = await Promise.all(
       result.map(async (s) => {
@@ -61,6 +62,13 @@ export async function GET(request: NextRequest) {
         }
 
         // Get latest photo as fallback
+=======
+    // Get latest photo thumbnail and Haikubox detection data for each species
+    const currentYear = new Date().getFullYear();
+    const speciesWithExtras = await Promise.all(
+      result.map(async (s) => {
+        // Get latest photo thumbnail
+>>>>>>> fa8f49f (Add Haikubox integration for bird detection data)
         const latestPhoto = await db
           .select({
             id: photos.id,
@@ -71,15 +79,32 @@ export async function GET(request: NextRequest) {
           .orderBy(desc(photos.uploadDate))
           .limit(1);
 
+        // Get Haikubox detection data for this species
+        const detection = await db
+          .select({
+            yearlyCount: haikuboxDetections.yearlyCount,
+            lastHeardAt: haikuboxDetections.lastHeardAt,
+          })
+          .from(haikuboxDetections)
+          .where(
+            and(
+              eq(haikuboxDetections.speciesId, s.id),
+              eq(haikuboxDetections.dataYear, currentYear)
+            )
+          )
+          .limit(1);
+
         return {
           ...s,
           coverPhoto,
           latestPhoto: latestPhoto[0] || null,
+          haikuboxYearlyCount: detection[0]?.yearlyCount || null,
+          haikuboxLastHeard: detection[0]?.lastHeardAt || null,
         };
       })
     );
 
-    return NextResponse.json({ species: speciesWithThumbnails });
+    return NextResponse.json({ species: speciesWithExtras });
   } catch (error) {
     console.error("Error fetching species:", error);
     return NextResponse.json(

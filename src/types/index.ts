@@ -17,6 +17,9 @@ export interface Species {
     id: number;
     thumbnailFilename: string;
   } | null;
+  // Haikubox detection data (populated when available)
+  haikuboxYearlyCount?: number | null;
+  haikuboxLastHeard?: string | null;
 }
 
 export interface Photo {
@@ -49,4 +52,37 @@ export interface PhotosResponse {
 
 export interface SpeciesResponse {
   species: Species[];
+}
+
+// Haikubox types
+export interface HaikuboxDetection {
+  id: number;
+  speciesCommonName: string;
+  yearlyCount: number;
+  lastHeardAt: string | null;
+  dataYear: number;
+  matchedSpeciesId: number | null;
+  matchedSpeciesName: string | null;
+}
+
+export interface HaikuboxDetectionsResponse {
+  detections: HaikuboxDetection[];
+}
+
+export interface PropertyStats {
+  totalHeard: number;
+  totalPhotographed: number;
+  heardAndPhotographed: number;
+  heardNotPhotographed: Array<{
+    commonName: string;
+    yearlyCount: number;
+    lastHeardAt: string | null;
+  }>;
+  recentlyHeard: Array<{
+    commonName: string;
+    lastHeardAt: string | null;
+    yearlyCount: number;
+    hasPhoto: boolean;
+  }>;
+  year: number;
 }

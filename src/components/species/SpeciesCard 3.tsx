@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Species } from "@/types";
 import RarityBadge from "@/components/ui/RarityBadge";
+import HeardBadge from "@/components/ui/HeardBadge";
 
 interface SpeciesCardProps {
   species: Species;
@@ -107,6 +108,15 @@ export default function SpeciesCard({ species, onEdit, index = 0 }: SpeciesCardP
 
         <div className="mt-3 flex items-center gap-2 flex-wrap">
           <RarityBadge rarity={species.rarity} size="sm" />
+
+          {/* Haikubox heard badge */}
+          {species.haikuboxYearlyCount && species.haikuboxYearlyCount > 0 && (
+            <HeardBadge
+              count={species.haikuboxYearlyCount}
+              lastHeard={species.haikuboxLastHeard}
+              size="sm"
+            />
+          )}
 
           {/* Photo count pill */}
           <div className="flex items-center gap-1.5 px-2.5 py-1
