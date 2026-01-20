@@ -43,9 +43,9 @@ export async function GET(request: NextRequest) {
       .groupBy(species.id)
       .orderBy(...getOrderBy());
 
-<<<<<<< HEAD
-    // Get cover photo and latest photo thumbnail for each species
-    const speciesWithThumbnails = await Promise.all(
+    // Get cover photo, latest photo thumbnail, and Haikubox detection data for each species
+    const currentYear = new Date().getFullYear();
+    const speciesWithExtras = await Promise.all(
       result.map(async (s) => {
         // Get cover photo if set
         let coverPhoto = null;
@@ -62,13 +62,6 @@ export async function GET(request: NextRequest) {
         }
 
         // Get latest photo as fallback
-=======
-    // Get latest photo thumbnail and Haikubox detection data for each species
-    const currentYear = new Date().getFullYear();
-    const speciesWithExtras = await Promise.all(
-      result.map(async (s) => {
-        // Get latest photo thumbnail
->>>>>>> fa8f49f (Add Haikubox integration for bird detection data)
         const latestPhoto = await db
           .select({
             id: photos.id,
