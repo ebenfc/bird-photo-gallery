@@ -57,26 +57,35 @@ function extractScientificName(
 
 /**
  * Extract a short description from Wikipedia extract
+ * Takes complete sentences up to approximately 500 characters
  */
 function extractDescription(extract: string): string | null {
   if (!extract) return null;
 
-  // Get first sentence or two
-  const sentences = extract.split(/\.\s+/);
-  if (sentences.length > 0) {
-    // Take first 1-2 sentences, max ~200 chars
-    let desc = sentences[0];
-    if (sentences.length > 1 && desc.length < 100) {
-      desc += ". " + sentences[1];
+  // Split into sentences (handle common abbreviations)
+  const sentences = extract.split(/(?<=[.!?])\s+(?=[A-Z])/);
+  if (sentences.length === 0) return null;
+
+  // Build description from complete sentences
+  let desc = "";
+  for (const sentence of sentences) {
+    const trimmedSentence = sentence.trim();
+    // Stop if adding this sentence would exceed ~500 chars
+    if (desc.length + trimmedSentence.length > 500 && desc.length > 0) {
+      break;
     }
-    // Clean up and truncate
-    desc = desc.trim();
-    if (desc.length > 250) {
-      desc = desc.substring(0, 247) + "...";
+    desc += (desc ? " " : "") + trimmedSentence;
+    // Ensure sentence ends with punctuation
+    if (!/[.!?]$/.test(desc)) {
+      desc += ".";
     }
-    return desc;
+    // Take at least 2 sentences if they're short, otherwise stop after reasonable length
+    if (desc.length >= 150) {
+      break;
+    }
   }
-  return null;
+
+  return desc.trim() || null;
 }
 
 /**
