@@ -1,12 +1,98 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import Image from "next/image";
 import { Photo, Species, Rarity, HaikuboxDetection } from "@/types";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import RarityBadge from "@/components/ui/RarityBadge";
 import HeardBadge from "@/components/ui/HeardBadge";
+
+interface BirdLookupResult {
+  commonName: string;
+  scientificName: string | null;
+  description: string | null;
+  source: string;
+}
+
+interface NameValidation {
+  isValid: boolean;
+  suggestions: string[];
+  errors: string[];
+}
+
+/**
+ * Validate and suggest corrections for bird common names
+ */
+function validateBirdName(name: string): NameValidation {
+  const errors: string[] = [];
+  const suggestions: string[] = [];
+  const trimmed = name.trim();
+
+  if (!trimmed) {
+    return { isValid: true, suggestions: [], errors: [] };
+  }
+
+  // Check for proper capitalization (Title Case for most words)
+  const words = trimmed.split(/\s+/);
+  const properlyCapitalized = words.map((word, index) => {
+    // Handle hyphenated words
+    if (word.includes("-")) {
+      return word
+        .split("-")
+        .map((part) => {
+          // Capitalize first letter, lowercase rest
+          return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+        })
+        .join("-");
+    }
+    // Articles/prepositions in middle should be lowercase (but not first word)
+    const lowercaseWords = ["the", "a", "an", "of", "and", "or"];
+    if (index > 0 && lowercaseWords.includes(word.toLowerCase())) {
+      return word.toLowerCase();
+    }
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  });
+
+  const correctedName = properlyCapitalized.join(" ");
+
+  if (correctedName !== trimmed) {
+    errors.push("Capitalization issue");
+    suggestions.push(correctedName);
+  }
+
+  // Check for common missing apostrophes in possessive names
+  const apostrophePatterns = [
+    { wrong: /\bAnnas\b/i, correct: "Anna's" },
+    { wrong: /\bHarriss\b/i, correct: "Harris's" },
+    { wrong: /\bBairds\b/i, correct: "Baird's" },
+    { wrong: /\bBewicks\b/i, correct: "Bewick's" },
+    { wrong: /\bBullocks\b/i, correct: "Bullock's" },
+    { wrong: /\bCoopers\b/i, correct: "Cooper's" },
+    { wrong: /\bStellers\b/i, correct: "Steller's" },
+    { wrong: /\bTownsends\b/i, correct: "Townsend's" },
+    { wrong: /\bWilsons\b/i, correct: "Wilson's" },
+    { wrong: /\bBrewers\b/i, correct: "Brewer's" },
+    { wrong: /\bCassins\b/i, correct: "Cassin's" },
+    { wrong: /\bLincolns\b/i, correct: "Lincoln's" },
+    { wrong: /\bNuttalls\b/i, correct: "Nuttall's" },
+  ];
+
+  let currentName = suggestions.length > 0 ? suggestions[0] : correctedName;
+  for (const pattern of apostrophePatterns) {
+    if (pattern.wrong.test(trimmed)) {
+      errors.push(`Missing apostrophe in "${pattern.correct}"`);
+      currentName = currentName.replace(pattern.wrong, pattern.correct);
+      suggestions[0] = currentName;
+    }
+  }
+
+  return {
+    isValid: errors.length === 0,
+    suggestions,
+    errors,
+  };
+}
 
 interface SpeciesAssignModalProps {
   photo: Photo | null;
@@ -42,6 +128,13 @@ export default function SpeciesAssignModal({
   const [loading, setLoading] = useState(false);
   const [recentDetections, setRecentDetections] = useState<HaikuboxDetection[]>([]);
 
+  // Name validation and lookup states
+  const [nameValidation, setNameValidation] = useState<NameValidation>({ isValid: true, suggestions: [], errors: [] });
+  const [lookupLoading, setLookupLoading] = useState(false);
+  const [lookupResult, setLookupResult] = useState<BirdLookupResult | null>(null);
+  const [scientificNameAutoFilled, setScientificNameAutoFilled] = useState(false);
+  const lookupTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // Fetch recent detections when modal opens
   useEffect(() => {
     const fetchRecent = async () => {
@@ -59,6 +152,71 @@ export default function SpeciesAssignModal({
       fetchRecent();
     }
   }, [isOpen]);
+
+  // Validate common name and lookup scientific name with debounce
+  useEffect(() => {
+    // Validate the name
+    const validation = validateBirdName(newCommonName);
+    setNameValidation(validation);
+
+    // Clear previous timeout
+    if (lookupTimeoutRef.current) {
+      clearTimeout(lookupTimeoutRef.current);
+    }
+
+    // Don't lookup if name is too short
+    const nameToLookup = validation.suggestions[0] || newCommonName.trim();
+    if (nameToLookup.length < 3) {
+      setLookupResult(null);
+      setLookupLoading(false);
+      return;
+    }
+
+    // Debounce the lookup
+    setLookupLoading(true);
+    lookupTimeoutRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/birds/lookup?name=${encodeURIComponent(nameToLookup)}`);
+        if (res.ok) {
+          const data: BirdLookupResult = await res.json();
+          setLookupResult(data);
+          // Auto-fill scientific name if not already filled manually
+          if (data.scientificName && !newScientificName && !scientificNameAutoFilled) {
+            setNewScientificName(data.scientificName);
+            setScientificNameAutoFilled(true);
+          }
+        } else {
+          setLookupResult(null);
+        }
+      } catch (err) {
+        console.error("Bird lookup failed:", err);
+        setLookupResult(null);
+      } finally {
+        setLookupLoading(false);
+      }
+    }, 600);
+
+    return () => {
+      if (lookupTimeoutRef.current) {
+        clearTimeout(lookupTimeoutRef.current);
+      }
+    };
+  }, [newCommonName]);
+
+  // Reset auto-fill flag when scientific name is manually cleared
+  const handleScientificNameChange = (value: string) => {
+    setNewScientificName(value);
+    if (!value) {
+      setScientificNameAutoFilled(false);
+    }
+  };
+
+  // Apply name suggestion
+  const applySuggestion = () => {
+    if (nameValidation.suggestions[0]) {
+      setNewCommonName(nameValidation.suggestions[0]);
+    }
+  };
 
   // Filter species that were recently heard
   const recentlyHeardSpecies = useMemo(() => {
@@ -320,19 +478,87 @@ export default function SpeciesAssignModal({
           ) : (
             /* New species form */
             <div className="space-y-4">
-              <Input
-                label="Common Name *"
-                placeholder="e.g., Dark-eyed Junco"
-                value={newCommonName}
-                onChange={(e) => setNewCommonName(e.target.value)}
-                autoFocus
-              />
-              <Input
-                label="Scientific Name (optional)"
-                placeholder="e.g., Junco hyemalis"
-                value={newScientificName}
-                onChange={(e) => setNewScientificName(e.target.value)}
-              />
+              {/* Common Name with validation */}
+              <div>
+                <Input
+                  label="Common Name *"
+                  placeholder="e.g., Dark-eyed Junco"
+                  value={newCommonName}
+                  onChange={(e) => setNewCommonName(e.target.value)}
+                  autoFocus
+                />
+                {/* Validation feedback */}
+                {!nameValidation.isValid && nameValidation.suggestions[0] && (
+                  <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <svg className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-amber-700">{nameValidation.errors[0]}</p>
+                        <button
+                          type="button"
+                          onClick={applySuggestion}
+                          className="mt-1 text-sm font-medium text-amber-700 hover:text-amber-800 underline underline-offset-2"
+                        >
+                          Use &quot;{nameValidation.suggestions[0]}&quot;
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {/* Lookup status */}
+                {lookupLoading && newCommonName.trim().length >= 3 && (
+                  <div className="mt-2 flex items-center gap-2 text-xs text-[var(--mist-500)]">
+                    <div className="w-3 h-3 border-2 border-[var(--moss-300)] border-t-transparent rounded-full animate-spin" />
+                    Looking up species...
+                  </div>
+                )}
+                {lookupResult && !lookupLoading && (
+                  <div className="mt-2 p-2 bg-[var(--moss-50)] border border-[var(--moss-200)] rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-4 h-4 text-[var(--moss-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-xs text-[var(--moss-700)]">
+                        Found: {lookupResult.scientificName ? (
+                          <span className="italic">{lookupResult.scientificName}</span>
+                        ) : "No scientific name found"}
+                      </span>
+                    </div>
+                  </div>
+                )}
+                {!lookupResult && !lookupLoading && newCommonName.trim().length >= 3 && nameValidation.isValid && (
+                  <div className="mt-2 flex items-center gap-2 text-xs text-[var(--mist-400)]">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Species not found in database
+                  </div>
+                )}
+              </div>
+
+              {/* Scientific Name with auto-fill indicator */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-sm font-medium text-[var(--forest-700)]">
+                    Scientific Name
+                  </label>
+                  {scientificNameAutoFilled && (
+                    <span className="text-xs text-[var(--moss-600)] flex items-center gap-1">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      Auto-filled
+                    </span>
+                  )}
+                </div>
+                <Input
+                  placeholder="e.g., Junco hyemalis"
+                  value={newScientificName}
+                  onChange={(e) => handleScientificNameChange(e.target.value)}
+                />
+              </div>
               <div>
                 <label className="block text-sm font-medium text-[var(--forest-700)] mb-2">
                   Rarity
@@ -366,6 +592,9 @@ export default function SpeciesAssignModal({
                     setNewCommonName("");
                     setNewScientificName("");
                     setNewRarity("common");
+                    setLookupResult(null);
+                    setScientificNameAutoFilled(false);
+                    setNameValidation({ isValid: true, suggestions: [], errors: [] });
                   }}
                   className="flex-1"
                 >

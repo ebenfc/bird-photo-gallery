@@ -396,9 +396,16 @@ export default function PhotoModal({
             className="w-full p-4 flex items-center justify-between border-b border-[var(--border)]"
           >
             <div className="flex items-center gap-3">
-              <h2 className="font-bold text-[var(--forest-900)]">
-                {photo.species?.commonName || "Species Unassigned"}
-              </h2>
+              <div>
+                <h2 className="font-bold text-[var(--forest-900)]">
+                  {photo.species?.commonName || "Species Unassigned"}
+                </h2>
+                {photo.species?.scientificName && (
+                  <p className="text-xs text-[var(--mist-500)] italic">
+                    {photo.species.scientificName}
+                  </p>
+                )}
+              </div>
               <button
                 onClick={(e) => { e.stopPropagation(); handleFavorite(); }}
                 className={`p-1.5 rounded-full ${justFavorited ? "animate-heart-beat" : ""}`}
