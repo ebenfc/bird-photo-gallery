@@ -55,13 +55,9 @@ export async function GET() {
         haikuboxDetections.lastHeardAt
       )
       .having(sql`count(${photos.id}) = 0`)
-      .orderBy(sql`${haikuboxDetections.yearlyCount} DESC`)
-      .limit(10);
+      .orderBy(sql`${haikuboxDetections.yearlyCount} DESC`);
 
-    // Recently heard species (last 7 days)
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-
+    // All heard birds with photo status (for the captured tab)
     const recentlyHeard = await db
       .select({
         commonName: haikuboxDetections.speciesCommonName,
@@ -72,20 +68,14 @@ export async function GET() {
       .from(haikuboxDetections)
       .leftJoin(species, eq(haikuboxDetections.speciesId, species.id))
       .leftJoin(photos, eq(photos.speciesId, species.id))
-      .where(
-        and(
-          eq(haikuboxDetections.dataYear, currentYear),
-          sql`${haikuboxDetections.lastHeardAt} > ${weekAgo.toISOString()}`
-        )
-      )
+      .where(eq(haikuboxDetections.dataYear, currentYear))
       .groupBy(
         haikuboxDetections.id,
         haikuboxDetections.speciesCommonName,
         haikuboxDetections.lastHeardAt,
         haikuboxDetections.yearlyCount
       )
-      .orderBy(sql`${haikuboxDetections.lastHeardAt} DESC`)
-      .limit(10);
+      .orderBy(sql`${haikuboxDetections.yearlyCount} DESC`);
 
     return NextResponse.json({
       totalHeard: Number(heardCount[0]?.count) || 0,
