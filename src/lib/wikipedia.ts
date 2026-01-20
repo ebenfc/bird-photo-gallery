@@ -87,83 +87,101 @@ function extractDescription(extract: string): string | null {
 }
 
 /**
+ * Convert to Wikipedia-style title case (first word capitalized, rest lowercase except proper nouns)
+ * E.g., "Red-Breasted Nuthatch" -> "Red-breasted nuthatch"
+ */
+function toWikipediaCase(name: string): string {
+  const words = name.split(/(\s+|-)/);
+  return words
+    .map((word, index) => {
+      if (word === " " || word === "-") return word;
+      if (index === 0) {
+        // First word: capitalize first letter
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      }
+      // Other words: lowercase (Wikipedia uses sentence case for bird names)
+      return word.toLowerCase();
+    })
+    .join("");
+}
+
+interface WikipediaPage {
+  pageid?: number;
+  title?: string;
+  extract?: string;
+}
+
+/**
+ * Try to fetch from Wikipedia with a specific title
+ */
+async function tryWikipediaFetch(
+  title: string
+): Promise<{ page: WikipediaPage; found: boolean }> {
+  const searchUrl = new URL("https://en.wikipedia.org/w/api.php");
+  searchUrl.searchParams.set("action", "query");
+  searchUrl.searchParams.set("format", "json");
+  searchUrl.searchParams.set("prop", "extracts|pageprops");
+  searchUrl.searchParams.set("exintro", "true");
+  searchUrl.searchParams.set("explaintext", "true");
+  searchUrl.searchParams.set("exsentences", "3");
+  searchUrl.searchParams.set("titles", title);
+  searchUrl.searchParams.set("redirects", "1");
+  searchUrl.searchParams.set("origin", "*");
+
+  const response = await fetch(searchUrl.toString());
+  if (!response.ok) {
+    return { page: {}, found: false };
+  }
+
+  const data: WikipediaSearchResult = await response.json();
+  if (!data.query?.pages) {
+    return { page: {}, found: false };
+  }
+
+  const pages = Object.values(data.query.pages);
+  const page = pages[0];
+
+  if (!page || page.pageid === undefined || page.pageid === -1) {
+    return { page: {}, found: false };
+  }
+
+  return { page, found: true };
+}
+
+/**
  * Look up a bird species by common name using Wikipedia API
+ * Tries multiple casing variations to handle Wikipedia's sentence case titles
  */
 export async function lookupBirdFromWikipedia(
   commonName: string
 ): Promise<BirdLookupResult | null> {
   try {
-    // Search Wikipedia for the bird
-    const searchUrl = new URL("https://en.wikipedia.org/w/api.php");
-    searchUrl.searchParams.set("action", "query");
-    searchUrl.searchParams.set("format", "json");
-    searchUrl.searchParams.set("prop", "extracts|pageprops");
-    searchUrl.searchParams.set("exintro", "true");
-    searchUrl.searchParams.set("explaintext", "true");
-    searchUrl.searchParams.set("exsentences", "3");
-    searchUrl.searchParams.set("titles", commonName);
-    searchUrl.searchParams.set("redirects", "1");
-    searchUrl.searchParams.set("origin", "*");
+    // Generate title variations to try
+    const wikiCase = toWikipediaCase(commonName);
+    const titlesToTry = [
+      commonName,                    // Original: "Red-Breasted Nuthatch"
+      wikiCase,                      // Wiki case: "Red-breasted nuthatch"
+      `${commonName} (bird)`,        // With suffix: "Red-Breasted Nuthatch (bird)"
+      `${wikiCase} (bird)`,          // Wiki case with suffix
+    ];
 
-    const response = await fetch(searchUrl.toString());
-    if (!response.ok) {
-      console.error("Wikipedia API error:", response.status);
-      return null;
-    }
+    // Remove duplicates
+    const uniqueTitles = [...new Set(titlesToTry)];
 
-    const data: WikipediaSearchResult = await response.json();
+    for (const title of uniqueTitles) {
+      const { page, found } = await tryWikipediaFetch(title);
 
-    if (!data.query?.pages) {
-      return null;
-    }
-
-    // Get the first (and usually only) page result
-    const pages = Object.values(data.query.pages);
-    const page = pages[0];
-
-    if (!page || page.pageid === undefined || page.pageid === -1) {
-      // Page not found, try with "bird" suffix
-      const birdSearchUrl = new URL("https://en.wikipedia.org/w/api.php");
-      birdSearchUrl.searchParams.set("action", "query");
-      birdSearchUrl.searchParams.set("format", "json");
-      birdSearchUrl.searchParams.set("prop", "extracts|pageprops");
-      birdSearchUrl.searchParams.set("exintro", "true");
-      birdSearchUrl.searchParams.set("explaintext", "true");
-      birdSearchUrl.searchParams.set("exsentences", "3");
-      birdSearchUrl.searchParams.set("titles", `${commonName} (bird)`);
-      birdSearchUrl.searchParams.set("redirects", "1");
-      birdSearchUrl.searchParams.set("origin", "*");
-
-      const birdResponse = await fetch(birdSearchUrl.toString());
-      if (birdResponse.ok) {
-        const birdData: WikipediaSearchResult = await birdResponse.json();
-        const birdPages = Object.values(birdData.query?.pages || {});
-        const birdPage = birdPages[0];
-
-        if (birdPage && birdPage.pageid && birdPage.pageid !== -1) {
-          const extract = birdPage.extract || "";
-          return {
-            commonName: commonName,
-            scientificName: extractScientificName(
-              birdPage.title || commonName,
-              extract
-            ),
-            description: extractDescription(extract),
-            source: "wikipedia",
-          };
-        }
+      if (found && page.extract) {
+        return {
+          commonName: commonName,
+          scientificName: extractScientificName(page.title || commonName, page.extract),
+          description: extractDescription(page.extract),
+          source: "wikipedia",
+        };
       }
-
-      return null;
     }
 
-    const extract = page.extract || "";
-    return {
-      commonName: commonName,
-      scientificName: extractScientificName(page.title || commonName, extract),
-      description: extractDescription(extract),
-      source: "wikipedia",
-    };
+    return null;
   } catch (error) {
     console.error("Wikipedia lookup error:", error);
     return null;
