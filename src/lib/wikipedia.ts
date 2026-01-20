@@ -87,6 +87,14 @@ function extractDescription(extract: string): string | null {
 }
 
 /**
+ * Normalize apostrophes to standard ASCII apostrophe
+ * Converts Unicode right single quotation mark (') to ASCII apostrophe (')
+ */
+function normalizeApostrophes(name: string): string {
+  return name.replace(/[\u2019\u2018\u0060\u00B4]/g, "'");
+}
+
+/**
  * Convert to Wikipedia-style title case (first word capitalized, rest lowercase except proper nouns)
  * E.g., "Red-Breasted Nuthatch" -> "Red-breasted nuthatch"
  */
@@ -156,12 +164,15 @@ export async function lookupBirdFromWikipedia(
   commonName: string
 ): Promise<BirdLookupResult | null> {
   try {
+    // Normalize apostrophes to standard ASCII (Unicode ' -> ASCII ')
+    const normalizedName = normalizeApostrophes(commonName);
+
     // Generate title variations to try
-    const wikiCase = toWikipediaCase(commonName);
+    const wikiCase = toWikipediaCase(normalizedName);
     const titlesToTry = [
-      commonName,                    // Original: "Red-Breasted Nuthatch"
+      normalizedName,                // With normalized apostrophes
       wikiCase,                      // Wiki case: "Red-breasted nuthatch"
-      `${commonName} (bird)`,        // With suffix: "Red-Breasted Nuthatch (bird)"
+      `${normalizedName} (bird)`,    // With suffix
       `${wikiCase} (bird)`,          // Wiki case with suffix
     ];
 
