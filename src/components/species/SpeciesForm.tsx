@@ -56,6 +56,35 @@ export default function SpeciesForm({
   const [lookupResult, setLookupResult] = useState<BirdLookupResult | null>(null);
   const lookupTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Lookup function that takes name as parameter (to avoid stale state issues)
+  const performLookup = async (nameToLookup: string) => {
+    if (!nameToLookup.trim() || nameToLookup.trim().length < 3) return;
+
+    setLookupLoading(true);
+    try {
+      const res = await fetch(`/api/birds/lookup?name=${encodeURIComponent(nameToLookup.trim())}`);
+      if (res.ok) {
+        const data: BirdLookupResult = await res.json();
+        setLookupResult(data);
+        // Auto-fill if scientific name is empty
+        if (data.scientificName) {
+          setScientificName(data.scientificName);
+        }
+        // Auto-fill description if empty and we have one
+        if (data.description) {
+          setDescription(data.description);
+        }
+      } else {
+        setLookupResult(null);
+      }
+    } catch (err) {
+      console.error("Bird lookup failed:", err);
+      setLookupResult(null);
+    } finally {
+      setLookupLoading(false);
+    }
+  };
+
   // Reset form when initialData changes or modal opens
   useEffect(() => {
     if (isOpen) {
@@ -65,18 +94,40 @@ export default function SpeciesForm({
       setRarity(initialData?.rarity || "common");
       setError("");
       setLookupResult(null);
+
+      // Auto-lookup when editing a species without scientific name
+      if (initialData?.commonName && !initialData?.scientificName) {
+        performLookup(initialData.commonName);
+      }
     }
   }, [isOpen, initialData]);
 
-  // Auto-lookup when editing a species without scientific name
+  // Debounced auto-lookup when typing a new species name
   useEffect(() => {
-    if (isOpen && initialData?.commonName && !initialData?.scientificName && !scientificName) {
-      // Auto-trigger lookup for existing species missing scientific name
-      handleLookup();
-    }
-  }, [isOpen, initialData]);
+    // Only auto-lookup for new species (no initialData) when typing
+    if (!isOpen || initialData) return;
 
-  // Manual lookup function
+    // Clear previous timeout
+    if (lookupTimeoutRef.current) {
+      clearTimeout(lookupTimeoutRef.current);
+    }
+
+    // Don't lookup if name too short or if we already have a scientific name
+    if (commonName.trim().length < 3 || scientificName) return;
+
+    // Debounce the lookup
+    lookupTimeoutRef.current = setTimeout(() => {
+      performLookup(commonName);
+    }, 800);
+
+    return () => {
+      if (lookupTimeoutRef.current) {
+        clearTimeout(lookupTimeoutRef.current);
+      }
+    };
+  }, [isOpen, initialData, commonName, scientificName]);
+
+  // Manual lookup function (uses current state)
   const handleLookup = async () => {
     if (!commonName.trim() || commonName.trim().length < 3) return;
 
