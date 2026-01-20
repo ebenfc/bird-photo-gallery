@@ -6,9 +6,10 @@ import { PropertyStats } from "@/types";
 interface PropertyBirdsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialTab?: TabType;
 }
 
-type TabType = "captured" | "opportunities";
+export type TabType = "captured" | "opportunities";
 type PriorityLevel = "high" | "medium" | "low";
 
 interface BirdWithPriority {
@@ -71,8 +72,16 @@ function getRelativeTime(dateString: string | null): string {
 export default function PropertyBirdsModal({
   isOpen,
   onClose,
+  initialTab = "opportunities",
 }: PropertyBirdsModalProps) {
-  const [activeTab, setActiveTab] = useState<TabType>("opportunities");
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
+
+  // Update active tab when initialTab changes (e.g., when opening with different tab)
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab(initialTab);
+    }
+  }, [isOpen, initialTab]);
   const [stats, setStats] = useState<PropertyStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAllLow, setShowAllLow] = useState(false);

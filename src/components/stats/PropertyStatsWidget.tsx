@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import HeardBadge from "@/components/ui/HeardBadge";
-import PropertyBirdsModal from "./PropertyBirdsModal";
+import PropertyBirdsModal, { TabType } from "./PropertyBirdsModal";
 import { PropertyStats } from "@/types";
 
 export default function PropertyStatsWidget() {
@@ -10,6 +10,12 @@ export default function PropertyStatsWidget() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalTab, setModalTab] = useState<TabType>("opportunities");
+
+  const openModal = (tab: TabType = "opportunities") => {
+    setModalTab(tab);
+    setModalOpen(true);
+  };
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -78,7 +84,7 @@ export default function PropertyStatsWidget() {
               <span className="text-sm text-[var(--mist-500)]">{stats.year}</span>
             </div>
             <button
-              onClick={() => setModalOpen(true)}
+              onClick={() => openModal("opportunities")}
               className="text-sm text-[var(--sky-600)] hover:text-[var(--sky-700)] font-medium flex items-center gap-1 transition-colors"
             >
               View All
@@ -93,7 +99,7 @@ export default function PropertyStatsWidget() {
         <div className="p-6">
           <div className="grid grid-cols-3 gap-4 mb-6">
             <button
-              onClick={() => setModalOpen(true)}
+              onClick={() => openModal("opportunities")}
               className="text-center p-3 rounded-xl bg-[var(--sky-50)] hover:bg-[var(--sky-100)] transition-colors cursor-pointer"
             >
               <div className="text-2xl font-bold text-[var(--sky-700)]">
@@ -101,12 +107,15 @@ export default function PropertyStatsWidget() {
               </div>
               <div className="text-xs text-[var(--mist-500)]">Species Heard</div>
             </button>
-            <div className="text-center p-3 rounded-xl bg-[var(--moss-50)]">
+            <button
+              onClick={() => openModal("captured")}
+              className="text-center p-3 rounded-xl bg-[var(--moss-50)] hover:bg-[var(--moss-100)] transition-colors cursor-pointer"
+            >
               <div className="text-2xl font-bold text-[var(--moss-700)]">
                 {stats.totalPhotographed}
               </div>
               <div className="text-xs text-[var(--mist-500)]">Photographed</div>
-            </div>
+            </button>
             <div className="text-center p-3 rounded-xl bg-[var(--forest-50)]">
               <div className="text-2xl font-bold text-[var(--forest-700)]">
                 {captureRate}%
@@ -124,7 +133,7 @@ export default function PropertyStatsWidget() {
                 </h4>
                 {stats.heardNotPhotographed.length > 5 && (
                   <button
-                    onClick={() => setModalOpen(true)}
+                    onClick={() => openModal("opportunities")}
                     className="text-xs text-[var(--sky-600)] hover:text-[var(--sky-700)] font-medium"
                   >
                     +{stats.heardNotPhotographed.length - 5} more
@@ -136,7 +145,7 @@ export default function PropertyStatsWidget() {
                   <div
                     key={i}
                     className="flex items-center justify-between py-2 px-3 rounded-lg bg-[var(--mist-50)] hover:bg-[var(--mist-100)] transition-colors cursor-pointer"
-                    onClick={() => setModalOpen(true)}
+                    onClick={() => openModal("opportunities")}
                   >
                     <span className="text-sm text-[var(--forest-800)]">
                       {bird.commonName}
@@ -155,7 +164,11 @@ export default function PropertyStatsWidget() {
       </div>
 
       {/* Modal */}
-      <PropertyBirdsModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+      <PropertyBirdsModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        initialTab={modalTab}
+      />
     </>
   );
 }
