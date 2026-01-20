@@ -1,10 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Rarity } from "@/types";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
+
+interface BirdLookupResult {
+  commonName: string;
+  scientificName: string | null;
+  description: string | null;
+  source: string;
+}
 
 interface SpeciesFormProps {
   isOpen: boolean;
@@ -44,6 +51,11 @@ export default function SpeciesForm({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState("");
 
+  // Lookup states
+  const [lookupLoading, setLookupLoading] = useState(false);
+  const [lookupResult, setLookupResult] = useState<BirdLookupResult | null>(null);
+  const lookupTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // Reset form when initialData changes or modal opens
   useEffect(() => {
     if (isOpen) {
@@ -52,8 +64,46 @@ export default function SpeciesForm({
       setDescription(initialData?.description || "");
       setRarity(initialData?.rarity || "common");
       setError("");
+      setLookupResult(null);
     }
   }, [isOpen, initialData]);
+
+  // Auto-lookup when editing a species without scientific name
+  useEffect(() => {
+    if (isOpen && initialData?.commonName && !initialData?.scientificName && !scientificName) {
+      // Auto-trigger lookup for existing species missing scientific name
+      handleLookup();
+    }
+  }, [isOpen, initialData]);
+
+  // Manual lookup function
+  const handleLookup = async () => {
+    if (!commonName.trim() || commonName.trim().length < 3) return;
+
+    setLookupLoading(true);
+    try {
+      const res = await fetch(`/api/birds/lookup?name=${encodeURIComponent(commonName.trim())}`);
+      if (res.ok) {
+        const data: BirdLookupResult = await res.json();
+        setLookupResult(data);
+        // Auto-fill if scientific name is empty
+        if (data.scientificName && !scientificName) {
+          setScientificName(data.scientificName);
+        }
+        // Auto-fill description if empty and we have one
+        if (data.description && !description) {
+          setDescription(data.description);
+        }
+      } else {
+        setLookupResult(null);
+      }
+    } catch (err) {
+      console.error("Bird lookup failed:", err);
+      setLookupResult(null);
+    } finally {
+      setLookupLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,12 +190,48 @@ export default function SpeciesForm({
             error={error && !commonName.trim() ? error : undefined}
           />
 
-          <Input
-            label="Scientific Name"
-            placeholder="e.g., Cardinalis cardinalis"
-            value={scientificName}
-            onChange={(e) => setScientificName(e.target.value)}
-          />
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-sm font-medium text-[var(--mist-700)]">
+                Scientific Name
+              </label>
+              <button
+                type="button"
+                onClick={handleLookup}
+                disabled={lookupLoading || !commonName.trim()}
+                className="text-xs text-[var(--moss-600)] hover:text-[var(--moss-700)] font-medium
+                  disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+              >
+                {lookupLoading ? (
+                  <>
+                    <div className="w-3 h-3 border-2 border-[var(--moss-300)] border-t-transparent rounded-full animate-spin" />
+                    Looking up...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    Look up
+                  </>
+                )}
+              </button>
+            </div>
+            <Input
+              placeholder="e.g., Cardinalis cardinalis"
+              value={scientificName}
+              onChange={(e) => setScientificName(e.target.value)}
+            />
+            {lookupResult && !scientificName && lookupResult.scientificName && (
+              <button
+                type="button"
+                onClick={() => setScientificName(lookupResult.scientificName!)}
+                className="mt-1.5 text-xs text-[var(--moss-600)] hover:text-[var(--moss-700)] underline"
+              >
+                Use &quot;{lookupResult.scientificName}&quot;
+              </button>
+            )}
+          </div>
 
           <div>
             <label className="block text-sm font-medium text-[var(--mist-700)] mb-1.5">
