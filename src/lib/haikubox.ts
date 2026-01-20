@@ -121,8 +121,13 @@ export async function fetchRecentDetections(
 
 /**
  * Normalize common name for case-insensitive matching
- * Converts to lowercase and trims whitespace
+ * Converts to lowercase, trims whitespace, and normalizes apostrophes
+ * (handles both ASCII ' and Unicode ' right single quotation mark)
  */
 export function normalizeCommonName(name: string): string {
-  return name.toLowerCase().trim();
+  return name
+    .toLowerCase()
+    .trim()
+    // Normalize various apostrophe characters to standard ASCII apostrophe
+    .replace(/[\u2019\u2018\u0060\u00B4]/g, "'");
 }
