@@ -1,17 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { species } from "@/db/schema";
 import { eq } from "drizzle-orm";
-
-interface BirdLookupResult {
-  commonName: string;
-  scientificName: string | null;
-  description: string | null;
-  source: string;
-}
+import { lookupBirdFromWikipedia } from "@/lib/wikipedia";
 
 // POST /api/species/refresh - Refresh all species with Wikipedia data
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     // Get all species
     const allSpecies = await db.select().from(species);
@@ -26,14 +20,10 @@ export async function POST(request: NextRequest) {
 
     for (const s of allSpecies) {
       try {
-        // Look up species from Wikipedia
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/birds/lookup?name=${encodeURIComponent(s.commonName)}`
-        );
+        // Look up species from Wikipedia directly
+        const data = await lookupBirdFromWikipedia(s.commonName);
 
-        if (res.ok) {
-          const data: BirdLookupResult = await res.json();
-
+        if (data) {
           // Update species with new data
           await db
             .update(species)
@@ -48,7 +38,7 @@ export async function POST(request: NextRequest) {
             commonName: s.commonName,
             status: "updated",
             scientificName: data.scientificName,
-            description: data.description?.substring(0, 50) + "...",
+            description: data.description ? data.description.substring(0, 80) + "..." : null,
           });
         } else {
           results.push({
@@ -59,7 +49,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Small delay to avoid rate limiting Wikipedia
-        await new Promise((resolve) => setTimeout(resolve, 200));
+        await new Promise((resolve) => setTimeout(resolve, 300));
       } catch (err) {
         console.error(`Error updating ${s.commonName}:`, err);
         results.push({
