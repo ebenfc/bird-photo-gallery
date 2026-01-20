@@ -56,7 +56,8 @@ export async function POST(request: NextRequest) {
     // 5. Upsert detection records
     let processed = 0;
     for (const detection of yearlyData) {
-      const normalized = normalizeCommonName(detection.species);
+      const birdName = detection.bird;
+      const normalized = normalizeCommonName(birdName);
       const matchedSpeciesId = speciesMap.get(normalized) || null;
       const lastHeard = recentMap.get(normalized) || null;
 
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
         .from(haikuboxDetections)
         .where(
           and(
-            eq(haikuboxDetections.speciesCommonName, detection.species),
+            eq(haikuboxDetections.speciesCommonName, birdName),
             eq(haikuboxDetections.dataYear, currentYear)
           )
         )
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
       } else {
         // Insert new record
         await db.insert(haikuboxDetections).values({
-          speciesCommonName: detection.species,
+          speciesCommonName: birdName,
           speciesId: matchedSpeciesId,
           yearlyCount: detection.count,
           lastHeardAt: lastHeard,

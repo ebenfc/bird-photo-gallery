@@ -5,21 +5,38 @@
 const HAIKUBOX_BASE_URL = "https://api.haikubox.com";
 const HAIKUBOX_SERIAL = process.env.HAIKUBOX_SERIAL || "28372F870638";
 
-// Types for Haikubox API responses
+// Types for Haikubox API responses (matching actual API format)
 export interface HaikuboxYearlySpecies {
-  species: string;
+  bird: string;  // Common name
   count: number;
 }
 
 export interface HaikuboxDailySpecies {
-  species: string;
+  bird: string;  // Common name
   count: number;
 }
 
+// Raw API response for recent detections
+interface HaikuboxRecentDetectionRaw {
+  cn: string;      // Common name
+  dt: string;      // Datetime ISO string
+  sn?: string;     // Scientific name
+  spCode?: string; // Species code
+  wav?: string;    // Audio file URL
+}
+
+interface HaikuboxRecentResponse {
+  haikuboxName: string;
+  id: string;
+  tz: string;
+  detections: HaikuboxRecentDetectionRaw[];
+}
+
+// Normalized type for internal use
 export interface HaikuboxRecentDetection {
   species: string;
   timestamp: string;
-  confidence?: number;
+  scientificName?: string;
 }
 
 /**
@@ -72,6 +89,7 @@ export async function fetchDailyDetections(
 
 /**
  * Fetch recent detections (last N hours)
+ * Returns normalized detection objects
  */
 export async function fetchRecentDetections(
   hours: number = 8
@@ -87,7 +105,14 @@ export async function fetchRecentDetections(
       throw new Error(`Haikubox API error: ${response.status}`);
     }
 
-    return response.json();
+    const data: HaikuboxRecentResponse = await response.json();
+
+    // Transform raw API format to normalized format
+    return data.detections.map((d) => ({
+      species: d.cn,
+      timestamp: d.dt,
+      scientificName: d.sn,
+    }));
   } catch (error) {
     console.error("Failed to fetch recent detections:", error);
     return [];
