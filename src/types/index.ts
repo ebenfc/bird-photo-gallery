@@ -86,3 +86,43 @@ export interface PropertyStats {
   }>;
   year: number;
 }
+
+// Activity Timeline types
+export interface HourlyActivity {
+  hour: number;
+  count: number;
+  percentage: number;
+}
+
+export interface ActivityPattern {
+  speciesName: string;
+  totalDetections: number;
+  hourlyBreakdown: HourlyActivity[];
+  peakHours: number[];
+  dataDateRange: { start: string; end: string } | null;
+}
+
+export interface ActiveSpecies {
+  speciesName: string;
+  activityScore: number;
+  recentCount: number;
+}
+
+export interface ActivityPatternResponse {
+  pattern: ActivityPattern;
+}
+
+export interface ActiveNowResponse {
+  activeSpecies: ActiveSpecies[];
+  currentHour: number;
+  timestamp: string;
+}
+
+export interface HeatmapResponse {
+  heatmap: Array<{
+    speciesName: string;
+    hourlyData: number[];
+  }>;
+  daysAnalyzed: number;
+  generatedAt: string;
+}

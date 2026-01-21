@@ -7,6 +7,7 @@ import {
   fetchRecentDetections,
   normalizeCommonName,
 } from "@/lib/haikubox";
+import { storeActivityLogs, cleanupOldActivityLogs } from "@/lib/activity";
 
 // POST /api/haikubox/sync - Sync Haikubox data to database
 // Can be triggered by Vercel Cron or manually
@@ -53,7 +54,17 @@ export async function POST(request: NextRequest) {
       gallerySpecies.map((s) => [normalizeCommonName(s.commonName), s.id])
     );
 
-    // 5. Upsert detection records
+    // 5. Store individual activity logs for timeline feature
+    const activityLogsStored = await storeActivityLogs(recentData, speciesMap);
+    console.log(`Stored ${activityLogsStored} activity log entries`);
+
+    // 5a. Cleanup old activity logs (90-day retention)
+    const cleaned = await cleanupOldActivityLogs(90);
+    if (cleaned > 0) {
+      console.log(`Cleaned up ${cleaned} old activity log entries`);
+    }
+
+    // 6. Upsert detection records
     let processed = 0;
     for (const detection of yearlyData) {
       const birdName = detection.bird;
@@ -97,7 +108,7 @@ export async function POST(request: NextRequest) {
       processed++;
     }
 
-    // 6. Log successful sync
+    // 7. Log successful sync
     await logSync("yearly", "success", processed);
 
     return NextResponse.json({
