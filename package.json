@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "type-check": "tsc --noEmit",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.1",
@@ -15,7 +18,8 @@
     "pg": "^8.17.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "sharp": "^0.34.5"
+    "sharp": "^0.34.5",
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

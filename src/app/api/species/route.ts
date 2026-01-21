@@ -3,12 +3,21 @@ import { db } from "@/db";
 import { species, photos, haikuboxDetections, Rarity } from "@/db/schema";
 import { eq, sql, desc, asc, and } from "drizzle-orm";
 import { getThumbnailUrl } from "@/lib/storage";
+import { checkAndGetRateLimitResponse, RATE_LIMITS, addRateLimitHeaders } from "@/lib/rateLimit";
+import { logError } from "@/lib/logger";
+import { SpeciesSchema, validateRequest } from "@/lib/validation";
+import { invalidateSpeciesCache } from "@/lib/cache";
 
 type SpeciesSortOption = "alpha" | "photo_count" | "recent_added" | "recent_taken";
-const VALID_RARITIES: Rarity[] = ["common", "uncommon", "rare"];
 
 // GET /api/species - List all species with photo counts
 export async function GET(request: NextRequest) {
+  // Rate limiting
+  const rateCheck = checkAndGetRateLimitResponse(request, RATE_LIMITS.read);
+  if (!rateCheck.allowed) {
+    return rateCheck.response;
+  }
+
   try {
     const searchParams = request.nextUrl.searchParams;
     const sort = (searchParams.get("sort") || "alpha") as SpeciesSortOption;
@@ -110,9 +119,13 @@ export async function GET(request: NextRequest) {
       })
     );
 
-    return NextResponse.json({ species: speciesWithExtras });
+    const response = NextResponse.json({ species: speciesWithExtras });
+    return addRateLimitHeaders(response, rateCheck.result, RATE_LIMITS.read);
   } catch (error) {
-    console.error("Error fetching species:", error);
+    logError("Error fetching species", error instanceof Error ? error : new Error(String(error)), {
+      route: "/api/species",
+      method: "GET"
+    });
     return NextResponse.json(
       { error: "Failed to fetch species" },
       { status: 500 }
@@ -122,35 +135,43 @@ export async function GET(request: NextRequest) {
 
 // POST /api/species - Create a new species
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const rateCheck = checkAndGetRateLimitResponse(request, RATE_LIMITS.write);
+  if (!rateCheck.allowed) {
+    return rateCheck.response;
+  }
+
   try {
     const body = await request.json();
-    const { commonName, scientificName, description, rarity } = body;
 
-    if (!commonName || typeof commonName !== "string") {
-      return NextResponse.json(
-        { error: "Common name is required" },
-        { status: 400 }
-      );
+    // Validate input using Zod schema
+    const validation = validateRequest(SpeciesSchema, body);
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
-    // Validate rarity if provided
-    const validatedRarity: Rarity = rarity && VALID_RARITIES.includes(rarity)
-      ? rarity
-      : "common";
+    const { commonName, scientificName, description, rarity } = validation.data;
 
     const result = await db
       .insert(species)
       .values({
-        commonName: commonName.trim(),
-        scientificName: scientificName?.trim() || null,
-        description: description?.trim() || null,
-        rarity: validatedRarity,
+        commonName,
+        scientificName: scientificName || null,
+        description: description || null,
+        rarity: rarity as Rarity,
       })
       .returning();
 
-    return NextResponse.json({ species: result[0] }, { status: 201 });
+    // Invalidate species cache
+    invalidateSpeciesCache();
+
+    const response = NextResponse.json({ species: result[0] }, { status: 201 });
+    return addRateLimitHeaders(response, rateCheck.result, RATE_LIMITS.write);
   } catch (error) {
-    console.error("Error creating species:", error);
+    logError("Error creating species", error instanceof Error ? error : new Error(String(error)), {
+      route: "/api/species",
+      method: "POST"
+    });
     return NextResponse.json(
       { error: "Failed to create species" },
       { status: 500 }

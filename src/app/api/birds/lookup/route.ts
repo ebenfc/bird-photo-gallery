@@ -1,26 +1,50 @@
 import { NextRequest, NextResponse } from "next/server";
 import { lookupBirdFromWikipedia } from "@/lib/wikipedia";
+import { checkAndGetRateLimitResponse, RATE_LIMITS, addRateLimitHeaders } from "@/lib/rateLimit";
+import { logError } from "@/lib/logger";
+import { BirdLookupSchema, validateSearchParams } from "@/lib/validation";
 
 // GET /api/birds/lookup?name=Dark-eyed Junco
 export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
-  const name = searchParams.get("name");
-
-  if (!name || name.trim().length < 2) {
-    return NextResponse.json(
-      { error: "Name parameter is required (min 2 characters)" },
-      { status: 400 }
-    );
+  // Rate limiting
+  const rateCheck = checkAndGetRateLimitResponse(request, RATE_LIMITS.read);
+  if (!rateCheck.allowed) {
+    return rateCheck.response;
   }
 
-  const result = await lookupBirdFromWikipedia(name.trim());
+  try {
+    const searchParams = request.nextUrl.searchParams;
 
-  if (!result) {
+    // Validate input
+    const validation = validateSearchParams(BirdLookupSchema, searchParams);
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: validation.error },
+        { status: 400 }
+      );
+    }
+
+    const { name } = validation.data;
+
+    const result = await lookupBirdFromWikipedia(name);
+
+    if (!result) {
+      return NextResponse.json(
+        { error: "Bird not found", name },
+        { status: 404 }
+      );
+    }
+
+    const response = NextResponse.json(result);
+    return addRateLimitHeaders(response, rateCheck.result, RATE_LIMITS.read);
+  } catch (error) {
+    logError("Error looking up bird", error instanceof Error ? error : new Error(String(error)), {
+      route: "/api/birds/lookup",
+      method: "GET"
+    });
     return NextResponse.json(
-      { error: "Bird not found", name: name.trim() },
-      { status: 404 }
+      { error: "Failed to lookup bird" },
+      { status: 500 }
     );
   }
-
-  return NextResponse.json(result);
 }

@@ -2,9 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { processUploadedImage } from "@/lib/image";
 import { db } from "@/db";
 import { photos } from "@/db/schema";
+import { checkAndGetRateLimitResponse, RATE_LIMITS, addRateLimitHeaders } from "@/lib/rateLimit";
+import { logError } from "@/lib/logger";
+import { validateImageFile, validateImageMagicBytesFromBuffer } from "@/lib/fileValidation";
 
 // POST /api/upload/browser - Upload a photo from browser (no API key needed)
 export async function POST(request: NextRequest) {
+  // Rate limiting for uploads
+  const rateCheck = checkAndGetRateLimitResponse(request, RATE_LIMITS.upload);
+  if (!rateCheck.allowed) {
+    return rateCheck.response;
+  }
+
   try {
     const formData = await request.formData();
     const photo = formData.get("photo") as File | null;
@@ -15,28 +24,45 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No photo provided" }, { status: 400 });
     }
 
-    // Validate file type
-    const validTypes = ["image/jpeg", "image/jpg", "image/heic", "image/heif", "image/png"];
-    const fileName = photo.name.toLowerCase();
-    const isValidType = validTypes.includes(photo.type.toLowerCase()) || fileName.endsWith(".heic") || fileName.endsWith(".heif");
-
-    if (!isValidType) {
+    // Validate file using file validation module
+    const fileValidation = validateImageFile(photo);
+    if (!fileValidation.valid) {
       return NextResponse.json(
-        { error: "Invalid file type. Supported: JPEG, HEIC, PNG" },
+        { error: fileValidation.error },
         { status: 400 }
       );
     }
 
-    // Validate file size (max 20MB)
-    if (photo.size > 20 * 1024 * 1024) {
+    // Validate notes length
+    if (notes && notes.length > 500) {
       return NextResponse.json(
-        { error: "File too large. Maximum size is 20MB" },
+        { error: "Notes must be 500 characters or less" },
         { status: 400 }
       );
+    }
+
+    // Validate speciesId if provided
+    if (speciesId) {
+      const parsedId = parseInt(speciesId, 10);
+      if (isNaN(parsedId) || parsedId <= 0) {
+        return NextResponse.json(
+          { error: "Invalid species ID" },
+          { status: 400 }
+        );
+      }
     }
 
     // Process image (convert to JPEG, generate thumbnail, extract EXIF)
     const buffer = Buffer.from(await photo.arrayBuffer());
+
+    // Deep validation: check magic bytes to ensure it's actually an image
+    if (!validateImageMagicBytesFromBuffer(buffer)) {
+      return NextResponse.json(
+        { error: "File appears to be corrupted or not a valid image" },
+        { status: 400 }
+      );
+    }
+
     const processed = await processUploadedImage(buffer);
 
     // Save to database
@@ -51,19 +77,29 @@ export async function POST(request: NextRequest) {
       })
       .returning();
 
-    return NextResponse.json({
+    const insertedPhoto = result[0];
+    if (!insertedPhoto) {
+      throw new Error("Failed to insert photo record");
+    }
+
+    const response = NextResponse.json({
       success: true,
-      photoId: result[0].id,
+      photoId: insertedPhoto.id,
       needsSpecies: !speciesId,
       message: speciesId
         ? "Photo uploaded successfully"
         : "Photo uploaded - species assignment needed",
     });
+
+    return addRateLimitHeaders(response, rateCheck.result, RATE_LIMITS.upload);
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error("Error uploading photo:", errorMessage, error);
+    logError("Error uploading photo", error instanceof Error ? error : new Error(String(error)), {
+      route: "/api/upload/browser",
+      method: "POST"
+    });
+    // Don't expose internal error details to client
     return NextResponse.json(
-      { error: "Failed to upload photo", details: errorMessage },
+      { error: "Failed to upload photo" },
       { status: 500 }
     );
   }
