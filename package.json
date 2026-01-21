@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "drizzle-kit push",
     "start": "next start",
     "lint": "eslint",
     "type-check": "tsc --noEmit",
