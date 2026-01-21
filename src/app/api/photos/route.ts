@@ -3,20 +3,32 @@ import { db } from "@/db";
 import { photos, species, Rarity } from "@/db/schema";
 import { eq, desc, asc, and, sql, inArray } from "drizzle-orm";
 import { getThumbnailUrl, getOriginalUrl } from "@/lib/storage";
+import { checkAndGetRateLimitResponse, RATE_LIMITS, addRateLimitHeaders } from "@/lib/rateLimit";
+import { logError } from "@/lib/logger";
 
 type SortOption = "recent_upload" | "oldest_upload" | "species_alpha" | "recent_taken";
 const VALID_RARITIES: Rarity[] = ["common", "uncommon", "rare"];
 
 // GET /api/photos - List photos with optional filtering
 export async function GET(request: NextRequest) {
+  // Rate limiting
+  const rateCheck = checkAndGetRateLimitResponse(request, RATE_LIMITS.read);
+  if (!rateCheck.allowed) {
+    return rateCheck.response;
+  }
+
   try {
     const searchParams = request.nextUrl.searchParams;
     const speciesId = searchParams.get("speciesId");
     const favorites = searchParams.get("favorites");
     const rarityParam = searchParams.get("rarity"); // comma-separated: "rare" or "uncommon,rare"
     const sort = (searchParams.get("sort") || "recent_upload") as SortOption;
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "50");
+
+    // Validate and parse pagination with bounds checking
+    const pageStr = searchParams.get("page") || "1";
+    const limitStr = searchParams.get("limit") || "50";
+    const page = Math.max(1, parseInt(pageStr) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(limitStr) || 50));
     const offset = (page - 1) * limit;
 
     // Parse rarity filter
@@ -64,7 +76,7 @@ export async function GET(request: NextRequest) {
       : countQuery;
 
     const countResult = await countWithJoin.where(whereClause);
-    const total = countResult[0].count;
+    const total = Number(countResult[0]?.count ?? 0);
 
     // Get photos with species info
     const result = await db
@@ -113,15 +125,20 @@ export async function GET(request: NextRequest) {
         : null,
     }));
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       photos: photosWithUrls,
       total,
       page,
       limit,
       totalPages: Math.ceil(total / limit),
     });
+
+    return addRateLimitHeaders(response, rateCheck.result, RATE_LIMITS.read);
   } catch (error) {
-    console.error("Error fetching photos:", error);
+    logError("Error fetching photos", error instanceof Error ? error : new Error(String(error)), {
+      route: "/api/photos",
+      method: "GET"
+    });
     return NextResponse.json(
       { error: "Failed to fetch photos" },
       { status: 500 }

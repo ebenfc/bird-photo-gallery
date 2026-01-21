@@ -46,9 +46,14 @@ export async function POST(request: NextRequest) {
       })
       .returning();
 
+    const insertedPhoto = result[0];
+    if (!insertedPhoto) {
+      throw new Error("Failed to insert photo record");
+    }
+
     return NextResponse.json({
       success: true,
-      photoId: result[0].id,
+      photoId: insertedPhoto.id,
       needsSpecies: !speciesId,
       message: speciesId
         ? "Photo uploaded successfully"
