@@ -442,7 +442,7 @@ export default function UploadModal({
                 <>
                   <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-[var(--mist-50)]">
                     <Image
-                      src={previewUrls[0]}
+                      src={previewUrls[0] ?? ""}
                       alt="Preview"
                       fill
                       className="object-contain"
@@ -528,8 +528,8 @@ export default function UploadModal({
                         setIndividualPhotoData((prev) => {
                           const updated = [...prev];
                           updated[currentPhotoIndex] = {
-                            ...updated[currentPhotoIndex],
                             speciesId: e.target.value,
+                            notes: updated[currentPhotoIndex]?.notes ?? "",
                           };
                           return updated;
                         });
@@ -639,7 +639,7 @@ export default function UploadModal({
                       setIndividualPhotoData((prev) => {
                         const updated = [...prev];
                         updated[currentPhotoIndex] = {
-                          ...updated[currentPhotoIndex],
+                          speciesId: updated[currentPhotoIndex]?.speciesId ?? "",
                           notes: e.target.value,
                         };
                         return updated;

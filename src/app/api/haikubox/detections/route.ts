@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { haikuboxDetections, species } from "@/db/schema";
-import { eq, desc, sql, isNull, or, ilike } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { normalizeCommonName } from "@/lib/haikubox";
 
 // GET /api/haikubox/detections - Query cached detection data

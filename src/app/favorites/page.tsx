@@ -48,7 +48,7 @@ export default function FavoritesPage() {
     const currentIndex = photos.findIndex((p) => p.id === selectedPhoto.id);
     const newIndex = direction === "prev" ? currentIndex - 1 : currentIndex + 1;
     if (newIndex >= 0 && newIndex < photos.length) {
-      setSelectedPhoto(photos[newIndex]);
+      setSelectedPhoto(photos[newIndex] ?? null);
     }
   };
 

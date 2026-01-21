@@ -26,13 +26,13 @@ export interface BirdLookupResult {
  * Looks for patterns like "Species name (Scientific name)" or italic text
  */
 function extractScientificName(
-  title: string,
+  _title: string,
   extract: string
 ): string | null {
   // Pattern 1: Look for "(Genus species)" pattern at the start of extract
   // E.g., "The dark-eyed junco (Junco hyemalis) is a..."
   const parenMatch = extract.match(/\(([A-Z][a-z]+ [a-z]+(?:\s+[a-z]+)?)\)/);
-  if (parenMatch) {
+  if (parenMatch && parenMatch[1]) {
     return parenMatch[1];
   }
 
@@ -42,7 +42,7 @@ function extractScientificName(
   const scientificPattern =
     /([A-Z][a-z]+\s[a-z]+(?:\s[a-z]+)?)\s+is\s+a\s+(?:species|bird)/i;
   const extractMatch = extract.match(scientificPattern);
-  if (extractMatch) {
+  if (extractMatch && extractMatch[1]) {
     const candidate = extractMatch[1];
     // Verify it looks like a scientific name (two Latin-looking words)
     if (/^[A-Z][a-z]+\s[a-z]+/.test(candidate)) {

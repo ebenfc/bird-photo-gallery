@@ -10,7 +10,7 @@ interface RouteParams {
 }
 
 // GET /api/species/[id] - Get a single species with photo count
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const speciesId = parseInt(id);
@@ -109,7 +109,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
             { status: 404 }
           );
         }
-        if (photo[0].speciesId !== speciesId) {
+        if (photo[0]?.speciesId !== speciesId) {
           return NextResponse.json(
             { error: "Photo does not belong to this species" },
             { status: 400 }
@@ -147,7 +147,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 }
 
 // DELETE /api/species/[id] - Delete a species (cascades to photos)
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const speciesId = parseInt(id);
