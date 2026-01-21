@@ -1,4 +1,4 @@
-import { pgTable, text, integer, boolean, serial, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, boolean, serial, timestamp, unique, index } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 // Rarity type for species
@@ -92,3 +92,34 @@ export type HaikuboxDetection = typeof haikuboxDetections.$inferSelect;
 export type NewHaikuboxDetection = typeof haikuboxDetections.$inferInsert;
 export type HaikuboxSyncLog = typeof haikuboxSyncLog.$inferSelect;
 export type NewHaikuboxSyncLog = typeof haikuboxSyncLog.$inferInsert;
+
+// Haikubox Activity Log Table - Stores individual detection timestamps for activity timeline
+export const haikuboxActivityLog = pgTable("haikubox_activity_log", {
+  id: serial("id").primaryKey(),
+  speciesCommonName: text("species_common_name").notNull(),
+  speciesId: integer("species_id").references(() => species.id, {
+    onDelete: "set null",
+  }),
+  detectedAt: timestamp("detected_at", { withTimezone: true }).notNull(),
+  hourOfDay: integer("hour_of_day").notNull(), // 0-23
+  dayOfWeek: integer("day_of_week").notNull(), // 0=Sunday, 6=Saturday
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+}, (table) => ({
+  uniqueDetection: unique().on(table.speciesCommonName, table.detectedAt),
+  speciesHourIdx: index("activity_species_hour_idx").on(table.speciesCommonName, table.hourOfDay),
+  detectedAtIdx: index("activity_detected_at_idx").on(table.detectedAt),
+}));
+
+// Haikubox Activity Log Relations
+export const haikuboxActivityLogRelations = relations(haikuboxActivityLog, ({ one }) => ({
+  species: one(species, {
+    fields: [haikuboxActivityLog.speciesId],
+    references: [species.id],
+  }),
+}));
+
+// Activity Log Type exports
+export type HaikuboxActivityLog = typeof haikuboxActivityLog.$inferSelect;
+export type NewHaikuboxActivityLog = typeof haikuboxActivityLog.$inferInsert;
