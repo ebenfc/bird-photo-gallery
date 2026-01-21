@@ -112,7 +112,7 @@ export default function PropertyStatsWidget() {
               className="text-center p-3 rounded-xl bg-[var(--moss-50)] hover:bg-[var(--moss-100)] transition-colors cursor-pointer"
             >
               <div className="text-2xl font-bold text-[var(--moss-700)]">
-                {stats.totalPhotographed}
+                {stats.heardAndPhotographed}
               </div>
               <div className="text-xs text-[var(--mist-500)]">Photographed</div>
             </button>

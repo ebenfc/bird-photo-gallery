@@ -9,7 +9,8 @@
     "lint": "eslint",
     "type-check": "tsc --noEmit",
     "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "postbuild": "drizzle-kit push"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.1",

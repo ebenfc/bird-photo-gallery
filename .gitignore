@@ -45,6 +45,10 @@ next-env.d.ts
 *.db
 *.sqlite
 
+# Migration scripts with credentials
+run-migration.mjs
+*-migration.mjs
+
 # Uploaded photos (local development only)
 /public/uploads/originals/
 /public/uploads/thumbnails/
