@@ -2,8 +2,8 @@
 // Handles storage and retrieval of bird activity patterns for the timeline feature
 
 import { db } from "@/db";
-import { haikuboxActivityLog, species } from "@/db/schema";
-import { eq, and, sql, gte, desc } from "drizzle-orm";
+import { haikuboxActivityLog } from "@/db/schema";
+import { and, sql, gte, desc } from "drizzle-orm";
 import { normalizeCommonName, HaikuboxRecentDetection } from "./haikubox";
 
 // Types
@@ -128,7 +128,7 @@ export async function getSpeciesActivityPattern(
     : null;
 
   return {
-    speciesName: logs[0].speciesCommonName,
+    speciesName: logs[0]!.speciesCommonName,
     totalDetections,
     hourlyBreakdown,
     peakHours,

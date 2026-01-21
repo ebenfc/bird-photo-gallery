@@ -8,10 +8,19 @@ import {
   normalizeCommonName,
 } from "@/lib/haikubox";
 import { storeActivityLogs, cleanupOldActivityLogs } from "@/lib/activity";
+import { checkAndGetRateLimitResponse, RATE_LIMITS, addRateLimitHeaders } from "@/lib/rateLimit";
+import { logError, logInfo } from "@/lib/logger";
+import { invalidateHaikuboxCache } from "@/lib/cache";
 
 // POST /api/haikubox/sync - Sync Haikubox data to database
 // Can be triggered by Vercel Cron or manually
 export async function POST(request: NextRequest) {
+  // Rate limiting - sync operations are expensive
+  const rateCheck = checkAndGetRateLimitResponse(request, RATE_LIMITS.sync);
+  if (!rateCheck.allowed) {
+    return rateCheck.response;
+  }
+
   // Optional: Verify authorization for cron requests
   const authHeader = request.headers.get("authorization");
   const expectedKey = process.env.HAIKUBOX_SYNC_KEY;
@@ -84,7 +93,8 @@ export async function POST(request: NextRequest) {
         )
         .limit(1);
 
-      if (existing.length > 0) {
+      const existingRecord = existing[0];
+      if (existingRecord) {
         // Update existing record
         await db
           .update(haikuboxDetections)
@@ -94,7 +104,7 @@ export async function POST(request: NextRequest) {
             lastHeardAt: lastHeard,
             syncedAt: new Date(),
           })
-          .where(eq(haikuboxDetections.id, existing[0].id));
+          .where(eq(haikuboxDetections.id, existingRecord.id));
       } else {
         // Insert new record
         await db.insert(haikuboxDetections).values({
@@ -111,14 +121,24 @@ export async function POST(request: NextRequest) {
     // 7. Log successful sync
     await logSync("yearly", "success", processed);
 
-    return NextResponse.json({
+    // Invalidate cache
+    invalidateHaikuboxCache();
+
+    logInfo("Haikubox sync completed", { processed, year: currentYear });
+
+    const response = NextResponse.json({
       success: true,
       processed,
       year: currentYear,
       matched: gallerySpecies.length,
     });
+
+    return addRateLimitHeaders(response, rateCheck.result, RATE_LIMITS.sync);
   } catch (error) {
-    console.error("Haikubox sync error:", error);
+    logError("Haikubox sync error", error instanceof Error ? error : new Error(String(error)), {
+      route: "/api/haikubox/sync",
+      method: "POST"
+    });
 
     // Log failed sync
     await logSync(
@@ -129,10 +149,7 @@ export async function POST(request: NextRequest) {
     );
 
     return NextResponse.json(
-      {
-        error: "Sync failed",
-        details: error instanceof Error ? error.message : "Unknown",
-      },
+      { error: "Sync failed" },
       { status: 500 }
     );
   }

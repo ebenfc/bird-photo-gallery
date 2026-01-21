@@ -68,21 +68,22 @@ export default function ActivityTimeline({ speciesName, compact = false }: Activ
 
     // Group consecutive hours into ranges
     const ranges: string[] = [];
-    let start = peaks[0];
-    let end = peaks[0];
+    let start: number = peaks[0]!;
+    let end: number = peaks[0]!;
 
     for (let i = 1; i <= peaks.length; i++) {
-      if (i < peaks.length && peaks[i] === end + 1) {
-        end = peaks[i];
+      const current = peaks[i];
+      if (i < peaks.length && current === end + 1) {
+        end = current;
       } else {
         if (start === end) {
-          ranges.push(HOUR_LABELS[start]);
+          ranges.push(HOUR_LABELS[start]!);
         } else {
-          ranges.push(`${HOUR_LABELS[start]}-${HOUR_LABELS[(end + 1) % 24]}`);
+          ranges.push(`${HOUR_LABELS[start]!}-${HOUR_LABELS[(end + 1) % 24]!}`);
         }
-        if (i < peaks.length) {
-          start = peaks[i];
-          end = peaks[i];
+        if (i < peaks.length && current !== undefined) {
+          start = current;
+          end = current;
         }
       }
     }

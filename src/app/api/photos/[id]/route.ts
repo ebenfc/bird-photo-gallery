@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { photos, species } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and, isNull } from "drizzle-orm";
 import {
   getThumbnailUrl,
   getOriginalUrl,
-  deletePhotoFiles,
 } from "@/lib/storage";
+import { checkAndGetRateLimitResponse, RATE_LIMITS, addRateLimitHeaders } from "@/lib/rateLimit";
+import { logError } from "@/lib/logger";
+import { PhotoUpdateSchema, validateRequest } from "@/lib/validation";
+import { softDeletePhoto } from "@/lib/softDelete";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -14,11 +17,17 @@ interface RouteParams {
 
 // GET /api/photos/[id] - Get a single photo
 export async function GET(request: NextRequest, { params }: RouteParams) {
+  // Rate limiting
+  const rateCheck = checkAndGetRateLimitResponse(request, RATE_LIMITS.read);
+  if (!rateCheck.allowed) {
+    return rateCheck.response;
+  }
+
   try {
     const { id } = await params;
     const photoId = parseInt(id);
 
-    if (isNaN(photoId)) {
+    if (isNaN(photoId) || photoId <= 0) {
       return NextResponse.json({ error: "Invalid photo ID" }, { status: 400 });
     }
 
@@ -42,11 +51,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       .leftJoin(species, eq(photos.speciesId, species.id))
       .where(eq(photos.id, photoId));
 
-    if (result.length === 0) {
+    const photo = result[0];
+    if (!photo) {
       return NextResponse.json({ error: "Photo not found" }, { status: 404 });
     }
 
-    const photo = result[0];
     return NextResponse.json({
       photo: {
         id: photo.id,
@@ -81,45 +90,46 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 // PATCH /api/photos/[id] - Update photo metadata
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
+  // Rate limiting
+  const rateCheck = checkAndGetRateLimitResponse(request, RATE_LIMITS.write);
+  if (!rateCheck.allowed) {
+    return rateCheck.response;
+  }
+
   try {
     const { id } = await params;
     const photoId = parseInt(id);
 
-    if (isNaN(photoId)) {
+    if (isNaN(photoId) || photoId <= 0) {
       return NextResponse.json({ error: "Invalid photo ID" }, { status: 400 });
     }
 
     const body = await request.json();
-    const { speciesId, isFavorite, notes, originalDateTaken } = body;
+
+    // Validate input using Zod schema
+    const validation = validateRequest(PhotoUpdateSchema, body);
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
+    }
+
+    const { speciesId, isFavorite, notes, originalDateTaken } = validation.data;
 
     const updateData: Record<string, unknown> = {};
     if (speciesId !== undefined) {
-      updateData.speciesId = speciesId ? parseInt(speciesId) : null;
+      updateData.speciesId = speciesId;
     }
     if (isFavorite !== undefined) {
-      updateData.isFavorite = Boolean(isFavorite);
+      updateData.isFavorite = isFavorite;
     }
     if (notes !== undefined) {
-      updateData.notes = notes?.trim() || null;
+      updateData.notes = notes || null;
     }
     if (originalDateTaken !== undefined) {
       if (originalDateTaken === null) {
         updateData.originalDateTaken = null;
         updateData.dateTakenSource = "manual";
       } else {
-        const parsedDate = new Date(originalDateTaken);
-        if (isNaN(parsedDate.getTime())) {
-          return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
-        }
-        // Validate date is not in the future
-        if (parsedDate > new Date()) {
-          return NextResponse.json({ error: "Date cannot be in the future" }, { status: 400 });
-        }
-        // Validate date is not before 1900
-        if (parsedDate.getFullYear() < 1900) {
-          return NextResponse.json({ error: "Date cannot be before 1900" }, { status: 400 });
-        }
-        updateData.originalDateTaken = parsedDate;
+        updateData.originalDateTaken = new Date(originalDateTaken);
         updateData.dateTakenSource = "manual";
       }
     }
@@ -134,16 +144,20 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const result = await db
       .update(photos)
       .set(updateData)
-      .where(eq(photos.id, photoId))
+      .where(and(eq(photos.id, photoId), isNull(photos.deletedAt)))
       .returning();
 
     if (result.length === 0) {
       return NextResponse.json({ error: "Photo not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ photo: result[0] });
+    const response = NextResponse.json({ photo: result[0] });
+    return addRateLimitHeaders(response, rateCheck.result, RATE_LIMITS.write);
   } catch (error) {
-    console.error("Error updating photo:", error);
+    logError("Error updating photo", error instanceof Error ? error : new Error(String(error)), {
+      route: "/api/photos/[id]",
+      method: "PATCH"
+    });
     return NextResponse.json(
       { error: "Failed to update photo" },
       { status: 500 }
@@ -151,38 +165,36 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-// DELETE /api/photos/[id] - Delete a photo and its files
+// DELETE /api/photos/[id] - Soft delete a photo
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  // Rate limiting
+  const rateCheck = checkAndGetRateLimitResponse(request, RATE_LIMITS.write);
+  if (!rateCheck.allowed) {
+    return rateCheck.response;
+  }
+
   try {
     const { id } = await params;
     const photoId = parseInt(id);
 
-    if (isNaN(photoId)) {
+    if (isNaN(photoId) || photoId <= 0) {
       return NextResponse.json({ error: "Invalid photo ID" }, { status: 400 });
     }
 
-    // Get photo info before deleting
-    const photoToDelete = await db
-      .select()
-      .from(photos)
-      .where(eq(photos.id, photoId));
+    // Soft delete the photo (marks as deleted but keeps in database)
+    const deleted = await softDeletePhoto(photoId);
 
-    if (photoToDelete.length === 0) {
-      return NextResponse.json({ error: "Photo not found" }, { status: 404 });
+    if (!deleted) {
+      return NextResponse.json({ error: "Photo not found or already deleted" }, { status: 404 });
     }
 
-    // Delete from database
-    await db.delete(photos).where(eq(photos.id, photoId));
-
-    // Delete files from Supabase Storage
-    await deletePhotoFiles(
-      photoToDelete[0].filename,
-      photoToDelete[0].thumbnailFilename
-    );
-
-    return NextResponse.json({ success: true, deleted: photoToDelete[0] });
+    const response = NextResponse.json({ success: true, message: "Photo deleted" });
+    return addRateLimitHeaders(response, rateCheck.result, RATE_LIMITS.write);
   } catch (error) {
-    console.error("Error deleting photo:", error);
+    logError("Error deleting photo", error instanceof Error ? error : new Error(String(error)), {
+      route: "/api/photos/[id]",
+      method: "DELETE"
+    });
     return NextResponse.json(
       { error: "Failed to delete photo" },
       { status: 500 }
