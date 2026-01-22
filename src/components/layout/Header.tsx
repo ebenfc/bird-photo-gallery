@@ -63,6 +63,7 @@ export default function Header() {
 
   // Close mobile menu when route changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Legitimate use: close menu on navigation
     setMobileMenuOpen(false);
   }, [pathname]);
 
