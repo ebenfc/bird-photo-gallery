@@ -12,7 +12,7 @@ export async function GET() {
       .select({ count: sql<number>`count(*)` })
       .from(photos)
       .where(isNull(photos.speciesId));
-    const count = countResult[0].count;
+    const count = Number(countResult[0]?.count ?? 0);
 
     // Get photos
     const result = await db

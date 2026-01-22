@@ -162,10 +162,15 @@ export async function POST(request: NextRequest) {
       })
       .returning();
 
+    const newSpecies = result[0];
+    if (!newSpecies) {
+      throw new Error("Failed to insert species record");
+    }
+
     // Invalidate species cache
     invalidateSpeciesCache();
 
-    const response = NextResponse.json({ species: result[0] }, { status: 201 });
+    const response = NextResponse.json({ species: newSpecies }, { status: 201 });
     return addRateLimitHeaders(response, rateCheck.result, RATE_LIMITS.write);
   } catch (error) {
     logError("Error creating species", error instanceof Error ? error : new Error(String(error)), {
