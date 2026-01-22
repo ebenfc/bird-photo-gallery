@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import { Photo, Species, Rarity, HaikuboxDetection } from "@/types";
 import Button from "@/components/ui/Button";
@@ -78,7 +78,7 @@ function validateBirdName(name: string): NameValidation {
     { wrong: /\bNuttalls\b/i, correct: "Nuttall's" },
   ];
 
-  let currentName = suggestions.length > 0 ? suggestions[0] : correctedName;
+  let currentName = (suggestions.length > 0 ? suggestions[0] : correctedName) ?? correctedName;
   for (const pattern of apostrophePatterns) {
     if (pattern.wrong.test(trimmed)) {
       errors.push(`Missing apostrophe in "${pattern.correct}"`);

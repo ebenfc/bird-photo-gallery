@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { haikuboxDetections, species, photos } from "@/db/schema";
-import { eq, sql, isNotNull, and } from "drizzle-orm";
+import { eq, sql, isNotNull } from "drizzle-orm";
 
 // GET /api/haikubox/stats - Get property bird statistics
 export async function GET() {

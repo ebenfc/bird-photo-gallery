@@ -51,7 +51,7 @@ export default function PhotoModal({
 
   // Haikubox detection data
   const [detection, setDetection] = useState<HaikuboxDetection | null>(null);
-  const [detectionLoading, setDetectionLoading] = useState(false);
+  const [_detectionLoading, setDetectionLoading] = useState(false);
 
   // Reset edit state when photo changes
   useEffect(() => {
@@ -803,7 +803,7 @@ export default function PhotoModal({
                     onClick={() => {
                       setEditDateValue(
                         photo.originalDateTaken
-                          ? new Date(photo.originalDateTaken).toISOString().split('T')[0]
+                          ? new Date(photo.originalDateTaken).toISOString().split('T')[0] ?? ""
                           : ""
                       );
                       setIsEditingDate(true);
