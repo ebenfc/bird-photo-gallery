@@ -1,11 +1,6 @@
-import sharp from "sharp";
 import exifr from "exifr";
 import { randomUUID } from "crypto";
 import { uploadToStorage } from "./supabase";
-
-// Configure sharp for serverless environments
-sharp.cache(false); // Disable caching to reduce memory usage
-sharp.concurrency(1); // Limit concurrency in serverless
 
 export interface ProcessedImage {
   filename: string;
@@ -13,13 +8,26 @@ export interface ProcessedImage {
   originalDateTaken: Date | null;
 }
 
+// Try to import and configure sharp, but don't fail if it's not available
+let sharpModule: typeof import("sharp") | null = null;
+async function getSharp() {
+  if (sharpModule === null) {
+    try {
+      sharpModule = (await import("sharp")).default;
+      sharpModule.cache(false);
+      sharpModule.concurrency(1);
+    } catch (e) {
+      console.error("Sharp import failed:", e);
+      sharpModule = undefined as unknown as typeof import("sharp");
+    }
+  }
+  return sharpModule;
+}
+
 export async function processUploadedImage(
   buffer: Buffer
 ): Promise<ProcessedImage> {
   const id = randomUUID();
-  const ext = ".jpg";
-  const filename = `${id}${ext}`;
-  const thumbnailFilename = `${id}_thumb${ext}`;
 
   // Validate buffer
   if (!buffer || buffer.length === 0) {
@@ -37,43 +45,95 @@ export async function processUploadedImage(
     // EXIF extraction failed, continue without date
   }
 
-  // Process original (convert HEIC if needed, always output as JPEG)
+  // Try to use sharp for processing
+  const sharp = await getSharp();
+
   let originalBuffer: Buffer;
-  try {
-    originalBuffer = await sharp(buffer, { failOn: 'none' })
-      .rotate() // Auto-rotate based on EXIF orientation
-      .jpeg({ quality: 90, mozjpeg: true })
-      .toBuffer();
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    throw new Error(`Sharp processing failed for original (buffer size: ${buffer.length}): ${msg}`);
+  let thumbnailBuffer: Buffer;
+  let ext = ".jpg";
+  let contentType = "image/jpeg";
+
+  if (sharp) {
+    try {
+      // Process original (convert to JPEG)
+      originalBuffer = await sharp(buffer, { failOn: 'none' })
+        .rotate()
+        .jpeg({ quality: 90 })
+        .toBuffer();
+
+      // Generate thumbnail
+      thumbnailBuffer = await sharp(buffer, { failOn: 'none' })
+        .rotate()
+        .resize(400, null, { withoutEnlargement: true })
+        .jpeg({ quality: 80 })
+        .toBuffer();
+    } catch (sharpError) {
+      console.error("Sharp processing failed, using original:", sharpError);
+      // Fall through to fallback
+      originalBuffer = buffer;
+      thumbnailBuffer = buffer;
+      // Detect format from magic bytes
+      const format = detectImageFormat(buffer);
+      ext = format.ext;
+      contentType = format.contentType;
+    }
+  } else {
+    // Sharp not available, upload original
+    console.warn("Sharp not available, uploading original image");
+    originalBuffer = buffer;
+    thumbnailBuffer = buffer;
+    const format = detectImageFormat(buffer);
+    ext = format.ext;
+    contentType = format.contentType;
   }
 
-  // Generate thumbnail (400px width, maintain aspect ratio)
-  let thumbnailBuffer: Buffer;
-  try {
-    thumbnailBuffer = await sharp(buffer, { failOn: 'none' })
-      .rotate()
-      .resize(400, null, { withoutEnlargement: true })
-      .jpeg({ quality: 80, mozjpeg: true })
-      .toBuffer();
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    throw new Error(`Sharp processing failed for thumbnail: ${msg}`);
-  }
+  const filename = `${id}${ext}`;
+  const thumbnailFilename = `${id}_thumb${ext}`;
 
   // Upload to Supabase Storage
   try {
-    await uploadToStorage(originalBuffer, `originals/${filename}`);
+    await uploadToStorage(originalBuffer, `originals/${filename}`, contentType);
   } catch (error) {
     throw new Error(`Storage upload failed for original: ${error instanceof Error ? error.message : String(error)}`);
   }
 
   try {
-    await uploadToStorage(thumbnailBuffer, `thumbnails/${thumbnailFilename}`);
+    await uploadToStorage(thumbnailBuffer, `thumbnails/${thumbnailFilename}`, contentType);
   } catch (error) {
     throw new Error(`Storage upload failed for thumbnail: ${error instanceof Error ? error.message : String(error)}`);
   }
 
   return { filename, thumbnailFilename, originalDateTaken };
+}
+
+function detectImageFormat(buffer: Buffer): { ext: string; contentType: string } {
+  if (buffer.length < 4) {
+    return { ext: ".jpg", contentType: "image/jpeg" };
+  }
+
+  const bytes = buffer.subarray(0, 12);
+
+  // JPEG: FF D8 FF
+  if (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) {
+    return { ext: ".jpg", contentType: "image/jpeg" };
+  }
+
+  // PNG: 89 50 4E 47
+  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) {
+    return { ext: ".png", contentType: "image/png" };
+  }
+
+  // WebP: RIFF....WEBP
+  if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
+      bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) {
+    return { ext: ".webp", contentType: "image/webp" };
+  }
+
+  // GIF: GIF87a or GIF89a
+  if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46) {
+    return { ext: ".gif", contentType: "image/gif" };
+  }
+
+  // Default to JPEG
+  return { ext: ".jpg", contentType: "image/jpeg" };
 }
