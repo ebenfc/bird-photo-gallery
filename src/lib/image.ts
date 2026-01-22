@@ -29,21 +29,40 @@ export async function processUploadedImage(
   }
 
   // Process original (convert HEIC if needed, always output as JPEG)
-  const originalBuffer = await sharp(buffer)
-    .rotate() // Auto-rotate based on EXIF orientation
-    .jpeg({ quality: 90 })
-    .toBuffer();
+  let originalBuffer: Buffer;
+  try {
+    originalBuffer = await sharp(buffer)
+      .rotate() // Auto-rotate based on EXIF orientation
+      .jpeg({ quality: 90 })
+      .toBuffer();
+  } catch (error) {
+    throw new Error(`Sharp processing failed for original: ${error instanceof Error ? error.message : String(error)}`);
+  }
 
   // Generate thumbnail (400px width, maintain aspect ratio)
-  const thumbnailBuffer = await sharp(buffer)
-    .rotate()
-    .resize(400, null, { withoutEnlargement: true })
-    .jpeg({ quality: 80 })
-    .toBuffer();
+  let thumbnailBuffer: Buffer;
+  try {
+    thumbnailBuffer = await sharp(buffer)
+      .rotate()
+      .resize(400, null, { withoutEnlargement: true })
+      .jpeg({ quality: 80 })
+      .toBuffer();
+  } catch (error) {
+    throw new Error(`Sharp processing failed for thumbnail: ${error instanceof Error ? error.message : String(error)}`);
+  }
 
   // Upload to Supabase Storage
-  await uploadToStorage(originalBuffer, `originals/${filename}`);
-  await uploadToStorage(thumbnailBuffer, `thumbnails/${thumbnailFilename}`);
+  try {
+    await uploadToStorage(originalBuffer, `originals/${filename}`);
+  } catch (error) {
+    throw new Error(`Storage upload failed for original: ${error instanceof Error ? error.message : String(error)}`);
+  }
+
+  try {
+    await uploadToStorage(thumbnailBuffer, `thumbnails/${thumbnailFilename}`);
+  } catch (error) {
+    throw new Error(`Storage upload failed for thumbnail: ${error instanceof Error ? error.message : String(error)}`);
+  }
 
   return { filename, thumbnailFilename, originalDateTaken };
 }

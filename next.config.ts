@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Ensure sharp works properly in serverless environment
+  serverExternalPackages: ['sharp'],
   images: {
     remotePatterns: [
       {
