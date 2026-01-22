@@ -53,7 +53,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Process image (convert to JPEG, generate thumbnail, extract EXIF)
-    const buffer = Buffer.from(await photo.arrayBuffer());
+    let buffer: Buffer;
+    try {
+      buffer = Buffer.from(await photo.arrayBuffer());
+    } catch (bufferError) {
+      logError("Failed to read photo buffer", bufferError instanceof Error ? bufferError : new Error(String(bufferError)), {
+        route: "/api/upload/browser",
+        method: "POST",
+        step: "buffer_read"
+      });
+      return NextResponse.json({ error: "Failed to read uploaded file" }, { status: 500 });
+    }
 
     // Deep validation: check magic bytes to ensure it's actually an image
     if (!validateImageMagicBytesFromBuffer(buffer)) {
@@ -63,23 +73,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const processed = await processUploadedImage(buffer);
+    let processed;
+    try {
+      processed = await processUploadedImage(buffer);
+    } catch (imageError) {
+      logError("Failed to process image", imageError instanceof Error ? imageError : new Error(String(imageError)), {
+        route: "/api/upload/browser",
+        method: "POST",
+        step: "image_processing"
+      });
+      return NextResponse.json({ error: "Failed to process image" }, { status: 500 });
+    }
 
     // Save to database
-    const result = await db
-      .insert(photos)
-      .values({
-        speciesId: speciesId ? parseInt(speciesId) : null,
-        filename: processed.filename,
-        thumbnailFilename: processed.thumbnailFilename,
-        originalDateTaken: processed.originalDateTaken,
-        notes: notes?.trim() || null,
-      })
-      .returning();
+    let insertedPhoto;
+    try {
+      const result = await db
+        .insert(photos)
+        .values({
+          speciesId: speciesId ? parseInt(speciesId) : null,
+          filename: processed.filename,
+          thumbnailFilename: processed.thumbnailFilename,
+          originalDateTaken: processed.originalDateTaken,
+          notes: notes?.trim() || null,
+        })
+        .returning();
 
-    const insertedPhoto = result[0];
-    if (!insertedPhoto) {
-      throw new Error("Failed to insert photo record");
+      insertedPhoto = result[0];
+      if (!insertedPhoto) {
+        throw new Error("Failed to insert photo record - no result returned");
+      }
+    } catch (dbError) {
+      logError("Failed to save photo to database", dbError instanceof Error ? dbError : new Error(String(dbError)), {
+        route: "/api/upload/browser",
+        method: "POST",
+        step: "database_insert"
+      });
+      return NextResponse.json({ error: "Failed to save photo" }, { status: 500 });
     }
 
     const response = NextResponse.json({
