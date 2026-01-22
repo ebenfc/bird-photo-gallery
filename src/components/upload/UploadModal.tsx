@@ -441,12 +441,14 @@ export default function UploadModal({
                 /* Single Photo Preview */
                 <>
                   <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-[var(--mist-50)]">
-                    <Image
-                      src={previewUrls[0] ?? ""}
-                      alt="Preview"
-                      fill
-                      className="object-contain"
-                    />
+                    {previewUrls[0] && (
+                      <Image
+                        src={previewUrls[0]}
+                        alt="Preview"
+                        fill
+                        className="object-contain"
+                      />
+                    )}
                   </div>
                   {selectedFiles[0] && (
                     <p className="text-xs text-[var(--mist-500)] text-center">
@@ -527,7 +529,9 @@ export default function UploadModal({
                       } else {
                         setIndividualPhotoData((prev) => {
                           const updated = [...prev];
+                          const existing = updated[currentPhotoIndex] ?? { speciesId: "", notes: "" };
                           updated[currentPhotoIndex] = {
+                            ...existing,
                             speciesId: e.target.value,
                             notes: updated[currentPhotoIndex]?.notes ?? "",
                           };
@@ -638,8 +642,9 @@ export default function UploadModal({
                     } else {
                       setIndividualPhotoData((prev) => {
                         const updated = [...prev];
+                        const existing = updated[currentPhotoIndex] ?? { speciesId: "", notes: "" };
                         updated[currentPhotoIndex] = {
-                          speciesId: updated[currentPhotoIndex]?.speciesId ?? "",
+                          ...existing,
                           notes: e.target.value,
                         };
                         return updated;

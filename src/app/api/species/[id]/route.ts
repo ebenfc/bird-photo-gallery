@@ -34,11 +34,12 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       .where(eq(species.id, speciesId))
       .groupBy(species.id);
 
-    if (result.length === 0) {
+    const speciesRecord = result[0];
+    if (!speciesRecord) {
       return NextResponse.json({ error: "Species not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ species: result[0] });
+    return NextResponse.json({ species: speciesRecord });
   } catch (error) {
     console.error("Error fetching species:", error);
     return NextResponse.json(
@@ -103,13 +104,14 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
           .where(eq(photos.id, coverPhotoId))
           .limit(1);
 
-        if (photo.length === 0) {
+        const photoRecord = photo[0];
+        if (!photoRecord) {
           return NextResponse.json(
             { error: "Photo not found" },
             { status: 404 }
           );
         }
-        if (photo[0]?.speciesId !== speciesId) {
+        if (photoRecord.speciesId !== speciesId) {
           return NextResponse.json(
             { error: "Photo does not belong to this species" },
             { status: 400 }
@@ -132,11 +134,12 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       .where(eq(species.id, speciesId))
       .returning();
 
-    if (result.length === 0) {
+    const updatedSpecies = result[0];
+    if (!updatedSpecies) {
       return NextResponse.json({ error: "Species not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ species: result[0] });
+    return NextResponse.json({ species: updatedSpecies });
   } catch (error) {
     console.error("Error updating species:", error);
     return NextResponse.json(
@@ -161,11 +164,12 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
       .where(eq(species.id, speciesId))
       .returning();
 
-    if (result.length === 0) {
+    const deletedSpecies = result[0];
+    if (!deletedSpecies) {
       return NextResponse.json({ error: "Species not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, deleted: result[0] });
+    return NextResponse.json({ success: true, deleted: deletedSpecies });
   } catch (error) {
     console.error("Error deleting species:", error);
     return NextResponse.json(

@@ -78,7 +78,7 @@ function validateBirdName(name: string): NameValidation {
     { wrong: /\bNuttalls\b/i, correct: "Nuttall's" },
   ];
 
-  let currentName: string = suggestions.length > 0 ? suggestions[0]! : correctedName;
+  let currentName = (suggestions.length > 0 ? suggestions[0] : correctedName) ?? correctedName;
   for (const pattern of apostrophePatterns) {
     if (pattern.wrong.test(trimmed)) {
       errors.push(`Missing apostrophe in "${pattern.correct}"`);

@@ -189,7 +189,7 @@ export default function InboxPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <p className="text-sm text-[var(--sky-800)]">
-                <strong>Tip:</strong> Click "Start Assigning" to go through your photos one by one,
+                <strong>Tip:</strong> Click &quot;Start Assigning&quot; to go through your photos one by one,
                 or click any photo to assign it individually.
               </p>
             </div>
