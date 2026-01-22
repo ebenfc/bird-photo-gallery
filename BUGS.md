@@ -2,7 +2,41 @@
 
 ## Open Bugs
 
-(none)
+### BUG-002: Photo Upload Fails with "Failed to process image"
+**Status:** Investigating
+**Severity:** Critical
+**Reported:** 2026-01-22
+
+**Description:**
+Photo uploads fail with HTTP 500 error and message "Failed to process image" on the production Railway deployment.
+
+**Steps to Reproduce:**
+1. Navigate to the bird gallery app
+2. Click to upload a photo
+3. Select any valid image file (JPEG, PNG, etc.)
+4. Click "Upload Photo"
+
+**Expected:** Photo uploads successfully
+**Actual:** Error message "Failed to process image"
+
+**Investigation Notes:**
+- Error occurs in `processUploadedImage()` function
+- Sharp library may be failing to import or process in Railway serverless environment
+- Fallback logic added to upload original image if sharp fails
+- Multiple fixes deployed but issue persists
+
+**Fixes Attempted:**
+1. Added `serverExternalPackages: ['sharp']` to next.config.ts
+2. Added sharp fallback to upload original if processing fails
+3. Fixed sharp import tracking bug (undefined vs null)
+4. Added DATABASE_URL validation
+
+**Next Steps:**
+1. Check Railway deployment logs for specific error
+2. Verify all environment variables are set
+3. If sharp continues to fail, consider removing image processing entirely
+
+**Workaround:** None currently - uploads are blocked
 
 ---
 

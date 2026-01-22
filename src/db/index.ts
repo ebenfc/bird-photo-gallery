@@ -7,8 +7,12 @@ let _db: NodePgDatabase<typeof schema> | null = null;
 
 function getDb(): NodePgDatabase<typeof schema> {
   if (!_db) {
+    const connectionString = process.env.DATABASE_URL;
+    if (!connectionString) {
+      throw new Error("DATABASE_URL environment variable is not set");
+    }
     const pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
+      connectionString,
       ssl:
         process.env.NODE_ENV === "production"
           ? { rejectUnauthorized: false }
