@@ -533,6 +533,7 @@ export default function UploadModal({
                           updated[currentPhotoIndex] = {
                             ...existing,
                             speciesId: e.target.value,
+                            notes: updated[currentPhotoIndex]?.notes ?? "",
                           };
                           return updated;
                         });

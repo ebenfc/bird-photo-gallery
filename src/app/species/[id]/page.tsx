@@ -6,6 +6,7 @@ import { Photo, Species, PhotosResponse } from "@/types";
 import PhotoGrid from "@/components/gallery/PhotoGrid";
 import PhotoModal from "@/components/gallery/PhotoModal";
 import Button from "@/components/ui/Button";
+import ActivityTimeline from "@/components/activity/ActivityTimeline";
 
 interface SpeciesPageProps {
   params: Promise<{ id: string }>;
@@ -137,6 +138,11 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
         <p className="mt-2 text-sm text-gray-500">
           {photos.length} photo{photos.length !== 1 ? "s" : ""}
         </p>
+      </div>
+
+      {/* Activity Timeline */}
+      <div className="mb-6">
+        <ActivityTimeline speciesName={species.commonName} />
       </div>
 
       <PhotoGrid

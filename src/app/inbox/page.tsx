@@ -25,10 +25,16 @@ export default function InboxPage() {
         fetch("/api/photos/unassigned"),
         fetch("/api/species"),
       ]);
+
+      if (!photosRes.ok || !speciesRes.ok) {
+        console.error("API error:", photosRes.status, speciesRes.status);
+        return;
+      }
+
       const photosData: UnassignedResponse = await photosRes.json();
       const speciesData: SpeciesResponse = await speciesRes.json();
-      setPhotos(photosData.photos);
-      setSpecies(speciesData.species);
+      setPhotos(photosData.photos ?? []);
+      setSpecies(speciesData.species ?? []);
     } catch (err) {
       console.error("Failed to fetch data:", err);
     } finally {

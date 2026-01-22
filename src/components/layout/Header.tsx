@@ -43,8 +43,12 @@ export default function Header() {
     const fetchUnassignedCount = async () => {
       try {
         const res = await fetch("/api/photos/unassigned");
+        if (!res.ok) {
+          console.error("Failed to fetch unassigned count: API returned", res.status);
+          return;
+        }
         const data = await res.json();
-        setUnassignedCount(data.count);
+        setUnassignedCount(data.count ?? 0);
       } catch (err) {
         console.error("Failed to fetch unassigned count:", err);
       }

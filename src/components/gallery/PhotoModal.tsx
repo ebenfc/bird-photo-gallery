@@ -425,6 +425,7 @@ export default function PhotoModal({
               {/* Overflow menu button */}
               <div className="relative">
                 <button
+                  id="mobile-overflow-btn"
                   onClick={(e) => { e.stopPropagation(); setShowOverflowMenu(!showOverflowMenu); }}
                   className="p-2 text-[var(--mist-400)] hover:text-[var(--forest-700)]
                     hover:bg-[var(--mist-50)] rounded-full transition-all"
@@ -435,70 +436,6 @@ export default function PhotoModal({
                     <circle cx="12" cy="19" r="2" />
                   </svg>
                 </button>
-                {/* Dropdown menu */}
-                {showOverflowMenu && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-10"
-                      onClick={(e) => { e.stopPropagation(); setShowOverflowMenu(false); }}
-                    />
-                    <div className="absolute right-0 top-full mt-1 z-20 bg-white rounded-[var(--radius-lg)]
-                      shadow-[var(--shadow-lg)] border border-[var(--border)] py-1 min-w-[180px]">
-                      {onChangeSpecies && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setShowOverflowMenu(false);
-                            onChangeSpecies(photo);
-                          }}
-                          className="w-full px-4 py-2.5 text-left text-sm text-[var(--forest-700)]
-                            hover:bg-[var(--moss-50)] flex items-center gap-2"
-                        >
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                          </svg>
-                          {photo.species ? "Change Species" : "Assign Species"}
-                        </button>
-                      )}
-                      {photo.species && onSetCoverPhoto && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setShowOverflowMenu(false);
-                            handleSetCoverPhoto();
-                          }}
-                          disabled={isSettingCover}
-                          className="w-full px-4 py-2.5 text-left text-sm text-[var(--forest-700)]
-                            hover:bg-[var(--moss-50)] flex items-center gap-2 disabled:opacity-50"
-                        >
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                          {isSettingCover ? "Setting..." : coverPhotoSet ? "Cover Set!" : "Set as Cover"}
-                        </button>
-                      )}
-                      {onDelete && (
-                        <>
-                          <div className="my-1 border-t border-[var(--border)]" />
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShowOverflowMenu(false);
-                              setShowDeleteConfirm(true);
-                            }}
-                            className="w-full px-4 py-2.5 text-left text-sm text-red-600
-                              hover:bg-red-50 flex items-center gap-2"
-                          >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                            Delete Photo
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </>
-                )}
               </div>
               <svg
                 className={`w-5 h-5 text-[var(--mist-400)] transition-transform duration-300
@@ -922,6 +859,73 @@ export default function PhotoModal({
           )}
         </div>
       </div>
+
+      {/* Mobile Overflow Menu - rendered outside overflow-hidden container */}
+      {showOverflowMenu && (
+        <div className="lg:hidden fixed inset-0 z-50">
+          <div
+            className="absolute inset-0"
+            onClick={(e) => { e.stopPropagation(); setShowOverflowMenu(false); }}
+          />
+          <div
+            className="absolute right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] bg-white rounded-[var(--radius-lg)]
+              shadow-[var(--shadow-2xl)] border border-[var(--border)] py-1 min-w-[180px] animate-fade-in-scale"
+          >
+            {onChangeSpecies && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowOverflowMenu(false);
+                  onChangeSpecies(photo);
+                }}
+                className="w-full px-4 py-2.5 text-left text-sm text-[var(--forest-700)]
+                  hover:bg-[var(--moss-50)] flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+                {photo.species ? "Change Species" : "Assign Species"}
+              </button>
+            )}
+            {photo.species && onSetCoverPhoto && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowOverflowMenu(false);
+                  handleSetCoverPhoto();
+                }}
+                disabled={isSettingCover}
+                className="w-full px-4 py-2.5 text-left text-sm text-[var(--forest-700)]
+                  hover:bg-[var(--moss-50)] flex items-center gap-2 disabled:opacity-50"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                {isSettingCover ? "Setting..." : coverPhotoSet ? "Cover Set!" : "Set as Cover"}
+              </button>
+            )}
+            {onDelete && (
+              <>
+                <div className="my-1 border-t border-[var(--border)]" />
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowOverflowMenu(false);
+                    setShowDeleteConfirm(true);
+                  }}
+                  className="w-full px-4 py-2.5 text-left text-sm text-red-600
+                    hover:bg-red-50 flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Delete Photo
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Delete Confirmation Dialog */}
       {showDeleteConfirm && (
