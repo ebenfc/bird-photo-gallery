@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { photos, species } from "@/db/schema";
-import { eq, and, isNull } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import {
   getThumbnailUrl,
   getOriginalUrl,
@@ -9,7 +9,6 @@ import {
 import { checkAndGetRateLimitResponse, RATE_LIMITS, addRateLimitHeaders } from "@/lib/rateLimit";
 import { logError } from "@/lib/logger";
 import { PhotoUpdateSchema, validateRequest } from "@/lib/validation";
-import { softDeletePhoto } from "@/lib/softDelete";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -144,7 +143,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const result = await db
       .update(photos)
       .set(updateData)
-      .where(and(eq(photos.id, photoId), isNull(photos.deletedAt)))
+      .where(eq(photos.id, photoId))
       .returning();
 
     if (result.length === 0) {
@@ -165,7 +164,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-// DELETE /api/photos/[id] - Soft delete a photo
+// DELETE /api/photos/[id] - Delete a photo
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   // Rate limiting
   const rateCheck = checkAndGetRateLimitResponse(request, RATE_LIMITS.write);
@@ -181,11 +180,14 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Invalid photo ID" }, { status: 400 });
     }
 
-    // Soft delete the photo (marks as deleted but keeps in database)
-    const deleted = await softDeletePhoto(photoId);
+    // Delete the photo from database
+    const result = await db
+      .delete(photos)
+      .where(eq(photos.id, photoId))
+      .returning();
 
-    if (!deleted) {
-      return NextResponse.json({ error: "Photo not found or already deleted" }, { status: 404 });
+    if (result.length === 0) {
+      return NextResponse.json({ error: "Photo not found" }, { status: 404 });
     }
 
     const response = NextResponse.json({ success: true, message: "Photo deleted" });

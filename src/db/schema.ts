@@ -15,7 +15,8 @@ export const species = pgTable("species", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-  deletedAt: timestamp("deleted_at", { withTimezone: true }), // Soft delete support
+  // Note: deletedAt column for soft deletes requires migration - uncomment after running db:push
+  // deletedAt: timestamp("deleted_at", { withTimezone: true }),
 });
 
 // Photos Table
@@ -33,7 +34,8 @@ export const photos = pgTable("photos", {
   dateTakenSource: text("date_taken_source").notNull().default("exif"), // 'exif' or 'manual'
   isFavorite: boolean("is_favorite").notNull().default(false),
   notes: text("notes"),
-  deletedAt: timestamp("deleted_at", { withTimezone: true }), // Soft delete support
+  // Note: deletedAt column for soft deletes requires migration - uncomment after running db:push
+  // deletedAt: timestamp("deleted_at", { withTimezone: true }),
 });
 
 // Relations
