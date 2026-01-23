@@ -2,13 +2,20 @@
 
 ## Open Bugs
 
+_No open bugs at this time._
+
+---
+
+## Closed Bugs
+
 ### BUG-002: Photo Upload Fails with "Failed to process image"
-**Status:** Investigating
+**Status:** Fixed (2026-01-23)
 **Severity:** Critical
 **Reported:** 2026-01-22
+**Resolved:** 2026-01-23
 
 **Description:**
-Photo uploads fail with HTTP 500 error and message "Failed to process image" on the production Railway deployment.
+Photo uploads failed with HTTP 500 error and message "Failed to process image" on the production Railway deployment.
 
 **Steps to Reproduce:**
 1. Navigate to the bird gallery app
@@ -19,28 +26,36 @@ Photo uploads fail with HTTP 500 error and message "Failed to process image" on 
 **Expected:** Photo uploads successfully
 **Actual:** Error message "Failed to process image"
 
-**Investigation Notes:**
-- Error occurs in `processUploadedImage()` function
-- Sharp library may be failing to import or process in Railway serverless environment
-- Fallback logic added to upload original image if sharp fails
-- Multiple fixes deployed but issue persists
+**Root Causes Identified:**
 
-**Fixes Attempted:**
-1. Added `serverExternalPackages: ['sharp']` to next.config.ts
-2. Added sharp fallback to upload original if processing fails
-3. Fixed sharp import tracking bug (undefined vs null)
-4. Added DATABASE_URL validation
+1. **Database Schema Out of Sync**
+   - Railway Postgres missing `haikubox_activity_log` table
+   - Queries looking for `deleted_at` column that didn't exist in production
+   - Solution: Ran `npm run db:push` with Railway DATABASE_URL to sync schema
 
-**Next Steps:**
-1. Check Railway deployment logs for specific error
-2. Verify all environment variables are set
-3. If sharp continues to fail, consider removing image processing entirely
+2. **Wrong DATABASE_URL Configuration**
+   - Railway environment variable pointed to Supabase database instead of Railway Postgres
+   - Caused production data to appear "lost" (it was actually in Railway DB)
+   - Solution: Updated to use `${{Postgres.DATABASE_URL}}` Railway variable reference
 
-**Workaround:** None currently - uploads are blocked
+3. **Malformed SUPABASE_ANON_KEY**
+   - Environment variable missing first character 'e'
+   - Had: `yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+   - Should be: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+   - JWT tokens must start with `eyJ` (base64 for `{"alg":`)
+   - Solution: Corrected the environment variable in Railway dashboard
+
+**Resolution:**
+- Updated Railway environment variables with correct values
+- Synchronized database schema to Railway Postgres
+- Verified Supabase storage bucket exists and is accessible
+- Redeployed application
+- All 26 production photos intact and accessible
+- Image uploads now working correctly
+
+**Related Documentation:** See [TROUBLESHOOTING-IMAGE-UPLOADS.md](./TROUBLESHOOTING-IMAGE-UPLOADS.md) for complete details
 
 ---
-
-## Closed Bugs
 
 ### BUG-001: Assign Species Modal Stuck on Second Photo
 **Status:** Fixed (2026-01-18)

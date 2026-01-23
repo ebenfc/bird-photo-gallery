@@ -32,54 +32,80 @@ Missing Supabase environment variables (`DATABASE_URL`, `SUPABASE_URL`, `SUPABAS
 
 ---
 
-## ⚠️ PRODUCTION ENVIRONMENT - NEEDS FIX
+## ✅ PRODUCTION ENVIRONMENT - FIXED
 
-### Platform: Vercel
+### Platform: Railway
 
-### Required Actions:
+### Issues Found and Resolved:
 
-#### Step 1: Update Vercel Environment Variables
-Go to: https://vercel.com/dashboard → Your Project → Settings → Environment Variables
+#### Issue 1: Database Schema Out of Sync
+**Problem:** Railway database was missing recent schema updates
+- Missing `haikubox_activity_log` table
+- Queries looking for `deleted_at` column that didn't exist
 
-Add/Update these three variables for **Production** environment:
-
-**DATABASE_URL:**
-```
-postgresql://postgres.vbojxtgnalidhsnjccrn:LaK81VtsbQ0MtAUR@aws-1-us-east-1.pooler.supabase.com:5432/postgres
-```
-
-**SUPABASE_URL:**
-```
-https://vbojxtgnalidhsnjccrn.supabase.co
-```
-
-**SUPABASE_ANON_KEY:**
-```
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZib2p4dGduYWxpZGhzbmpjY3JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MTc2MTYsImV4cCI6MjA4NDE5MzYxNn0.bSvmWz9_xhmVD3UzzjJlbWCMaqkSeBVwBD-6q4WhpKo
-```
-
-**Important:** Also verify these existing variables are set:
-- `API_KEY` - For iOS Shortcut authentication
-- `HAIKUBOX_SERIAL` - For Haikubox integration
-
-#### Step 2: Redeploy
-
-**Option A - Manual Redeploy:**
-1. Go to **Deployments** tab
-2. Click three dots on latest deployment
-3. Click **Redeploy**
-
-**Option B - Git Push:**
+**Solution:**
 ```bash
-git commit --allow-empty -m "Trigger redeploy with updated env vars"
-git push
+DATABASE_URL="postgresql://postgres:PASSWORD@hopper.proxy.rlwy.net:PORT/railway" npm run db:push
 ```
 
-#### Step 3: Verify Production
-1. Visit your production URL
-2. Test image upload
-3. Verify image appears in gallery
-4. Check Supabase Storage for new files
+#### Issue 2: Wrong DATABASE_URL
+**Problem:** Railway was configured to use Supabase database instead of Railway Postgres
+- Production showed only local test data
+- All production photos appeared to be "lost"
+
+**Solution:** Updated DATABASE_URL in Railway to point to internal Railway Postgres:
+```
+${{Postgres.DATABASE_URL}}
+```
+Or manually:
+```
+postgresql://postgres:PASSWORD@postgres.railway.internal:5432/railway
+```
+
+**Important:** Production data was NOT lost - it was just in the Railway database, but the app was connecting to Supabase.
+
+#### Issue 3: Malformed SUPABASE_ANON_KEY
+**Problem:** Environment variable was missing first character
+- Had: `yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+- Should be: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` (note the 'e' at the start)
+
+**Why this matters:** JWT tokens always start with `eyJ` (base64 for `{"alg":`)
+
+**Solution:** Corrected SUPABASE_ANON_KEY in Railway dashboard
+
+#### Issue 4: Supabase Storage Bucket
+**Problem:** Initially thought bucket was missing, but it existed with correct name `bird-photos` (lowercase)
+
+**Verified:**
+- Bucket exists and is PUBLIC
+- Policies configured correctly for INSERT, SELECT, UPDATE, DELETE
+- Direct upload test succeeded
+
+### Final Environment Variables (Railway Production):
+
+**Required Variables:**
+```
+DATABASE_URL=${{Postgres.DATABASE_URL}}
+SUPABASE_URL=https://vbojxtgnalidhsnjccrn.supabase.co
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZib2p4dGduYWxpZGhzbmpjY3JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MTc2MTYsImV4cCI6MjA4NDE5MzYxNn0.bSvmWz9_xhmVD3UzzjJlbWCMaqkSeBVwBD-6q4WhpKo
+API_KEY=<your-api-key>
+HAIKUBOX_SERIAL=<your-serial>
+```
+
+### Resolution Steps Taken:
+1. ✅ Pushed database schema to Railway Postgres
+2. ✅ Fixed DATABASE_URL to point to Railway internal database
+3. ✅ Corrected SUPABASE_ANON_KEY (added missing 'e' prefix)
+4. ✅ Verified Supabase storage bucket exists and is accessible
+5. ✅ Redeployed Railway application
+6. ✅ Tested image upload - SUCCESS
+
+### Current Status: ✅ WORKING
+- Production URL: https://bird-photo-gallery-production.up.railway.app/
+- Image uploads functioning correctly
+- All 26 production photos intact and accessible
+- Images uploading to Supabase Storage
+- Database records created in Railway Postgres
 
 ---
 
@@ -142,28 +168,48 @@ bird-photos/
 - [x] Upload test successful
 - [x] Images display in gallery
 
-### Production (Vercel):
-- [ ] Environment variables in Vercel dashboard
-- [ ] Redeployment triggered
-- [ ] Upload test successful
-- [ ] Images display in gallery
-- [ ] Existing photos still accessible
+### Production (Railway):
+- [x] Environment variables in Railway dashboard
+- [x] Database schema synchronized
+- [x] Redeployment triggered
+- [x] Upload test successful
+- [x] Images display in gallery
+- [x] Existing photos still accessible
 
 ---
 
 ## Common Issues & Solutions
 
 ### Issue: "Failed to process image"
-**Solution:** Missing `SUPABASE_URL` or `SUPABASE_ANON_KEY` environment variables
+**Causes:**
+1. Missing `SUPABASE_URL` or `SUPABASE_ANON_KEY` environment variables
+2. Malformed `SUPABASE_ANON_KEY` (JWT must start with `eyJ`)
+3. Supabase storage bucket doesn't exist or has incorrect name
 
-### Issue: "relation 'photos' does not exist"
-**Solution:** Run `DATABASE_URL="..." npm run db:push` to create tables
+**Solution:** Verify all Supabase environment variables are correct and bucket exists
 
-### Issue: Database connection refused (IPv6 error)
-**Solution:** Use Session Pooler URL instead of Direct Connection URL
+### Issue: "relation 'photos' does not exist" or "column 'deleted_at' does not exist"
+**Cause:** Database schema is out of sync
 
-### Issue: "password authentication failed"
-**Solution:** Reset database password in Supabase dashboard or verify correct password in DATABASE_URL
+**Solution:** Push schema to production database:
+```bash
+DATABASE_URL="<production-db-url>" npm run db:push
+```
+
+### Issue: Production shows wrong data (local test data instead of production data)
+**Cause:** DATABASE_URL pointing to wrong database
+
+**Solution:**
+- For Railway: Use `${{Postgres.DATABASE_URL}}` variable reference
+- Verify DATABASE_URL points to production database, not local/development database
+
+### Issue: "Bucket not found" in Supabase
+**Causes:**
+1. Storage bucket doesn't exist
+2. Bucket name case mismatch (code uses `bird-photos` but bucket is `BIRD-PHOTOS`)
+3. Bucket policies don't allow anonymous access
+
+**Solution:** Create bucket with exact name in code, ensure it's public, verify policies allow INSERT/SELECT
 
 ---
 
@@ -198,4 +244,4 @@ bird-photos/
 ---
 
 **Last Updated:** 2026-01-23
-**Status:** Local ✅ | Production ⚠️ (env vars need updating)
+**Status:** Local ✅ | Production ✅ (RESOLVED)
