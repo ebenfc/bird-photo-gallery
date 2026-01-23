@@ -4,22 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-// Evergreen tree icon component
-function EvergreenIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path d="M12 2L6 9h2l-3 5h2l-4 7h18l-4-7h2l-3-5h2L12 2z" />
-      <rect x="10" y="21" width="4" height="2" rx="0.5" />
-    </svg>
-  );
-}
-
-// Bird silhouette icon
+// Bird silhouette icon - songbird profile
 function BirdIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -28,8 +13,9 @@ function BirdIcon({ className }: { className?: string }) {
       fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path d="M21.5 8.5c-.5-.5-1.5-.5-2.5 0L15 12l-3-1-4.5 2.5c-1.5 1-2 2.5-1.5 4l1 2.5 1.5-1 2-1.5 3 .5 2-1.5 4-4c1-1 1-2.5 0-3.5l-2.5-2z" />
-      <circle cx="18" cy="7" r="1" />
+      {/* Small songbird silhouette in profile */}
+      <path d="M5 12c0-1.2.6-2.3 1.5-3 .3-1.1 1.2-2 2.3-2.3.5-.2 1-.2 1.5 0 .4-.9 1.3-1.5 2.3-1.5.8 0 1.5.4 2 1 .6-.4 1.3-.5 2-.3 1 .3 1.8 1.1 2.1 2.1.5.1 1 .4 1.3.8.6.7.9 1.6.7 2.5-.1.5-.3 1-.6 1.4.3.6.4 1.3.2 2-.2 1-1 1.8-2 2.1-.4.1-.8.1-1.2 0-.5.7-1.3 1.1-2.2 1.1-.9 0-1.7-.5-2.2-1.2-.6.1-1.2.1-1.8-.2-1-.5-1.6-1.5-1.7-2.6-.7-.4-1.2-1-1.4-1.8-.2-.6-.2-1.2 0-1.8z" />
+      <circle cx="16" cy="10" r="0.9" />
     </svg>
   );
 }
@@ -118,11 +104,9 @@ export default function Header() {
             className="flex items-center gap-2 sm:gap-3 group -ml-2 pl-2 pr-3 py-2
               active:opacity-80 transition-opacity"
           >
-            <div className="relative transition-transform duration-[var(--timing-fast)] group-hover:scale-105">
-              <EvergreenIcon className="w-7 h-7 sm:w-8 sm:h-8 text-[var(--moss-400)]
+            <div className="transition-transform duration-[var(--timing-fast)] group-hover:scale-105">
+              <BirdIcon className="w-7 h-7 sm:w-8 sm:h-8 text-white
                 group-hover:text-[var(--moss-300)] transition-colors duration-[var(--timing-fast)]" />
-              <BirdIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white
-                absolute -right-0.5 -top-0.5 sm:-right-1 sm:top-0 opacity-90" />
             </div>
             <span className="font-bold text-base sm:text-lg text-white tracking-tight">
               Bird Feed
