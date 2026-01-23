@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Bird Photo Gallery",
+  title: "Bird Feed",
   description: "A personal gallery for organizing bird photography",
 };
 

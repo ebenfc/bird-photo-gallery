@@ -125,7 +125,7 @@ export default function Header() {
                 absolute -right-0.5 -top-0.5 sm:-right-1 sm:top-0 opacity-90" />
             </div>
             <span className="font-bold text-base sm:text-lg text-white tracking-tight">
-              Bird Gallery
+              Bird Feed
             </span>
           </Link>
 
