@@ -3,7 +3,7 @@
 
 import { db } from "@/db";
 import { haikuboxActivityLog } from "@/db/schema";
-import { and, sql, gte, desc } from "drizzle-orm";
+import { and, sql, gte, desc, inArray } from "drizzle-orm";
 import { normalizeCommonName, HaikuboxRecentDetection } from "./haikubox";
 
 // Types
@@ -163,7 +163,7 @@ export async function getActiveNowSpecies(
     .from(haikuboxActivityLog)
     .where(
       and(
-        sql`${haikuboxActivityLog.hourOfDay} = ANY(${hoursToCheck})`,
+        inArray(haikuboxActivityLog.hourOfDay, hoursToCheck),
         gte(haikuboxActivityLog.detectedAt, thirtyDaysAgo)
       )
     )

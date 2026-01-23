@@ -126,3 +126,22 @@ export interface HeatmapResponse {
   daysAnalyzed: number;
   generatedAt: string;
 }
+
+// Photo Suggestions types
+export interface Suggestion {
+  id: number;
+  commonName: string;
+  scientificName: string | null;
+  rarity: Rarity;
+  score: number;
+  reason: string;
+  yearlyCount: number;
+  photoCount: number;
+  lastHeard: Date | null;
+}
+
+export interface SuggestionsResponse {
+  suggestions: Suggestion[];
+  topSuggestion: Suggestion | null;
+  generatedAt: string;
+}
