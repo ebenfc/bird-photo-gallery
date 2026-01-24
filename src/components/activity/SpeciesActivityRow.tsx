@@ -3,26 +3,38 @@
 import { SpeciesActivityData } from "@/types";
 import RarityBadge from "@/components/ui/RarityBadge";
 import { useRouter } from "next/navigation";
-import { formatDistanceToNow } from "date-fns";
+
+interface SpeciesLookup {
+  id: number;
+  commonName: string;
+}
 
 interface SpeciesActivityRowProps {
   data: SpeciesActivityData;
+  speciesLookup: SpeciesLookup[];
 }
 
-export default function SpeciesActivityRow({ data }: SpeciesActivityRowProps) {
+export default function SpeciesActivityRow({
+  data,
+  speciesLookup,
+}: SpeciesActivityRowProps) {
   const router = useRouter();
 
   const handleClick = () => {
-    // Navigate to species search
-    router.push(`/species?search=${encodeURIComponent(data.commonName)}`);
-  };
+    // Find species by matching common name (case-insensitive)
+    const foundSpecies = speciesLookup.find(
+      (s) => s.commonName.toLowerCase() === data.commonName.toLowerCase()
+    );
 
-  const formatLastHeard = (dateString: string | null) => {
-    if (!dateString) return "Never";
-    try {
-      return formatDistanceToNow(new Date(dateString), { addSuffix: true });
-    } catch {
-      return "Unknown";
+    if (foundSpecies) {
+      // Navigate to individual species page by ID
+      router.push(`/species/${foundSpecies.id}`);
+    } else if (data.speciesId) {
+      // Fallback: use speciesId from data if available
+      router.push(`/species/${data.speciesId}`);
+    } else {
+      // Final fallback: navigate to species search
+      router.push(`/species?search=${encodeURIComponent(data.commonName)}`);
     }
   };
 
@@ -36,8 +48,9 @@ export default function SpeciesActivityRow({ data }: SpeciesActivityRowProps) {
   return (
     <button
       onClick={handleClick}
+      aria-label={`View ${data.commonName} species details`}
       className={`
-        w-full text-left px-4 py-3
+        w-full text-left px-4 py-3.5
         rounded-[var(--radius-md)]
         border border-transparent
         transition-all duration-[var(--timing-fast)]
@@ -95,18 +108,11 @@ export default function SpeciesActivityRow({ data }: SpeciesActivityRowProps) {
           </span>
           <span className="text-xs text-[var(--mist-600)] ml-1">heard</span>
         </div>
-
-        {/* Last Heard */}
-        <div className="flex-shrink-0 text-right min-w-[100px]">
-          <span className="text-sm text-[var(--mist-600)]">
-            {formatLastHeard(data.lastHeardAt)}
-          </span>
-        </div>
       </div>
 
       {/* Mobile Layout - Stacked */}
-      <div className="flex sm:hidden flex-col gap-2">
-        <div className="flex items-center gap-2">
+      <div className="flex sm:hidden flex-col gap-3">
+        <div className="flex items-center gap-2.5">
           {/* Photo Status Icon */}
           {data.hasPhoto ? (
             <svg
@@ -134,16 +140,15 @@ export default function SpeciesActivityRow({ data }: SpeciesActivityRowProps) {
           </span>
         </div>
 
-        {/* Second row: Rarity, Count, Last Heard */}
-        <div className="flex items-center gap-2 text-sm flex-wrap">
+        {/* Second row: Rarity and Count */}
+        <div className="flex items-center gap-3 text-sm flex-wrap">
           <RarityBadge rarity={data.rarity || "common"} size="sm" />
-          <span className="text-[var(--forest-700)] font-semibold">
-            {formatCount(data.yearlyCount)} heard
-          </span>
-          <span className="text-[var(--mist-600)]">·</span>
-          <span className="text-[var(--mist-600)]">
-            {formatLastHeard(data.lastHeardAt)}
-          </span>
+          <div className="flex items-center gap-1">
+            <span className="text-[var(--forest-700)] font-semibold">
+              {formatCount(data.yearlyCount)}
+            </span>
+            <span className="text-[var(--mist-600)]">heard</span>
+          </div>
         </div>
       </div>
     </button>

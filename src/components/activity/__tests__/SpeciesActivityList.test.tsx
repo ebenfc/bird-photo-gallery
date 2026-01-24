@@ -4,6 +4,14 @@ import SpeciesActivityList from "../SpeciesActivityList";
 import { SpeciesActivityData } from "@/types";
 import { useRouter } from "next/navigation";
 
+// Mock fetch globally
+global.fetch = jest.fn(() =>
+  Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve({ species: [] }),
+  } as Response)
+);
+
 // Mock next/navigation
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -12,7 +20,7 @@ jest.mock("next/navigation", () => ({
 // Mock child components
 jest.mock("../SpeciesActivityRow", () => ({
   __esModule: true,
-  default: ({ data }: { data: SpeciesActivityData }) => (
+  default: ({ data }: { data: SpeciesActivityData; speciesLookup: unknown }) => (
     <div data-testid={`species-row-${data.commonName}`}>
       {data.commonName} - {data.yearlyCount}
     </div>
@@ -24,6 +32,10 @@ describe("SpeciesActivityList", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ species: [] }),
+    });
     (useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
     });
