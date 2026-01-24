@@ -22,30 +22,7 @@ function BirdIcon({ className }: { className?: string }) {
 
 export default function Header() {
   const pathname = usePathname();
-  const [unassignedCount, setUnassignedCount] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const fetchUnassignedCount = async () => {
-      try {
-        const res = await fetch("/api/photos/unassigned");
-        if (!res.ok) {
-          console.error("Failed to fetch unassigned count: API returned", res.status);
-          return;
-        }
-        const data = await res.json();
-        setUnassignedCount(data.count ?? 0);
-      } catch (err) {
-        console.error("Failed to fetch unassigned count:", err);
-      }
-    };
-
-    fetchUnassignedCount();
-
-    // Refresh count every 10 seconds
-    const interval = setInterval(fetchUnassignedCount, 10000);
-    return () => clearInterval(interval);
-  }, []);
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -53,23 +30,13 @@ export default function Header() {
     setMobileMenuOpen(false);
   }, [pathname]);
 
-  const navItems: Array<{ href: string; label: string; badge?: number; icon: React.ReactNode }> = [
+  const navItems: Array<{ href: string; label: string; icon: React.ReactNode }> = [
     {
       href: "/",
       label: "Gallery",
       icon: (
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-      ),
-    },
-    {
-      href: "/inbox",
-      label: "Inbox",
-      badge: unassignedCount,
-      icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
         </svg>
       ),
     },
@@ -83,20 +50,20 @@ export default function Header() {
       ),
     },
     {
-      href: "/favorites",
-      label: "Favorites",
-      icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-        </svg>
-      ),
-    },
-    {
       href: "/activity",
       label: "Activity",
       icon: (
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+        </svg>
+      ),
+    },
+    {
+      href: "/resources",
+      label: "Resources",
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
         </svg>
       ),
     },
@@ -126,13 +93,12 @@ export default function Header() {
           <nav className="hidden sm:flex gap-1.5">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
-              const hasBadge = item.badge !== undefined && item.badge > 0;
 
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`relative px-4 py-2.5 rounded-[var(--radius-lg)] text-sm font-semibold
+                  className={`px-4 py-2.5 rounded-[var(--radius-lg)] text-sm font-semibold
                     transition-all duration-[var(--timing-fast)]
                     ${isActive
                       ? "bg-white/20 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
@@ -140,21 +106,6 @@ export default function Header() {
                     }`}
                 >
                   {item.label}
-                  {hasBadge && (
-                    <span
-                      className={`absolute -top-1.5 -right-1.5 min-w-[22px] h-[22px]
-                        flex items-center justify-center px-1.5
-                        text-xs font-bold rounded-full
-                        shadow-[var(--shadow-md)]
-                        transition-all duration-[var(--timing-fast)]
-                        ${isActive
-                          ? "bg-[var(--moss-300)] text-[var(--forest-950)]"
-                          : "bg-gradient-to-b from-[var(--moss-400)] to-[var(--moss-500)] text-white"
-                        }`}
-                    >
-                      {item.badge}
-                    </span>
-                  )}
                 </Link>
               );
             })}
@@ -188,7 +139,6 @@ export default function Header() {
           <nav className="px-4 py-3 space-y-1">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
-              const hasBadge = item.badge !== undefined && item.badge > 0;
 
               return (
                 <Link
@@ -204,15 +154,7 @@ export default function Header() {
                     }`}
                 >
                   {item.icon}
-                  <span className="flex-1">{item.label}</span>
-                  {hasBadge && (
-                    <span className="min-w-[26px] h-[26px] flex items-center justify-center px-2
-                      text-sm font-bold rounded-full
-                      bg-gradient-to-b from-[var(--moss-400)] to-[var(--moss-500)] text-white
-                      shadow-[var(--shadow-sm)]">
-                      {item.badge}
-                    </span>
-                  )}
+                  <span>{item.label}</span>
                 </Link>
               );
             })}
