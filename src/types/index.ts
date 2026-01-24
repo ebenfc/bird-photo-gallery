@@ -83,9 +83,34 @@ export interface PropertyStats {
     lastHeardAt: string | null;
     yearlyCount: number;
     hasPhoto: boolean;
+    speciesId: number | null;
+    rarity: Rarity;
   }>;
   year: number;
 }
+
+// Species Activity types (for comprehensive activity view)
+export interface SpeciesActivityData {
+  commonName: string;
+  speciesId: number | null;
+  yearlyCount: number;
+  lastHeardAt: string | null;
+  hasPhoto: boolean;
+  rarity: Rarity;
+}
+
+export interface SpeciesActivityFilters {
+  rarity: Rarity | "all";
+  photoStatus: "all" | "photographed" | "not-yet";
+}
+
+export type SpeciesActivitySort =
+  | "count-desc"
+  | "count-asc"
+  | "name-asc"
+  | "name-desc"
+  | "last-heard-desc"
+  | "last-heard-asc";
 
 // Activity Timeline types
 export interface HourlyActivity {

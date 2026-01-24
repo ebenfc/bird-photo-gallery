@@ -64,6 +64,8 @@ export async function GET() {
         lastHeardAt: haikuboxDetections.lastHeardAt,
         yearlyCount: haikuboxDetections.yearlyCount,
         hasPhoto: sql<boolean>`count(${photos.id}) > 0`,
+        speciesId: haikuboxDetections.speciesId,
+        rarity: species.rarity,
       })
       .from(haikuboxDetections)
       .leftJoin(species, eq(haikuboxDetections.speciesId, species.id))
@@ -73,7 +75,9 @@ export async function GET() {
         haikuboxDetections.id,
         haikuboxDetections.speciesCommonName,
         haikuboxDetections.lastHeardAt,
-        haikuboxDetections.yearlyCount
+        haikuboxDetections.yearlyCount,
+        haikuboxDetections.speciesId,
+        species.rarity
       )
       .orderBy(sql`${haikuboxDetections.yearlyCount} DESC`);
 

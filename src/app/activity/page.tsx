@@ -1,19 +1,70 @@
 "use client";
 
-import ActiveNowWidget from "@/components/activity/ActiveNowWidget";
+import { useEffect, useState } from "react";
 import PropertyStatsWidget from "@/components/stats/PropertyStatsWidget";
+import SpeciesActivityList from "@/components/activity/SpeciesActivityList";
+import { SpeciesActivityData } from "@/types";
 
 /**
  * Activity Page - Haikubox Integration
  *
- * This page should only be accessible to users who have integrated their Bird Feed
- * app with a Haikubox device. It displays bird detection insights and activity
- * data from the Haikubox.
- *
- * Note: Navigation to this page is currently always visible. Consider implementing
- * conditional rendering in the Header component based on Haikubox integration status.
+ * Displays comprehensive bird detection insights and activity data from the Haikubox,
+ * including detection counts, rarity status, and photo capture status.
+ * Users can filter by rarity and photo status, and sort by various criteria.
  */
 export default function ActivityPage() {
+  const [activityData, setActivityData] = useState<SpeciesActivityData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchActivityData() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await fetch("/api/haikubox/stats");
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch activity data");
+        }
+
+        const data = await response.json();
+
+        // Transform recentlyHeard data to SpeciesActivityData format
+        const activityData: SpeciesActivityData[] = data.recentlyHeard.map(
+          (item: {
+            commonName: string;
+            speciesId: number | null;
+            yearlyCount: number;
+            lastHeardAt: string | null;
+            hasPhoto: boolean;
+            rarity: string | null;
+          }) => ({
+            commonName: item.commonName,
+            speciesId: item.speciesId,
+            yearlyCount: item.yearlyCount,
+            lastHeardAt: item.lastHeardAt,
+            hasPhoto: item.hasPhoto,
+            // Default to "common" if rarity is null (unmatched species)
+            rarity: (item.rarity as "common" | "uncommon" | "rare") || "common",
+          })
+        );
+
+        setActivityData(activityData);
+      } catch (err) {
+        console.error("Error fetching activity data:", err);
+        setError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchActivityData();
+  }, []);
+
   return (
     <div className="pnw-texture min-h-screen">
       <div className="mb-8">
@@ -21,7 +72,7 @@ export default function ActivityPage() {
           Haikubox Activity
         </h1>
         <p className="text-[var(--mist-600)]">
-          Bird detection insights from your Haikubox
+          Comprehensive view of all detected bird species
         </p>
       </div>
 
@@ -30,9 +81,36 @@ export default function ActivityPage() {
         <PropertyStatsWidget />
       </div>
 
-      {/* Active Now Widget */}
-      <div className="max-w-2xl">
-        <ActiveNowWidget />
+      {/* Error state */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-[var(--radius-lg)] p-4 mb-8">
+          <div className="flex items-start gap-3">
+            <svg
+              className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <div>
+              <h3 className="font-semibold text-red-800 mb-1">
+                Error Loading Activity Data
+              </h3>
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Species Activity List */}
+      <div className="mb-8">
+        <SpeciesActivityList data={activityData} loading={loading} />
       </div>
     </div>
   );
