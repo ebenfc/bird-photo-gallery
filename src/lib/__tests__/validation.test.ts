@@ -1,6 +1,5 @@
 import {
   SpeciesSchema,
-  SpeciesUpdateSchema,
   PhotoUpdateSchema,
   BrowserUploadSchema,
   PaginationSchema,

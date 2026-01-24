@@ -6,9 +6,9 @@ A modern, full-stack web application for managing and organizing bird photograph
 
 ### Core Functionality
 - 📸 **Photo Management**: Upload, organize, and tag bird photos with species information
-- 🔍 **Smart Species Assignment**: Automatic species suggestions from Haikubox detections
-- ⭐ **Favorites & Collections**: Mark favorite photos and organize by species
+- ⭐ **Favorites & Filtering**: Mark favorite photos and filter by species, rarity, or favorites
 - 🗓️ **Timeline View**: Browse photos chronologically with EXIF date support
+- 📚 **Resource Directory**: Curated links to bird identification tools and species encyclopedias
 - 📊 **Statistics Dashboard**: Track species diversity, photo counts, and activity
 - 🔊 **Haikubox Integration**: Sync detections from your Haikubox device
 
@@ -129,10 +129,10 @@ bird-photo-gallery/
 │   │   │   ├── upload/       # Photo upload endpoints
 │   │   │   ├── haikubox/     # Haikubox sync endpoints
 │   │   │   └── activity/     # Activity timeline endpoints
-│   │   ├── favorites/        # Favorites page
-│   │   ├── inbox/            # Unassigned photos page
+│   │   ├── activity/         # Haikubox activity and insights page
+│   │   ├── resources/        # Bird identification and info resources page
 │   │   ├── species/          # Species list and detail pages
-│   │   ├── page.tsx          # Home page (photo gallery)
+│   │   ├── page.tsx          # Home page (photo gallery with filters)
 │   │   └── layout.tsx        # Root layout
 │   ├── components/           # React components
 │   │   ├── activity/         # Activity timeline components
@@ -334,6 +334,21 @@ Before committing:
 See [BUGS.md](BUGS.md) for tracked issues and fixes.
 
 ## Recent Updates
+
+### 2026-01-23: Navigation Simplified - Resources Page Added 📚
+
+**Streamlined navigation** to focus on core workflows and added helpful external resources.
+
+**Changes:**
+- Removed inbox page (redundant with gallery workflow)
+- Removed favorites tab (favorites filter remains on gallery page)
+- Added Resources page with curated external links:
+  - Bird identification tools (Merlin, eBird, iNaturalist)
+  - Bird encyclopedias and information (All About Birds, Audubon)
+  - Haikubox setup and integration guides
+- Updated navigation to 4 clean tabs: Gallery, Species, Activity, Resources
+
+**Result:** Simpler navigation focusing on Bird Feed's core purpose as a photo gallery and cataloguing tool, while providing easy access to specialized identification and research resources.
 
 ### 2026-01-23: UX Simplified - Haikubox Features Isolated ✨
 
