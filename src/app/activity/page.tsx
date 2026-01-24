@@ -2,8 +2,17 @@
 
 import ActiveNowWidget from "@/components/activity/ActiveNowWidget";
 import PropertyStatsWidget from "@/components/stats/PropertyStatsWidget";
-import PhotoThisNextWidget from "@/components/suggestions/PhotoThisNextWidget";
 
+/**
+ * Activity Page - Haikubox Integration
+ *
+ * This page should only be accessible to users who have integrated their Bird Feed
+ * app with a Haikubox device. It displays bird detection insights and activity
+ * data from the Haikubox.
+ *
+ * Note: Navigation to this page is currently always visible. Consider implementing
+ * conditional rendering in the Header component based on Haikubox integration status.
+ */
 export default function ActivityPage() {
   return (
     <div className="pnw-texture min-h-screen">
@@ -12,7 +21,7 @@ export default function ActivityPage() {
           Haikubox Activity
         </h1>
         <p className="text-[var(--mist-600)]">
-          Bird detection insights and photo suggestions from your Haikubox
+          Bird detection insights from your Haikubox
         </p>
       </div>
 
@@ -21,10 +30,9 @@ export default function ActivityPage() {
         <PropertyStatsWidget />
       </div>
 
-      {/* Activity and Suggestion Widgets */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Active Now Widget */}
+      <div className="max-w-2xl">
         <ActiveNowWidget />
-        <PhotoThisNextWidget />
       </div>
     </div>
   );

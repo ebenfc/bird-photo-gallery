@@ -335,6 +335,21 @@ See [BUGS.md](BUGS.md) for tracked issues and fixes.
 
 ## Recent Updates
 
+### 2026-01-24: Activity Page Refinements 🔍
+
+**Enhanced the Activity page** to provide better bird detection insights.
+
+**Changes:**
+- Removed "Photo This Next" widget
+- Updated Property Bird Activity to show all detected birds by default
+- Added tabbed view: All birds, Captured, Not Yet
+- All birds view shows detection status (✓ captured / ◌ not captured)
+- Improved focus on bird detection insights from Haikubox
+
+**Note:** Activity page is designed for users with Haikubox integration. The navigation tab is currently always visible, but content gracefully handles cases where Haikubox is not configured.
+
+**Result:** More comprehensive view of all bird activity on your property with clear visual indicators of capture status.
+
 ### 2026-01-23: Navigation Simplified - Resources Page Added 📚
 
 **Streamlined navigation** to focus on core workflows and added helpful external resources.
