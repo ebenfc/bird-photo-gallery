@@ -335,6 +335,19 @@ See [BUGS.md](BUGS.md) for tracked issues and fixes.
 
 ## Recent Updates
 
+### 2026-01-23: UX Simplified - Haikubox Features Isolated ✨
+
+**Simplified the app** to focus on core bird photo management workflow.
+
+**Changes:**
+- Created dedicated `/activity` page for all Haikubox features
+- Added "Activity" tab to navigation for users with Haikubox integration
+- Removed Haikubox widgets from Gallery and Species pages
+- Gallery page now focuses purely on uploading, categorizing, and viewing photos
+- Species page streamlined for species directory management
+
+**Result:** Cleaner, faster primary user experience. Haikubox features remain fully accessible in dedicated Activity tab.
+
 ### 2026-01-23: Image Upload Issue Resolved ✅
 
 **Fixed:** Production image uploads failing with "Failed to process image"
