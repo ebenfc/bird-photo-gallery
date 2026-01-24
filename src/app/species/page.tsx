@@ -5,7 +5,6 @@ import { Species, SpeciesResponse, Rarity } from "@/types";
 import SpeciesCard from "@/components/species/SpeciesCard";
 import SpeciesForm from "@/components/species/SpeciesForm";
 import Button from "@/components/ui/Button";
-import PropertyStatsWidget from "@/components/stats/PropertyStatsWidget";
 
 export default function SpeciesDirectory() {
   const [species, setSpecies] = useState<Species[]>([]);
@@ -131,11 +130,6 @@ export default function SpeciesDirectory() {
           </svg>
           Add Species
         </Button>
-      </div>
-
-      {/* Property Bird Activity Stats */}
-      <div className="mb-8">
-        <PropertyStatsWidget />
       </div>
 
       {species.length === 0 ? (

@@ -9,9 +9,6 @@ import GalleryFilters from "@/components/gallery/GalleryFilters";
 import SpeciesAssignModal from "@/components/species/SpeciesAssignModal";
 import UploadModal from "@/components/upload/UploadModal";
 import Button from "@/components/ui/Button";
-import ActiveNowWidget from "@/components/activity/ActiveNowWidget";
-import PropertyStatsWidget from "@/components/stats/PropertyStatsWidget";
-import PhotoThisNextWidget from "@/components/suggestions/PhotoThisNextWidget";
 
 function GalleryContent() {
   const router = useRouter();
@@ -316,17 +313,6 @@ function GalleryContent() {
             Upload
           </Button>
         </div>
-      </div>
-
-      {/* Activity and Suggestion Widgets */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <ActiveNowWidget />
-        <PhotoThisNextWidget />
-      </div>
-
-      {/* Property Stats Widget */}
-      <div className="mb-8">
-        <PropertyStatsWidget />
       </div>
 
       <GalleryFilters
