@@ -145,3 +145,24 @@ export interface SuggestionsResponse {
   topSuggestion: Suggestion | null;
   generatedAt: string;
 }
+
+// Bubble Chart types
+export interface BubbleChartBird {
+  commonName: string;
+  yearlyCount: number;
+  hasPhoto: boolean;
+  lastHeardAt: string | null;
+}
+
+export interface BubblePosition {
+  x: number;
+  y: number;
+  r: number; // radius in pixels
+  bird: BubbleChartBird;
+}
+
+export interface TooltipState {
+  visible: boolean;
+  bird: BubbleChartBird | null;
+  position: { x: number; y: number };
+}
