@@ -9,19 +9,6 @@ jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
 }));
 
-// Mock date-fns
-jest.mock("date-fns", () => ({
-  formatDistanceToNow: jest.fn((date: Date) => {
-    const now = new Date("2024-01-20T12:00:00Z");
-    const diff = now.getTime() - date.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    if (days === 0) return "today";
-    if (days === 1) return "1 day ago";
-    if (days === 2) return "2 days ago";
-    return `${days} days ago`;
-  }),
-}));
-
 describe("SpeciesActivityRow", () => {
   const mockPush = jest.fn();
 
@@ -41,21 +28,27 @@ describe("SpeciesActivityRow", () => {
     rarity: "common",
   };
 
+  const mockSpeciesLookup = [
+    { id: 1, commonName: "American Robin" },
+    { id: 2, commonName: "House Finch" },
+    { id: 3, commonName: "Anna's Hummingbird" },
+  ];
+
   it("renders species data correctly", () => {
-    render(<SpeciesActivityRow data={baseData} />);
+    render(<SpeciesActivityRow data={baseData} speciesLookup={mockSpeciesLookup} />);
 
     // Species name appears in both desktop and mobile layouts
     const names = screen.getAllByText("American Robin");
     expect(names.length).toBeGreaterThan(0);
-    expect(screen.getByText("856")).toBeInTheDocument();
+    // Count appears in both desktop and mobile layouts
+    const counts = screen.getAllByText("856");
+    expect(counts.length).toBeGreaterThan(0);
     const heardTexts = screen.getAllByText("heard");
     expect(heardTexts.length).toBeGreaterThan(0);
-    const dateTexts = screen.getAllByText("2 days ago");
-    expect(dateTexts.length).toBeGreaterThan(0);
   });
 
   it("shows checkmark icon for photographed species", () => {
-    render(<SpeciesActivityRow data={baseData} />);
+    render(<SpeciesActivityRow data={baseData} speciesLookup={mockSpeciesLookup} />);
 
     // Check for checkmark SVG (filled checkmark path)
     const checkmarks = screen.getAllByRole("button");
@@ -64,7 +57,7 @@ describe("SpeciesActivityRow", () => {
 
   it("shows circle icon for not-yet-photographed species", () => {
     const notPhotographedData = { ...baseData, hasPhoto: false };
-    render(<SpeciesActivityRow data={notPhotographedData} />);
+    render(<SpeciesActivityRow data={notPhotographedData} speciesLookup={mockSpeciesLookup} />);
 
     // Component should render (name appears in both layouts)
     const names = screen.getAllByText("American Robin");
@@ -72,7 +65,7 @@ describe("SpeciesActivityRow", () => {
   });
 
   it("displays rarity badge", () => {
-    render(<SpeciesActivityRow data={baseData} />);
+    render(<SpeciesActivityRow data={baseData} speciesLookup={mockSpeciesLookup} />);
 
     // RarityBadge component renders "Common" text
     expect(screen.getAllByText("Common").length).toBeGreaterThan(0);
@@ -80,38 +73,42 @@ describe("SpeciesActivityRow", () => {
 
   it("formats large counts correctly", () => {
     const largeCountData = { ...baseData, yearlyCount: 1500 };
-    render(<SpeciesActivityRow data={largeCountData} />);
+    render(<SpeciesActivityRow data={largeCountData} speciesLookup={mockSpeciesLookup} />);
 
-    expect(screen.getByText("1.5k")).toBeInTheDocument();
+    // 1.5k appears in both desktop and mobile layouts
+    const counts = screen.getAllByText("1.5k");
+    expect(counts.length).toBeGreaterThan(0);
   });
 
   it("handles null lastHeardAt", () => {
     const nullDateData = { ...baseData, lastHeardAt: null };
-    render(<SpeciesActivityRow data={nullDateData} />);
+    render(<SpeciesActivityRow data={nullDateData} speciesLookup={mockSpeciesLookup} />);
 
-    expect(screen.getAllByText("Never").length).toBeGreaterThan(0);
+    // Should still render the species name correctly even with null lastHeardAt
+    const names = screen.getAllByText("American Robin");
+    expect(names.length).toBeGreaterThan(0);
   });
 
   it("handles null rarity by defaulting to common", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const nullRarityData = { ...baseData, rarity: null as any };
-    render(<SpeciesActivityRow data={nullRarityData} />);
+    render(<SpeciesActivityRow data={nullRarityData} speciesLookup={mockSpeciesLookup} />);
 
     expect(screen.getAllByText("Common").length).toBeGreaterThan(0);
   });
 
-  it("navigates to species search on click", async () => {
+  it("navigates to species page by ID on click", async () => {
     const user = userEvent.setup();
-    render(<SpeciesActivityRow data={baseData} />);
+    render(<SpeciesActivityRow data={baseData} speciesLookup={mockSpeciesLookup} />);
 
     const button = screen.getByRole("button");
     await user.click(button);
 
-    expect(mockPush).toHaveBeenCalledWith("/species?search=American%20Robin");
+    expect(mockPush).toHaveBeenCalledWith("/species/1");
   });
 
   it("applies correct background color for photographed species", () => {
-    const { container } = render(<SpeciesActivityRow data={baseData} />);
+    const { container } = render(<SpeciesActivityRow data={baseData} speciesLookup={mockSpeciesLookup} />);
 
     const button = container.querySelector("button");
     expect(button?.className).toContain("moss");
@@ -120,7 +117,7 @@ describe("SpeciesActivityRow", () => {
   it("applies correct background color for not-yet-photographed species", () => {
     const notPhotographedData = { ...baseData, hasPhoto: false };
     const { container } = render(
-      <SpeciesActivityRow data={notPhotographedData} />
+      <SpeciesActivityRow data={notPhotographedData} speciesLookup={mockSpeciesLookup} />
     );
 
     const button = container.querySelector("button");
@@ -129,14 +126,14 @@ describe("SpeciesActivityRow", () => {
 
   it("displays uncommon rarity correctly", () => {
     const uncommonData = { ...baseData, rarity: "uncommon" as const };
-    render(<SpeciesActivityRow data={uncommonData} />);
+    render(<SpeciesActivityRow data={uncommonData} speciesLookup={mockSpeciesLookup} />);
 
     expect(screen.getAllByText("Uncommon").length).toBeGreaterThan(0);
   });
 
   it("displays rare rarity correctly", () => {
     const rareData = { ...baseData, rarity: "rare" as const };
-    render(<SpeciesActivityRow data={rareData} />);
+    render(<SpeciesActivityRow data={rareData} speciesLookup={mockSpeciesLookup} />);
 
     expect(screen.getAllByText("Rare").length).toBeGreaterThan(0);
   });

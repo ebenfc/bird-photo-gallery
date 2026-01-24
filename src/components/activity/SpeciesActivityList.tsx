@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { SpeciesActivityData, Rarity, SpeciesActivitySort } from "@/types";
 import SpeciesActivityFilters from "./SpeciesActivityFilters";
 import SpeciesActivityRow from "./SpeciesActivityRow";
@@ -8,6 +8,11 @@ import SpeciesActivityRow from "./SpeciesActivityRow";
 interface SpeciesActivityListProps {
   data: SpeciesActivityData[];
   loading?: boolean;
+}
+
+interface SpeciesLookup {
+  id: number;
+  commonName: string;
 }
 
 export default function SpeciesActivityList({
@@ -20,6 +25,28 @@ export default function SpeciesActivityList({
   >("all");
   const [sortOption, setSortOption] =
     useState<SpeciesActivitySort>("count-desc");
+  const [speciesLookup, setSpeciesLookup] = useState<SpeciesLookup[]>([]);
+
+  // Fetch species data for ID lookup
+  useEffect(() => {
+    const fetchSpecies = async () => {
+      try {
+        const response = await fetch("/api/species");
+        if (!response.ok) return;
+        const data = await response.json();
+        setSpeciesLookup(
+          data.species.map((s: { id: number; commonName: string }) => ({
+            id: s.id,
+            commonName: s.commonName,
+          }))
+        );
+      } catch (error) {
+        console.error("Failed to fetch species for lookup:", error);
+      }
+    };
+
+    fetchSpecies();
+  }, []);
 
   // Filter and sort data
   const filteredAndSortedData = useMemo(() => {
@@ -181,7 +208,11 @@ export default function SpeciesActivityList({
       {/* Species List */}
       <div className="space-y-2">
         {filteredAndSortedData.map((species) => (
-          <SpeciesActivityRow key={species.commonName} data={species} />
+          <SpeciesActivityRow
+            key={species.commonName}
+            data={species}
+            speciesLookup={speciesLookup}
+          />
         ))}
       </div>
     </div>
