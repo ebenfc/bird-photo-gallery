@@ -335,27 +335,6 @@ See [BUGS.md](BUGS.md) for tracked issues and fixes.
 
 ## Recent Updates
 
-### 2026-01-24: Activity Page Bubble Chart Visualization 🎨
-
-**Redesigned the Activity page** with an interactive bubble chart as the primary visualization.
-
-**Changes:**
-- Added bubble chart showing all detected bird species with visit frequency
-- Bubble size represents detection count (logarithmic scale)
-- Color-coded: green/moss for photographed, blue/sky for not-yet-photographed
-- Interactive features: hover tooltips with details, click to navigate to species search
-- Detailed statistics moved to collapsible section (collapsed by default)
-- Single API call optimization - lifted data fetching to page level
-- Fully responsive design (desktop, tablet, mobile)
-- Comprehensive test coverage: 25 new tests for BubbleChart, BubbleChartTooltip, and CollapsibleSection components
-
-**New Components:**
-- `BubbleChart` - Custom SVG bubble chart with collision detection and spiral layout algorithm
-- `BubbleChartTooltip` - Smart-positioned tooltip with portal rendering
-- `CollapsibleSection` - Reusable accordion component for expandable content
-
-**Result:** Activity page now provides immediate visual insights into bird activity patterns and photo capture status at a glance, with detailed stats still accessible via expandable section.
-
 ### 2026-01-24: Activity Page Refinements 🔍
 
 **Enhanced the Activity page** to provide better bird detection insights.

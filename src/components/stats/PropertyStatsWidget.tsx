@@ -1,19 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import HeardBadge from "@/components/ui/HeardBadge";
 import PropertyBirdsModal, { TabType } from "./PropertyBirdsModal";
 import { PropertyStats } from "@/types";
 
-interface PropertyStatsWidgetProps {
-  stats: PropertyStats | null;
-  loading: boolean;
-}
-
-export default function PropertyStatsWidget({
-  stats,
-  loading,
-}: PropertyStatsWidgetProps) {
+export default function PropertyStatsWidget() {
+  const [stats, setStats] = useState<PropertyStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTab, setModalTab] = useState<TabType>("all");
 
@@ -21,6 +16,24 @@ export default function PropertyStatsWidget({
     setModalTab(tab);
     setModalOpen(true);
   };
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch("/api/haikubox/stats");
+        if (!res.ok) throw new Error("Failed to fetch");
+        const data = await res.json();
+        setStats(data);
+      } catch (err) {
+        setError("Unable to load Haikubox stats");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   if (loading) {
     return (
@@ -35,8 +48,8 @@ export default function PropertyStatsWidget({
     );
   }
 
-  // Silently hide widget if no data
-  if (!stats || stats.totalHeard === 0) {
+  // Silently hide widget if Haikubox unavailable or no data
+  if (error || !stats || stats.totalHeard === 0) {
     return null;
   }
 
