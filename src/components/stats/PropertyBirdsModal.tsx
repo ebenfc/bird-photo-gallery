@@ -9,7 +9,7 @@ interface PropertyBirdsModalProps {
   initialTab?: TabType;
 }
 
-export type TabType = "captured" | "opportunities";
+export type TabType = "all" | "captured" | "opportunities";
 type PriorityLevel = "high" | "medium" | "low";
 
 interface BirdWithPriority {
@@ -72,7 +72,7 @@ function getRelativeTime(dateString: string | null): string {
 export default function PropertyBirdsModal({
   isOpen,
   onClose,
-  initialTab = "opportunities",
+  initialTab = "all",
 }: PropertyBirdsModalProps) {
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
 
@@ -138,6 +138,13 @@ export default function PropertyBirdsModal({
       .sort((a, b) => b.yearlyCount - a.yearlyCount);
   }, [stats]);
 
+  // All birds (both captured and not captured)
+  const allBirds = useMemo(() => {
+    if (!stats) return [];
+    const allDetected = [...(stats.heardNotPhotographed || []), ...(capturedBirds || [])];
+    return allDetected.sort((a, b) => b.yearlyCount - a.yearlyCount);
+  }, [stats, capturedBirds]);
+
   if (!isOpen) return null;
 
   const totalOpportunities =
@@ -195,6 +202,17 @@ export default function PropertyBirdsModal({
         {/* Tabs */}
         <div className="flex gap-2 p-4 border-b border-[var(--border)]">
           <button
+            onClick={() => setActiveTab("all")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              activeTab === "all"
+                ? "bg-[var(--forest-100)] text-[var(--forest-700)]"
+                : "text-[var(--mist-500)] hover:bg-[var(--mist-50)]"
+            }`}
+          >
+            <span>🐦</span>
+            <span>All ({stats?.totalHeard || 0})</span>
+          </button>
+          <button
             onClick={() => setActiveTab("captured")}
             className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
               activeTab === "captured"
@@ -223,6 +241,37 @@ export default function PropertyBirdsModal({
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-2 border-[var(--moss-200)] border-t-[var(--moss-600)]" />
+            </div>
+          ) : activeTab === "all" ? (
+            /* All Birds Tab */
+            <div className="space-y-2">
+              {allBirds.length > 0 ? (
+                allBirds.map((bird) => {
+                  const hasPhoto = capturedBirds.some((b) => b.commonName === bird.commonName);
+                  return (
+                    <div
+                      key={bird.commonName}
+                      className={`flex items-center justify-between py-2 px-3 rounded-[var(--radius-md)] ${
+                        hasPhoto ? "bg-[var(--moss-50)]" : "bg-[var(--sky-50)]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className={hasPhoto ? "text-[var(--moss-500)]" : "text-[var(--sky-500)]"}>
+                          {hasPhoto ? "✓" : "◌"}
+                        </span>
+                        <span className="text-[var(--forest-800)]">{bird.commonName}</span>
+                      </div>
+                      <span className="text-sm text-[var(--mist-500)]">
+                        ({formatCount(bird.yearlyCount)}x heard)
+                      </span>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="text-center py-12 text-[var(--mist-500)]">
+                  <p>No birds detected yet</p>
+                </div>
+              )}
             </div>
           ) : activeTab === "opportunities" ? (
             <div className="space-y-6">

@@ -10,9 +10,9 @@ export default function PropertyStatsWidget() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalTab, setModalTab] = useState<TabType>("opportunities");
+  const [modalTab, setModalTab] = useState<TabType>("all");
 
-  const openModal = (tab: TabType = "opportunities") => {
+  const openModal = (tab: TabType = "all") => {
     setModalTab(tab);
     setModalOpen(true);
   };
@@ -84,7 +84,7 @@ export default function PropertyStatsWidget() {
               <span className="text-sm text-[var(--mist-500)]">{stats.year}</span>
             </div>
             <button
-              onClick={() => openModal("opportunities")}
+              onClick={() => openModal("all")}
               className="text-sm text-[var(--sky-600)] hover:text-[var(--sky-700)] font-medium flex items-center gap-1 transition-colors"
             >
               View All
@@ -99,7 +99,7 @@ export default function PropertyStatsWidget() {
         <div className="p-6">
           <div className="grid grid-cols-3 gap-4 mb-6">
             <button
-              onClick={() => openModal("opportunities")}
+              onClick={() => openModal("all")}
               className="text-center p-3 rounded-xl bg-[var(--sky-50)] hover:bg-[var(--sky-100)] transition-colors cursor-pointer"
             >
               <div className="text-2xl font-bold text-[var(--sky-700)]">
