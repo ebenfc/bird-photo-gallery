@@ -153,14 +153,13 @@ export default function ResourcesPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[var(--bg-page)] py-6 sm:py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="pnw-texture min-h-screen">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] mb-3">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[var(--forest-900)] tracking-tight mb-2">
             Resources
           </h1>
-          <p className="text-[var(--text-secondary)] text-base sm:text-lg">
+          <p className="text-[var(--mist-600)]">
             Bird Feed is an online gallery tool for cataloguing your bird activity.
             Use these resources for bird identification and in-depth species information.
           </p>
@@ -176,10 +175,10 @@ export default function ResourcesPage() {
             >
               <div className="bg-gradient-to-r from-[var(--forest-50)] to-[var(--moss-50)]
                 border-b border-[var(--border-light)] px-5 sm:px-6 py-4">
-                <h2 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-1">
+                <h2 className="text-xl sm:text-2xl font-bold text-[var(--forest-900)] mb-1">
                   {section.title}
                 </h2>
-                <p className="text-sm sm:text-base text-[var(--text-secondary)]">
+                <p className="text-sm sm:text-base text-[var(--mist-600)]">
                   {section.description}
                 </p>
               </div>
@@ -189,7 +188,7 @@ export default function ResourcesPage() {
                 {section.title === "Haikubox Setup" && (
                   <div className="mb-6 p-5 bg-gradient-to-br from-[var(--sky-50)] to-[var(--moss-50)]
                     rounded-[var(--radius-lg)] border border-[var(--sky-200)]">
-                    <h3 className="font-semibold text-[var(--text-primary)] mb-3 flex items-center gap-2">
+                    <h3 className="font-semibold text-[var(--forest-900)] mb-3 flex items-center gap-2">
                       <svg className="w-5 h-5 text-[var(--sky-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -199,7 +198,7 @@ export default function ResourcesPage() {
 
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                        <label className="block text-sm font-medium text-[var(--forest-900)] mb-2">
                           Haikubox Serial Number
                         </label>
                         <input
@@ -208,11 +207,11 @@ export default function ResourcesPage() {
                           onChange={(e) => setHaikuboxSerial(e.target.value)}
                           placeholder="e.g., 1000000066e59043"
                           className="w-full px-4 py-2.5 border border-[var(--border-light)] rounded-[var(--radius-md)]
-                            text-[var(--text-primary)] bg-white
+                            text-[var(--forest-900)] bg-white
                             focus:outline-none focus:ring-2 focus:ring-[var(--moss-500)] focus:border-transparent
                             transition-all duration-[var(--timing-fast)]"
                         />
-                        <p className="text-xs text-[var(--text-secondary)] mt-1.5">
+                        <p className="text-xs text-[var(--mist-600)] mt-1.5">
                           Find your serial number on your Haikubox device or in the Haikubox app
                         </p>
                       </div>
@@ -295,11 +294,11 @@ export default function ResourcesPage() {
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-[var(--text-primary)] mb-1
+                          <h3 className="font-semibold text-[var(--forest-900)] mb-1
                             group-hover:text-[var(--moss-700)] transition-colors duration-[var(--timing-fast)]">
                             {link.name}
                           </h3>
-                          <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                          <p className="text-sm text-[var(--mist-600)] leading-relaxed">
                             {link.description}
                           </p>
                         </div>
@@ -312,16 +311,15 @@ export default function ResourcesPage() {
           ))}
         </div>
 
-        {/* Footer Note */}
-        <div className="mt-8 p-4 bg-[var(--moss-50)] rounded-[var(--radius-md)]
-          border border-[var(--moss-200)]">
-          <p className="text-sm text-[var(--text-secondary)] text-center">
-            <span className="font-semibold text-[var(--text-primary)]">Note:</span> Bird Feed
-            is designed for organizing and cataloguing your bird photos, not for detailed species
-            identification or research. These external resources complement Bird Feed by providing
-            expert identification tools and comprehensive species information.
-          </p>
-        </div>
+      {/* Footer Note */}
+      <div className="mt-8 p-4 bg-[var(--moss-50)] rounded-[var(--radius-md)]
+        border border-[var(--moss-200)]">
+        <p className="text-sm text-[var(--mist-600)] text-center">
+          <span className="font-semibold text-[var(--forest-900)]">Note:</span> Bird Feed
+          is designed for organizing and cataloguing your bird photos, not for detailed species
+          identification or research. These external resources complement Bird Feed by providing
+          expert identification tools and comprehensive species information.
+        </p>
       </div>
     </div>
   );

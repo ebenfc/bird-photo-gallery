@@ -9,6 +9,8 @@ interface SpeciesActivityListProps {
   data: SpeciesActivityData[];
   loading?: boolean;
   onUnassignedClick?: (data: SpeciesActivityData) => void;
+  showMobileFilters?: boolean;
+  onActiveFiltersChange?: (filters: { rarity: boolean; photo: boolean }) => void;
 }
 
 interface SpeciesLookup {
@@ -20,6 +22,8 @@ export default function SpeciesActivityList({
   data,
   loading = false,
   onUnassignedClick,
+  showMobileFilters = false,
+  onActiveFiltersChange,
 }: SpeciesActivityListProps) {
   const [rarityFilter, setRarityFilter] = useState<Rarity | "unassigned" | "all">("all");
   const [photoFilter, setPhotoFilter] = useState<
@@ -28,6 +32,14 @@ export default function SpeciesActivityList({
   const [sortOption, setSortOption] =
     useState<SpeciesActivitySort>("count-desc");
   const [speciesLookup, setSpeciesLookup] = useState<SpeciesLookup[]>([]);
+
+  // Report active filters to parent
+  useEffect(() => {
+    onActiveFiltersChange?.({
+      rarity: rarityFilter !== "all",
+      photo: photoFilter !== "all",
+    });
+  }, [rarityFilter, photoFilter, onActiveFiltersChange]);
 
   // Fetch species data for ID lookup
   useEffect(() => {
@@ -168,6 +180,7 @@ export default function SpeciesActivityList({
           onRarityChange={setRarityFilter}
           onPhotoFilterChange={setPhotoFilter}
           onSortChange={setSortOption}
+          showMobileFilters={showMobileFilters}
         />
         <div className="text-center py-12 px-4">
           <svg
@@ -207,6 +220,7 @@ export default function SpeciesActivityList({
         onRarityChange={setRarityFilter}
         onPhotoFilterChange={setPhotoFilter}
         onSortChange={setSortOption}
+        showMobileFilters={showMobileFilters}
       />
 
       {/* Species List */}
