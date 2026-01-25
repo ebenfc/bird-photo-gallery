@@ -26,6 +26,7 @@ function GalleryContent() {
     }
     return "recent_upload";
   });
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   // Get filter state from URL (memoized to prevent infinite loops)
   const selectedSpecies = searchParams.get("species")
@@ -288,21 +289,25 @@ function GalleryContent() {
     }
   };
 
+  // Count active filters for the badge
+  const activeFilterCount = (selectedSpecies ? 1 : 0) + (showFavoritesOnly ? 1 : 0) + selectedRarities.length;
+
   return (
     <div className="pnw-texture min-h-screen pb-24 sm:pb-0">
-      <div className="flex items-center justify-between mb-5 sm:mb-8">
+      {/* Desktop header */}
+      <div className="hidden sm:flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[var(--forest-900)] tracking-tight">
-            Gallery
+          <h1 className="text-3xl font-bold text-[var(--forest-900)] tracking-tight">
+            Feed
           </h1>
           <p className="text-[var(--mist-600)] mt-1">
             Browse, upload, and organize your bird photography collection.
           </p>
         </div>
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => router.push('/species')}
-            className="text-xs sm:text-sm font-semibold text-[var(--forest-700)] px-3 sm:px-4 py-1.5
+            className="text-sm font-semibold text-[var(--forest-700)] px-4 py-1.5
               bg-gradient-to-br from-[var(--moss-50)] to-[var(--forest-50)]
               rounded-full shadow-[var(--shadow-xs)] ring-1 ring-[var(--border)]
               hover:shadow-[var(--shadow-sm)] hover:ring-[var(--moss-300)]
@@ -310,13 +315,12 @@ function GalleryContent() {
           >
             {species.filter(s => s.photoCount && s.photoCount > 0).length} species
           </button>
-          <span className="text-xs sm:text-sm font-semibold text-[var(--forest-700)] px-3 sm:px-4 py-1.5
+          <span className="text-sm font-semibold text-[var(--forest-700)] px-4 py-1.5
             bg-gradient-to-br from-[var(--moss-50)] to-[var(--forest-50)]
             rounded-full shadow-[var(--shadow-xs)] ring-1 ring-[var(--border)]">
             {photos.length} photo{photos.length !== 1 ? "s" : ""}
           </span>
-          {/* Upload button - hidden on mobile, FAB shown instead */}
-          <Button onClick={() => setShowUploadModal(true)} className="hidden sm:flex">
+          <Button onClick={() => setShowUploadModal(true)}>
             <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
@@ -325,17 +329,85 @@ function GalleryContent() {
         </div>
       </div>
 
-      <GalleryFilters
-        species={species}
-        selectedSpecies={selectedSpecies}
-        showFavoritesOnly={showFavoritesOnly}
-        selectedRarities={selectedRarities}
-        sortOption={sortOption}
-        onSpeciesChange={(id) => updateFilters(id, showFavoritesOnly, selectedRarities)}
-        onFavoritesChange={(value) => updateFilters(selectedSpecies, value, selectedRarities)}
-        onRarityChange={(rarities) => updateFilters(selectedSpecies, showFavoritesOnly, rarities)}
-        onSortChange={handleSortChange}
-      />
+      {/* Mobile header - compact with filter toggle */}
+      <div className="sm:hidden mb-4">
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-2xl font-bold text-[var(--forest-900)] tracking-tight">
+            Feed
+          </h1>
+          <button
+            onClick={() => setShowMobileFilters(!showMobileFilters)}
+            className={`flex items-center gap-1.5 px-3 py-2 text-sm font-semibold
+              rounded-[var(--radius-lg)] border
+              transition-all duration-[var(--timing-fast)] active:scale-95
+              ${showMobileFilters || activeFilterCount > 0
+                ? "bg-gradient-to-b from-[var(--forest-500)] to-[var(--forest-600)] text-white border-[var(--forest-600)]"
+                : "bg-white text-[var(--forest-700)] border-[var(--mist-200)] hover:border-[var(--moss-300)]"
+              }`}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+            Filter
+            {activeFilterCount > 0 && (
+              <span className="ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full bg-white/20">
+                {activeFilterCount}
+              </span>
+            )}
+            <svg
+              className={`w-4 h-4 transition-transform duration-200 ${showMobileFilters ? "rotate-180" : ""}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-[var(--mist-500)]">
+          <button
+            onClick={() => router.push('/species')}
+            className="hover:text-[var(--forest-600)] transition-colors"
+          >
+            {species.filter(s => s.photoCount && s.photoCount > 0).length} species
+          </button>
+          <span>•</span>
+          <span>{photos.length} photo{photos.length !== 1 ? "s" : ""}</span>
+        </div>
+      </div>
+
+      {/* Mobile filters - collapsible */}
+      <div className={`sm:hidden overflow-hidden transition-all duration-300 ease-out
+        ${showMobileFilters ? "max-h-96 opacity-100 mb-4" : "max-h-0 opacity-0"}`}>
+        <div className="bg-white/80 backdrop-blur-sm rounded-[var(--radius-xl)] p-4 shadow-[var(--shadow-sm)] border border-[var(--border)]">
+          <GalleryFilters
+            species={species}
+            selectedSpecies={selectedSpecies}
+            showFavoritesOnly={showFavoritesOnly}
+            selectedRarities={selectedRarities}
+            sortOption={sortOption}
+            onSpeciesChange={(id) => updateFilters(id, showFavoritesOnly, selectedRarities)}
+            onFavoritesChange={(value) => updateFilters(selectedSpecies, value, selectedRarities)}
+            onRarityChange={(rarities) => updateFilters(selectedSpecies, showFavoritesOnly, rarities)}
+            onSortChange={handleSortChange}
+          />
+        </div>
+      </div>
+
+      {/* Desktop filters - always visible */}
+      <div className="hidden sm:block">
+        <GalleryFilters
+          species={species}
+          selectedSpecies={selectedSpecies}
+          showFavoritesOnly={showFavoritesOnly}
+          selectedRarities={selectedRarities}
+          sortOption={sortOption}
+          onSpeciesChange={(id) => updateFilters(id, showFavoritesOnly, selectedRarities)}
+          onFavoritesChange={(value) => updateFilters(selectedSpecies, value, selectedRarities)}
+          onRarityChange={(rarities) => updateFilters(selectedSpecies, showFavoritesOnly, rarities)}
+          onSortChange={handleSortChange}
+        />
+      </div>
 
       <PhotoGrid
         photos={photos}
