@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Photo, HaikuboxDetection } from "@/types";
@@ -57,6 +57,10 @@ export default function PhotoModal({
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
+  // Track if we're navigating between photos (to preserve fullscreen/detail state)
+  const isNavigatingRef = useRef(false);
+  const wasFullscreenRef = useRef(false);
+
   // Reset edit state when photo changes
   useEffect(() => {
     setIsEditingDate(false);
@@ -65,11 +69,22 @@ export default function PhotoModal({
     setEditNotesValue("");
     setShowDeleteConfirm(false);
     setJustFavorited(false);
-    setIsFullscreen(false);
-    setShowFullscreenUI(false);
     setCoverPhotoSet(false);
     setShowOverflowMenu(false);
     setDetection(null);
+
+    // Preserve fullscreen state when navigating between photos
+    if (isNavigatingRef.current) {
+      // Restore fullscreen state after navigation
+      setIsFullscreen(wasFullscreenRef.current);
+      setShowFullscreenUI(wasFullscreenRef.current);
+      isNavigatingRef.current = false;
+    } else {
+      // Opening fresh - reset fullscreen
+      setIsFullscreen(false);
+      setShowFullscreenUI(false);
+    }
+
     if (fullscreenUITimer) {
       clearTimeout(fullscreenUITimer);
       setFullscreenUITimer(null);
@@ -153,8 +168,14 @@ export default function PhotoModal({
           onClose();
         }
       } else if (e.key === "ArrowLeft" && onNavigate && canNavigate.prev) {
+        // Preserve current view state during keyboard navigation
+        isNavigatingRef.current = true;
+        wasFullscreenRef.current = isFullscreen;
         onNavigate("prev");
       } else if (e.key === "ArrowRight" && onNavigate && canNavigate.next) {
+        // Preserve current view state during keyboard navigation
+        isNavigatingRef.current = true;
+        wasFullscreenRef.current = isFullscreen;
         onNavigate("next");
       } else if (e.key === "f") {
         setIsFullscreen(prev => !prev);
@@ -226,10 +247,14 @@ export default function PhotoModal({
     const isRightSwipe = distance < -minSwipeDistance;
 
     if (isLeftSwipe && canNavigate.next) {
-      // Swiped left = next photo
+      // Swiped left = next photo - preserve current view state
+      isNavigatingRef.current = true;
+      wasFullscreenRef.current = isFullscreen;
       onNavigate("next");
     } else if (isRightSwipe && canNavigate.prev) {
-      // Swiped right = previous photo
+      // Swiped right = previous photo - preserve current view state
+      isNavigatingRef.current = true;
+      wasFullscreenRef.current = isFullscreen;
       onNavigate("prev");
     }
   };
@@ -296,7 +321,13 @@ export default function PhotoModal({
             {/* Navigation in fullscreen */}
             {onNavigate && canNavigate.prev && (
               <button
-                onClick={(e) => { e.stopPropagation(); onNavigate("prev"); showUITemporarily(); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  isNavigatingRef.current = true;
+                  wasFullscreenRef.current = true;
+                  onNavigate("prev");
+                  showUITemporarily();
+                }}
                 className="absolute left-4 top-1/2 -translate-y-1/2 p-3
                   bg-black/30 backdrop-blur-sm rounded-full text-white/80
                   hover:bg-black/50 transition-all animate-fade-in"
@@ -308,7 +339,13 @@ export default function PhotoModal({
             )}
             {onNavigate && canNavigate.next && (
               <button
-                onClick={(e) => { e.stopPropagation(); onNavigate("next"); showUITemporarily(); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  isNavigatingRef.current = true;
+                  wasFullscreenRef.current = true;
+                  onNavigate("next");
+                  showUITemporarily();
+                }}
                 className="absolute right-4 top-1/2 -translate-y-1/2 p-3
                   bg-black/30 backdrop-blur-sm rounded-full text-white/80
                   hover:bg-black/50 transition-all animate-fade-in"
@@ -383,7 +420,12 @@ export default function PhotoModal({
           {/* Navigation arrows */}
           {onNavigate && canNavigate.prev && (
             <button
-              onClick={(e) => { e.stopPropagation(); onNavigate("prev"); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                isNavigatingRef.current = true;
+                wasFullscreenRef.current = false;
+                onNavigate("prev");
+              }}
               className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-3.5
                 bg-white/10 backdrop-blur-md rounded-full
                 text-white/80 hover:text-white hover:bg-white/20
@@ -398,7 +440,12 @@ export default function PhotoModal({
           )}
           {onNavigate && canNavigate.next && (
             <button
-              onClick={(e) => { e.stopPropagation(); onNavigate("next"); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                isNavigatingRef.current = true;
+                wasFullscreenRef.current = false;
+                onNavigate("next");
+              }}
               className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-3.5
                 bg-white/10 backdrop-blur-md rounded-full
                 text-white/80 hover:text-white hover:bg-white/20

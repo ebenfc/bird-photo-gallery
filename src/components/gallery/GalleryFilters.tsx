@@ -52,7 +52,7 @@ export default function GalleryFilters({
   };
 
   return (
-    <div className="space-y-4 mb-6 animate-fade-in">
+    <div className="space-y-4 sm:mb-6 animate-fade-in">
       {/* Row 1: Dropdowns */}
       <div className="flex flex-col sm:flex-row gap-3">
         <Select
