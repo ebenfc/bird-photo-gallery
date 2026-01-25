@@ -1,9 +1,10 @@
 // Haikubox API Client
 // Fetches bird detection data from Haikubox audio monitoring device
 
+import { getHaikuboxSerial } from "./settings";
+
 // Configuration
 const HAIKUBOX_BASE_URL = "https://api.haikubox.com";
-const HAIKUBOX_SERIAL = process.env.HAIKUBOX_SERIAL || "28372F870638";
 
 // Types for Haikubox API responses (matching actual API format)
 export interface HaikuboxYearlySpecies {
@@ -45,7 +46,8 @@ export interface HaikuboxRecentDetection {
 export async function fetchYearlyDetections(
   year: number
 ): Promise<HaikuboxYearlySpecies[]> {
-  const url = `${HAIKUBOX_BASE_URL}/haikubox/${HAIKUBOX_SERIAL}/yearly-count?year=${year}`;
+  const serial = await getHaikuboxSerial();
+  const url = `${HAIKUBOX_BASE_URL}/haikubox/${serial}/yearly-count?year=${year}`;
 
   try {
     const response = await fetch(url, {
@@ -69,7 +71,8 @@ export async function fetchYearlyDetections(
 export async function fetchDailyDetections(
   date: string
 ): Promise<HaikuboxDailySpecies[]> {
-  const url = `${HAIKUBOX_BASE_URL}/haikubox/${HAIKUBOX_SERIAL}/daily-count?date=${date}`;
+  const serial = await getHaikuboxSerial();
+  const url = `${HAIKUBOX_BASE_URL}/haikubox/${serial}/daily-count?date=${date}`;
 
   try {
     const response = await fetch(url, {
@@ -94,7 +97,8 @@ export async function fetchDailyDetections(
 export async function fetchRecentDetections(
   hours: number = 8
 ): Promise<HaikuboxRecentDetection[]> {
-  const url = `${HAIKUBOX_BASE_URL}/haikubox/${HAIKUBOX_SERIAL}/detections?hours=${hours}`;
+  const serial = await getHaikuboxSerial();
+  const url = `${HAIKUBOX_BASE_URL}/haikubox/${serial}/detections?hours=${hours}`;
 
   try {
     const response = await fetch(url, {

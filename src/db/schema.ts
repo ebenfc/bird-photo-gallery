@@ -125,3 +125,18 @@ export const haikuboxActivityLogRelations = relations(haikuboxActivityLog, ({ on
 // Activity Log Type exports
 export type HaikuboxActivityLog = typeof haikuboxActivityLog.$inferSelect;
 export type NewHaikuboxActivityLog = typeof haikuboxActivityLog.$inferInsert;
+
+// App Settings Table - Stores global application settings
+export const appSettings = pgTable("app_settings", {
+  id: serial("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
+// App Settings Type exports
+export type AppSetting = typeof appSettings.$inferSelect;
+export type NewAppSetting = typeof appSettings.$inferInsert;

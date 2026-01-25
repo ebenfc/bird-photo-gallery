@@ -1,6 +1,91 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 export default function ResourcesPage() {
+  // Haikubox connection form state
+  const [haikuboxSerial, setHaikuboxSerial] = useState("");
+  const [testing, setTesting] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [testStatus, setTestStatus] = useState<{
+    success: boolean;
+    message: string;
+  } | null>(null);
+  const [saveStatus, setSaveStatus] = useState<string | null>(null);
+
+  // Load existing serial on mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const res = await fetch("/api/settings");
+        const data = await res.json();
+        if (data.haikuboxSerial) {
+          setHaikuboxSerial(data.haikuboxSerial);
+        }
+      } catch (error) {
+        console.error("Failed to load settings:", error);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  const handleTestConnection = async () => {
+    setTesting(true);
+    setTestStatus(null);
+    try {
+      const res = await fetch("/api/haikubox/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ serial: haikuboxSerial }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setTestStatus({
+          success: true,
+          message: `✓ Connected to ${data.deviceName}`,
+        });
+      } else {
+        setTestStatus({
+          success: false,
+          message: data.error || "Connection failed",
+        });
+      }
+    } catch (_error) {
+      setTestStatus({
+        success: false,
+        message: "Network error. Please try again.",
+      });
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveStatus(null);
+    try {
+      const res = await fetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ haikuboxSerial }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setSaveStatus("✓ Settings saved successfully!");
+        // Clear save status after 3 seconds
+        setTimeout(() => setSaveStatus(null), 3000);
+      } else {
+        setSaveStatus(data.error || "Failed to save");
+      }
+    } catch (_error) {
+      setSaveStatus("Network error. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const resources = [
     {
       title: "Bird Identification",
@@ -59,9 +144,9 @@ export default function ResourcesPage() {
           description: "Purchase a Haikubox to automatically detect and identify birds visiting your yard 24/7",
         },
         {
-          name: "Connect Haikubox to Bird Feed",
-          url: "https://haikubox.com/blog/bird-feed-integration",
-          description: "Learn how to connect your Haikubox to Bird Feed to automatically import bird detections and suggested photos",
+          name: "Haikubox API Documentation",
+          url: "https://api.haikubox.com/docs",
+          description: "Technical documentation for the Haikubox API",
         },
       ],
     },
@@ -100,6 +185,82 @@ export default function ResourcesPage() {
               </div>
 
               <div className="p-5 sm:p-6">
+                {/* Haikubox Connection Form (special case for Haikubox section) */}
+                {section.title === "Haikubox Setup" && (
+                  <div className="mb-6 p-5 bg-gradient-to-br from-[var(--sky-50)] to-[var(--moss-50)]
+                    rounded-[var(--radius-lg)] border border-[var(--sky-200)]">
+                    <h3 className="font-semibold text-[var(--text-primary)] mb-3 flex items-center gap-2">
+                      <svg className="w-5 h-5 text-[var(--sky-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      Device Configuration
+                    </h3>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                          Haikubox Serial Number
+                        </label>
+                        <input
+                          type="text"
+                          value={haikuboxSerial}
+                          onChange={(e) => setHaikuboxSerial(e.target.value)}
+                          placeholder="e.g., 1000000066e59043"
+                          className="w-full px-4 py-2.5 border border-[var(--border-light)] rounded-[var(--radius-md)]
+                            text-[var(--text-primary)] bg-white
+                            focus:outline-none focus:ring-2 focus:ring-[var(--moss-500)] focus:border-transparent
+                            transition-all duration-[var(--timing-fast)]"
+                        />
+                        <p className="text-xs text-[var(--text-secondary)] mt-1.5">
+                          Find your serial number on your Haikubox device or in the Haikubox app
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <button
+                          onClick={handleTestConnection}
+                          disabled={!haikuboxSerial || testing}
+                          className="px-4 py-2.5 border-2 border-[var(--moss-600)] text-[var(--moss-700)]
+                            rounded-[var(--radius-md)] font-medium
+                            hover:bg-[var(--moss-50)] disabled:opacity-50 disabled:cursor-not-allowed
+                            transition-all duration-[var(--timing-fast)] active:scale-95"
+                        >
+                          {testing ? "Testing..." : "Test Connection"}
+                        </button>
+
+                        <button
+                          onClick={handleSave}
+                          disabled={!haikuboxSerial || saving || !testStatus?.success}
+                          className="px-4 py-2.5 bg-gradient-to-b from-[var(--forest-500)] to-[var(--forest-600)]
+                            text-white rounded-[var(--radius-md)] font-medium shadow-[var(--shadow-sm)]
+                            hover:from-[var(--forest-600)] hover:to-[var(--forest-700)]
+                            disabled:opacity-50 disabled:cursor-not-allowed
+                            transition-all duration-[var(--timing-fast)] active:scale-95"
+                        >
+                          {saving ? "Saving..." : "Save"}
+                        </button>
+                      </div>
+
+                      {testStatus && (
+                        <div className={`p-3 rounded-[var(--radius-md)] text-sm font-medium ${
+                          testStatus.success
+                            ? "bg-green-50 text-green-800 border border-green-200"
+                            : "bg-red-50 text-red-800 border border-red-200"
+                        }`}>
+                          {testStatus.message}
+                        </div>
+                      )}
+
+                      {saveStatus && (
+                        <div className="p-3 rounded-[var(--radius-md)] bg-blue-50 text-blue-800 border border-blue-200 text-sm font-medium">
+                          {saveStatus}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-5">
                   {section.links.map((link, linkIdx) => (
                     <a
