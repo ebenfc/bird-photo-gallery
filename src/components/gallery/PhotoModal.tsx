@@ -53,6 +53,10 @@ export default function PhotoModal({
   const [detection, setDetection] = useState<HaikuboxDetection | null>(null);
   const [_detectionLoading, setDetectionLoading] = useState(false);
 
+  // Touch/swipe gesture state
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
   // Reset edit state when photo changes
   useEffect(() => {
     setIsEditingDate(false);
@@ -196,6 +200,40 @@ export default function PhotoModal({
     }
   };
 
+  // Minimum swipe distance (in px) to trigger navigation
+  const minSwipeDistance = 50;
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    const touch = e.targetTouches[0];
+    if (touch) {
+      setTouchStart(touch.clientX);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const touch = e.targetTouches[0];
+    if (touch) {
+      setTouchEnd(touch.clientX);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd || !onNavigate) return;
+
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && canNavigate.next) {
+      // Swiped left = next photo
+      onNavigate("next");
+    } else if (isRightSwipe && canNavigate.prev) {
+      // Swiped right = previous photo
+      onNavigate("prev");
+    }
+  };
+
   if (!photo) return null;
 
   const formatDate = (dateStr: string) => {
@@ -234,6 +272,9 @@ export default function PhotoModal({
       <div
         className="fixed inset-0 z-50 bg-black flex items-center justify-center cursor-pointer"
         onClick={handleFullscreenTap}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         <Image
           src={photo.originalUrl}
@@ -303,6 +344,9 @@ export default function PhotoModal({
               setIsFullscreen(true);
             }
           }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           {/* Top controls bar */}
           <div className="absolute top-4 left-4 right-4 z-20 flex justify-between items-center">
