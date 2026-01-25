@@ -176,3 +176,38 @@ Optional:
 **Logo:**
 - Updated Bird Feed logo with Dark Eyed Junco-inspired design (path-based SVG)
 - Note: Logo may need further refinement to match mockups
+
+### Haikubox Connection Workflow (January 2026)
+
+**Resources Page Enhancement:**
+- Replaced broken external link with functional in-page connection form
+- Users can now configure their Haikubox device directly in the app
+- Form includes:
+  - Serial number input with validation (alphanumeric only)
+  - "Test Connection" button to validate device before saving
+  - "Save" button (only enabled after successful test)
+  - Real-time success/error feedback
+  - Auto-loads existing serial on page mount
+
+**New Database:**
+- Added `app_settings` table to store global application settings
+- Settings stored as key-value pairs
+- Created `src/lib/settings.ts` service for database-backed configuration
+
+**New API Endpoints:**
+- `POST /api/haikubox/test` - Validates Haikubox serial by testing connection to Haikubox API
+- `GET /api/settings` - Retrieves current settings from database
+- `POST /api/settings` - Saves Haikubox serial to database
+
+**Backend Integration:**
+- Updated `src/lib/haikubox.ts` to read serial from database first
+- Falls back to `HAIKUBOX_SERIAL` environment variable for backward compatibility
+- All Haikubox API calls (`fetchYearlyDetections`, `fetchDailyDetections`, `fetchRecentDetections`) now use database-stored serial
+- No restart needed when changing device configuration
+
+**Key Files:**
+- `src/lib/settings.ts` - Settings service
+- `src/app/api/haikubox/test/route.ts` - Connection test endpoint
+- `src/app/api/settings/route.ts` - Settings management endpoint
+- `src/app/resources/page.tsx` - Resources page with connection form
+- `src/db/schema.ts` - Database schema with app_settings table
