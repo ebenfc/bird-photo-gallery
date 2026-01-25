@@ -12,15 +12,24 @@ interface SpeciesLookup {
 interface SpeciesActivityRowProps {
   data: SpeciesActivityData;
   speciesLookup: SpeciesLookup[];
+  onUnassignedClick?: (data: SpeciesActivityData) => void;
 }
 
 export default function SpeciesActivityRow({
   data,
   speciesLookup,
+  onUnassignedClick,
 }: SpeciesActivityRowProps) {
   const router = useRouter();
+  const isUnassigned = data.rarity === null;
 
   const handleClick = () => {
+    // If unassigned and callback provided, open modal to create species
+    if (isUnassigned && onUnassignedClick) {
+      onUnassignedClick(data);
+      return;
+    }
+
     // Find species by matching common name (case-insensitive)
     const foundSpecies = speciesLookup.find(
       (s) => s.commonName.toLowerCase() === data.commonName.toLowerCase()
@@ -48,7 +57,11 @@ export default function SpeciesActivityRow({
   return (
     <button
       onClick={handleClick}
-      aria-label={`View ${data.commonName} species details`}
+      aria-label={
+        isUnassigned
+          ? `Assign ${data.commonName} to a rarity category`
+          : `View ${data.commonName} species details`
+      }
       className={`
         w-full text-left px-4 py-3.5
         rounded-[var(--radius-md)]
@@ -98,7 +111,7 @@ export default function SpeciesActivityRow({
 
         {/* Rarity Badge */}
         <div className="flex-shrink-0">
-          <RarityBadge rarity={data.rarity || "common"} size="sm" />
+          <RarityBadge rarity={data.rarity} size="sm" />
         </div>
 
         {/* Detection Count */}
@@ -142,7 +155,7 @@ export default function SpeciesActivityRow({
 
         {/* Second row: Rarity and Count */}
         <div className="flex items-center gap-3 text-sm flex-wrap">
-          <RarityBadge rarity={data.rarity || "common"} size="sm" />
+          <RarityBadge rarity={data.rarity} size="sm" />
           <div className="flex items-center gap-1">
             <span className="text-[var(--forest-700)] font-semibold">
               {formatCount(data.yearlyCount)}

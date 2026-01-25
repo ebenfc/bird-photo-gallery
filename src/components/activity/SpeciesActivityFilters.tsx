@@ -4,12 +4,12 @@ import { Rarity, SpeciesActivitySort } from "@/types";
 import Select from "@/components/ui/Select";
 
 interface SpeciesActivityFiltersProps {
-  rarityFilter: Rarity | "all";
+  rarityFilter: Rarity | "unassigned" | "all";
   photoFilter: "all" | "photographed" | "not-yet";
   sortOption: SpeciesActivitySort;
   resultCount: number;
   totalCount: number;
-  onRarityChange: (rarity: Rarity | "all") => void;
+  onRarityChange: (rarity: Rarity | "unassigned" | "all") => void;
   onPhotoFilterChange: (filter: "all" | "photographed" | "not-yet") => void;
   onSortChange: (sort: SpeciesActivitySort) => void;
 }
@@ -23,11 +23,12 @@ const sortOptions: { value: SpeciesActivitySort; label: string }[] = [
   { value: "last-heard-asc", label: "Last Heard (Oldest)" },
 ];
 
-const rarityOptions: { value: Rarity | "all"; label: string }[] = [
+const rarityOptions: { value: Rarity | "unassigned" | "all"; label: string }[] = [
   { value: "all", label: "All" },
   { value: "common", label: "Common" },
   { value: "uncommon", label: "Uncommon" },
   { value: "rare", label: "Rare" },
+  { value: "unassigned", label: "Unassigned" },
 ];
 
 const photoFilterOptions: {

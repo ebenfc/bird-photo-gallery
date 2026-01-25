@@ -8,6 +8,7 @@ import SpeciesActivityRow from "./SpeciesActivityRow";
 interface SpeciesActivityListProps {
   data: SpeciesActivityData[];
   loading?: boolean;
+  onUnassignedClick?: (data: SpeciesActivityData) => void;
 }
 
 interface SpeciesLookup {
@@ -18,8 +19,9 @@ interface SpeciesLookup {
 export default function SpeciesActivityList({
   data,
   loading = false,
+  onUnassignedClick,
 }: SpeciesActivityListProps) {
-  const [rarityFilter, setRarityFilter] = useState<Rarity | "all">("all");
+  const [rarityFilter, setRarityFilter] = useState<Rarity | "unassigned" | "all">("all");
   const [photoFilter, setPhotoFilter] = useState<
     "all" | "photographed" | "not-yet"
   >("all");
@@ -55,9 +57,11 @@ export default function SpeciesActivityList({
     // Apply rarity filter
     if (rarityFilter !== "all") {
       result = result.filter((item) => {
-        // Handle null rarity by defaulting to "common"
-        const itemRarity = item.rarity || "common";
-        return itemRarity === rarityFilter;
+        if (rarityFilter === "unassigned") {
+          // Show items with null rarity (unassigned species)
+          return item.rarity === null;
+        }
+        return item.rarity === rarityFilter;
       });
     }
 
@@ -212,6 +216,7 @@ export default function SpeciesActivityList({
             key={species.commonName}
             data={species}
             speciesLookup={speciesLookup}
+            onUnassignedClick={onUnassignedClick}
           />
         ))}
       </div>
