@@ -295,11 +295,16 @@ function GalleryContent() {
           Photo Gallery
         </h1>
         <div className="flex items-center gap-2 sm:gap-3">
-          <span className="text-xs sm:text-sm font-semibold text-[var(--forest-700)] px-3 sm:px-4 py-1.5
-            bg-gradient-to-br from-[var(--moss-50)] to-[var(--forest-50)]
-            rounded-full shadow-[var(--shadow-xs)] ring-1 ring-[var(--border)]">
+          <button
+            onClick={() => router.push('/species')}
+            className="text-xs sm:text-sm font-semibold text-[var(--forest-700)] px-3 sm:px-4 py-1.5
+              bg-gradient-to-br from-[var(--moss-50)] to-[var(--forest-50)]
+              rounded-full shadow-[var(--shadow-xs)] ring-1 ring-[var(--border)]
+              hover:shadow-[var(--shadow-sm)] hover:ring-[var(--moss-300)]
+              transition-all duration-[var(--timing-fast)] active:scale-95 cursor-pointer"
+          >
             {species.filter(s => s.photoCount && s.photoCount > 0).length} species
-          </span>
+          </button>
           <span className="text-xs sm:text-sm font-semibold text-[var(--forest-700)] px-3 sm:px-4 py-1.5
             bg-gradient-to-br from-[var(--moss-50)] to-[var(--forest-50)]
             rounded-full shadow-[var(--shadow-xs)] ring-1 ring-[var(--border)]">

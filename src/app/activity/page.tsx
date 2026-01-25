@@ -69,10 +69,10 @@ export default function ActivityPage() {
     <div className="pnw-texture min-h-screen">
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-[var(--forest-900)] tracking-tight mb-2">
-          Haikubox Activity
+          Activity
         </h1>
         <p className="text-[var(--mist-600)]">
-          Comprehensive view of all detected bird species
+          Bird species automatically detected by your Haikubox device on the property.
         </p>
       </div>
 

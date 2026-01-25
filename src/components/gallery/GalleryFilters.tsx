@@ -18,8 +18,6 @@ interface GalleryFiltersProps {
 const sortOptions = [
   { value: "recent_upload", label: "Most Recent" },
   { value: "oldest_upload", label: "Oldest First" },
-  { value: "species_alpha", label: "Species A-Z" },
-  { value: "recent_taken", label: "Recently Photographed" },
 ];
 
 const rarityOptions: {
