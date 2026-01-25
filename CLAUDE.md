@@ -305,3 +305,41 @@ Optional:
 - `src/components/activity/SpeciesActivityList.tsx` - Pass mobile filter state, report active filters to parent
 - `src/components/gallery/PhotoModal.tsx` - Added `defaultToFullscreen` prop
 - Test updates for mobile/desktop dual rendering
+
+### Mobile UX Bug Fixes (PR #31)
+
+**Species Page Loading Title Flash:**
+- Fixed loading skeleton showing "Species Directory" instead of "Species"
+- Loading state now matches final heading to prevent visual flash
+
+**Species Detail Page Fullscreen Navigation:**
+- Fixed fullscreen exit behavior when `defaultToFullscreen` is true
+- Tapping to exit fullscreen now closes modal and returns to scroll position
+- Previously navigated to unwanted detail view instead
+- Escape key now also closes modal when in fullscreen on Species detail page
+- Swipe navigation between photos still works correctly in fullscreen
+
+**Key Files Modified:**
+- `src/app/species/page.tsx` - Fixed loading skeleton title
+- `src/components/gallery/PhotoModal.tsx` - Fixed fullscreen exit behavior
+
+### Property Stats Widget Improvements (PR #33)
+
+**Clickable Photographed Count:**
+- Made "Photographed" species count clickable, linking to Species page
+- Added hover effects (scale, background color, shadow) for better UX
+- Provides quick navigation to full species directory
+
+**Layout Redesign:**
+- Redesigned widget layout: moved "Property Bird Activity 2026" from prominent header to subtle footer
+- Reduced visual weight while retaining year context
+- Footer includes small speaker icon and muted colors
+
+**Species Count Fix:**
+- Fixed species count discrepancy between Activity page (16) and Gallery/Species (25)
+- Root cause: Widget was using `heardAndPhotographed` (species heard this year AND photographed) instead of `totalPhotographed` (all species with photos)
+- Now shows accurate total across all pages (Feed, Species, Activity all show 25)
+- Also fixed capture rate calculation to use correct numerator
+
+**Key Files Modified:**
+- `src/components/stats/PropertyStatsWidget.tsx` - Clickable count, footer redesign, count fix
