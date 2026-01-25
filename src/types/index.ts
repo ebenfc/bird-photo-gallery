@@ -1,5 +1,8 @@
 export type Rarity = "common" | "uncommon" | "rare";
 
+// Display-only rarity that includes unassigned status (for UI purposes)
+export type DisplayRarity = Rarity | "unassigned";
+
 export interface Species {
   id: number;
   commonName: string;
@@ -84,7 +87,7 @@ export interface PropertyStats {
     yearlyCount: number;
     hasPhoto: boolean;
     speciesId: number | null;
-    rarity: Rarity;
+    rarity: Rarity | null; // null indicates unassigned (no matching species)
   }>;
   year: number;
 }
@@ -96,11 +99,11 @@ export interface SpeciesActivityData {
   yearlyCount: number;
   lastHeardAt: string | null;
   hasPhoto: boolean;
-  rarity: Rarity;
+  rarity: Rarity | null; // null indicates unassigned (no matching species)
 }
 
 export interface SpeciesActivityFilters {
-  rarity: Rarity | "all";
+  rarity: Rarity | "unassigned" | "all";
   photoStatus: "all" | "photographed" | "not-yet";
 }
 

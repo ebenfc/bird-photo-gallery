@@ -89,12 +89,42 @@ describe("SpeciesActivityRow", () => {
     expect(names.length).toBeGreaterThan(0);
   });
 
-  it("handles null rarity by defaulting to common", () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const nullRarityData = { ...baseData, rarity: null as any };
+  it("displays 'Unassigned' badge when rarity is null", () => {
+    const nullRarityData = { ...baseData, rarity: null, speciesId: null };
     render(<SpeciesActivityRow data={nullRarityData} speciesLookup={mockSpeciesLookup} />);
 
-    expect(screen.getAllByText("Common").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Unassigned").length).toBeGreaterThan(0);
+  });
+
+  it("calls onUnassignedClick when clicking unassigned row", async () => {
+    const mockOnUnassignedClick = jest.fn();
+    const unassignedData = { ...baseData, rarity: null, speciesId: null };
+    const user = userEvent.setup();
+
+    render(
+      <SpeciesActivityRow
+        data={unassignedData}
+        speciesLookup={mockSpeciesLookup}
+        onUnassignedClick={mockOnUnassignedClick}
+      />
+    );
+
+    const button = screen.getByRole("button");
+    await user.click(button);
+
+    expect(mockOnUnassignedClick).toHaveBeenCalledWith(unassignedData);
+    expect(mockPush).not.toHaveBeenCalled(); // Should not navigate
+  });
+
+  it("has correct aria-label for unassigned species", () => {
+    const unassignedData = { ...baseData, rarity: null, speciesId: null };
+    render(<SpeciesActivityRow data={unassignedData} speciesLookup={mockSpeciesLookup} />);
+
+    const button = screen.getByRole("button");
+    expect(button).toHaveAttribute(
+      "aria-label",
+      "Assign American Robin to a rarity category"
+    );
   });
 
   it("navigates to species page by ID on click", async () => {

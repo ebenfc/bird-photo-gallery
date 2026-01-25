@@ -32,6 +32,16 @@ describe("SpeciesActivityFilters", () => {
     expect(screen.getByText("Common")).toBeInTheDocument();
     expect(screen.getByText("Uncommon")).toBeInTheDocument();
     expect(screen.getByText("Rare")).toBeInTheDocument();
+    expect(screen.getByText("Unassigned")).toBeInTheDocument();
+  });
+
+  it("calls onRarityChange with 'unassigned' when Unassigned filter is clicked", async () => {
+    const user = userEvent.setup();
+    render(<SpeciesActivityFilters {...defaultProps} />);
+
+    await user.click(screen.getByText("Unassigned"));
+
+    expect(mockOnRarityChange).toHaveBeenCalledWith("unassigned");
   });
 
   it("renders all photo filter options", () => {
@@ -157,6 +167,9 @@ describe("SpeciesActivityFilters", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByLabelText("Filter by Common rarity")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Filter by Unassigned rarity")
     ).toBeInTheDocument();
     expect(
       screen.getByLabelText("Filter by All photo status")

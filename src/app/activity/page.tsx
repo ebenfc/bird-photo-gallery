@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import PropertyStatsWidget from "@/components/stats/PropertyStatsWidget";
 import SpeciesActivityList from "@/components/activity/SpeciesActivityList";
-import { SpeciesActivityData } from "@/types";
+import UnassignedSpeciesModal from "@/components/activity/UnassignedSpeciesModal";
+import { SpeciesActivityData, Rarity } from "@/types";
 
 /**
  * Activity Page - Haikubox Integration
@@ -17,53 +18,103 @@ export default function ActivityPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchActivityData() {
-      try {
-        setLoading(true);
-        setError(null);
+  // Modal state for unassigned species
+  const [unassignedModalOpen, setUnassignedModalOpen] = useState(false);
+  const [selectedUnassigned, setSelectedUnassigned] =
+    useState<SpeciesActivityData | null>(null);
 
-        const response = await fetch("/api/haikubox/stats");
+  // Fetch activity data - extracted to callback for reuse after creating species
+  const fetchActivityData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch activity data");
-        }
+      const response = await fetch("/api/haikubox/stats");
 
-        const data = await response.json();
-
-        // Transform recentlyHeard data to SpeciesActivityData format
-        const activityData: SpeciesActivityData[] = data.recentlyHeard.map(
-          (item: {
-            commonName: string;
-            speciesId: number | null;
-            yearlyCount: number;
-            lastHeardAt: string | null;
-            hasPhoto: boolean;
-            rarity: string | null;
-          }) => ({
-            commonName: item.commonName,
-            speciesId: item.speciesId,
-            yearlyCount: item.yearlyCount,
-            lastHeardAt: item.lastHeardAt,
-            hasPhoto: item.hasPhoto,
-            // Default to "common" if rarity is null (unmatched species)
-            rarity: (item.rarity as "common" | "uncommon" | "rare") || "common",
-          })
-        );
-
-        setActivityData(activityData);
-      } catch (err) {
-        console.error("Error fetching activity data:", err);
-        setError(
-          err instanceof Error ? err.message : "An unknown error occurred"
-        );
-      } finally {
-        setLoading(false);
+      if (!response.ok) {
+        throw new Error("Failed to fetch activity data");
       }
+
+      const data = await response.json();
+
+      // Transform recentlyHeard data to SpeciesActivityData format
+      const activityData: SpeciesActivityData[] = data.recentlyHeard.map(
+        (item: {
+          commonName: string;
+          speciesId: number | null;
+          yearlyCount: number;
+          lastHeardAt: string | null;
+          hasPhoto: boolean;
+          rarity: string | null;
+        }) => ({
+          commonName: item.commonName,
+          speciesId: item.speciesId,
+          yearlyCount: item.yearlyCount,
+          lastHeardAt: item.lastHeardAt,
+          hasPhoto: item.hasPhoto,
+          // Keep null for unassigned species (no matching species record)
+          rarity: item.rarity as Rarity | null,
+        })
+      );
+
+      setActivityData(activityData);
+    } catch (err) {
+      console.error("Error fetching activity data:", err);
+      setError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchActivityData();
+  }, [fetchActivityData]);
+
+  // Handler for clicking on unassigned species
+  const handleUnassignedClick = (data: SpeciesActivityData) => {
+    setSelectedUnassigned(data);
+    setUnassignedModalOpen(true);
+  };
+
+  // Handler for creating species from modal
+  const handleCreateSpecies = async (speciesData: {
+    commonName: string;
+    scientificName?: string;
+    description?: string;
+    rarity: Rarity;
+  }) => {
+    // 1. Create the species
+    const createResponse = await fetch("/api/species", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(speciesData),
+    });
+
+    if (!createResponse.ok) {
+      throw new Error("Failed to create species");
     }
 
-    fetchActivityData();
-  }, []);
+    const { species: newSpecies } = await createResponse.json();
+
+    // 2. Link existing detections to the new species
+    await fetch("/api/haikubox/detections/link", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        speciesId: newSpecies.id,
+        detectionCommonName: speciesData.commonName,
+      }),
+    });
+
+    // 3. Refresh the activity data
+    await fetchActivityData();
+
+    // 4. Close modal
+    setUnassignedModalOpen(false);
+    setSelectedUnassigned(null);
+  };
 
   return (
     <div className="pnw-texture min-h-screen">
@@ -110,8 +161,25 @@ export default function ActivityPage() {
 
       {/* Species Activity List */}
       <div className="mb-8">
-        <SpeciesActivityList data={activityData} loading={loading} />
+        <SpeciesActivityList
+          data={activityData}
+          loading={loading}
+          onUnassignedClick={handleUnassignedClick}
+        />
       </div>
+
+      {/* Unassigned Species Modal */}
+      {selectedUnassigned && (
+        <UnassignedSpeciesModal
+          isOpen={unassignedModalOpen}
+          onClose={() => {
+            setUnassignedModalOpen(false);
+            setSelectedUnassigned(null);
+          }}
+          onSubmit={handleCreateSpecies}
+          detectionCommonName={selectedUnassigned.commonName}
+        />
+      )}
     </div>
   );
 }

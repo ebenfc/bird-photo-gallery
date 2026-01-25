@@ -248,27 +248,50 @@ describe("SpeciesActivityList", () => {
     expect(screen.getByText("Showing 2 of 4 species")).toBeInTheDocument();
   });
 
-  it("handles null rarity by defaulting to common", async () => {
+  it("filters by unassigned rarity (null rarity)", async () => {
     const dataWithNullRarity: SpeciesActivityData[] = [
       ...mockData,
       {
-        commonName: "Unknown Bird",
+        commonName: "Unassigned Bird",
         speciesId: null,
         yearlyCount: 100,
         lastHeardAt: "2024-01-18T10:30:00Z",
         hasPhoto: false,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        rarity: null as any,
+        rarity: null,
       },
     ];
 
     const user = userEvent.setup();
     render(<SpeciesActivityList data={dataWithNullRarity} />);
 
-    // Filter by common should include the null rarity bird
+    // Filter by unassigned should show only the null rarity bird
+    await user.click(screen.getByLabelText("Filter by Unassigned rarity"));
+
+    expect(screen.getByTestId("species-row-Unassigned Bird")).toBeInTheDocument();
+    expect(screen.queryByTestId("species-row-American Robin")).not.toBeInTheDocument();
+  });
+
+  it("excludes null rarity from common filter", async () => {
+    const dataWithNullRarity: SpeciesActivityData[] = [
+      ...mockData,
+      {
+        commonName: "Unassigned Bird",
+        speciesId: null,
+        yearlyCount: 100,
+        lastHeardAt: "2024-01-18T10:30:00Z",
+        hasPhoto: false,
+        rarity: null,
+      },
+    ];
+
+    const user = userEvent.setup();
+    render(<SpeciesActivityList data={dataWithNullRarity} />);
+
+    // Filter by common should NOT include the null rarity bird
     await user.click(screen.getByLabelText("Filter by Common rarity"));
 
-    expect(screen.getByTestId("species-row-Unknown Bird")).toBeInTheDocument();
+    expect(screen.queryByTestId("species-row-Unassigned Bird")).not.toBeInTheDocument();
+    expect(screen.getByTestId("species-row-American Robin")).toBeInTheDocument();
   });
 
   it("handles null lastHeardAt in sorting", async () => {

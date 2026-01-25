@@ -1,13 +1,23 @@
-import { Rarity } from "@/types";
+import { Rarity, DisplayRarity } from "@/types";
 
 interface RarityBadgeProps {
-  rarity: Rarity;
+  rarity: Rarity | null; // null indicates unassigned
   size?: "sm" | "md";
   showLabel?: boolean;
   showIcon?: boolean;
 }
 
-const rarityConfig = {
+const rarityConfig: Record<
+  DisplayRarity,
+  {
+    label: string;
+    icon: string;
+    bgColor: string;
+    textColor: string;
+    borderColor: string;
+    glow?: string;
+  }
+> = {
   common: {
     label: "Common",
     icon: "M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707",
@@ -30,6 +40,13 @@ const rarityConfig = {
     borderColor: "border-red-300",
     glow: "shadow-[0_2px_8px_rgba(239,68,68,0.15)]",
   },
+  unassigned: {
+    label: "Unassigned",
+    icon: "M12 4v16m8-8H4", // Plus sign to indicate action needed
+    bgColor: "bg-gradient-to-br from-slate-50 to-slate-100",
+    textColor: "text-slate-600",
+    borderColor: "border-slate-300 border-dashed",
+  },
 };
 
 export default function RarityBadge({
@@ -38,8 +55,11 @@ export default function RarityBadge({
   showLabel = true,
   showIcon = false,
 }: RarityBadgeProps) {
-  const config = rarityConfig[rarity];
-  const isRare = rarity === "rare";
+  // Convert null to "unassigned" for display
+  const displayRarity: DisplayRarity = rarity ?? "unassigned";
+  const config = rarityConfig[displayRarity];
+  const isRare = displayRarity === "rare";
+  const isUnassigned = displayRarity === "unassigned";
 
   const sizeClasses = {
     sm: "text-xs px-2.5 py-1 gap-1",
@@ -60,22 +80,22 @@ export default function RarityBadge({
         ${config.bgColor} ${config.textColor} ${config.borderColor}
         ${sizeClasses[size]}
         ${isRare ? "shadow-[0_2px_8px_rgba(239,68,68,0.2)] hover:shadow-[0_4px_12px_rgba(239,68,68,0.25)]" : ""}
-        ${rarity === "uncommon" ? "shadow-[0_2px_6px_rgba(245,158,11,0.15)]" : ""}
+        ${displayRarity === "uncommon" ? "shadow-[0_2px_6px_rgba(245,158,11,0.15)]" : ""}
       `}
     >
-      {showIcon && (
+      {(showIcon || isUnassigned) && (
         <svg
           className={`${iconSizes[size]} flex-shrink-0`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
-          strokeWidth={rarity === "common" ? 2 : 1.5}
+          strokeWidth={displayRarity === "common" || isUnassigned ? 2 : 1.5}
         >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
             d={config.icon}
-            fill={rarity !== "common" ? "currentColor" : "none"}
+            fill={displayRarity !== "common" && !isUnassigned ? "currentColor" : "none"}
           />
         </svg>
       )}
@@ -85,6 +105,7 @@ export default function RarityBadge({
 }
 
 // Helper to get just the label
-export function getRarityLabel(rarity: Rarity): string {
-  return rarityConfig[rarity].label;
+export function getRarityLabel(rarity: Rarity | null): string {
+  const displayRarity: DisplayRarity = rarity ?? "unassigned";
+  return rarityConfig[displayRarity].label;
 }
