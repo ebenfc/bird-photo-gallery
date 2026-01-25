@@ -291,9 +291,14 @@ function GalleryContent() {
   return (
     <div className="pnw-texture min-h-screen pb-24 sm:pb-0">
       <div className="flex items-center justify-between mb-5 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-[var(--forest-900)] tracking-tight">
-          Photo Gallery
-        </h1>
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[var(--forest-900)] tracking-tight">
+            Photo Gallery
+          </h1>
+          <p className="text-[var(--mist-600)] mt-1">
+            Browse, upload, and organize your bird photography collection.
+          </p>
+        </div>
         <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => router.push('/species')}
