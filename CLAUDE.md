@@ -211,3 +211,28 @@ Optional:
 - `src/app/api/settings/route.ts` - Settings management endpoint
 - `src/app/resources/page.tsx` - Resources page with connection form
 - `src/db/schema.ts` - Database schema with app_settings table
+
+### Unassigned Species Feature (PR #27)
+
+**User-Controlled Rarity Classification:**
+- Species rarity (Common/Uncommon/Rare) is now defined by the user, not auto-assigned
+- Haikubox detections that don't have a matching Species entry show "Unassigned" instead of defaulting to "Common"
+- Visual: Unassigned badge has a dashed border style with plus icon to indicate action needed
+
+**Activity Page Enhancements:**
+- Added "Unassigned" filter option to quickly find species needing classification
+- Clicking on unassigned species opens a modal to create a new species entry
+- Modal pre-fills the common name and auto-looks up the scientific name
+- User selects rarity (Common/Uncommon/Rare) and creates the species
+- Detections are automatically linked to newly created species
+
+**New Components:**
+- `src/components/activity/UnassignedSpeciesModal.tsx` - Modal for creating species from Activity page
+
+**New API Endpoints:**
+- `POST /api/haikubox/detections/link` - Links detections to a newly created species by matching common name
+
+**Type Changes:**
+- `SpeciesActivityData.rarity` now allows `null` (indicates unassigned)
+- `SpeciesActivityFilters.rarity` now includes `"unassigned"` option
+- Added `DisplayRarity` type (`Rarity | "unassigned"`) for UI purposes
