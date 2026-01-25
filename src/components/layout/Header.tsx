@@ -4,41 +4,47 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-// Bird icon - Dark Eyed Junco inspired design
+// Bird icon - Dark Eyed Junco silhouette
 function BirdIcon({ className }: { className?: string }) {
   return (
     <svg
       className={className}
-      viewBox="0 0 40 32"
+      viewBox="0 0 56 40"
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Gray head - rounded top */}
-      <ellipse cx="24" cy="10" rx="7" ry="6.5" fill="#5B6770" />
-
-      {/* Brown back/wing - curved middle section */}
+      {/* Gray head */}
       <path
-        fill="#8B6F47"
-        d="M 10,12 Q 18,8 28,10 Q 35,11 38,16 Q 39,18 38,20 Q 36,23 32,24 Q 28,25 24,23 Q 20,21 16,20 Q 12,19 10,18 Q 7,17 6,15 Q 5,13 6,12 Q 8,10 10,12 Z"
+        fill="#5B6770"
+        d="M 32,6 C 36,6 40,7 42,9 C 45,11 47,14 47,18 C 47,20 46,22 44,24 C 42,25 40,26 37,26 C 35,26 33,25 31,24 C 29,23 27,21 26,19 C 25,17 24,16 22,15 C 23,14 25,13 27,11 C 29,9 30,7 32,6 Z"
       />
 
-      {/* Orange breast - lower rounded section */}
-      <ellipse cx="12" cy="20" rx="6" ry="5.5" fill="#FF6B4A" />
+      {/* Brown wing/back */}
+      <path
+        fill="#8B6F47"
+        d="M 22,15 C 18,16 14,18 11,21 C 8,24 6,27 6,30 C 6,32 7,34 9,35 C 11,36 14,36 17,35 C 20,34 23,32 25,30 C 27,28 29,26 31,24 C 33,25 35,26 37,26 C 40,26 42,25 44,24 C 46,22 47,20 47,18 C 47,16 46,14 44,12 C 42,10 39,9 36,8 C 33,7 30,7 27,8 L 22,15 Z"
+      />
 
-      {/* White accent stripe - curved divider */}
+      {/* Tail */}
+      <path
+        fill="#8B6F47"
+        d="M 11,21 C 8,22 5,24 3,26 C 2,27 1,29 2,31 C 3,33 5,34 7,33 C 9,32 10,30 11,28 C 11,26 11,24 11,21 Z"
+      />
+
+      {/* Orange breast */}
+      <path
+        fill="#FF6B4A"
+        d="M 17,35 C 14,36 11,36 9,35 C 7,34 6,32 6,30 C 6,28 7,26 8,24 C 10,22 12,20 15,19 C 17,18 19,18 21,19 C 23,20 24,22 24,24 C 24,27 23,30 21,32 C 20,33 18,34 17,35 Z"
+      />
+
+      {/* White accent trim */}
       <path
         fill="#FFFFFF"
-        d="M 13,15 Q 16,14 19,15 Q 21,16 21,17.5 Q 21,19 19,20 Q 16,21 13,20 Q 11,19.5 11,17.5 Q 11,16 13,15 Z"
-        opacity="0.9"
+        d="M 21,19 C 23,18 25,18 27,19 C 29,20 30,21 30,23 C 30,25 29,26 27,27 C 25,28 23,28 21,27 C 19,26 18,24 18,22 C 18,21 19,20 21,19 Z"
+        opacity="0.95"
       />
 
       {/* Eye */}
-      <circle cx="25" cy="9" r="1.3" fill="#1A202C" />
-
-      {/* Small beak */}
-      <path
-        fill="#3D3D3D"
-        d="M 30,10 L 33,10 L 31,11 Z"
-      />
+      <circle cx="38" cy="16" r="2" fill="#1A202C" />
     </svg>
   );
 }
