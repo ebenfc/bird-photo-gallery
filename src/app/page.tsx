@@ -293,7 +293,7 @@ function GalleryContent() {
       <div className="flex items-center justify-between mb-5 sm:mb-8">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-[var(--forest-900)] tracking-tight">
-            Photo Gallery
+            Gallery
           </h1>
           <p className="text-[var(--mist-600)] mt-1">
             Browse, upload, and organize your bird photography collection.
