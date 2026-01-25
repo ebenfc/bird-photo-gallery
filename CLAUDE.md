@@ -262,3 +262,46 @@ Optional:
 - `src/app/page.tsx` - Title rename, mobile filter toggle, restructured header
 - `src/components/gallery/GalleryFilters.tsx` - Removed mobile-only bottom margin
 - `src/components/gallery/PhotoModal.tsx` - Added `isNavigatingRef` and `wasFullscreenRef` to preserve view state
+
+### Mobile UI Enhancements (PR #29)
+
+**Species Page Mobile UX:**
+- Added collapsible filter toggle matching Feed page pattern
+- Filter button shows active filter count badge
+- Rarity filters hidden by default on mobile, expand on tap
+- Sub-header hidden on mobile (shows species count instead)
+- Replaced "Add Species" button with circular floating action button (FAB) on mobile
+- Desktop layout unchanged
+
+**Activity Page Mobile UX:**
+- Added collapsible filter toggle matching Feed page pattern
+- Filter button shows active filter count badge
+- Sub-header hidden on mobile (shows detection count instead)
+- Removed "Last Heard" sort options (most recent/oldest)
+- Sort dropdown moved into collapsible filter panel on mobile
+- Desktop layout unchanged (sort stays outside filters)
+
+**Species Detail Page Mobile UX:**
+- Photos displayed in single column with larger 4:3 aspect ratio on mobile
+- Favorite heart icon shown directly on photo thumbnails
+- Photos default to fullscreen mode when opened on mobile
+- Grid layout preserved on desktop
+
+**Resources Page Styling:**
+- Updated font colors to match other pages:
+  - Headers: `text-[var(--forest-900)]`
+  - Descriptions: `text-[var(--mist-600)]`
+- Applied consistent styling to section headers, form labels, and link cards
+- Added `pnw-texture` class to match page backgrounds
+
+**Note:** Rarity tags and Haikubox activity count bubbles were already implemented on Species directory cards (SpeciesCard component) prior to this PR.
+
+**Key Files Modified:**
+- `src/app/species/page.tsx` - Mobile filter toggle, FAB button, responsive header
+- `src/app/species/[id]/page.tsx` - Single column photo layout on mobile, fullscreen default
+- `src/app/activity/page.tsx` - Mobile filter toggle, responsive header
+- `src/app/resources/page.tsx` - Font color consistency fixes
+- `src/components/activity/SpeciesActivityFilters.tsx` - Sort in collapsible panel on mobile, removed last-heard options
+- `src/components/activity/SpeciesActivityList.tsx` - Pass mobile filter state, report active filters to parent
+- `src/components/gallery/PhotoModal.tsx` - Added `defaultToFullscreen` prop
+- Test updates for mobile/desktop dual rendering
