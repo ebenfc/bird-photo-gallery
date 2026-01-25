@@ -146,3 +146,33 @@ Optional:
 - PR #21 (bubble chart) was merged then rolled back due to issues
 - 4 pre-existing test failures in `image.test.ts` (documented, not blocking)
 - The app is actively used and should remain stable
+
+## Recent Updates (January 2026)
+
+### UI Enhancements (PRs #24, #25, #26)
+
+**Navigation & Links:**
+- Added external links to allaboutbirds.org on species detail pages
+- Made species count bubble on Gallery page clickable → routes to Species page
+- Added "View species" button in photo modal (desktop & mobile) linking to species detail page
+
+**Filtering & Sorting:**
+- Simplified Gallery sort options to "Most Recent" and "Oldest First" (removed "Species A-Z" and "Recently Photographed")
+- Added rarity filters (Common, Uncommon, Rare) to Species page
+
+**Page Headers:**
+- Updated Gallery: Changed "Photo Gallery" to "Gallery"
+- Updated Activity: Changed "Haikubox Activity" to "Activity"
+- Added consistent descriptive sub-headers across all pages:
+  - Gallery: "Browse, upload, and organize your bird photography collection."
+  - Species: "Your complete directory of bird species, from common backyard visitors to rare sightings."
+  - Activity: "Bird species automatically detected by your Haikubox device on the property."
+
+**Mobile UX:**
+- Added swipe gesture support in photo modal (swipe left = next, swipe right = previous)
+- Minimum swipe distance of 50px prevents accidental navigation
+- Works in both normal and fullscreen modes
+
+**Logo:**
+- Updated Bird Feed logo with Dark Eyed Junco-inspired design (path-based SVG)
+- Note: Logo may need further refinement to match mockups
