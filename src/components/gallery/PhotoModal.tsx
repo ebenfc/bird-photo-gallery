@@ -154,18 +154,28 @@ export default function PhotoModal({
         clearTimeout(fullscreenUITimer);
         setFullscreenUITimer(null);
       }
-      setIsFullscreen(false);
+      // If opened with defaultToFullscreen, close modal entirely instead of showing detail view
+      if (defaultToFullscreen) {
+        onClose();
+      } else {
+        setIsFullscreen(false);
+      }
     } else {
       // UI is hidden, show it temporarily
       showUITemporarily();
     }
-  }, [showFullscreenUI, fullscreenUITimer, showUITemporarily]);
+  }, [showFullscreenUI, fullscreenUITimer, showUITemporarily, defaultToFullscreen, onClose]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         if (isFullscreen) {
-          setIsFullscreen(false);
+          // If opened with defaultToFullscreen, close modal entirely instead of showing detail view
+          if (defaultToFullscreen) {
+            onClose();
+          } else {
+            setIsFullscreen(false);
+          }
         } else {
           onClose();
         }
@@ -183,7 +193,7 @@ export default function PhotoModal({
         setIsFullscreen(prev => !prev);
       }
     },
-    [onClose, onNavigate, canNavigate, isFullscreen]
+    [onClose, onNavigate, canNavigate, isFullscreen, defaultToFullscreen]
   );
 
   useEffect(() => {

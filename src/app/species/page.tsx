@@ -93,7 +93,7 @@ export default function SpeciesDirectory() {
     return (
       <div className="pnw-texture min-h-screen">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold text-[var(--forest-900)]">Species Directory</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[var(--forest-900)] tracking-tight">Species</h1>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
