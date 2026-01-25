@@ -12,6 +12,7 @@ interface SpeciesActivityFiltersProps {
   onRarityChange: (rarity: Rarity | "unassigned" | "all") => void;
   onPhotoFilterChange: (filter: "all" | "photographed" | "not-yet") => void;
   onSortChange: (sort: SpeciesActivitySort) => void;
+  showMobileFilters?: boolean;
 }
 
 const sortOptions: { value: SpeciesActivitySort; label: string }[] = [
@@ -49,6 +50,7 @@ export default function SpeciesActivityFilters({
   onRarityChange,
   onPhotoFilterChange,
   onSortChange,
+  showMobileFilters = false,
 }: SpeciesActivityFiltersProps) {
   const hasFilters = rarityFilter !== "all" || photoFilter !== "all";
 
@@ -82,86 +84,99 @@ export default function SpeciesActivityFilters({
         </div>
       </div>
 
-      {/* Row 2: Filter pills */}
-      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-2">
-        {/* Rarity filter pills */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm font-semibold text-[var(--mist-600)] mr-1 shrink-0">
-            Rarity:
-          </span>
-          {rarityOptions.map((opt) => {
-            const isSelected = rarityFilter === opt.value;
-            return (
+      {/* Filter pills - responsive wrapper */}
+      {/* On mobile: collapsible with showMobileFilters state */}
+      {/* On desktop: always visible */}
+      <div className={`
+        overflow-hidden transition-all duration-300 ease-out
+        sm:!max-h-none sm:!opacity-100
+        ${showMobileFilters ? "max-h-96 opacity-100" : "max-h-0 opacity-0 sm:max-h-none sm:opacity-100"}
+      `}>
+        <div className={`
+          sm:bg-transparent sm:backdrop-blur-none sm:rounded-none sm:p-0 sm:shadow-none sm:border-0
+          bg-white/80 backdrop-blur-sm rounded-[var(--radius-xl)] p-4 shadow-[var(--shadow-sm)] border border-[var(--border)]
+        `}>
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-2">
+            {/* Rarity filter pills */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm font-semibold text-[var(--mist-600)] mr-1 shrink-0">
+                Rarity:
+              </span>
+              {rarityOptions.map((opt) => {
+                const isSelected = rarityFilter === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => onRarityChange(opt.value)}
+                    aria-label={`Filter by ${opt.label} rarity`}
+                    aria-pressed={isSelected}
+                    className={`px-3 sm:px-4 py-2 text-sm font-semibold
+                      rounded-[var(--radius-full)] border-2
+                      shadow-[var(--shadow-xs)]
+                      transition-all duration-[var(--timing-fast)]
+                      active:scale-95
+                      ${
+                        isSelected
+                          ? "bg-gradient-to-b from-[var(--moss-500)] to-[var(--moss-600)] text-white border-[var(--moss-600)] shadow-[var(--shadow-moss)]"
+                          : "bg-white text-[var(--mist-500)] border-[var(--mist-200)] hover:border-[var(--moss-300)] hover:text-[var(--forest-700)] hover:shadow-[var(--shadow-sm)]"
+                      }`}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Separator - only show on desktop */}
+            <div className="hidden sm:block h-6 w-px bg-[var(--mist-200)]" />
+
+            {/* Photo status filter pills */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm font-semibold text-[var(--mist-600)] mr-1 shrink-0">
+                Photo Status:
+              </span>
+              {photoFilterOptions.map((opt) => {
+                const isSelected = photoFilter === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => onPhotoFilterChange(opt.value)}
+                    aria-label={`Filter by ${opt.label} photo status`}
+                    aria-pressed={isSelected}
+                    className={`px-3 sm:px-4 py-2 text-sm font-semibold
+                      rounded-[var(--radius-full)] border-2
+                      shadow-[var(--shadow-xs)]
+                      transition-all duration-[var(--timing-fast)]
+                      active:scale-95
+                      ${
+                        isSelected
+                          ? "bg-gradient-to-b from-[var(--sky-500)] to-[var(--sky-600)] text-white border-[var(--sky-600)] shadow-[0_2px_8px_rgba(14,165,233,0.3)]"
+                          : "bg-white text-[var(--mist-500)] border-[var(--mist-200)] hover:border-[var(--sky-300)] hover:text-[var(--sky-700)] hover:shadow-[var(--shadow-sm)]"
+                      }`}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Clear filters button */}
+            {hasFilters && (
               <button
-                key={opt.value}
-                onClick={() => onRarityChange(opt.value)}
-                aria-label={`Filter by ${opt.label} rarity`}
-                aria-pressed={isSelected}
-                className={`px-3 sm:px-4 py-2 text-sm font-semibold
-                  rounded-[var(--radius-full)] border-2
-                  shadow-[var(--shadow-xs)]
+                onClick={handleClearFilters}
+                className="px-3 sm:px-4 py-2 text-sm font-semibold text-[var(--mist-500)]
+                  hover:text-[var(--forest-700)] hover:bg-[var(--mist-50)]
+                  rounded-[var(--radius-full)]
                   transition-all duration-[var(--timing-fast)]
                   active:scale-95
-                  ${
-                    isSelected
-                      ? "bg-gradient-to-b from-[var(--moss-500)] to-[var(--moss-600)] text-white border-[var(--moss-600)] shadow-[var(--shadow-moss)]"
-                      : "bg-white text-[var(--mist-500)] border-[var(--mist-200)] hover:border-[var(--moss-300)] hover:text-[var(--forest-700)] hover:shadow-[var(--shadow-sm)]"
-                  }`}
+                  self-start sm:self-auto"
+                aria-label="Clear all filters"
               >
-                {opt.label}
+                Clear filters
               </button>
-            );
-          })}
+            )}
+          </div>
         </div>
-
-        {/* Separator - only show on desktop */}
-        <div className="hidden sm:block h-6 w-px bg-[var(--mist-200)]" />
-
-        {/* Photo status filter pills */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm font-semibold text-[var(--mist-600)] mr-1 shrink-0">
-            Photo Status:
-          </span>
-          {photoFilterOptions.map((opt) => {
-            const isSelected = photoFilter === opt.value;
-            return (
-              <button
-                key={opt.value}
-                onClick={() => onPhotoFilterChange(opt.value)}
-                aria-label={`Filter by ${opt.label} photo status`}
-                aria-pressed={isSelected}
-                className={`px-3 sm:px-4 py-2 text-sm font-semibold
-                  rounded-[var(--radius-full)] border-2
-                  shadow-[var(--shadow-xs)]
-                  transition-all duration-[var(--timing-fast)]
-                  active:scale-95
-                  ${
-                    isSelected
-                      ? "bg-gradient-to-b from-[var(--sky-500)] to-[var(--sky-600)] text-white border-[var(--sky-600)] shadow-[0_2px_8px_rgba(14,165,233,0.3)]"
-                      : "bg-white text-[var(--mist-500)] border-[var(--mist-200)] hover:border-[var(--sky-300)] hover:text-[var(--sky-700)] hover:shadow-[var(--shadow-sm)]"
-                  }`}
-              >
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Clear filters button */}
-        {hasFilters && (
-          <button
-            onClick={handleClearFilters}
-            className="px-3 sm:px-4 py-2 text-sm font-semibold text-[var(--mist-500)]
-              hover:text-[var(--forest-700)] hover:bg-[var(--mist-50)]
-              rounded-[var(--radius-full)]
-              transition-all duration-[var(--timing-fast)]
-              active:scale-95
-              self-start sm:self-auto"
-            aria-label="Clear all filters"
-          >
-            Clear filters
-          </button>
-        )}
       </div>
     </div>
   );

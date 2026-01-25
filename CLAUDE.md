@@ -161,10 +161,10 @@ Optional:
 - Added rarity filters (Common, Uncommon, Rare) to Species page
 
 **Page Headers:**
-- Updated Gallery: Changed "Photo Gallery" to "Gallery"
+- Updated Gallery: Changed "Photo Gallery" to "Gallery" (later renamed to "Feed" in PR #28)
 - Updated Activity: Changed "Haikubox Activity" to "Activity"
 - Added consistent descriptive sub-headers across all pages:
-  - Gallery: "Browse, upload, and organize your bird photography collection."
+  - Feed: "Browse, upload, and organize your bird photography collection."
   - Species: "Your complete directory of bird species, from common backyard visitors to rare sightings."
   - Activity: "Bird species automatically detected by your Haikubox device on the property."
 
@@ -236,3 +236,29 @@ Optional:
 - `SpeciesActivityData.rarity` now allows `null` (indicates unassigned)
 - `SpeciesActivityFilters.rarity` now includes `"unassigned"` option
 - Added `DisplayRarity` type (`Rarity | "unassigned"`) for UI purposes
+
+### Feed Page Updates (PR #28)
+
+**Naming:**
+- Renamed "Gallery" to "Feed" throughout the app (navigation menu and page title)
+- Page description unchanged: "Browse, upload, and organize your bird photography collection."
+
+**Mobile Filter UX:**
+- Filters now hidden by default on mobile to prioritize viewing photos
+- Added "Filter" button with collapsible panel
+- Filter count badge shows number of active filters
+- Filters slide down smoothly when expanded
+- Desktop layout unchanged (filters always visible)
+
+**Swipe Navigation Fix:**
+- Fixed issue where swiping in fullscreen mode would exit to detail view
+- Navigation now preserves current view state:
+  - Fullscreen → swipe → stays in fullscreen for next photo
+  - Detail view → swipe → stays in detail view for next photo
+- Works for swipe gestures, arrow button clicks, and keyboard navigation
+
+**Key Files Modified:**
+- `src/components/layout/Header.tsx` - "Gallery" → "Feed" in nav
+- `src/app/page.tsx` - Title rename, mobile filter toggle, restructured header
+- `src/components/gallery/GalleryFilters.tsx` - Removed mobile-only bottom margin
+- `src/components/gallery/PhotoModal.tsx` - Added `isNavigatingRef` and `wasFullscreenRef` to preserve view state
