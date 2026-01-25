@@ -167,11 +167,44 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
         <ActivityTimeline speciesName={species.commonName} />
       </div>
 
-      <PhotoGrid
-        photos={photos}
-        onPhotoClick={setSelectedPhoto}
-        showSpecies={false}
-      />
+      {/* Desktop: Grid layout */}
+      <div className="hidden sm:block">
+        <PhotoGrid
+          photos={photos}
+          onPhotoClick={setSelectedPhoto}
+          showSpecies={false}
+        />
+      </div>
+
+      {/* Mobile: Single column with larger photos */}
+      <div className="sm:hidden space-y-4">
+        {photos.map((photo, index) => (
+          <button
+            key={photo.id}
+            onClick={() => setSelectedPhoto(photo)}
+            className="w-full block rounded-[var(--radius-xl)] overflow-hidden shadow-[var(--shadow-md)]
+              border border-[var(--border-light)] hover:shadow-[var(--shadow-lg)]
+              transition-all duration-[var(--timing-normal)] active:scale-[0.98]"
+            style={{ animationDelay: `${index * 50}ms` }}
+          >
+            <div className="relative aspect-[4/3] bg-gray-100">
+              <img
+                src={photo.thumbnailUrl}
+                alt={photo.species?.commonName || "Bird photo"}
+                className="w-full h-full object-cover"
+              />
+              {photo.isFavorite && (
+                <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm
+                  shadow-[var(--shadow-sm)] flex items-center justify-center">
+                  <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              )}
+            </div>
+          </button>
+        ))}
+      </div>
 
       <PhotoModal
         photo={selectedPhoto}
@@ -179,6 +212,7 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
         onFavoriteToggle={handleFavoriteToggle}
         onNavigate={handleNavigate}
         canNavigate={canNavigate}
+        defaultToFullscreen={true}
       />
     </div>
   );

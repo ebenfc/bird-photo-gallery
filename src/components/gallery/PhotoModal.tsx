@@ -16,6 +16,7 @@ interface PhotoModalProps {
   onNotesChange?: (id: number, notes: string | null) => Promise<void>;
   onDelete?: (id: number) => Promise<void>;
   onSetCoverPhoto?: (photoId: number, speciesId: number) => Promise<boolean>;
+  defaultToFullscreen?: boolean;
 }
 
 export default function PhotoModal({
@@ -29,6 +30,7 @@ export default function PhotoModal({
   onNotesChange,
   onDelete,
   onSetCoverPhoto,
+  defaultToFullscreen = false,
 }: PhotoModalProps) {
   const [isEditingDate, setIsEditingDate] = useState(false);
   const [editDateValue, setEditDateValue] = useState("");
@@ -80,9 +82,9 @@ export default function PhotoModal({
       setShowFullscreenUI(wasFullscreenRef.current);
       isNavigatingRef.current = false;
     } else {
-      // Opening fresh - reset fullscreen
-      setIsFullscreen(false);
-      setShowFullscreenUI(false);
+      // Opening fresh - use defaultToFullscreen if provided
+      setIsFullscreen(defaultToFullscreen);
+      setShowFullscreenUI(defaultToFullscreen);
     }
 
     if (fullscreenUITimer) {

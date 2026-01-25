@@ -20,8 +20,6 @@ const sortOptions: { value: SpeciesActivitySort; label: string }[] = [
   { value: "count-asc", label: "Count (Lowest First)" },
   { value: "name-asc", label: "Species Name (A-Z)" },
   { value: "name-desc", label: "Species Name (Z-A)" },
-  { value: "last-heard-desc", label: "Last Heard (Most Recent)" },
-  { value: "last-heard-asc", label: "Last Heard (Oldest)" },
 ];
 
 const rarityOptions: { value: Rarity | "unassigned" | "all"; label: string }[] = [
@@ -61,12 +59,12 @@ export default function SpeciesActivityFilters({
 
   return (
     <div className="space-y-4 mb-6 animate-fade-in">
-      {/* Row 1: Sort dropdown and result count */}
-      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+      {/* Desktop: Sort dropdown and result count in row */}
+      <div className="hidden sm:flex gap-3 items-center justify-between">
         <Select
           value={sortOption}
           onChange={(e) => onSortChange(e.target.value as SpeciesActivitySort)}
-          className="w-full sm:w-64"
+          className="w-64"
         >
           {sortOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -84,19 +82,43 @@ export default function SpeciesActivityFilters({
         </div>
       </div>
 
+      {/* Mobile: Result count only (sort moved into filter panel) */}
+      <div className="sm:hidden">
+        <div
+          className="text-sm text-[var(--mist-600)] font-medium"
+          aria-live="polite"
+        >
+          Showing {resultCount} of {totalCount} species
+        </div>
+      </div>
+
       {/* Filter pills - responsive wrapper */}
       {/* On mobile: collapsible with showMobileFilters state */}
       {/* On desktop: always visible */}
       <div className={`
         overflow-hidden transition-all duration-300 ease-out
         sm:!max-h-none sm:!opacity-100
-        ${showMobileFilters ? "max-h-96 opacity-100" : "max-h-0 opacity-0 sm:max-h-none sm:opacity-100"}
+        ${showMobileFilters ? "max-h-[32rem] opacity-100" : "max-h-0 opacity-0 sm:max-h-none sm:opacity-100"}
       `}>
         <div className={`
           sm:bg-transparent sm:backdrop-blur-none sm:rounded-none sm:p-0 sm:shadow-none sm:border-0
           bg-white/80 backdrop-blur-sm rounded-[var(--radius-xl)] p-4 shadow-[var(--shadow-sm)] border border-[var(--border)]
         `}>
           <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-2">
+            {/* Mobile only: Sort dropdown inside filter panel */}
+            <div className="sm:hidden w-full">
+              <Select
+                value={sortOption}
+                onChange={(e) => onSortChange(e.target.value as SpeciesActivitySort)}
+                className="w-full"
+              >
+                {sortOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    Sort: {opt.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
             {/* Rarity filter pills */}
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-sm font-semibold text-[var(--mist-600)] mr-1 shrink-0">

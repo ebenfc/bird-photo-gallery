@@ -54,7 +54,8 @@ describe("SpeciesActivityFilters", () => {
   it("displays result count", () => {
     render(<SpeciesActivityFilters {...defaultProps} />);
 
-    expect(screen.getByText("Showing 42 of 100 species")).toBeInTheDocument();
+    const resultCounts = screen.getAllByText("Showing 42 of 100 species");
+    expect(resultCounts.length).toBeGreaterThan(0); // Appears on both mobile and desktop
   });
 
   it("calls onRarityChange when rarity filter is clicked", async () => {
@@ -79,7 +80,7 @@ describe("SpeciesActivityFilters", () => {
     const user = userEvent.setup();
     render(<SpeciesActivityFilters {...defaultProps} />);
 
-    const sortSelect = screen.getByRole("combobox");
+    const sortSelect = screen.getAllByRole("combobox")[0]!; // Get first one (desktop)
     await user.selectOptions(sortSelect, "name-asc");
 
     expect(mockOnSortChange).toHaveBeenCalledWith("name-asc");
@@ -147,16 +148,14 @@ describe("SpeciesActivityFilters", () => {
   it("displays all sort options in dropdown", () => {
     render(<SpeciesActivityFilters {...defaultProps} />);
 
-    const sortSelect = screen.getByRole("combobox");
+    const sortSelect = screen.getAllByRole("combobox")[0]!; // Get first one (desktop)
     const options = Array.from(sortSelect.querySelectorAll("option"));
 
-    expect(options).toHaveLength(6);
+    expect(options).toHaveLength(4);
     expect(options[0]?.textContent).toContain("Count (Highest First)");
     expect(options[1]?.textContent).toContain("Count (Lowest First)");
     expect(options[2]?.textContent).toContain("Species Name (A-Z)");
     expect(options[3]?.textContent).toContain("Species Name (Z-A)");
-    expect(options[4]?.textContent).toContain("Last Heard (Most Recent)");
-    expect(options[5]?.textContent).toContain("Last Heard (Oldest)");
   });
 
   it("has proper ARIA labels for accessibility", () => {
@@ -194,12 +193,14 @@ describe("SpeciesActivityFilters", () => {
   it("updates result count dynamically", () => {
     const { rerender } = render(<SpeciesActivityFilters {...defaultProps} />);
 
-    expect(screen.getByText("Showing 42 of 100 species")).toBeInTheDocument();
+    let resultCounts = screen.getAllByText("Showing 42 of 100 species");
+    expect(resultCounts.length).toBeGreaterThan(0);
 
     rerender(
       <SpeciesActivityFilters {...defaultProps} resultCount={10} totalCount={100} />
     );
 
-    expect(screen.getByText("Showing 10 of 100 species")).toBeInTheDocument();
+    resultCounts = screen.getAllByText("Showing 10 of 100 species");
+    expect(resultCounts.length).toBeGreaterThan(0);
   });
 });
