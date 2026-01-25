@@ -82,10 +82,10 @@ export default function SpeciesActivityFilters({
       </div>
 
       {/* Row 2: Filter pills */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-2">
         {/* Rarity filter pills */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-[var(--mist-600)] mr-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-sm font-semibold text-[var(--mist-600)] mr-1 shrink-0">
             Rarity:
           </span>
           {rarityOptions.map((opt) => {
@@ -96,7 +96,7 @@ export default function SpeciesActivityFilters({
                 onClick={() => onRarityChange(opt.value)}
                 aria-label={`Filter by ${opt.label} rarity`}
                 aria-pressed={isSelected}
-                className={`px-4 py-2 text-sm font-semibold
+                className={`px-3 sm:px-4 py-2 text-sm font-semibold
                   rounded-[var(--radius-full)] border-2
                   shadow-[var(--shadow-xs)]
                   transition-all duration-[var(--timing-fast)]
@@ -113,12 +113,12 @@ export default function SpeciesActivityFilters({
           })}
         </div>
 
-        {/* Separator */}
-        <div className="h-6 w-px bg-[var(--mist-200)]" />
+        {/* Separator - only show on desktop */}
+        <div className="hidden sm:block h-6 w-px bg-[var(--mist-200)]" />
 
         {/* Photo status filter pills */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-[var(--mist-600)] mr-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-sm font-semibold text-[var(--mist-600)] mr-1 shrink-0">
             Photo Status:
           </span>
           {photoFilterOptions.map((opt) => {
@@ -129,7 +129,7 @@ export default function SpeciesActivityFilters({
                 onClick={() => onPhotoFilterChange(opt.value)}
                 aria-label={`Filter by ${opt.label} photo status`}
                 aria-pressed={isSelected}
-                className={`px-4 py-2 text-sm font-semibold
+                className={`px-3 sm:px-4 py-2 text-sm font-semibold
                   rounded-[var(--radius-full)] border-2
                   shadow-[var(--shadow-xs)]
                   transition-all duration-[var(--timing-fast)]
@@ -150,11 +150,12 @@ export default function SpeciesActivityFilters({
         {hasFilters && (
           <button
             onClick={handleClearFilters}
-            className="px-4 py-2 text-sm font-semibold text-[var(--mist-500)]
+            className="px-3 sm:px-4 py-2 text-sm font-semibold text-[var(--mist-500)]
               hover:text-[var(--forest-700)] hover:bg-[var(--mist-50)]
               rounded-[var(--radius-full)]
               transition-all duration-[var(--timing-fast)]
-              active:scale-95"
+              active:scale-95
+              self-start sm:self-auto"
             aria-label="Clear all filters"
           >
             Clear filters
