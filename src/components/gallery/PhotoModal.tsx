@@ -583,15 +583,28 @@ export default function PhotoModal({
                       {photo.species.scientificName}
                     </p>
                   )}
-                  {onChangeSpecies && (
-                    <button
-                      onClick={() => onChangeSpecies(photo)}
-                      className="text-sm text-[var(--moss-600)] hover:text-[var(--moss-700)]
-                        underline underline-offset-2 mt-1.5 transition-colors"
+                  <div className="flex items-center gap-3 mt-1.5">
+                    <Link
+                      href={`/species/${photo.species.id}`}
+                      onClick={onClose}
+                      className="text-sm text-[var(--forest-600)] hover:text-[var(--forest-700)]
+                        underline underline-offset-2 transition-colors font-medium"
                     >
-                      Change species
-                    </button>
-                  )}
+                      View species
+                    </Link>
+                    {onChangeSpecies && (
+                      <>
+                        <span className="text-[var(--mist-300)]">•</span>
+                        <button
+                          onClick={() => onChangeSpecies(photo)}
+                          className="text-sm text-[var(--moss-600)] hover:text-[var(--moss-700)]
+                            underline underline-offset-2 transition-colors"
+                        >
+                          Change species
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </>
               ) : (
                 <div>
@@ -915,6 +928,24 @@ export default function PhotoModal({
             className="absolute right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] bg-white rounded-[var(--radius-lg)]
               shadow-[var(--shadow-2xl)] border border-[var(--border)] py-1 min-w-[180px] animate-fade-in-scale"
           >
+            {photo.species && (
+              <Link
+                href={`/species/${photo.species.id}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowOverflowMenu(false);
+                  onClose();
+                }}
+                className="w-full px-4 py-2.5 text-left text-sm text-[var(--forest-700)]
+                  hover:bg-[var(--moss-50)] flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                View Species
+              </Link>
+            )}
             {onChangeSpecies && (
               <button
                 onClick={(e) => {
