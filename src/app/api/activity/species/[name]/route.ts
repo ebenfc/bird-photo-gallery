@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSpeciesActivityPattern } from "@/lib/activity";
+import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
 // GET /api/activity/species/:name - Get activity pattern for a species
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ name: string }> }
 ) {
+  // Authentication
+  const authResult = await requireAuth();
+  if (isErrorResponse(authResult)) {
+    return authResult;
+  }
+  const { userId } = authResult;
+
   try {
     const { name } = await params;
     const speciesName = decodeURIComponent(name);
@@ -13,7 +21,7 @@ export async function GET(
     const searchParams = request.nextUrl.searchParams;
     const daysBack = parseInt(searchParams.get("days") || "90");
 
-    const pattern = await getSpeciesActivityPattern(speciesName, daysBack);
+    const pattern = await getSpeciesActivityPattern(userId, speciesName, daysBack);
 
     if (!pattern) {
       return NextResponse.json(

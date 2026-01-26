@@ -3,7 +3,7 @@
 
 import { db } from "@/db";
 import { haikuboxActivityLog } from "@/db/schema";
-import { and, sql, gte, desc, inArray } from "drizzle-orm";
+import { and, sql, gte, desc, inArray, eq } from "drizzle-orm";
 import { normalizeCommonName, HaikuboxRecentDetection } from "./haikubox";
 
 // Types
@@ -32,6 +32,7 @@ export interface ActiveSpecies {
  * Uses ON CONFLICT DO NOTHING to skip duplicates
  */
 export async function storeActivityLogs(
+  userId: string,
   detections: HaikuboxRecentDetection[],
   speciesMap: Map<string, number>
 ): Promise<number> {
@@ -46,6 +47,7 @@ export async function storeActivityLogs(
       await db
         .insert(haikuboxActivityLog)
         .values({
+          userId,
           speciesCommonName: detection.species,
           speciesId: matchedSpeciesId,
           detectedAt,
@@ -68,6 +70,7 @@ export async function storeActivityLogs(
  * Returns hourly breakdown and peak hours
  */
 export async function getSpeciesActivityPattern(
+  userId: string,
   speciesName: string,
   daysBack: number = 90
 ): Promise<ActivityPattern | null> {
@@ -85,6 +88,7 @@ export async function getSpeciesActivityPattern(
     .from(haikuboxActivityLog)
     .where(
       and(
+        eq(haikuboxActivityLog.userId, userId),
         sql`LOWER(${haikuboxActivityLog.speciesCommonName}) = ${normalized}`,
         gte(haikuboxActivityLog.detectedAt, startDate)
       )
@@ -141,6 +145,7 @@ export async function getSpeciesActivityPattern(
  * Uses historical data to predict what's likely active now
  */
 export async function getActiveNowSpecies(
+  userId: string,
   hourWindow: number = 1
 ): Promise<ActiveSpecies[]> {
   const currentHour = new Date().getHours();
@@ -163,6 +168,7 @@ export async function getActiveNowSpecies(
     .from(haikuboxActivityLog)
     .where(
       and(
+        eq(haikuboxActivityLog.userId, userId),
         inArray(haikuboxActivityLog.hourOfDay, hoursToCheck),
         gte(haikuboxActivityLog.detectedAt, thirtyDaysAgo)
       )
@@ -183,6 +189,7 @@ export async function getActiveNowSpecies(
  * Returns hourly breakdown for each species
  */
 export async function getAllSpeciesHeatmap(
+  userId: string,
   daysBack: number = 30
 ): Promise<Array<{ speciesName: string; hourlyData: number[] }>> {
   const startDate = new Date();
@@ -195,7 +202,10 @@ export async function getAllSpeciesHeatmap(
       count: sql<number>`count(*)::int`,
     })
     .from(haikuboxActivityLog)
-    .where(gte(haikuboxActivityLog.detectedAt, startDate))
+    .where(and(
+      eq(haikuboxActivityLog.userId, userId),
+      gte(haikuboxActivityLog.detectedAt, startDate)
+    ))
     .groupBy(haikuboxActivityLog.speciesCommonName, haikuboxActivityLog.hourOfDay)
     .orderBy(haikuboxActivityLog.speciesCommonName);
 
@@ -220,6 +230,7 @@ export async function getAllSpeciesHeatmap(
  * Deletes records older than the specified number of days
  */
 export async function cleanupOldActivityLogs(
+  userId: string,
   retentionDays: number = 90
 ): Promise<number> {
   const cutoffDate = new Date();
@@ -227,7 +238,10 @@ export async function cleanupOldActivityLogs(
 
   const result = await db
     .delete(haikuboxActivityLog)
-    .where(sql`${haikuboxActivityLog.detectedAt} < ${cutoffDate}`);
+    .where(and(
+      eq(haikuboxActivityLog.userId, userId),
+      sql`${haikuboxActivityLog.detectedAt} < ${cutoffDate}`
+    ));
 
   return result.rowCount || 0;
 }

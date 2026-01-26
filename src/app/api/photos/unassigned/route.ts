@@ -1,24 +1,38 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { photos } from "@/db/schema";
-import { isNull, desc, sql } from "drizzle-orm";
+import { isNull, desc, sql, eq, and } from "drizzle-orm";
 import { getThumbnailUrl, getOriginalUrl } from "@/lib/storage";
+import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
 // GET /api/photos/unassigned - Get count and list of unassigned photos
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Authentication
+  const authResult = await requireAuth();
+  if (isErrorResponse(authResult)) {
+    return authResult;
+  }
+  const { userId } = authResult;
+
   try {
     // Get count
     const countResult = await db
       .select({ count: sql<number>`count(*)` })
       .from(photos)
-      .where(isNull(photos.speciesId));
+      .where(and(
+        eq(photos.userId, userId),
+        isNull(photos.speciesId)
+      ));
     const count = Number(countResult[0]?.count ?? 0);
 
     // Get photos
     const result = await db
       .select()
       .from(photos)
-      .where(isNull(photos.speciesId))
+      .where(and(
+        eq(photos.userId, userId),
+        isNull(photos.speciesId)
+      ))
       .orderBy(desc(photos.uploadDate));
 
     const photosWithUrls = result.map((photo) => ({

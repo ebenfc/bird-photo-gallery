@@ -494,9 +494,9 @@ export default function PhotoModal({
           transition-all duration-300 ease-out overflow-hidden
           ${isDetailsExpanded ? "max-h-[50vh]" : "max-h-20"}`}>
           {/* Collapse/Expand handle */}
-          <button
+          <div
             onClick={() => setIsDetailsExpanded(!isDetailsExpanded)}
-            className="w-full p-4 flex items-center justify-between border-b border-[var(--border)]"
+            className="w-full p-4 flex items-center justify-between border-b border-[var(--border)] cursor-pointer"
           >
             <div className="flex items-center gap-3">
               <div>
@@ -550,7 +550,7 @@ export default function PhotoModal({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
               </svg>
             </div>
-          </button>
+          </div>
 
           {/* Expandable content */}
           <div className="p-4 overflow-auto max-h-[calc(50vh-5rem)]">

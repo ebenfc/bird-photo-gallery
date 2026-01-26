@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { species, photos, Rarity } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, and } from "drizzle-orm";
+import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
 const VALID_RARITIES: Rarity[] = ["common", "uncommon", "rare"];
 
@@ -10,7 +11,14 @@ interface RouteParams {
 }
 
 // GET /api/species/[id] - Get a single species with photo count
-export async function GET(_request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
+  // Authentication
+  const authResult = await requireAuth();
+  if (isErrorResponse(authResult)) {
+    return authResult;
+  }
+  const { userId } = authResult;
+
   try {
     const { id } = await params;
     const speciesId = parseInt(id);
@@ -30,8 +38,14 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
         photoCount: sql<number>`count(${photos.id})`.as("photo_count"),
       })
       .from(species)
-      .leftJoin(photos, eq(photos.speciesId, species.id))
-      .where(eq(species.id, speciesId))
+      .leftJoin(photos, and(
+        eq(photos.speciesId, species.id),
+        eq(photos.userId, userId)
+      ))
+      .where(and(
+        eq(species.id, speciesId),
+        eq(species.userId, userId)
+      ))
       .groupBy(species.id);
 
     const speciesRecord = result[0];
@@ -51,6 +65,13 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 
 // PATCH /api/species/[id] - Update a species
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
+  // Authentication
+  const authResult = await requireAuth();
+  if (isErrorResponse(authResult)) {
+    return authResult;
+  }
+  const { userId } = authResult;
+
   try {
     const { id } = await params;
     const speciesId = parseInt(id);
@@ -96,12 +117,15 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       updateData.rarity = rarity;
     }
     if (coverPhotoId !== undefined) {
-      // Validate that the photo exists and belongs to this species
+      // Validate that the photo exists and belongs to this species and user
       if (coverPhotoId !== null) {
         const photo = await db
           .select({ id: photos.id, speciesId: photos.speciesId })
           .from(photos)
-          .where(eq(photos.id, coverPhotoId))
+          .where(and(
+            eq(photos.id, coverPhotoId),
+            eq(photos.userId, userId)
+          ))
           .limit(1);
 
         const photoRecord = photo[0];
@@ -131,7 +155,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const result = await db
       .update(species)
       .set(updateData)
-      .where(eq(species.id, speciesId))
+      .where(and(
+        eq(species.id, speciesId),
+        eq(species.userId, userId)
+      ))
       .returning();
 
     const updatedSpecies = result[0];
@@ -150,7 +177,14 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 }
 
 // DELETE /api/species/[id] - Delete a species (cascades to photos)
-export async function DELETE(_request: NextRequest, { params }: RouteParams) {
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  // Authentication
+  const authResult = await requireAuth();
+  if (isErrorResponse(authResult)) {
+    return authResult;
+  }
+  const { userId } = authResult;
+
   try {
     const { id } = await params;
     const speciesId = parseInt(id);
@@ -161,7 +195,10 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
 
     const result = await db
       .delete(species)
-      .where(eq(species.id, speciesId))
+      .where(and(
+        eq(species.id, speciesId),
+        eq(species.userId, userId)
+      ))
       .returning();
 
     const deletedSpecies = result[0];
