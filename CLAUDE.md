@@ -354,10 +354,9 @@ Optional:
 
 ### Deployment Status
 
-**Railway**: ⏳ Custom domain configured, SSL certificate pending
-- birdfeed.io added as custom domain
-- CNAME points to `mjfi163h.up.railway.app`
-- Waiting for Let's Encrypt certificate validation
+**Railway**: ✅ Live at birdfeed.io
+- Custom domain configured with SSL certificate
+- CNAME points to `cjnyqfkl.up.railway.app`
 
 **Clerk Production**: ✅ Fully configured
 - All 5 DNS records verified (clerk, accounts, clkmail, clk._domainkey, clk2._domainkey)
@@ -365,7 +364,7 @@ Optional:
 - Production keys (pk_live_, sk_live_) configured in Railway
 
 **DNS (Namecheap)**: ✅ All records configured
-- birdfeed.io → Railway (CNAME to mjfi163h.up.railway.app)
+- birdfeed.io → Railway (CNAME to cjnyqfkl.up.railway.app)
 - www.birdfeed.io → Railway
 - clerk.birdfeed.io → frontend-api.clerk.services
 - accounts.birdfeed.io → accounts.clerk.services
