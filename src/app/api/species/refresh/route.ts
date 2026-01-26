@@ -1,14 +1,25 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { species } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { lookupBirdFromWikipedia } from "@/lib/wikipedia";
+import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
 // POST /api/species/refresh - Refresh all species with Wikipedia data
-export async function POST() {
+export async function POST(_request: NextRequest) {
+  // Authentication
+  const authResult = await requireAuth();
+  if (isErrorResponse(authResult)) {
+    return authResult;
+  }
+  const { userId } = authResult;
+
   try {
-    // Get all species
-    const allSpecies = await db.select().from(species);
+    // Get all species for this user
+    const allSpecies = await db
+      .select()
+      .from(species)
+      .where(eq(species.userId, userId));
 
     const results: Array<{
       id: number;
@@ -31,7 +42,10 @@ export async function POST() {
               scientificName: data.scientificName || s.scientificName,
               description: data.description || s.description,
             })
-            .where(eq(species.id, s.id));
+            .where(and(
+              eq(species.id, s.id),
+              eq(species.userId, userId)
+            ));
 
           results.push({
             id: s.id,

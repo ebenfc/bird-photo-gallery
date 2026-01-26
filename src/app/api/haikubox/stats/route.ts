@@ -1,10 +1,18 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { haikuboxDetections, species, photos } from "@/db/schema";
-import { eq, sql, isNotNull } from "drizzle-orm";
+import { eq, sql, isNotNull, and } from "drizzle-orm";
+import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
 // GET /api/haikubox/stats - Get property bird statistics
-export async function GET() {
+export async function GET(_request: NextRequest) {
+  // Authentication
+  const authResult = await requireAuth();
+  if (isErrorResponse(authResult)) {
+    return authResult;
+  }
+  const { userId } = authResult;
+
   try {
     const currentYear = new Date().getFullYear();
 
@@ -14,7 +22,10 @@ export async function GET() {
         count: sql<number>`count(distinct ${haikuboxDetections.speciesCommonName})`,
       })
       .from(haikuboxDetections)
-      .where(eq(haikuboxDetections.dataYear, currentYear));
+      .where(and(
+        eq(haikuboxDetections.userId, userId),
+        eq(haikuboxDetections.dataYear, currentYear)
+      ));
 
     // Total species photographed (with at least one photo)
     const photographedCount = await db
@@ -22,7 +33,10 @@ export async function GET() {
         count: sql<number>`count(distinct ${photos.speciesId})`,
       })
       .from(photos)
-      .where(isNotNull(photos.speciesId));
+      .where(and(
+        eq(photos.userId, userId),
+        isNotNull(photos.speciesId)
+      ));
 
     // Species both heard AND photographed (matched and have photos)
     const heardAndPhotographed = await db
@@ -30,9 +44,18 @@ export async function GET() {
         count: sql<number>`count(distinct ${haikuboxDetections.speciesId})`,
       })
       .from(haikuboxDetections)
-      .innerJoin(species, eq(haikuboxDetections.speciesId, species.id))
-      .innerJoin(photos, eq(photos.speciesId, species.id))
-      .where(eq(haikuboxDetections.dataYear, currentYear));
+      .innerJoin(species, and(
+        eq(haikuboxDetections.speciesId, species.id),
+        eq(species.userId, userId)
+      ))
+      .innerJoin(photos, and(
+        eq(photos.speciesId, species.id),
+        eq(photos.userId, userId)
+      ))
+      .where(and(
+        eq(haikuboxDetections.userId, userId),
+        eq(haikuboxDetections.dataYear, currentYear)
+      ));
 
     // Species heard but NOT photographed (photo opportunities)
     // These are detections that either:
@@ -45,9 +68,18 @@ export async function GET() {
         lastHeardAt: haikuboxDetections.lastHeardAt,
       })
       .from(haikuboxDetections)
-      .leftJoin(species, eq(haikuboxDetections.speciesId, species.id))
-      .leftJoin(photos, eq(photos.speciesId, species.id))
-      .where(eq(haikuboxDetections.dataYear, currentYear))
+      .leftJoin(species, and(
+        eq(haikuboxDetections.speciesId, species.id),
+        eq(species.userId, userId)
+      ))
+      .leftJoin(photos, and(
+        eq(photos.speciesId, species.id),
+        eq(photos.userId, userId)
+      ))
+      .where(and(
+        eq(haikuboxDetections.userId, userId),
+        eq(haikuboxDetections.dataYear, currentYear)
+      ))
       .groupBy(
         haikuboxDetections.id,
         haikuboxDetections.speciesCommonName,
@@ -68,9 +100,18 @@ export async function GET() {
         rarity: species.rarity,
       })
       .from(haikuboxDetections)
-      .leftJoin(species, eq(haikuboxDetections.speciesId, species.id))
-      .leftJoin(photos, eq(photos.speciesId, species.id))
-      .where(eq(haikuboxDetections.dataYear, currentYear))
+      .leftJoin(species, and(
+        eq(haikuboxDetections.speciesId, species.id),
+        eq(species.userId, userId)
+      ))
+      .leftJoin(photos, and(
+        eq(photos.speciesId, species.id),
+        eq(photos.userId, userId)
+      ))
+      .where(and(
+        eq(haikuboxDetections.userId, userId),
+        eq(haikuboxDetections.dataYear, currentYear)
+      ))
       .groupBy(
         haikuboxDetections.id,
         haikuboxDetections.speciesCommonName,

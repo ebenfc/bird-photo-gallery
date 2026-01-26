@@ -322,3 +322,121 @@ Optional:
 **Key Files Modified:**
 - `src/app/species/page.tsx` - Fixed loading skeleton title
 - `src/components/gallery/PhotoModal.tsx` - Fixed fullscreen exit behavior
+
+### Property Stats Widget Improvements (PR #33)
+
+**Clickable Photographed Count:**
+- Made "Photographed" species count clickable, linking to Species page
+- Added hover effects (scale, background color, shadow) for better UX
+- Provides quick navigation to full species directory
+
+**Layout Redesign:**
+- Redesigned widget layout: moved "Property Bird Activity 2026" from prominent header to subtle footer
+- Reduced visual weight while retaining year context
+- Footer includes small speaker icon and muted colors
+
+**Species Count Fix:**
+- Fixed species count discrepancy between Activity page (16) and Gallery/Species (25)
+- Root cause: Widget was using `heardAndPhotographed` (species heard this year AND photographed) instead of `totalPhotographed` (all species with photos)
+- Now shows accurate total across all pages (Feed, Species, Activity all show 25)
+- Also fixed capture rate calculation to use correct numerator
+
+**Key Files Modified:**
+- `src/components/stats/PropertyStatsWidget.tsx` - Clickable count, footer redesign, count fix
+
+---
+
+## Clerk Authentication Integration (In Progress - January 2026)
+
+**Status**: 60% Complete - Core infrastructure done, API routes pending
+**Documentation**: See [CLERK-INTEGRATION-STATUS.md](./CLERK-INTEGRATION-STATUS.md) for full details
+
+### Overview
+Transforming Bird Photo Gallery from single-user public app to multi-user authenticated app using Clerk. Each user will have isolated photo collections, species directories, and Haikubox configurations.
+
+### Completed (Phase 1-4)
+
+**Foundation:**
+- Installed Clerk packages: `@clerk/nextjs`, `svix`, `tsx`
+- Added Clerk environment variables to `.env.local` (keys need to be filled in)
+- Updated database schema with `users` table
+- Added `userId` fields to all tables (photos, species, appSettings, haikubox tables)
+- Schema pushed to database (userId nullable for safe migration)
+
+**Authentication Setup:**
+- Created middleware (`src/middleware.ts`) - protects all routes except sign-in/sign-up/webhooks
+- Updated root layout with `ClerkProvider`
+- Created sign-in page (`src/app/sign-in/[[...sign-in]]/page.tsx`)
+- Created sign-up page (`src/app/sign-up/[[...sign-up]]/page.tsx`)
+- Updated Header component with Clerk `UserButton` (desktop and mobile)
+
+**User Management:**
+- Created user service (`src/lib/user.ts`) - syncs Clerk users to local database
+- Created Clerk webhook handler (`src/app/api/webhook/clerk/route.ts`) - handles user.created, user.updated, user.deleted
+- Created auth helpers (`src/lib/authHelpers.ts`) - `requireAuth()`, `getCurrentUserId()`, `isErrorResponse()`
+
+**Service Updates:**
+- Updated settings service with userId parameter for per-user settings
+- Updated Haikubox service with userId parameter for per-user device configuration
+- Updated browser upload API route with authentication and userId association
+
+### Remaining Work
+
+**API Routes** (22 of 23 routes need updates):
+- Photo APIs: `/api/photos`, `/api/photos/[id]`, `/api/photos/unassigned`
+- Species APIs: `/api/species`, `/api/species/[id]`, `/api/species/refresh`
+- Settings API: `/api/settings`
+- Haikubox APIs: 6 endpoints (test, sync, stats, detections, link)
+- Activity APIs: 3 endpoints (current, heatmap, species/[name])
+- Other: suggestions, birds/lookup
+
+**Data Migration:**
+- Create migration script (`scripts/migrate-to-multi-user.ts`)
+- Run migration to assign existing data to first user
+
+**Final Steps:**
+- Set up Clerk webhook in dashboard
+- Make userId required in schema (remove nullable)
+- Test with multiple accounts
+- Deploy to Railway with production Clerk keys
+
+### Key Architecture Decisions
+
+1. **Users Table**: Local table synced via webhooks (integer PKs for foreign keys)
+2. **Data Isolation**: All tables have userId foreign key - each user has separate data
+3. **Haikubox**: Per-user device configuration (not shared)
+4. **Settings**: Per-user with unique constraint on (userId, key)
+5. **Migration Strategy**: Nullable userId → migrate data → make required
+6. **API Key Auth**: Kept for `/api/upload` (iOS Shortcuts) - unused but preserved
+
+### Testing Strategy
+
+1. Sign up first user → webhook creates user in database
+2. Run migration script to assign existing data
+3. Create second test account
+4. Verify complete data isolation between accounts
+5. Test all functionality with both accounts
+
+### New Files Created
+- `src/middleware.ts`
+- `src/app/sign-in/[[...sign-in]]/page.tsx`
+- `src/app/sign-up/[[...sign-up]]/page.tsx`
+- `src/app/api/webhook/clerk/route.ts`
+- `src/lib/authHelpers.ts`
+- `src/lib/user.ts`
+- `CLERK-INTEGRATION-STATUS.md` (session documentation)
+
+### Modified Files
+- `src/db/schema.ts` - Added users table + userId to all tables
+- `src/app/layout.tsx` - ClerkProvider wrapper
+- `src/components/layout/Header.tsx` - UserButton
+- `src/lib/settings.ts` - userId parameter (needs re-application - linter reverted)
+- `src/lib/haikubox.ts` - userId parameter (needs re-application - linter reverted)
+- `src/app/api/upload/browser/route.ts` - Auth + userId
+- `.env.local` - Clerk environment variables
+
+### Notes for Next Session
+- Settings and Haikubox services need userId parameter re-applied (linter reverted changes)
+- All API routes follow same pattern: `requireAuth()` → get `userId` → filter queries
+- Webhook secret can be obtained from Clerk Dashboard after setting up webhook endpoint
+- Migration script will be based on pattern in implementation plan

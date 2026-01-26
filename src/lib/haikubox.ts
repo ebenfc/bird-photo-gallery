@@ -44,9 +44,10 @@ export interface HaikuboxRecentDetection {
  * Fetch yearly species counts (top 75 species for the year)
  */
 export async function fetchYearlyDetections(
+  userId: string,
   year: number
 ): Promise<HaikuboxYearlySpecies[]> {
-  const serial = await getHaikuboxSerial();
+  const serial = await getHaikuboxSerial(userId);
   const url = `${HAIKUBOX_BASE_URL}/haikubox/${serial}/yearly-count?year=${year}`;
 
   try {
@@ -69,9 +70,10 @@ export async function fetchYearlyDetections(
  * Fetch daily species counts for a specific date
  */
 export async function fetchDailyDetections(
+  userId: string,
   date: string
 ): Promise<HaikuboxDailySpecies[]> {
-  const serial = await getHaikuboxSerial();
+  const serial = await getHaikuboxSerial(userId);
   const url = `${HAIKUBOX_BASE_URL}/haikubox/${serial}/daily-count?date=${date}`;
 
   try {
@@ -95,9 +97,10 @@ export async function fetchDailyDetections(
  * Returns normalized detection objects
  */
 export async function fetchRecentDetections(
+  userId: string,
   hours: number = 8
 ): Promise<HaikuboxRecentDetection[]> {
-  const serial = await getHaikuboxSerial();
+  const serial = await getHaikuboxSerial(userId);
   const url = `${HAIKUBOX_BASE_URL}/haikubox/${serial}/detections?hours=${hours}`;
 
   try {

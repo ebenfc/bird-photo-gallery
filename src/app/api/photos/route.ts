@@ -5,6 +5,7 @@ import { eq, desc, asc, and, sql, inArray } from "drizzle-orm";
 import { getThumbnailUrl, getOriginalUrl } from "@/lib/storage";
 import { checkAndGetRateLimitResponse, RATE_LIMITS, addRateLimitHeaders } from "@/lib/rateLimit";
 import { logError } from "@/lib/logger";
+import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
 type SortOption = "recent_upload" | "oldest_upload" | "species_alpha" | "recent_taken";
 const VALID_RARITIES: Rarity[] = ["common", "uncommon", "rare"];
@@ -16,6 +17,13 @@ export async function GET(request: NextRequest) {
   if (!rateCheck.allowed) {
     return rateCheck.response;
   }
+
+  // Authentication
+  const authResult = await requireAuth();
+  if (isErrorResponse(authResult)) {
+    return authResult;
+  }
+  const { userId } = authResult;
 
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -52,7 +60,7 @@ export async function GET(request: NextRequest) {
     };
 
     // Build where conditions
-    const conditions = [];
+    const conditions = [eq(photos.userId, userId)];
     if (speciesId) {
       conditions.push(eq(photos.speciesId, parseInt(speciesId)));
     }
@@ -63,7 +71,7 @@ export async function GET(request: NextRequest) {
       conditions.push(inArray(species.rarity, rarityFilter));
     }
 
-    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+    const whereClause = and(...conditions);
 
     // Get total count (need JOIN if filtering by rarity)
     const countQuery = db

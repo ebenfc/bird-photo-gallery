@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { haikuboxDetections, species } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import { normalizeCommonName } from "@/lib/haikubox";
+import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
 // GET /api/haikubox/detections - Query cached detection data
 export async function GET(request: NextRequest) {
+  // Authentication
+  const authResult = await requireAuth();
+  if (isErrorResponse(authResult)) {
+    return authResult;
+  }
+  const { userId } = authResult;
+
   try {
     const searchParams = request.nextUrl.searchParams;
     const limit = parseInt(searchParams.get("limit") || "50");
@@ -29,7 +37,11 @@ export async function GET(request: NextRequest) {
           matchedSpeciesName: species.commonName,
         })
         .from(haikuboxDetections)
-        .leftJoin(species, eq(haikuboxDetections.speciesId, species.id));
+        .leftJoin(species, and(
+          eq(haikuboxDetections.speciesId, species.id),
+          eq(species.userId, userId)
+        ))
+        .where(eq(haikuboxDetections.userId, userId));
 
       // Filter with normalized comparison
       const matchedDetections = allDetections.filter((d) => {
@@ -53,7 +65,11 @@ export async function GET(request: NextRequest) {
         matchedSpeciesName: species.commonName,
       })
       .from(haikuboxDetections)
-      .leftJoin(species, eq(haikuboxDetections.speciesId, species.id))
+      .leftJoin(species, and(
+        eq(haikuboxDetections.speciesId, species.id),
+        eq(species.userId, userId)
+      ))
+      .where(eq(haikuboxDetections.userId, userId))
       .orderBy(desc(haikuboxDetections.yearlyCount))
       .limit(limit);
 

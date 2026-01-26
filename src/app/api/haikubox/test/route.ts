@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
 /**
  * POST /api/haikubox/test
  * Test Haikubox connection by validating serial number
  */
 export async function POST(request: NextRequest) {
+  // Authentication
+  const authResult = await requireAuth();
+  if (isErrorResponse(authResult)) {
+    return authResult;
+  }
+
   try {
     const { serial } = await request.json();
 

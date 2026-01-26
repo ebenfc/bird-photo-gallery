@@ -11,6 +11,7 @@ import { storeActivityLogs, cleanupOldActivityLogs } from "@/lib/activity";
 import { checkAndGetRateLimitResponse, RATE_LIMITS, addRateLimitHeaders } from "@/lib/rateLimit";
 import { logError, logInfo } from "@/lib/logger";
 import { invalidateHaikuboxCache } from "@/lib/cache";
+import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
 // POST /api/haikubox/sync - Sync Haikubox data to database
 // Can be triggered by Vercel Cron or manually
@@ -21,22 +22,21 @@ export async function POST(request: NextRequest) {
     return rateCheck.response;
   }
 
-  // Optional: Verify authorization for cron requests
-  const authHeader = request.headers.get("authorization");
-  const expectedKey = process.env.HAIKUBOX_SYNC_KEY;
-
-  if (expectedKey && authHeader !== `Bearer ${expectedKey}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Authentication
+  const authResult = await requireAuth();
+  if (isErrorResponse(authResult)) {
+    return authResult;
   }
+  const { userId } = authResult;
 
   try {
     const currentYear = new Date().getFullYear();
 
     // 1. Fetch yearly data from Haikubox
-    const yearlyData = await fetchYearlyDetections(currentYear);
+    const yearlyData = await fetchYearlyDetections(userId, currentYear);
 
     if (!yearlyData || yearlyData.length === 0) {
-      await logSync("yearly", "error", 0, "No data returned from Haikubox API");
+      await logSync(userId, "yearly", "error", 0, "No data returned from Haikubox API");
       return NextResponse.json(
         { error: "No data returned from Haikubox API" },
         { status: 502 }
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Fetch recent detections for "last heard" timestamps
-    const recentData = await fetchRecentDetections(72); // Last 3 days
+    const recentData = await fetchRecentDetections(userId, 72); // Last 3 days
 
     // 3. Build lookup map for recent detections (most recent timestamp per species)
     const recentMap = new Map<string, Date>();
@@ -58,17 +58,20 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Get all gallery species for matching
-    const gallerySpecies = await db.select().from(species);
+    const gallerySpecies = await db
+      .select()
+      .from(species)
+      .where(eq(species.userId, userId));
     const speciesMap = new Map(
       gallerySpecies.map((s) => [normalizeCommonName(s.commonName), s.id])
     );
 
     // 5. Store individual activity logs for timeline feature
-    const activityLogsStored = await storeActivityLogs(recentData, speciesMap);
+    const activityLogsStored = await storeActivityLogs(userId, recentData, speciesMap);
     console.log(`Stored ${activityLogsStored} activity log entries`);
 
     // 5a. Cleanup old activity logs (90-day retention)
-    const cleaned = await cleanupOldActivityLogs(90);
+    const cleaned = await cleanupOldActivityLogs(userId, 90);
     if (cleaned > 0) {
       console.log(`Cleaned up ${cleaned} old activity log entries`);
     }
@@ -81,12 +84,13 @@ export async function POST(request: NextRequest) {
       const matchedSpeciesId = speciesMap.get(normalized) || null;
       const lastHeard = recentMap.get(normalized) || null;
 
-      // Check if record exists for this species/year
+      // Check if record exists for this species/year/user
       const existing = await db
         .select()
         .from(haikuboxDetections)
         .where(
           and(
+            eq(haikuboxDetections.userId, userId),
             eq(haikuboxDetections.speciesCommonName, birdName),
             eq(haikuboxDetections.dataYear, currentYear)
           )
@@ -108,6 +112,7 @@ export async function POST(request: NextRequest) {
       } else {
         // Insert new record
         await db.insert(haikuboxDetections).values({
+          userId,
           speciesCommonName: birdName,
           speciesId: matchedSpeciesId,
           yearlyCount: detection.count,
@@ -119,7 +124,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 7. Log successful sync
-    await logSync("yearly", "success", processed);
+    await logSync(userId, "yearly", "success", processed);
 
     // Invalidate cache
     invalidateHaikuboxCache();
@@ -141,12 +146,16 @@ export async function POST(request: NextRequest) {
     });
 
     // Log failed sync
-    await logSync(
-      "yearly",
-      "error",
-      0,
-      error instanceof Error ? error.message : "Unknown error"
-    );
+    const authResult2 = await requireAuth();
+    if (!isErrorResponse(authResult2)) {
+      await logSync(
+        authResult2.userId,
+        "yearly",
+        "error",
+        0,
+        error instanceof Error ? error.message : "Unknown error"
+      );
+    }
 
     return NextResponse.json(
       { error: "Sync failed" },
@@ -156,22 +165,34 @@ export async function POST(request: NextRequest) {
 }
 
 // GET /api/haikubox/sync - Get sync status
-export async function GET() {
+export async function GET(_request: NextRequest) {
+  // Authentication
+  const authResult = await requireAuth();
+  if (isErrorResponse(authResult)) {
+    return authResult;
+  }
+  const { userId } = authResult;
+
   try {
     const lastSync = await db
       .select()
       .from(haikuboxSyncLog)
+      .where(eq(haikuboxSyncLog.userId, userId))
       .orderBy(desc(haikuboxSyncLog.syncedAt))
       .limit(1);
 
     const detectionCount = await db
       .select({ count: sql<number>`count(*)` })
-      .from(haikuboxDetections);
+      .from(haikuboxDetections)
+      .where(eq(haikuboxDetections.userId, userId));
 
     const matchedCount = await db
       .select({ count: sql<number>`count(*)` })
       .from(haikuboxDetections)
-      .where(sql`${haikuboxDetections.speciesId} IS NOT NULL`);
+      .where(and(
+        eq(haikuboxDetections.userId, userId),
+        sql`${haikuboxDetections.speciesId} IS NOT NULL`
+      ));
 
     return NextResponse.json({
       lastSync: lastSync[0] || null,
@@ -189,6 +210,7 @@ export async function GET() {
 
 // Helper to log sync attempts
 async function logSync(
+  userId: string,
   syncType: string,
   status: string,
   recordsProcessed: number,
@@ -196,6 +218,7 @@ async function logSync(
 ) {
   try {
     await db.insert(haikuboxSyncLog).values({
+      userId,
       syncType,
       status,
       recordsProcessed,
