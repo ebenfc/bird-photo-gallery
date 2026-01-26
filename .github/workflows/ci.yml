@@ -56,9 +56,9 @@ jobs:
           HAIKUBOX_SERIAL: dummy
           SUPABASE_URL: https://dummy.supabase.co
           SUPABASE_ANON_KEY: dummy
-          # Clerk keys for build
-          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_dummy
-          CLERK_SECRET_KEY: sk_test_dummy
+          # Clerk keys for build (from GitHub repository secrets)
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
 
   security-scan:
     name: Security Scan
