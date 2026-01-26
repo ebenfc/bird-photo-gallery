@@ -348,64 +348,60 @@ Optional:
 
 ## Clerk Authentication Integration (PR #34 - January 2026)
 
-**Status**: PR #34 created, CI passing, awaiting merge
-**Branch**: `feature/clerk-authentication`
+**Status**: ✅ PR #34 merged, production deployment in progress
+**Production URL**: https://birdfeed.io
 **PR**: https://github.com/ebenfc/bird-photo-gallery/pull/34
 
-### Current Issue (BLOCKING)
+### Deployment Status
 
-**Problem**: Railway deployment shows sign-in page but Clerk component doesn't render.
-- URL shows: `bird-photo-gallery-production.up.railway.app/sign-in?redirect_url=...`
-- Page shows "Welcome to Bird Feed" text but NO sign-in form
-- Root cause: Railway is missing Clerk environment variables
+**Railway**: ✅ Custom domain configured, SSL certificate pending
+- birdfeed.io added as custom domain
+- CNAME points to `mjfi163h.up.railway.app`
+- Waiting for Let's Encrypt certificate validation
 
-**Solution**: Add these environment variables in Railway dashboard:
-1. `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - from Clerk Dashboard → API Keys (starts with `pk_`)
-2. `CLERK_SECRET_KEY` - from Clerk Dashboard → API Keys (starts with `sk_`)
+**Clerk Production**: ✅ Fully configured
+- All 5 DNS records verified (clerk, accounts, clkmail, clk._domainkey, clk2._domainkey)
+- SSL certificates issued for Frontend API and Account portal
+- Production keys (pk_live_, sk_live_) configured in Railway
 
-After adding, redeploy the app.
+**DNS (Namecheap)**: ✅ All records configured
+- birdfeed.io → Railway (CNAME to mjfi163h.up.railway.app)
+- www.birdfeed.io → Railway
+- clerk.birdfeed.io → frontend-api.clerk.services
+- accounts.birdfeed.io → accounts.clerk.services
+- Email/DKIM records for Clerk
 
 ### What's Complete
 
+**Code & CI**: ✅
+- PR #34 merged to main
+- All CI checks passing
+- GitHub secrets configured for CI builds
+
 **Local Development**: ✅ Working
 - Sign-up/sign-in works at localhost:3000
-- User created in database via manual Clerk API call
-- Migration script ran successfully - existing data assigned to user
+- Migration script ran successfully
 - All photos and species visible after sign-in
 
-**CI Pipeline**: ✅ Passing
-- GitHub repository secrets added: `CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`
-- CI workflow updated to use `${{ secrets.CLERK_PUBLISHABLE_KEY }}`
-- TypeScript errors fixed (unused params prefixed with `_`)
-- Exposed secrets removed from documentation files
+**Infrastructure**:
+- Clerk packages: `@clerk/nextjs`, `svix`
+- Database schema: `users` table, `userId` fields on all tables
+- Middleware: protects routes except sign-in/sign-up/webhooks
+- Auth helpers: `requireAuth()`, `getCurrentUserId()`
 
-**Code Changes**:
-- Clerk packages installed: `@clerk/nextjs`, `svix`
-- Database schema: `users` table added, `userId` fields on all tables
-- Middleware: protects all routes except sign-in/sign-up/webhooks
-- Auth helpers: `requireAuth()`, `getCurrentUserId()`, `isErrorResponse()`
-- Sign-in/sign-up pages created with Clerk components
-- Header: UserButton added (desktop + mobile)
-- PhotoModal: Fixed button nesting hydration error (changed `<button>` to `<div>`)
+### Remaining Work
 
-**Key Bug Fixes This Session**:
-- `auth().protect is not a function` → Changed to `await auth.protect()`
-- `useSession can only be used within ClerkProvider` → Added ClerkProvider to layout
-- Invalid publishable key format → User corrected typo in .env.local
-- API routes returning 401 → Fixed user.ts to use `users.id` not `users.clerkId`
-- Button nesting hydration error → Changed outer button to div with cursor-pointer
+**Once SSL certificate is issued**:
+1. Test sign-up at https://birdfeed.io
+2. Set up Clerk webhook:
+   - Endpoint: `https://birdfeed.io/api/webhook/clerk`
+   - Events: `user.created`, `user.updated`, `user.deleted`
+   - Add `CLERK_WEBHOOK_SECRET` to Railway
+3. Run migration script to assign existing data to your user
 
-### Remaining Work After Railway Deployment
-
-**Clerk Dashboard Setup**:
-1. Set up webhook endpoint: `https://birdfeed.io/api/webhook/clerk`
-2. Subscribe to events: `user.created`, `user.updated`, `user.deleted`
-3. Copy webhook secret to Railway as `CLERK_WEBHOOK_SECRET`
-
-**birdfeed.io Domain**:
-- Currently birdfeed.io shows a parked domain page (not your app)
-- Need to verify DNS/domain configuration points to Railway
-- May need to use `bird-photo-gallery-production.up.railway.app` instead
+**Optional cleanup**:
+- Remove old Railway domain (`bird-photo-gallery-production.up.railway.app`) once birdfeed.io is working
+- Consider rotating any credentials that were previously exposed
 
 ### Key Files
 
@@ -419,16 +415,12 @@ After adding, redeploy the app.
 - `src/app/sign-in/[[...sign-in]]/page.tsx`
 - `src/app/sign-up/[[...sign-up]]/page.tsx`
 
-**Configuration**:
-- `.github/workflows/ci.yml` - Uses GitHub secrets for Clerk keys
-- `.env.local` - Local Clerk keys (not committed)
-
-### Environment Variables Needed
+### Environment Variables
 
 **Railway** (production):
-- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Clerk publishable key
-- `CLERK_SECRET_KEY` - Clerk secret key
-- `CLERK_WEBHOOK_SECRET` - From Clerk webhook setup (after webhook created)
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - ✅ Configured (pk_live_)
+- `CLERK_SECRET_KEY` - ✅ Configured (sk_live_)
+- `CLERK_WEBHOOK_SECRET` - ⏳ Pending (add after webhook setup)
 
 **GitHub Secrets** (for CI):
 - `CLERK_PUBLISHABLE_KEY` - ✅ Added
