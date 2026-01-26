@@ -6,7 +6,7 @@ import { lookupBirdFromWikipedia } from "@/lib/wikipedia";
 import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
 // POST /api/species/refresh - Refresh all species with Wikipedia data
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   // Authentication
   const authResult = await requireAuth();
   if (isErrorResponse(authResult)) {

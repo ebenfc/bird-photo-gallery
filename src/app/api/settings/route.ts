@@ -6,7 +6,7 @@ import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
  * GET /api/settings
  * Get current settings
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   // Authentication
   const authResult = await requireAuth();
   if (isErrorResponse(authResult)) {

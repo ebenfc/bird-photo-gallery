@@ -5,7 +5,7 @@ import { eq, sql, isNotNull, and } from "drizzle-orm";
 import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
 // GET /api/haikubox/stats - Get property bird statistics
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   // Authentication
   const authResult = await requireAuth();
   if (isErrorResponse(authResult)) {

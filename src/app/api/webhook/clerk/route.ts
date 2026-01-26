@@ -75,7 +75,7 @@ export async function POST(req: Request) {
 
       // Create user in our database
       await db.insert(users).values({
-        clerkId: id,
+        id: id,
         email: email_addresses[0]?.email_address || '',
         firstName: first_name,
         lastName: last_name,
@@ -98,7 +98,7 @@ export async function POST(req: Request) {
           lastName: last_name,
           updatedAt: new Date(),
         })
-        .where(eq(users.clerkId, id));
+        .where(eq(users.id, id));
 
       console.log(`User updated successfully: ${id}`);
     }
@@ -114,7 +114,7 @@ export async function POST(req: Request) {
       console.log(`Deleting user from database: ${id}`);
 
       // Delete user from our database (cascade will delete all related data)
-      await db.delete(users).where(eq(users.clerkId, id));
+      await db.delete(users).where(eq(users.id, id));
 
       console.log(`User deleted successfully: ${id}`);
     }

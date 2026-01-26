@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
 }
 
 // GET /api/haikubox/sync - Get sync status
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   // Authentication
   const authResult = await requireAuth();
   if (isErrorResponse(authResult)) {

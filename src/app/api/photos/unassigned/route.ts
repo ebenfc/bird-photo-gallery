@@ -6,7 +6,7 @@ import { getThumbnailUrl, getOriginalUrl } from "@/lib/storage";
 import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
 // GET /api/photos/unassigned - Get count and list of unassigned photos
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   // Authentication
   const authResult = await requireAuth();
   if (isErrorResponse(authResult)) {
