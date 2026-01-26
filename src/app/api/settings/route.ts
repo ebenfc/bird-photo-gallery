@@ -1,13 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { setSetting, getSetting } from "@/lib/settings";
+import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
 /**
  * GET /api/settings
  * Get current settings
  */
-export async function GET() {
+export async function GET(_request: NextRequest) {
+  // Authentication
+  const authResult = await requireAuth();
+  if (isErrorResponse(authResult)) {
+    return authResult;
+  }
+  const { userId } = authResult;
+
   try {
-    const haikuboxSerial = await getSetting("haikubox_serial");
+    const haikuboxSerial = await getSetting(userId, "haikubox_serial");
 
     return NextResponse.json({
       haikuboxSerial: haikuboxSerial || null,
@@ -26,6 +34,13 @@ export async function GET() {
  * Save Haikubox serial number
  */
 export async function POST(request: NextRequest) {
+  // Authentication
+  const authResult = await requireAuth();
+  if (isErrorResponse(authResult)) {
+    return authResult;
+  }
+  const { userId } = authResult;
+
   try {
     const { haikuboxSerial } = await request.json();
 
@@ -44,7 +59,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await setSetting("haikubox_serial", haikuboxSerial);
+    await setSetting(userId, "haikubox_serial", haikuboxSerial);
 
     return NextResponse.json({ success: true });
   } catch (error) {

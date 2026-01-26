@@ -1,16 +1,19 @@
 import { db } from "@/db";
 import { appSettings } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 /**
  * Get a setting value by key
  */
-export async function getSetting(key: string): Promise<string | null> {
+export async function getSetting(userId: string, key: string): Promise<string | null> {
   try {
     const result = await db
       .select()
       .from(appSettings)
-      .where(eq(appSettings.key, key))
+      .where(and(
+        eq(appSettings.userId, userId),
+        eq(appSettings.key, key)
+      ))
       .limit(1);
 
     return result[0]?.value ?? null;
@@ -23,12 +26,12 @@ export async function getSetting(key: string): Promise<string | null> {
 /**
  * Set a setting value (upsert)
  */
-export async function setSetting(key: string, value: string): Promise<void> {
+export async function setSetting(userId: string, key: string, value: string): Promise<void> {
   await db
     .insert(appSettings)
-    .values({ key, value })
+    .values({ userId, key, value })
     .onConflictDoUpdate({
-      target: appSettings.key,
+      target: [appSettings.userId, appSettings.key],
       set: { value, updatedAt: new Date() },
     });
 }
@@ -36,9 +39,9 @@ export async function setSetting(key: string, value: string): Promise<void> {
 /**
  * Get Haikubox serial number from database or fallback to env var
  */
-export async function getHaikuboxSerial(): Promise<string> {
+export async function getHaikuboxSerial(userId: string): Promise<string> {
   // Try database first
-  const dbSerial = await getSetting("haikubox_serial");
+  const dbSerial = await getSetting(userId, "haikubox_serial");
   if (dbSerial) {
     return dbSerial;
   }

@@ -306,7 +306,7 @@ Optional:
 - `src/components/gallery/PhotoModal.tsx` - Added `defaultToFullscreen` prop
 - Test updates for mobile/desktop dual rendering
 
-### Mobile UX Bug Fixes (PR #31)
+### Bug Fixes - Species Page Mobile UX (PR #31)
 
 **Species Page Loading Title Flash:**
 - Fixed loading skeleton showing "Species Directory" instead of "Species"
@@ -343,3 +343,85 @@ Optional:
 
 **Key Files Modified:**
 - `src/components/stats/PropertyStatsWidget.tsx` - Clickable count, footer redesign, count fix
+
+---
+
+## Clerk Authentication Integration (PR #34 - January 2026)
+
+**Status**: ✅ PR #34 merged, production deployment in progress
+**Production URL**: https://birdfeed.io
+**PR**: https://github.com/ebenfc/bird-photo-gallery/pull/34
+
+### Deployment Status
+
+**Railway**: ⏳ Custom domain configured, SSL certificate pending
+- birdfeed.io added as custom domain
+- CNAME points to `mjfi163h.up.railway.app`
+- Waiting for Let's Encrypt certificate validation
+
+**Clerk Production**: ✅ Fully configured
+- All 5 DNS records verified (clerk, accounts, clkmail, clk._domainkey, clk2._domainkey)
+- SSL certificates issued for Frontend API and Account portal
+- Production keys (pk_live_, sk_live_) configured in Railway
+
+**DNS (Namecheap)**: ✅ All records configured
+- birdfeed.io → Railway (CNAME to mjfi163h.up.railway.app)
+- www.birdfeed.io → Railway
+- clerk.birdfeed.io → frontend-api.clerk.services
+- accounts.birdfeed.io → accounts.clerk.services
+- Email/DKIM records for Clerk
+
+### What's Complete
+
+**Code & CI**: ✅
+- PR #34 merged to main
+- All CI checks passing
+- GitHub secrets configured for CI builds
+
+**Local Development**: ✅ Working
+- Sign-up/sign-in works at localhost:3000
+- Migration script ran successfully
+- All photos and species visible after sign-in
+
+**Architecture**:
+- Clerk packages: `@clerk/nextjs`, `svix`
+- Database schema: `users` table, `userId` fields on all tables
+- Middleware: protects routes except sign-in/sign-up/webhooks
+- Auth helpers: `requireAuth()`, `getCurrentUserId()`
+- All API routes updated with authentication
+
+### Remaining Work
+
+**Once Railway SSL certificate is issued**:
+1. Test sign-up at https://birdfeed.io
+2. Set up Clerk webhook:
+   - Endpoint: `https://birdfeed.io/api/webhook/clerk`
+   - Events: `user.created`, `user.updated`, `user.deleted`
+   - Add `CLERK_WEBHOOK_SECRET` to Railway
+3. Run migration script to assign existing data to your user:
+   ```bash
+   npx tsx scripts/migrate-to-multi-user.ts YOUR_EMAIL
+   ```
+
+### Key Files
+
+**Authentication**:
+- `src/middleware.ts` - Route protection
+- `src/lib/authHelpers.ts` - `requireAuth()` helper for API routes
+- `src/lib/user.ts` - User database operations
+- `src/app/api/webhook/clerk/route.ts` - Webhook handler
+
+**Sign-in/Sign-up**:
+- `src/app/sign-in/[[...sign-in]]/page.tsx`
+- `src/app/sign-up/[[...sign-up]]/page.tsx`
+
+### Environment Variables
+
+**Railway** (production):
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - ✅ Configured (pk_live_)
+- `CLERK_SECRET_KEY` - ✅ Configured (sk_live_)
+- `CLERK_WEBHOOK_SECRET` - ⏳ Pending (add after webhook setup)
+
+**GitHub Secrets** (for CI):
+- `CLERK_PUBLISHABLE_KEY` - ✅ Added
+- `CLERK_SECRET_KEY` - ✅ Added

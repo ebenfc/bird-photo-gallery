@@ -7,6 +7,7 @@ import { checkAndGetRateLimitResponse, RATE_LIMITS, addRateLimitHeaders } from "
 import { logError } from "@/lib/logger";
 import { SpeciesSchema, validateRequest } from "@/lib/validation";
 import { invalidateSpeciesCache } from "@/lib/cache";
+import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
 type SpeciesSortOption = "alpha" | "photo_count" | "recent_added" | "recent_taken";
 
@@ -17,6 +18,13 @@ export async function GET(request: NextRequest) {
   if (!rateCheck.allowed) {
     return rateCheck.response;
   }
+
+  // Authentication
+  const authResult = await requireAuth();
+  if (isErrorResponse(authResult)) {
+    return authResult;
+  }
+  const { userId } = authResult;
 
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -49,7 +57,11 @@ export async function GET(request: NextRequest) {
         photoCount: sql<number>`count(${photos.id})`.as("photo_count"),
       })
       .from(species)
-      .leftJoin(photos, eq(photos.speciesId, species.id))
+      .leftJoin(photos, and(
+        eq(photos.speciesId, species.id),
+        eq(photos.userId, userId)
+      ))
+      .where(eq(species.userId, userId))
       .groupBy(species.id)
       .orderBy(...getOrderBy());
 
@@ -66,7 +78,10 @@ export async function GET(request: NextRequest) {
               thumbnailFilename: photos.thumbnailFilename,
             })
             .from(photos)
-            .where(eq(photos.id, s.coverPhotoId))
+            .where(and(
+              eq(photos.id, s.coverPhotoId),
+              eq(photos.userId, userId)
+            ))
             .limit(1);
           if (cover[0]) {
             coverPhoto = {
@@ -83,7 +98,10 @@ export async function GET(request: NextRequest) {
             thumbnailFilename: photos.thumbnailFilename,
           })
           .from(photos)
-          .where(eq(photos.speciesId, s.id))
+          .where(and(
+            eq(photos.speciesId, s.id),
+            eq(photos.userId, userId)
+          ))
           .orderBy(desc(photos.uploadDate))
           .limit(1);
 
@@ -104,6 +122,7 @@ export async function GET(request: NextRequest) {
           .where(
             and(
               eq(haikuboxDetections.speciesId, s.id),
+              eq(haikuboxDetections.userId, userId),
               eq(haikuboxDetections.dataYear, currentYear)
             )
           )
@@ -141,6 +160,13 @@ export async function POST(request: NextRequest) {
     return rateCheck.response;
   }
 
+  // Authentication
+  const authResult = await requireAuth();
+  if (isErrorResponse(authResult)) {
+    return authResult;
+  }
+  const { userId } = authResult;
+
   try {
     const body = await request.json();
 
@@ -155,6 +181,7 @@ export async function POST(request: NextRequest) {
     const result = await db
       .insert(species)
       .values({
+        userId,
         commonName,
         scientificName: scientificName || null,
         description: description || null,

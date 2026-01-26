@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { photos, species } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import {
   getThumbnailUrl,
   getOriginalUrl,
@@ -9,6 +9,7 @@ import {
 import { checkAndGetRateLimitResponse, RATE_LIMITS, addRateLimitHeaders } from "@/lib/rateLimit";
 import { logError } from "@/lib/logger";
 import { PhotoUpdateSchema, validateRequest } from "@/lib/validation";
+import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -21,6 +22,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   if (!rateCheck.allowed) {
     return rateCheck.response;
   }
+
+  // Authentication
+  const authResult = await requireAuth();
+  if (isErrorResponse(authResult)) {
+    return authResult;
+  }
+  const { userId } = authResult;
 
   try {
     const { id } = await params;
@@ -48,7 +56,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       })
       .from(photos)
       .leftJoin(species, eq(photos.speciesId, species.id))
-      .where(eq(photos.id, photoId));
+      .where(and(
+        eq(photos.id, photoId),
+        eq(photos.userId, userId)
+      ));
 
     const photo = result[0];
     if (!photo) {
@@ -94,6 +105,13 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   if (!rateCheck.allowed) {
     return rateCheck.response;
   }
+
+  // Authentication
+  const authResult = await requireAuth();
+  if (isErrorResponse(authResult)) {
+    return authResult;
+  }
+  const { userId } = authResult;
 
   try {
     const { id } = await params;
@@ -143,7 +161,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const result = await db
       .update(photos)
       .set(updateData)
-      .where(eq(photos.id, photoId))
+      .where(and(
+        eq(photos.id, photoId),
+        eq(photos.userId, userId)
+      ))
       .returning();
 
     if (result.length === 0) {
@@ -172,6 +193,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     return rateCheck.response;
   }
 
+  // Authentication
+  const authResult = await requireAuth();
+  if (isErrorResponse(authResult)) {
+    return authResult;
+  }
+  const { userId } = authResult;
+
   try {
     const { id } = await params;
     const photoId = parseInt(id);
@@ -183,7 +211,10 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     // Delete the photo from database
     const result = await db
       .delete(photos)
-      .where(eq(photos.id, photoId))
+      .where(and(
+        eq(photos.id, photoId),
+        eq(photos.userId, userId)
+      ))
       .returning();
 
     if (result.length === 0) {

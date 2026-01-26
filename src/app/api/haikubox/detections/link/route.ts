@@ -3,10 +3,18 @@ import { db } from "@/db";
 import { haikuboxDetections, haikuboxActivityLog } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { normalizeCommonName } from "@/lib/haikubox";
+import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
 // POST /api/haikubox/detections/link
 // Links detections to a newly created species
 export async function POST(request: NextRequest) {
+  // Authentication
+  const authResult = await requireAuth();
+  if (isErrorResponse(authResult)) {
+    return authResult;
+  }
+  const { userId } = authResult;
+
   try {
     const body = await request.json();
     const { speciesId, detectionCommonName } = body;
@@ -20,8 +28,11 @@ export async function POST(request: NextRequest) {
 
     const normalizedName = normalizeCommonName(detectionCommonName);
 
-    // Get all detections to find matching ones (case-insensitive, apostrophe-normalized)
-    const allDetections = await db.select().from(haikuboxDetections);
+    // Get all detections for this user to find matching ones (case-insensitive, apostrophe-normalized)
+    const allDetections = await db
+      .select()
+      .from(haikuboxDetections)
+      .where(eq(haikuboxDetections.userId, userId));
     const matchingDetections = allDetections.filter(
       (d) => normalizeCommonName(d.speciesCommonName) === normalizedName
     );
@@ -37,7 +48,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Also update haikuboxActivityLog table for timeline consistency
-    const allActivityLogs = await db.select().from(haikuboxActivityLog);
+    const allActivityLogs = await db
+      .select()
+      .from(haikuboxActivityLog)
+      .where(eq(haikuboxActivityLog.userId, userId));
     const matchingActivityLogs = allActivityLogs.filter(
       (a) => normalizeCommonName(a.speciesCommonName) === normalizedName
     );

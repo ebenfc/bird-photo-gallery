@@ -4,9 +4,29 @@ import { relations } from "drizzle-orm";
 // Rarity type for species
 export type Rarity = "common" | "uncommon" | "rare";
 
+// Users Table - Synced from Clerk
+export const users = pgTable("users", {
+  id: text("id").primaryKey(), // Clerk user ID
+  email: text("email").notNull().unique(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  imageUrl: text("image_url"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// User Type exports
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
+
 // Bird Species Table
 export const species = pgTable("species", {
   id: serial("id").primaryKey(),
+  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
   commonName: text("common_name").notNull(),
   scientificName: text("scientific_name"),
   description: text("description"),
@@ -22,6 +42,7 @@ export const species = pgTable("species", {
 // Photos Table
 export const photos = pgTable("photos", {
   id: serial("id").primaryKey(),
+  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
   speciesId: integer("species_id").references(() => species.id, {
     onDelete: "cascade",
   }),
@@ -53,6 +74,7 @@ export const photosRelations = relations(photos, ({ one }) => ({
 // Haikubox Detections Table - Stores synced bird detection data from Haikubox
 export const haikuboxDetections = pgTable("haikubox_detections", {
   id: serial("id").primaryKey(),
+  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
   speciesCommonName: text("species_common_name").notNull(),
   speciesId: integer("species_id").references(() => species.id, {
     onDelete: "set null",
@@ -68,6 +90,7 @@ export const haikuboxDetections = pgTable("haikubox_detections", {
 // Haikubox Sync Log Table - Tracks sync history for monitoring
 export const haikuboxSyncLog = pgTable("haikubox_sync_log", {
   id: serial("id").primaryKey(),
+  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
   syncType: text("sync_type").notNull(), // 'yearly' | 'daily' | 'recent'
   status: text("status").notNull(), // 'success' | 'error'
   recordsProcessed: integer("records_processed").default(0),
@@ -98,6 +121,7 @@ export type NewHaikuboxSyncLog = typeof haikuboxSyncLog.$inferInsert;
 // Haikubox Activity Log Table - Stores individual detection timestamps for activity timeline
 export const haikuboxActivityLog = pgTable("haikubox_activity_log", {
   id: serial("id").primaryKey(),
+  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
   speciesCommonName: text("species_common_name").notNull(),
   speciesId: integer("species_id").references(() => species.id, {
     onDelete: "set null",
@@ -126,16 +150,19 @@ export const haikuboxActivityLogRelations = relations(haikuboxActivityLog, ({ on
 export type HaikuboxActivityLog = typeof haikuboxActivityLog.$inferSelect;
 export type NewHaikuboxActivityLog = typeof haikuboxActivityLog.$inferInsert;
 
-// App Settings Table - Stores global application settings
+// App Settings Table - Stores per-user application settings
 export const appSettings = pgTable("app_settings", {
   id: serial("id").primaryKey(),
-  key: text("key").notNull().unique(),
+  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  key: text("key").notNull(),
   value: text("value").notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow()
     .$onUpdate(() => new Date()),
-});
+}, (table) => ({
+  userKeyUnique: unique().on(table.userId, table.key),
+}));
 
 // App Settings Type exports
 export type AppSetting = typeof appSettings.$inferSelect;

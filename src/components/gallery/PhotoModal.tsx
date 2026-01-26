@@ -154,18 +154,28 @@ export default function PhotoModal({
         clearTimeout(fullscreenUITimer);
         setFullscreenUITimer(null);
       }
-      setIsFullscreen(false);
+      // If opened with defaultToFullscreen, close modal entirely instead of showing detail view
+      if (defaultToFullscreen) {
+        onClose();
+      } else {
+        setIsFullscreen(false);
+      }
     } else {
       // UI is hidden, show it temporarily
       showUITemporarily();
     }
-  }, [showFullscreenUI, fullscreenUITimer, showUITemporarily]);
+  }, [showFullscreenUI, fullscreenUITimer, showUITemporarily, defaultToFullscreen, onClose]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         if (isFullscreen) {
-          setIsFullscreen(false);
+          // If opened with defaultToFullscreen, close modal entirely instead of showing detail view
+          if (defaultToFullscreen) {
+            onClose();
+          } else {
+            setIsFullscreen(false);
+          }
         } else {
           onClose();
         }
@@ -183,7 +193,7 @@ export default function PhotoModal({
         setIsFullscreen(prev => !prev);
       }
     },
-    [onClose, onNavigate, canNavigate, isFullscreen]
+    [onClose, onNavigate, canNavigate, isFullscreen, defaultToFullscreen]
   );
 
   useEffect(() => {
@@ -484,9 +494,9 @@ export default function PhotoModal({
           transition-all duration-300 ease-out overflow-hidden
           ${isDetailsExpanded ? "max-h-[50vh]" : "max-h-20"}`}>
           {/* Collapse/Expand handle */}
-          <button
+          <div
             onClick={() => setIsDetailsExpanded(!isDetailsExpanded)}
-            className="w-full p-4 flex items-center justify-between border-b border-[var(--border)]"
+            className="w-full p-4 flex items-center justify-between border-b border-[var(--border)] cursor-pointer"
           >
             <div className="flex items-center gap-3">
               <div>
@@ -540,7 +550,7 @@ export default function PhotoModal({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
               </svg>
             </div>
-          </button>
+          </div>
 
           {/* Expandable content */}
           <div className="p-4 overflow-auto max-h-[calc(50vh-5rem)]">

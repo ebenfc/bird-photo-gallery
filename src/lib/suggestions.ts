@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { species, haikuboxDetections, photos } from "@/db/schema";
-import { eq, gte, sql } from "drizzle-orm";
+import { eq, gte, sql, and } from "drizzle-orm";
 import type { Rarity } from "@/types";
 
 export interface Suggestion {
@@ -110,10 +110,11 @@ function generateReason(data: SuggestionData): string {
  * Get top photography suggestions
  * Returns species with high detection counts but low photo coverage
  *
+ * @param userId - User ID to filter suggestions by
  * @param limit - Maximum number of suggestions to return (default: 10)
  * @returns Array of suggestions sorted by priority score (highest first)
  */
-export async function getPhotoSuggestions(limit: number = 10): Promise<Suggestion[]> {
+export async function getPhotoSuggestions(userId: string, limit: number = 10): Promise<Suggestion[]> {
   // Query: Join species + detections + photo counts
   // Only include species with at least 10 detections
   const results = await db
@@ -129,11 +130,20 @@ export async function getPhotoSuggestions(limit: number = 10): Promise<Suggestio
     .from(species)
     .innerJoin(
       haikuboxDetections,
-      eq(species.id, haikuboxDetections.speciesId)
+      and(
+        eq(species.id, haikuboxDetections.speciesId),
+        eq(haikuboxDetections.userId, userId)
+      )
     )
-    .leftJoin(photos, eq(species.id, photos.speciesId))
+    .leftJoin(photos, and(
+      eq(species.id, photos.speciesId),
+      eq(photos.userId, userId)
+    ))
     .where(
-      gte(haikuboxDetections.yearlyCount, 10) // Minimum 10 detections
+      and(
+        eq(species.userId, userId),
+        gte(haikuboxDetections.yearlyCount, 10) // Minimum 10 detections
+      )
     )
     .groupBy(
       species.id,

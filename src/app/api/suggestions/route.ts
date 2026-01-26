@@ -5,12 +5,20 @@ import {
   addRateLimitHeaders,
   RATE_LIMITS,
 } from "@/lib/rateLimit";
+import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
 // GET /api/suggestions - Get photography suggestions
 export async function GET(request: NextRequest) {
   // Rate limiting
   const rateCheck = checkAndGetRateLimitResponse(request, RATE_LIMITS.read);
   if (!rateCheck.allowed) return rateCheck.response;
+
+  // Authentication
+  const authResult = await requireAuth();
+  if (isErrorResponse(authResult)) {
+    return authResult;
+  }
+  const { userId } = authResult;
 
   try {
     const { searchParams } = new URL(request.url);
@@ -24,7 +32,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const suggestions = await getPhotoSuggestions(limit);
+    const suggestions = await getPhotoSuggestions(userId, limit);
 
     const response = NextResponse.json({
       suggestions,
