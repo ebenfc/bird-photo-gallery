@@ -346,97 +346,90 @@ Optional:
 
 ---
 
-## Clerk Authentication Integration (In Progress - January 2026)
+## Clerk Authentication Integration (PR #34 - January 2026)
 
-**Status**: 60% Complete - Core infrastructure done, API routes pending
-**Documentation**: See [CLERK-INTEGRATION-STATUS.md](./CLERK-INTEGRATION-STATUS.md) for full details
+**Status**: PR #34 created, CI passing, awaiting merge
+**Branch**: `feature/clerk-authentication`
+**PR**: https://github.com/ebenfc/bird-photo-gallery/pull/34
 
-### Overview
-Transforming Bird Photo Gallery from single-user public app to multi-user authenticated app using Clerk. Each user will have isolated photo collections, species directories, and Haikubox configurations.
+### Current Issue (BLOCKING)
 
-### Completed (Phase 1-4)
+**Problem**: Railway deployment shows sign-in page but Clerk component doesn't render.
+- URL shows: `bird-photo-gallery-production.up.railway.app/sign-in?redirect_url=...`
+- Page shows "Welcome to Bird Feed" text but NO sign-in form
+- Root cause: Railway is missing Clerk environment variables
 
-**Foundation:**
-- Installed Clerk packages: `@clerk/nextjs`, `svix`, `tsx`
-- Added Clerk environment variables to `.env.local` (keys need to be filled in)
-- Updated database schema with `users` table
-- Added `userId` fields to all tables (photos, species, appSettings, haikubox tables)
-- Schema pushed to database (userId nullable for safe migration)
+**Solution**: Add these environment variables in Railway dashboard:
+1. `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - from Clerk Dashboard → API Keys (starts with `pk_`)
+2. `CLERK_SECRET_KEY` - from Clerk Dashboard → API Keys (starts with `sk_`)
 
-**Authentication Setup:**
-- Created middleware (`src/middleware.ts`) - protects all routes except sign-in/sign-up/webhooks
-- Updated root layout with `ClerkProvider`
-- Created sign-in page (`src/app/sign-in/[[...sign-in]]/page.tsx`)
-- Created sign-up page (`src/app/sign-up/[[...sign-up]]/page.tsx`)
-- Updated Header component with Clerk `UserButton` (desktop and mobile)
+After adding, redeploy the app.
 
-**User Management:**
-- Created user service (`src/lib/user.ts`) - syncs Clerk users to local database
-- Created Clerk webhook handler (`src/app/api/webhook/clerk/route.ts`) - handles user.created, user.updated, user.deleted
-- Created auth helpers (`src/lib/authHelpers.ts`) - `requireAuth()`, `getCurrentUserId()`, `isErrorResponse()`
+### What's Complete
 
-**Service Updates:**
-- Updated settings service with userId parameter for per-user settings
-- Updated Haikubox service with userId parameter for per-user device configuration
-- Updated browser upload API route with authentication and userId association
+**Local Development**: ✅ Working
+- Sign-up/sign-in works at localhost:3000
+- User created in database via manual Clerk API call
+- Migration script ran successfully - existing data assigned to user
+- All photos and species visible after sign-in
 
-### Remaining Work
+**CI Pipeline**: ✅ Passing
+- GitHub repository secrets added: `CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`
+- CI workflow updated to use `${{ secrets.CLERK_PUBLISHABLE_KEY }}`
+- TypeScript errors fixed (unused params prefixed with `_`)
+- Exposed secrets removed from documentation files
 
-**API Routes** (22 of 23 routes need updates):
-- Photo APIs: `/api/photos`, `/api/photos/[id]`, `/api/photos/unassigned`
-- Species APIs: `/api/species`, `/api/species/[id]`, `/api/species/refresh`
-- Settings API: `/api/settings`
-- Haikubox APIs: 6 endpoints (test, sync, stats, detections, link)
-- Activity APIs: 3 endpoints (current, heatmap, species/[name])
-- Other: suggestions, birds/lookup
+**Code Changes**:
+- Clerk packages installed: `@clerk/nextjs`, `svix`
+- Database schema: `users` table added, `userId` fields on all tables
+- Middleware: protects all routes except sign-in/sign-up/webhooks
+- Auth helpers: `requireAuth()`, `getCurrentUserId()`, `isErrorResponse()`
+- Sign-in/sign-up pages created with Clerk components
+- Header: UserButton added (desktop + mobile)
+- PhotoModal: Fixed button nesting hydration error (changed `<button>` to `<div>`)
 
-**Data Migration:**
-- Create migration script (`scripts/migrate-to-multi-user.ts`)
-- Run migration to assign existing data to first user
+**Key Bug Fixes This Session**:
+- `auth().protect is not a function` → Changed to `await auth.protect()`
+- `useSession can only be used within ClerkProvider` → Added ClerkProvider to layout
+- Invalid publishable key format → User corrected typo in .env.local
+- API routes returning 401 → Fixed user.ts to use `users.id` not `users.clerkId`
+- Button nesting hydration error → Changed outer button to div with cursor-pointer
 
-**Final Steps:**
-- Set up Clerk webhook in dashboard
-- Make userId required in schema (remove nullable)
-- Test with multiple accounts
-- Deploy to Railway with production Clerk keys
+### Remaining Work After Railway Deployment
 
-### Key Architecture Decisions
+**Clerk Dashboard Setup**:
+1. Set up webhook endpoint: `https://birdfeed.io/api/webhook/clerk`
+2. Subscribe to events: `user.created`, `user.updated`, `user.deleted`
+3. Copy webhook secret to Railway as `CLERK_WEBHOOK_SECRET`
 
-1. **Users Table**: Local table synced via webhooks (integer PKs for foreign keys)
-2. **Data Isolation**: All tables have userId foreign key - each user has separate data
-3. **Haikubox**: Per-user device configuration (not shared)
-4. **Settings**: Per-user with unique constraint on (userId, key)
-5. **Migration Strategy**: Nullable userId → migrate data → make required
-6. **API Key Auth**: Kept for `/api/upload` (iOS Shortcuts) - unused but preserved
+**birdfeed.io Domain**:
+- Currently birdfeed.io shows a parked domain page (not your app)
+- Need to verify DNS/domain configuration points to Railway
+- May need to use `bird-photo-gallery-production.up.railway.app` instead
 
-### Testing Strategy
+### Key Files
 
-1. Sign up first user → webhook creates user in database
-2. Run migration script to assign existing data
-3. Create second test account
-4. Verify complete data isolation between accounts
-5. Test all functionality with both accounts
+**Authentication**:
+- `src/middleware.ts` - Route protection
+- `src/lib/authHelpers.ts` - `requireAuth()` helper for API routes
+- `src/lib/user.ts` - User database operations
+- `src/app/api/webhook/clerk/route.ts` - Webhook handler
 
-### New Files Created
-- `src/middleware.ts`
+**Sign-in/Sign-up**:
 - `src/app/sign-in/[[...sign-in]]/page.tsx`
 - `src/app/sign-up/[[...sign-up]]/page.tsx`
-- `src/app/api/webhook/clerk/route.ts`
-- `src/lib/authHelpers.ts`
-- `src/lib/user.ts`
-- `CLERK-INTEGRATION-STATUS.md` (session documentation)
 
-### Modified Files
-- `src/db/schema.ts` - Added users table + userId to all tables
-- `src/app/layout.tsx` - ClerkProvider wrapper
-- `src/components/layout/Header.tsx` - UserButton
-- `src/lib/settings.ts` - userId parameter (needs re-application - linter reverted)
-- `src/lib/haikubox.ts` - userId parameter (needs re-application - linter reverted)
-- `src/app/api/upload/browser/route.ts` - Auth + userId
-- `.env.local` - Clerk environment variables
+**Configuration**:
+- `.github/workflows/ci.yml` - Uses GitHub secrets for Clerk keys
+- `.env.local` - Local Clerk keys (not committed)
 
-### Notes for Next Session
-- Settings and Haikubox services need userId parameter re-applied (linter reverted changes)
-- All API routes follow same pattern: `requireAuth()` → get `userId` → filter queries
-- Webhook secret can be obtained from Clerk Dashboard after setting up webhook endpoint
-- Migration script will be based on pattern in implementation plan
+### Environment Variables Needed
+
+**Railway** (production):
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Clerk publishable key
+- `CLERK_SECRET_KEY` - Clerk secret key
+- `CLERK_WEBHOOK_SECRET` - From Clerk webhook setup (after webhook created)
+
+**GitHub Secrets** (for CI):
+- `CLERK_PUBLISHABLE_KEY` - ✅ Added
+- `CLERK_SECRET_KEY` - ✅ Added
