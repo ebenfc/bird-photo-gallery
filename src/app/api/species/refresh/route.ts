@@ -5,6 +5,9 @@ import { eq, and } from "drizzle-orm";
 import { lookupBirdFromWikipedia } from "@/lib/wikipedia";
 import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
+// Ensure this route runs on Node.js runtime (not Edge)
+export const runtime = "nodejs";
+
 // POST /api/species/refresh - Refresh all species with Wikipedia data
 export async function POST(_request: NextRequest) {
   // Authentication

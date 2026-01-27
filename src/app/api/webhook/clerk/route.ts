@@ -5,6 +5,9 @@ import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
+// Ensure this route runs on Node.js runtime (not Edge)
+export const runtime = "nodejs";
+
 /**
  * Clerk Webhook Handler
  *

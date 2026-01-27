@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSpeciesActivityPattern } from "@/lib/activity";
 import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
+// Ensure this route runs on Node.js runtime (not Edge)
+export const runtime = "nodejs";
+
 // GET /api/activity/species/:name - Get activity pattern for a species
 export async function GET(
   request: NextRequest,

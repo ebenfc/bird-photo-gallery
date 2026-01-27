@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { db } from '@/db';
 import { sql } from 'drizzle-orm';
 
+// Ensure this route runs on Node.js runtime (not Edge)
+export const runtime = "nodejs";
+
 interface CheckResult {
   status: 'pass' | 'fail';
   responseTime?: number;

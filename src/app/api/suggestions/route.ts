@@ -7,6 +7,9 @@ import {
 } from "@/lib/rateLimit";
 import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
+// Ensure this route runs on Node.js runtime (not Edge)
+export const runtime = "nodejs";
+
 // GET /api/suggestions - Get photography suggestions
 export async function GET(request: NextRequest) {
   // Rate limiting

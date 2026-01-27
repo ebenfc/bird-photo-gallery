@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { setSetting, getSetting } from "@/lib/settings";
 import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
+// Ensure this route runs on Node.js runtime (not Edge)
+export const runtime = "nodejs";
+
 /**
  * GET /api/settings
  * Get current settings

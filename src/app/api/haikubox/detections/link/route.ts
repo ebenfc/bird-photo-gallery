@@ -5,6 +5,9 @@ import { eq } from "drizzle-orm";
 import { normalizeCommonName } from "@/lib/haikubox";
 import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
+// Ensure this route runs on Node.js runtime (not Edge)
+export const runtime = "nodejs";
+
 // POST /api/haikubox/detections/link
 // Links detections to a newly created species
 export async function POST(request: NextRequest) {

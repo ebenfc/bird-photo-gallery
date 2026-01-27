@@ -13,6 +13,9 @@ import { logError, logInfo } from "@/lib/logger";
 import { invalidateHaikuboxCache } from "@/lib/cache";
 import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
+// Ensure this route runs on Node.js runtime (not Edge)
+export const runtime = "nodejs";
+
 // POST /api/haikubox/sync - Sync Haikubox data to database
 // Can be triggered by Vercel Cron or manually
 export async function POST(request: NextRequest) {
