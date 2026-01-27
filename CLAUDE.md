@@ -348,29 +348,67 @@ Optional:
 
 ## Clerk Authentication Integration (PR #34 - January 2026)
 
-**Status**: 🔧 Pending deployment verification
+**Status**: 🚨 **BLOCKED** - API routes still returning 404 after fix deployed
 **Production URL**: https://birdfeed.io
-**PR**: https://github.com/ebenfc/bird-photo-gallery/pull/35
+**PR**: https://github.com/ebenfc/bird-photo-gallery/pull/35 (MERGED)
 
-### Issue Resolved (January 27, 2026)
+### Current Issue (January 27, 2026)
 
-**Problem**: API routes returning 404 in production
+**Problem**: ALL API routes return 404 in production
+- Pages load correctly (Feed, Species, Activity, Resources)
+- Sign-in/sign-up works via Clerk
+- ALL API calls (GET/POST to `/api/*`) return 404
 - Railway logs showed: `Couldn't load fs` and `Couldn't load zlib`
 
-**Root Cause**: Railway was running API routes in Edge runtime by default, which doesn't support Node.js built-in modules like `fs` and `zlib`. The `pg` (PostgreSQL) driver depends on these modules.
+**Symptom**: Creating a species shows "Failed to save species" error
 
-**Fix Applied** (PR #35):
-- Added `export const runtime = "nodejs"` to all 21 API routes
-- This forces Next.js to use Node.js runtime instead of Edge runtime
+### What Was Tried
 
-**Next Steps**:
-1. Merge PR #35 to main
-2. Wait for Railway to auto-deploy
-3. Test API endpoints at birdfeed.io:
-   - GET /api/health
-   - GET /api/photos
-   - GET /api/species
-   - POST /api/species (create new species)
+1. **Added `runtime = "nodejs"` to all API routes** (PR #35 - MERGED)
+   - Added `export const runtime = "nodejs"` to all 21 API routes
+   - This should force Node.js runtime instead of Edge runtime
+   - Build succeeded locally
+   - PR merged to main
+
+2. **Railway deployment**
+   - PR was merged
+   - Railway showed deployment complete
+   - Cleared build cache and redeployed
+   - **API still returns 404**
+
+3. **Verified code is correct**
+   - GitHub main branch has correct code (commit `0cc193e`)
+   - All route files have `runtime = "nodejs"` declaration
+   - Local build works fine
+
+### Diagnosis
+
+The static asset hashes in the HTML response (`8Dt_4PDeHoN_cIcVeU4t0`) haven't changed between deployments, suggesting:
+- Railway may be serving cached build output
+- The new code may not actually be deploying
+- There may be a build configuration issue specific to Railway
+
+### Next Steps to Debug
+
+1. **Check Railway build logs** for errors during build
+2. **Verify the deployed code** - check if Railway's deployed files contain the runtime declarations
+3. **Try alternative approaches**:
+   - Add `runtime = "nodejs"` to a root `route.ts` config
+   - Check if `next.config.ts` needs additional configuration
+   - Try setting `NEXT_RUNTIME=nodejs` environment variable in Railway
+4. **Consider Vercel** as alternative deployment platform (Next.js native)
+
+### Configuration Already in Place
+
+**next.config.ts**:
+```typescript
+serverExternalPackages: ['sharp', 'pg']
+```
+
+**All API routes have**:
+```typescript
+export const runtime = "nodejs";
+```
 
 ### Deployment Status
 
