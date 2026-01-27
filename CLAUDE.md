@@ -348,9 +348,28 @@ Optional:
 
 ## Clerk Authentication Integration (PR #34 - January 2026)
 
-**Status**: ✅ PR #34 merged, production deployment in progress
+**Status**: 🔧 Debugging API routes in production
 **Production URL**: https://birdfeed.io
 **PR**: https://github.com/ebenfc/bird-photo-gallery/pull/34
+
+### Current Issue (January 27, 2026)
+
+**Problem**: API routes returning 404 in production
+- Pages load correctly (Feed, Species, Activity, Resources)
+- Sign-in/sign-up works via Clerk
+- All API calls (GET/POST to `/api/*`) return 404
+- Railway logs show: `Couldn't load fs` and `Couldn't load zlib`
+
+**Fixes Applied** (pending Railway redeploy):
+1. Added `runtime = "nodejs"` to `src/app/api/species/route.ts`
+2. Added `pg` to `serverExternalPackages` in `next.config.ts`
+3. Added fallback `|| []` to species page to prevent crash on API errors
+
+**Next Steps**:
+1. Wait for Railway to deploy latest changes (commit 7a9bf2c)
+2. If still broken, clear Railway build cache and redeploy
+3. Test creating a species at birdfeed.io
+4. Verify all API routes work (photos, species, activity, etc.)
 
 ### Deployment Status
 
@@ -359,48 +378,31 @@ Optional:
 - CNAME points to `cjnyqfkl.up.railway.app`
 
 **Clerk Production**: ✅ Fully configured
-- All 5 DNS records verified (clerk, accounts, clkmail, clk._domainkey, clk2._domainkey)
-- SSL certificates issued for Frontend API and Account portal
-- Production keys (pk_live_, sk_live_) configured in Railway
+- All 5 DNS records verified
+- SSL certificates issued
+- Production keys configured in Railway
+- `CLERK_WEBHOOK_SECRET` - ✅ Configured in Railway
 
-**DNS (Namecheap)**: ✅ All records configured
-- birdfeed.io → Railway (CNAME to cjnyqfkl.up.railway.app)
-- www.birdfeed.io → Railway
-- clerk.birdfeed.io → frontend-api.clerk.services
-- accounts.birdfeed.io → accounts.clerk.services
-- Email/DKIM records for Clerk
+**Clerk Webhook**: ✅ Configured
+- Endpoint: `https://birdfeed.io/api/webhook/clerk`
+- Events: `user.created`, `user.updated`, `user.deleted`
 
-### What's Complete
+### User Database Status
 
-**Code & CI**: ✅
-- PR #34 merged to main
-- All CI checks passing
-- GitHub secrets configured for CI builds
+**Eben's Account**:
+- Clerk ID: `user_38mfWcObdqPy7W50V6nObciMrmB`
+- Email: `ebenfc@gmail.com`
+- Database record: ✅ Created manually (webhook didn't fire on initial signup)
 
-**Local Development**: ✅ Working
-- Sign-up/sign-in works at localhost:3000
-- Migration script ran successfully
-- All photos and species visible after sign-in
+**Note**: The webhook was set up AFTER Eben signed up, so the user record had to be created manually via script. Future signups should work automatically.
 
-**Architecture**:
+### Architecture
+
 - Clerk packages: `@clerk/nextjs`, `svix`
 - Database schema: `users` table, `userId` fields on all tables
 - Middleware: protects routes except sign-in/sign-up/webhooks
 - Auth helpers: `requireAuth()`, `getCurrentUserId()`
 - All API routes updated with authentication
-
-### Remaining Work
-
-**Once Railway SSL certificate is issued**:
-1. Test sign-up at https://birdfeed.io
-2. Set up Clerk webhook:
-   - Endpoint: `https://birdfeed.io/api/webhook/clerk`
-   - Events: `user.created`, `user.updated`, `user.deleted`
-   - Add `CLERK_WEBHOOK_SECRET` to Railway
-3. Run migration script to assign existing data to your user:
-   ```bash
-   npx tsx scripts/migrate-to-multi-user.ts YOUR_EMAIL
-   ```
 
 ### Key Files
 
@@ -419,7 +421,7 @@ Optional:
 **Railway** (production):
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - ✅ Configured (pk_live_)
 - `CLERK_SECRET_KEY` - ✅ Configured (sk_live_)
-- `CLERK_WEBHOOK_SECRET` - ⏳ Pending (add after webhook setup)
+- `CLERK_WEBHOOK_SECRET` - ✅ Configured
 
 **GitHub Secrets** (for CI):
 - `CLERK_PUBLISHABLE_KEY` - ✅ Added
