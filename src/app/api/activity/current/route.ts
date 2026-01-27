@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getActiveNowSpecies } from "@/lib/activity";
 import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
+// Ensure this route runs on Node.js runtime (not Edge)
+export const runtime = "nodejs";
+
 // GET /api/activity/current - Get species typically active at current hour
 export async function GET(request: NextRequest) {
   // Authentication

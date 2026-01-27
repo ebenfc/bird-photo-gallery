@@ -5,6 +5,9 @@ import { eq, desc, and } from "drizzle-orm";
 import { normalizeCommonName } from "@/lib/haikubox";
 import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
+// Ensure this route runs on Node.js runtime (not Edge)
+export const runtime = "nodejs";
+
 // GET /api/haikubox/detections - Query cached detection data
 export async function GET(request: NextRequest) {
   // Authentication

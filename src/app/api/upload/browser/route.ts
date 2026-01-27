@@ -6,6 +6,9 @@ import { checkAndGetRateLimitResponse, RATE_LIMITS, addRateLimitHeaders } from "
 import { logError } from "@/lib/logger";
 import { validateImageFile, validateImageMagicBytesFromBuffer } from "@/lib/fileValidation";
 
+// Ensure this route runs on Node.js runtime (not Edge)
+export const runtime = "nodejs";
+
 // POST /api/upload/browser - Upload a photo from browser (no API key needed)
 export async function POST(request: NextRequest) {
   // Rate limiting for uploads

@@ -4,6 +4,9 @@ import { haikuboxDetections, species, photos } from "@/db/schema";
 import { eq, sql, isNotNull, and } from "drizzle-orm";
 import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
+// Ensure this route runs on Node.js runtime (not Edge)
+export const runtime = "nodejs";
+
 // GET /api/haikubox/stats - Get property bird statistics
 export async function GET(_request: NextRequest) {
   // Authentication

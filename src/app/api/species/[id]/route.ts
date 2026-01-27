@@ -4,6 +4,9 @@ import { species, photos, Rarity } from "@/db/schema";
 import { eq, sql, and } from "drizzle-orm";
 import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
+// Ensure this route runs on Node.js runtime (not Edge)
+export const runtime = "nodejs";
+
 const VALID_RARITIES: Rarity[] = ["common", "uncommon", "rare"];
 
 interface RouteParams {

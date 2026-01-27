@@ -4,6 +4,9 @@ import { checkAndGetRateLimitResponse, RATE_LIMITS, addRateLimitHeaders } from "
 import { logError } from "@/lib/logger";
 import { BirdLookupSchema, validateSearchParams } from "@/lib/validation";
 
+// Ensure this route runs on Node.js runtime (not Edge)
+export const runtime = "nodejs";
+
 // GET /api/birds/lookup?name=Dark-eyed Junco
 export async function GET(request: NextRequest) {
   // Rate limiting

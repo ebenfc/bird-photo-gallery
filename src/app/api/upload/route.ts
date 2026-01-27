@@ -4,6 +4,9 @@ import { processUploadedImage } from "@/lib/image";
 import { db } from "@/db";
 import { photos } from "@/db/schema";
 
+// Ensure this route runs on Node.js runtime (not Edge)
+export const runtime = "nodejs";
+
 // POST /api/upload - Upload a photo (iOS Shortcut endpoint)
 export async function POST(request: NextRequest) {
   // Validate API key

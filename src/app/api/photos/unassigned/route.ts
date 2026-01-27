@@ -5,6 +5,9 @@ import { isNull, desc, sql, eq, and } from "drizzle-orm";
 import { getThumbnailUrl, getOriginalUrl } from "@/lib/storage";
 import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
+// Ensure this route runs on Node.js runtime (not Edge)
+export const runtime = "nodejs";
+
 // GET /api/photos/unassigned - Get count and list of unassigned photos
 export async function GET(_request: NextRequest) {
   // Authentication

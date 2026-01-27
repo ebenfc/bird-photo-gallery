@@ -11,6 +11,9 @@ import { logError } from "@/lib/logger";
 import { PhotoUpdateSchema, validateRequest } from "@/lib/validation";
 import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
+// Ensure this route runs on Node.js runtime (not Edge)
+export const runtime = "nodejs";
+
 interface RouteParams {
   params: Promise<{ id: string }>;
 }

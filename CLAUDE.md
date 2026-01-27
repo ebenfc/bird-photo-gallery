@@ -348,28 +348,29 @@ Optional:
 
 ## Clerk Authentication Integration (PR #34 - January 2026)
 
-**Status**: 🔧 Debugging API routes in production
+**Status**: 🔧 Pending deployment verification
 **Production URL**: https://birdfeed.io
-**PR**: https://github.com/ebenfc/bird-photo-gallery/pull/34
+**PR**: https://github.com/ebenfc/bird-photo-gallery/pull/35
 
-### Current Issue (January 27, 2026)
+### Issue Resolved (January 27, 2026)
 
 **Problem**: API routes returning 404 in production
-- Pages load correctly (Feed, Species, Activity, Resources)
-- Sign-in/sign-up works via Clerk
-- All API calls (GET/POST to `/api/*`) return 404
-- Railway logs show: `Couldn't load fs` and `Couldn't load zlib`
+- Railway logs showed: `Couldn't load fs` and `Couldn't load zlib`
 
-**Fixes Applied** (pending Railway redeploy):
-1. Added `runtime = "nodejs"` to `src/app/api/species/route.ts`
-2. Added `pg` to `serverExternalPackages` in `next.config.ts`
-3. Added fallback `|| []` to species page to prevent crash on API errors
+**Root Cause**: Railway was running API routes in Edge runtime by default, which doesn't support Node.js built-in modules like `fs` and `zlib`. The `pg` (PostgreSQL) driver depends on these modules.
+
+**Fix Applied** (PR #35):
+- Added `export const runtime = "nodejs"` to all 21 API routes
+- This forces Next.js to use Node.js runtime instead of Edge runtime
 
 **Next Steps**:
-1. Wait for Railway to deploy latest changes (commit 7a9bf2c)
-2. If still broken, clear Railway build cache and redeploy
-3. Test creating a species at birdfeed.io
-4. Verify all API routes work (photos, species, activity, etc.)
+1. Merge PR #35 to main
+2. Wait for Railway to auto-deploy
+3. Test API endpoints at birdfeed.io:
+   - GET /api/health
+   - GET /api/photos
+   - GET /api/species
+   - POST /api/species (create new species)
 
 ### Deployment Status
 

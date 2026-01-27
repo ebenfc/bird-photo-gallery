@@ -7,6 +7,9 @@ import { checkAndGetRateLimitResponse, RATE_LIMITS, addRateLimitHeaders } from "
 import { logError } from "@/lib/logger";
 import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
+// Ensure this route runs on Node.js runtime (not Edge)
+export const runtime = "nodejs";
+
 type SortOption = "recent_upload" | "oldest_upload" | "species_alpha" | "recent_taken";
 const VALID_RARITIES: Rarity[] = ["common", "uncommon", "rare"];
 
