@@ -18,7 +18,7 @@ export default function SpeciesDirectory() {
     try {
       const res = await fetch("/api/species");
       const data: SpeciesResponse = await res.json();
-      setSpecies(data.species);
+      setSpecies(data.species || []);
     } catch (err) {
       console.error("Failed to fetch species:", err);
     } finally {
