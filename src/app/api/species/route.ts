@@ -9,6 +9,10 @@ import { SpeciesSchema, validateRequest } from "@/lib/validation";
 import { invalidateSpeciesCache } from "@/lib/cache";
 import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
+// Ensure this route runs on Node.js runtime (not Edge)
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 type SpeciesSortOption = "alpha" | "photo_count" | "recent_added" | "recent_taken";
 
 // GET /api/species - List all species with photo counts
