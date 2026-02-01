@@ -412,9 +412,14 @@ export const runtime = "nodejs";
 
 ### Deployment Status
 
-**Railway**: ✅ Live at birdfeed.io
+**Railway**: ✅ Live at birdfeed.io (Production)
 - Custom domain configured with SSL certificate
 - CNAME points to `cjnyqfkl.up.railway.app`
+
+**Vercel**: ✅ Configured for PR previews
+- Project: `bird-photo-gallery`
+- Preview deployments on PRs
+- Cron job: Haikubox sync runs daily at 6am UTC
 
 **Clerk Production**: ✅ Fully configured
 - All 5 DNS records verified
@@ -466,9 +471,16 @@ export const runtime = "nodejs";
 - `CLERK_PUBLISHABLE_KEY` - ✅ Added
 - `CLERK_SECRET_KEY` - ✅ Added
 
+**Vercel** (preview deployments):
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - ✅ Configured
+- `CLERK_SECRET_KEY` - ✅ Configured
+- `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL` - ✅ Configured
+- `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL` - ✅ Configured
+- `NEXT_PUBLIC_CLERK_SIGN_UP_URL` - ✅ Configured
+
 ---
 
-## Account Menu Feature (PR #36 - February 2026)
+## Account Menu Feature (PR #39 - February 2026)
 
 **Added user account menu to the Header for easy login/logout and account management.**
 
