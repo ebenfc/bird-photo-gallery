@@ -465,3 +465,30 @@ export const runtime = "nodejs";
 **GitHub Secrets** (for CI):
 - `CLERK_PUBLISHABLE_KEY` - ✅ Added
 - `CLERK_SECRET_KEY` - ✅ Added
+
+---
+
+## Account Menu Feature (PR #36 - February 2026)
+
+**Added user account menu to the Header for easy login/logout and account management.**
+
+### Features
+
+**User Avatar Dropdown (when signed in):**
+- Displays user avatar in header (right side)
+- Clicking opens dropdown with:
+  - "Manage account" - Opens Clerk's account portal for profile, password, sessions
+  - "Sign out" - Logs out and redirects to home page
+
+**Sign In Link (when signed out):**
+- Desktop: "Sign in" link in header navigation
+- Mobile: "Sign in" option in mobile menu with login icon
+
+### Implementation
+
+- Uses Clerk's built-in `UserButton` component
+- `SignedIn` / `SignedOut` wrappers for conditional rendering
+- Responsive design: avatar visible on all screen sizes
+
+### Key File Modified
+- `src/components/layout/Header.tsx` - Added UserButton and sign-in links
