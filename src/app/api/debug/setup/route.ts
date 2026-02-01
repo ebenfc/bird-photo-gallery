@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { users } from "@/db/schema";
 import { sql } from "drizzle-orm";
 
 export const runtime = "nodejs";
