@@ -5,7 +5,6 @@ const showcasePhotos = [
   { src: "/landing/showcase-2.jpg", alt: "Bird in flight" },
   { src: "/landing/showcase-3.jpg", alt: "Bird at feeder" },
   { src: "/landing/showcase-4.jpg", alt: "Hummingbird hovering" },
-  { src: "/landing/showcase-5.jpg", alt: "Owl portrait" },
   { src: "/landing/showcase-6.jpg", alt: "Songbird singing" },
 ];
 
