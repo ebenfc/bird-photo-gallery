@@ -3,7 +3,6 @@ import Image from "next/image";
 const showcasePhotos = [
   { src: "/landing/showcase-1.jpg", alt: "Colorful bird perched on branch" },
   { src: "/landing/showcase-2.jpg", alt: "Bird in flight" },
-  { src: "/landing/showcase-3.jpg", alt: "Bird at feeder" },
   { src: "/landing/showcase-4.jpg", alt: "Hummingbird hovering" },
   { src: "/landing/showcase-6.jpg", alt: "Songbird singing" },
 ];
@@ -22,7 +21,7 @@ export default function PhotoShowcase() {
         </div>
 
         {/* Photo grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 gap-4 sm:gap-6 max-w-4xl mx-auto">
           {showcasePhotos.map((photo, index) => (
             <div
               key={photo.src}
