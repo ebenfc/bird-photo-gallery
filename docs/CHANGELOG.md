@@ -386,3 +386,35 @@ export const runtime = "nodejs";
 **Verification:**
 - `npm audit` shows 0 vulnerabilities after update
 - No breaking changes (patch version update)
+
+---
+
+### Production Database & Upload Fix (February 1, 2026)
+
+**Resolved critical issues preventing species creation and photo uploads in production.**
+
+**Issues Fixed:**
+
+1. **Database Tables Missing**
+   - Railway PostgreSQL had no tables (schema never pushed)
+   - Manually ran `drizzle-kit push` using `DATABASE_PUBLIC_URL`
+
+2. **Browser Upload Route Broken**
+   - Route file was named `route 2.ts` (with space) instead of `route.ts`
+   - Created proper `route.ts` with authentication
+
+3. **Users Not in Database**
+   - Clerk webhook only fires on profile updates, not for users created before webhook setup
+   - Manually inserted user records via Node.js script
+
+4. **Duplicate Files Causing Build Failures**
+   - 36 duplicate files with spaces (`route 2.ts`, `schema 2.ts`, etc.) were committed
+   - These caused TypeScript errors during Railway builds
+   - Deleted all duplicate files
+
+**Result:** Species creation and photo uploads now working in production.
+
+**Key Learnings:**
+- Railway's internal DB URL (`postgres.railway.internal`) only works within Railway network
+- Use `DATABASE_PUBLIC_URL` for local migrations against production
+- Files with spaces in names are not recognized as Next.js routes
