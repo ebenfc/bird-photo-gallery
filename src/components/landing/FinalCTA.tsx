@@ -4,7 +4,7 @@ export default function FinalCTA() {
   return (
     <section className="py-16 sm:py-24 bg-gradient-to-br from-[var(--forest-900)] to-[var(--forest-950)]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
+        <h2 className="text-3xl sm:text-4xl font-bold text-[var(--moss-50)] tracking-tight">
           Start cataloguing your bird photos
         </h2>
         <p className="mt-4 text-lg text-[var(--forest-200)] max-w-xl mx-auto">
@@ -29,10 +29,10 @@ export default function FinalCTA() {
 
         {/* Footer */}
         <div className="mt-16 pt-8 border-t border-[var(--forest-800)]">
-          <p className="text-sm text-[var(--forest-400)]">
+          <p className="text-sm text-[var(--forest-200)]">
             Made with care in the Pacific Northwest
           </p>
-          <p className="mt-2 text-xs text-[var(--forest-500)]">
+          <p className="mt-2 text-xs text-[var(--forest-300)]">
             &copy; {new Date().getFullYear()} Bird Feed
           </p>
         </div>
