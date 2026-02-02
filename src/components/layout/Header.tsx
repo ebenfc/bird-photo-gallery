@@ -5,51 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton, SignedIn, SignedOut } from "@clerk/nextjs";
 
-// Bird icon - Dark Eyed Junco silhouette
-function BirdIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 56 40"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {/* Gray head */}
-      <path
-        fill="#5B6770"
-        d="M 32,6 C 36,6 40,7 42,9 C 45,11 47,14 47,18 C 47,20 46,22 44,24 C 42,25 40,26 37,26 C 35,26 33,25 31,24 C 29,23 27,21 26,19 C 25,17 24,16 22,15 C 23,14 25,13 27,11 C 29,9 30,7 32,6 Z"
-      />
-
-      {/* Brown wing/back */}
-      <path
-        fill="#8B6F47"
-        d="M 22,15 C 18,16 14,18 11,21 C 8,24 6,27 6,30 C 6,32 7,34 9,35 C 11,36 14,36 17,35 C 20,34 23,32 25,30 C 27,28 29,26 31,24 C 33,25 35,26 37,26 C 40,26 42,25 44,24 C 46,22 47,20 47,18 C 47,16 46,14 44,12 C 42,10 39,9 36,8 C 33,7 30,7 27,8 L 22,15 Z"
-      />
-
-      {/* Tail */}
-      <path
-        fill="#8B6F47"
-        d="M 11,21 C 8,22 5,24 3,26 C 2,27 1,29 2,31 C 3,33 5,34 7,33 C 9,32 10,30 11,28 C 11,26 11,24 11,21 Z"
-      />
-
-      {/* Orange breast */}
-      <path
-        fill="#FF6B4A"
-        d="M 17,35 C 14,36 11,36 9,35 C 7,34 6,32 6,30 C 6,28 7,26 8,24 C 10,22 12,20 15,19 C 17,18 19,18 21,19 C 23,20 24,22 24,24 C 24,27 23,30 21,32 C 20,33 18,34 17,35 Z"
-      />
-
-      {/* White accent trim */}
-      <path
-        fill="#FFFFFF"
-        d="M 21,19 C 23,18 25,18 27,19 C 29,20 30,21 30,23 C 30,25 29,26 27,27 C 25,28 23,28 21,27 C 19,26 18,24 18,22 C 18,21 19,20 21,19 Z"
-        opacity="0.95"
-      />
-
-      {/* Eye */}
-      <circle cx="38" cy="16" r="2" fill="#1A202C" />
-    </svg>
-  );
-}
-
 export default function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -107,13 +62,9 @@ export default function Header() {
           {/* Logo - with proper touch target for mobile */}
           <Link
             href="/"
-            className="flex items-center gap-2 sm:gap-3 group -ml-2 pl-2 pr-3 py-2
+            className="flex items-center -ml-2 pl-2 pr-3 py-2
               active:opacity-80 transition-opacity"
           >
-            <div className="transition-transform duration-[var(--timing-fast)] group-hover:scale-105">
-              <BirdIcon className="w-7 h-7 sm:w-8 sm:h-8 text-white
-                group-hover:text-[var(--moss-300)] transition-colors duration-[var(--timing-fast)]" />
-            </div>
             <span className="font-bold text-base sm:text-lg text-white tracking-tight">
               Bird Feed
             </span>
