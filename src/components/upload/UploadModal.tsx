@@ -680,10 +680,9 @@ export default function UploadModal({
                 bg-gradient-to-br from-[var(--moss-100)] to-[var(--forest-100)]
                 flex items-center justify-center
                 shadow-[var(--shadow-sm)]">
-                {/* Animated bird icon */}
+                {/* Generic bird silhouette */}
                 <svg className="w-10 h-10 text-[var(--forest-600)] animate-bird-hop" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M21.5 8.5c-.5-.5-1.5-.5-2.5 0L15 12l-3-1-4.5 2.5c-1.5 1-2 2.5-1.5 4l1 2.5 1.5-1 2-1.5 3 .5 2-1.5 4-4c1-1 1-2.5 0-3.5l-2.5-2z" />
-                  <circle cx="18" cy="7" r="1.5" />
+                  <path d="M12 3C10.5 3 9 4 8.5 5.5C8 7 8 8.5 8.5 10C7 10.5 5.5 11 4 11C3 11 2 11.5 2 12.5C2 13 2.5 13.5 3 13.5C4 13.5 5 13 6 12.5C7 14.5 8.5 16 10.5 17C10 17.5 9 18 8.5 19C8 19.5 8 20 8.5 20.5C9 21 9.5 21 10 20.5C11 19.5 12 18.5 13 18C14 18.5 15 19 15.5 19C14.5 17.5 14 16.5 14 15.5C16 14 18 12 19 9.5C19.5 8 20 6.5 19.5 5C19 3.5 17.5 2.5 16 3C14.5 3.5 13.5 4.5 13 6C12.5 5 12.5 4 12 3Z" />
                 </svg>
               </div>
               <h3 className="text-lg font-medium text-[var(--forest-800)] mb-4">
