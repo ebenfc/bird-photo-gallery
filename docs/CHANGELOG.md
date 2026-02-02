@@ -418,3 +418,17 @@ export const runtime = "nodejs";
 - Railway's internal DB URL (`postgres.railway.internal`) only works within Railway network
 - Use `DATABASE_PUBLIC_URL` for local migrations against production
 - Files with spaces in names are not recognized as Next.js routes
+
+---
+
+### Remove Warped Logo (PR #41)
+
+**Temporarily removed the bird logo from the header due to display issues.**
+
+**Changes:**
+- Removed the SVG BirdIcon component that was rendering incorrectly/warped
+- Header now displays just "Bird Feed" text until a better logo is designed
+- Cleaned up unused BirdIcon component code (~45 lines removed)
+
+**Key File Modified:**
+- `src/components/layout/Header.tsx` - Removed BirdIcon component and usage
