@@ -35,7 +35,7 @@ export default function HeroSection() {
                   active:scale-[0.96]
                   transition-all duration-[var(--timing-fast)]"
               >
-                Get Started
+                Get Started Free
               </Link>
               <Link
                 href="/sign-in"

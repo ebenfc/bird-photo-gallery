@@ -29,10 +29,10 @@ export default function FinalCTA() {
 
         {/* Footer */}
         <div className="mt-16 pt-8 border-t border-[var(--forest-800)]">
-          <p className="text-sm text-[var(--forest-200)]">
+          <p className="text-sm text-[var(--forest-400)]">
             Made with care in the Pacific Northwest
           </p>
-          <p className="mt-2 text-xs text-[var(--forest-300)]">
+          <p className="mt-2 text-xs text-[var(--forest-500)]">
             &copy; {new Date().getFullYear()} Bird Feed
           </p>
         </div>
