@@ -11,6 +11,9 @@ export const users = pgTable("users", {
   firstName: text("first_name"),
   lastName: text("last_name"),
   imageUrl: text("image_url"),
+  // Public gallery sharing fields
+  username: text("username").unique(), // URL-safe username for public profile (e.g., /u/eben)
+  isPublicGalleryEnabled: boolean("is_public_gallery_enabled").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

@@ -3,6 +3,14 @@ export type Rarity = "common" | "uncommon" | "rare";
 // Display-only rarity that includes unassigned status (for UI purposes)
 export type DisplayRarity = Rarity | "unassigned";
 
+// Public profile data for shared galleries
+export interface PublicProfile {
+  username: string;
+  displayName: string;
+  photoCount: number;
+  speciesCount: number;
+}
+
 export interface Species {
   id: number;
   commonName: string;

@@ -8,7 +8,7 @@ import { Photo, HaikuboxDetection } from "@/types";
 interface PhotoModalProps {
   photo: Photo | null;
   onClose: () => void;
-  onFavoriteToggle: (id: number, isFavorite: boolean) => void;
+  onFavoriteToggle?: (id: number, isFavorite: boolean) => void;
   onNavigate?: (direction: "prev" | "next") => void;
   canNavigate?: { prev: boolean; next: boolean };
   onChangeSpecies?: (photo: Photo) => void;
@@ -17,6 +17,8 @@ interface PhotoModalProps {
   onDelete?: (id: number) => Promise<void>;
   onSetCoverPhoto?: (photoId: number, speciesId: number) => Promise<boolean>;
   defaultToFullscreen?: boolean;
+  /** When true, hides all edit controls (favorite, edit date, edit notes, delete, etc.) */
+  readOnly?: boolean;
 }
 
 export default function PhotoModal({
@@ -31,6 +33,7 @@ export default function PhotoModal({
   onDelete,
   onSetCoverPhoto,
   defaultToFullscreen = false,
+  readOnly = false,
 }: PhotoModalProps) {
   const [isEditingDate, setIsEditingDate] = useState(false);
   const [editDateValue, setEditDateValue] = useState("");
@@ -94,9 +97,10 @@ export default function PhotoModal({
   }, [photo?.id]);
 
   // Fetch Haikubox detection data for the species
+  // Skip in readOnly mode (public view) - detection data is location-sensitive
   useEffect(() => {
     const fetchDetection = async () => {
-      if (!photo?.species?.commonName) {
+      if (!photo?.species?.commonName || readOnly) {
         setDetection(null);
         return;
       }
@@ -121,7 +125,7 @@ export default function PhotoModal({
     };
 
     fetchDetection();
-  }, [photo?.species?.commonName]);
+  }, [photo?.species?.commonName, readOnly]);
 
   // Clear fullscreen UI timer on unmount
   useEffect(() => {
@@ -208,7 +212,7 @@ export default function PhotoModal({
   }, [photo, handleKeyDown]);
 
   const handleFavorite = () => {
-    if (!photo) return;
+    if (!photo || readOnly || !onFavoriteToggle) return;
     const newState = !photo.isFavorite;
     onFavoriteToggle(photo.id, newState);
     if (newState) {
@@ -509,37 +513,41 @@ export default function PhotoModal({
                   </p>
                 )}
               </div>
-              <button
-                onClick={(e) => { e.stopPropagation(); handleFavorite(); }}
-                className={`p-1.5 rounded-full ${justFavorited ? "animate-heart-beat" : ""}`}
-              >
-                <svg
-                  className={`w-5 h-5 ${photo.isFavorite ? "text-red-500 fill-current" : "text-[var(--mist-300)]"}`}
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={photo.isFavorite ? 0 : 2}
-                  fill={photo.isFavorite ? "currentColor" : "none"}
-                >
-                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                </svg>
-              </button>
-            </div>
-            <div className="flex items-center gap-2">
-              {/* Overflow menu button */}
-              <div className="relative">
+              {!readOnly && (
                 <button
-                  id="mobile-overflow-btn"
-                  onClick={(e) => { e.stopPropagation(); setShowOverflowMenu(!showOverflowMenu); }}
-                  className="p-2 text-[var(--mist-400)] hover:text-[var(--forest-700)]
-                    hover:bg-[var(--mist-50)] rounded-full transition-all"
+                  onClick={(e) => { e.stopPropagation(); handleFavorite(); }}
+                  className={`p-1.5 rounded-full ${justFavorited ? "animate-heart-beat" : ""}`}
                 >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <circle cx="12" cy="5" r="2" />
-                    <circle cx="12" cy="12" r="2" />
-                    <circle cx="12" cy="19" r="2" />
+                  <svg
+                    className={`w-5 h-5 ${photo.isFavorite ? "text-red-500 fill-current" : "text-[var(--mist-300)]"}`}
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={photo.isFavorite ? 0 : 2}
+                    fill={photo.isFavorite ? "currentColor" : "none"}
+                  >
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                   </svg>
                 </button>
-              </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {/* Overflow menu button - hidden in readOnly mode */}
+              {!readOnly && (
+                <div className="relative">
+                  <button
+                    id="mobile-overflow-btn"
+                    onClick={(e) => { e.stopPropagation(); setShowOverflowMenu(!showOverflowMenu); }}
+                    className="p-2 text-[var(--mist-400)] hover:text-[var(--forest-700)]
+                      hover:bg-[var(--mist-50)] rounded-full transition-all"
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <circle cx="12" cy="5" r="2" />
+                      <circle cx="12" cy="12" r="2" />
+                      <circle cx="12" cy="19" r="2" />
+                    </svg>
+                  </button>
+                </div>
+              )}
               <svg
                 className={`w-5 h-5 text-[var(--mist-400)] transition-transform duration-300
                   ${isDetailsExpanded ? "rotate-180" : ""}`}
@@ -651,7 +659,7 @@ export default function PhotoModal({
                     >
                       View species
                     </Link>
-                    {onChangeSpecies && (
+                    {!readOnly && onChangeSpecies && (
                       <>
                         <span className="text-[var(--mist-300)]">•</span>
                         <button
@@ -670,7 +678,7 @@ export default function PhotoModal({
                   <h2 className="text-xl font-bold text-[var(--mist-500)] italic">
                     Species Unassigned
                   </h2>
-                  {onChangeSpecies ? (
+                  {!readOnly && (onChangeSpecies ? (
                     <button
                       onClick={() => onChangeSpecies(photo)}
                       className="text-sm text-[var(--moss-600)] hover:text-[var(--moss-700)]
@@ -687,29 +695,31 @@ export default function PhotoModal({
                     >
                       Assign species
                     </Link>
-                  )}
+                  ))}
                 </div>
               )}
             </div>
 
-            {/* Favorite button with heartbeat animation */}
-            <button
-              onClick={handleFavorite}
-              className={`p-2.5 rounded-full transition-all duration-[var(--timing-fast)]
-                hover:bg-[var(--moss-50)] active:scale-90
-                ${justFavorited ? "animate-heart-beat" : ""}`}
-            >
-              <svg
-                className={`w-7 h-7 transition-colors duration-[var(--timing-fast)]
-                  ${photo.isFavorite ? "text-red-500 fill-current" : "text-[var(--mist-300)]"}`}
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={photo.isFavorite ? 0 : 2}
-                fill={photo.isFavorite ? "currentColor" : "none"}
+            {/* Favorite button with heartbeat animation - hidden in readOnly mode */}
+            {!readOnly && (
+              <button
+                onClick={handleFavorite}
+                className={`p-2.5 rounded-full transition-all duration-[var(--timing-fast)]
+                  hover:bg-[var(--moss-50)] active:scale-90
+                  ${justFavorited ? "animate-heart-beat" : ""}`}
               >
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-              </svg>
-            </button>
+                <svg
+                  className={`w-7 h-7 transition-colors duration-[var(--timing-fast)]
+                    ${photo.isFavorite ? "text-red-500 fill-current" : "text-[var(--mist-300)]"}`}
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={photo.isFavorite ? 0 : 2}
+                  fill={photo.isFavorite ? "currentColor" : "none"}
+                >
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                </svg>
+              </button>
+            )}
           </div>
 
           {photo.species?.description && (
@@ -756,8 +766,8 @@ export default function PhotoModal({
             </div>
           )}
 
-          {/* Set as cover photo button */}
-          {photo.species && onSetCoverPhoto && (
+          {/* Set as cover photo button - hidden in readOnly mode */}
+          {!readOnly && photo.species && onSetCoverPhoto && (
             <button
               onClick={handleSetCoverPhoto}
               disabled={isSettingCover || coverPhotoSet}
@@ -851,7 +861,7 @@ export default function PhotoModal({
                     </p>
                   )}
                 </div>
-                {onDateChange && !isEditingDate && (
+                {!readOnly && onDateChange && !isEditingDate && (
                   <button
                     onClick={() => {
                       setEditDateValue(
@@ -888,7 +898,7 @@ export default function PhotoModal({
                   </div>
                   <span className="text-[var(--bark-600)] text-xs font-semibold uppercase tracking-wider">Notes</span>
                 </div>
-                {onNotesChange && !isEditingNotes && (
+                {!readOnly && onNotesChange && !isEditingNotes && (
                   <button
                     onClick={() => {
                       setEditNotesValue(photo.notes || "");
@@ -958,8 +968,8 @@ export default function PhotoModal({
             </div>
           </div>
 
-          {/* Delete link - subtle placement */}
-          {onDelete && (
+          {/* Delete link - subtle placement, hidden in readOnly mode */}
+          {!readOnly && onDelete && (
             <div className="mt-6 pt-4 border-t border-[var(--border)]">
               <button
                 onClick={() => setShowDeleteConfirm(true)}
@@ -976,8 +986,8 @@ export default function PhotoModal({
         </div>
       </div>
 
-      {/* Mobile Overflow Menu - rendered outside overflow-hidden container */}
-      {showOverflowMenu && (
+      {/* Mobile Overflow Menu - rendered outside overflow-hidden container, hidden in readOnly mode */}
+      {!readOnly && showOverflowMenu && (
         <div className="lg:hidden fixed inset-0 z-50">
           <div
             className="absolute inset-0"

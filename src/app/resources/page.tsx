@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import PublicGallerySettings from "@/components/settings/PublicGallerySettings";
 
 export default function ResourcesPage() {
   // Haikubox connection form state
@@ -164,6 +165,26 @@ export default function ResourcesPage() {
             Use these resources for bird identification and in-depth species information.
           </p>
         </div>
+
+        {/* Public Gallery Section */}
+        <section className="bg-white rounded-[var(--radius-lg)] shadow-[var(--shadow-md)]
+          border border-[var(--border-light)] overflow-hidden mb-8">
+          <div className="bg-gradient-to-r from-[var(--moss-50)] to-[var(--forest-50)]
+            border-b border-[var(--border-light)] px-5 sm:px-6 py-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-[var(--forest-900)] mb-1 flex items-center gap-2">
+              <svg className="w-6 h-6 text-[var(--moss-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+              Public Gallery
+            </h2>
+            <p className="text-sm sm:text-base text-[var(--mist-600)]">
+              Share your bird feed with friends and followers
+            </p>
+          </div>
+          <div className="p-5 sm:p-6">
+            <PublicGallerySettings />
+          </div>
+        </section>
 
         {/* Resource Sections */}
         <div className="space-y-8">
