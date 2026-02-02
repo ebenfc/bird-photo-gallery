@@ -432,3 +432,19 @@ export const runtime = "nodejs";
 
 **Key File Modified:**
 - `src/components/layout/Header.tsx` - Removed BirdIcon component and usage
+
+---
+
+### Generic Bird Silhouette (PR #43)
+
+**Replaced custom bird icon with a cleaner, more recognizable songbird silhouette.**
+
+**Changes:**
+- Updated bird SVG in empty states to use a generic songbird profile
+- Previous icon had an unusual shape that wasn't recognizable as a bird
+- New silhouette is simpler and more universally understood
+
+**Files Modified:**
+- `src/components/gallery/PhotoGrid.tsx` - Empty state on Feed page
+- `src/components/upload/UploadModal.tsx` - Loading state during upload
+- `src/components/species/SpeciesCard.tsx` - Placeholder for species without photos
