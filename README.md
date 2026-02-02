@@ -137,6 +137,7 @@ bird-photo-gallery/
 │   ├── components/           # React components
 │   │   ├── activity/         # Activity timeline components
 │   │   ├── gallery/          # Photo gallery components
+│   │   ├── landing/          # Public landing page components
 │   │   ├── layout/           # Header and navigation
 │   │   ├── species/          # Species management components
 │   │   ├── stats/            # Statistics widgets
@@ -334,6 +335,27 @@ Before committing:
 See [BUGS.md](BUGS.md) for tracked issues and fixes.
 
 ## Recent Updates
+
+### 2026-02-02: Public Landing Page 🚀
+
+**Added a public landing page** for unauthenticated visitors to learn about Bird Feed before signing up.
+
+**Features:**
+- Hero section with "Catalogue your bird photography" headline and CTAs
+- Photo showcase grid displaying sample bird photography (2x2 layout)
+- Features section highlighting core functionality
+- Final CTA section with "Start cataloguing your bird photos" heading
+- Responsive design with Pacific Northwest-inspired color palette
+
+**Technical Changes:**
+- Updated `proxy.ts` to allow unauthenticated access to root path
+- Converted root page to server component with auth-based rendering
+- Created new landing components in `src/components/landing/`
+- Authenticated users continue to see their photo gallery at `/`
+
+**Accessibility Fixes:**
+- CTA heading uses inline style to override global heading color for visibility
+- Footer text uses lighter colors for legibility against dark background
 
 ### 2026-01-24: Activity Page Refinements 🔍
 
