@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { getUserByUsername } from "@/lib/user";
 import PublicHeader from "@/components/layout/PublicHeader";
 
@@ -34,12 +35,12 @@ export default async function PublicGalleryLayout({
       {/* Mobile CTA footer */}
       <footer className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[var(--border-light)]
         py-3 px-4 text-center">
-        <a
+        <Link
           href="/"
           className="text-sm text-[var(--forest-600)] font-medium hover:text-[var(--moss-600)]"
         >
           Create your own Bird Feed
-        </a>
+        </Link>
       </footer>
     </div>
   );
