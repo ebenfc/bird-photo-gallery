@@ -2,6 +2,7 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
 // Define public routes (everything else requires authentication)
 const isPublicRoute = createRouteMatcher([
+  '/',              // Landing page for unauthenticated users
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/api/webhook/clerk', // Clerk webhook endpoint
