@@ -348,55 +348,47 @@ Optional:
 
 ## Clerk Authentication Integration (PR #34 - January 2026)
 
-**Status**: 🚨 **BLOCKED** - API routes still returning 404 after fix deployed
+**Status**: ✅ **RESOLVED** (February 1, 2026)
 **Production URL**: https://birdfeed.io
-**PR**: https://github.com/ebenfc/bird-photo-gallery/pull/35 (MERGED)
 
-### Current Issue (January 27, 2026)
+### Issues Resolved (February 1, 2026)
 
-**Problem**: ALL API routes return 404 in production
-- Pages load correctly (Feed, Species, Activity, Resources)
-- Sign-in/sign-up works via Clerk
-- ALL API calls (GET/POST to `/api/*`) return 404
-- Railway logs showed: `Couldn't load fs` and `Couldn't load zlib`
+**Root Causes Identified and Fixed:**
 
-**Symptom**: Creating a species shows "Failed to save species" error
+1. **Missing Database Tables**
+   - The `users` table didn't exist in the Railway PostgreSQL database
+   - The `postbuild` script (`drizzle-kit push`) wasn't running during Railway deployments
+   - **Fix**: Manually ran `drizzle-kit push` against the production database using `DATABASE_PUBLIC_URL`
+   - **Command**: `DATABASE_URL="postgresql://..." npx drizzle-kit push`
 
-### What Was Tried
+2. **Browser Upload Route Missing**
+   - The file was incorrectly named `route 2.ts` (with a space) instead of `route.ts`
+   - Next.js doesn't recognize files with spaces as valid route handlers
+   - **Fix**: Created proper `route.ts` with authentication (`requireAuth()`)
 
-1. **Added `runtime = "nodejs"` to all API routes** (PR #35 - MERGED)
-   - Added `export const runtime = "nodejs"` to all 21 API routes
-   - This should force Node.js runtime instead of Edge runtime
-   - Build succeeded locally
-   - PR merged to main
+3. **User Not Synced to Database**
+   - Clerk webhook fires `user.updated` when editing profile, not `user.created`
+   - Users created before the webhook was set up were never added to the database
+   - **Fix**: Created a Node.js script to manually insert user records
 
-2. **Railway deployment**
-   - PR was merged
-   - Railway showed deployment complete
-   - Cleared build cache and redeployed
-   - **API still returns 404**
+4. **Duplicate Files with Spaces**
+   - Many duplicate files like `route 2.ts`, `route 3.ts`, etc. were accidentally committed
+   - These caused TypeScript build failures in Railway
+   - **Fix**: Deleted all 36 duplicate files
 
-3. **Verified code is correct**
-   - GitHub main branch has correct code (commit `0cc193e`)
-   - All route files have `runtime = "nodejs"` declaration
-   - Local build works fine
+### Debug Endpoints
 
-### Diagnosis
+- `GET /api/debug/auth` - Check authentication status and user database sync
+- `POST /api/debug/setup` - Manually create current user in database
 
-The static asset hashes in the HTML response (`8Dt_4PDeHoN_cIcVeU4t0`) haven't changed between deployments, suggesting:
-- Railway may be serving cached build output
-- The new code may not actually be deploying
-- There may be a build configuration issue specific to Railway
+### Database Migration Command
 
-### Next Steps to Debug
+When deploying schema changes, use the PUBLIC URL (not internal):
+```bash
+DATABASE_URL="postgresql://postgres:[PASSWORD]@[HOST].proxy.rlwy.net:[PORT]/railway" npx drizzle-kit push
+```
 
-1. **Check Railway build logs** for errors during build
-2. **Verify the deployed code** - check if Railway's deployed files contain the runtime declarations
-3. **Try alternative approaches**:
-   - Add `runtime = "nodejs"` to a root `route.ts` config
-   - Check if `next.config.ts` needs additional configuration
-   - Try setting `NEXT_RUNTIME=nodejs` environment variable in Railway
-4. **Consider Vercel** as alternative deployment platform (Next.js native)
+**Note**: The internal URL (`postgres.railway.internal`) only works from within Railway's network.
 
 ### Configuration Already in Place
 
