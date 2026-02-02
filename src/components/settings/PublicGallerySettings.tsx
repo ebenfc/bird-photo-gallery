@@ -57,6 +57,14 @@ export default function PublicGallerySettings() {
       const res = await fetch(
         `/api/settings/profile/check-username?username=${encodeURIComponent(value)}`
       );
+      if (!res.ok) {
+        // API error (e.g., database not migrated yet)
+        setUsernameStatus({
+          available: false,
+          error: "Unable to check availability. Please try again later.",
+        });
+        return;
+      }
       const data = await res.json();
       setUsernameStatus({
         available: data.available,
@@ -64,7 +72,10 @@ export default function PublicGallerySettings() {
       });
     } catch (error) {
       console.error("Failed to check username:", error);
-      setUsernameStatus(null);
+      setUsernameStatus({
+        available: false,
+        error: "Unable to check availability. Please try again later.",
+      });
     } finally {
       setCheckingUsername(false);
     }
@@ -233,6 +244,9 @@ export default function PublicGallerySettings() {
         )}
         <p className="text-xs text-[var(--mist-500)] mt-1.5">
           3-30 characters. Letters, numbers, and hyphens only.
+        </p>
+        <p className="text-xs text-[var(--mist-400)] mt-1">
+          Tip: For privacy, avoid using your real name or email address.
         </p>
       </div>
 
