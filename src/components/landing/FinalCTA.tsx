@@ -4,7 +4,10 @@ export default function FinalCTA() {
   return (
     <section className="py-16 sm:py-24 bg-gradient-to-br from-[var(--forest-900)] to-[var(--forest-950)]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
+        <h2
+          className="text-3xl sm:text-4xl font-bold tracking-tight"
+          style={{ color: "white" }}
+        >
           Start cataloguing your bird photos
         </h2>
         <p className="mt-4 text-lg text-[var(--forest-200)] max-w-xl mx-auto">
