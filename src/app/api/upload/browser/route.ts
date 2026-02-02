@@ -5,17 +5,25 @@ import { photos } from "@/db/schema";
 import { checkAndGetRateLimitResponse, RATE_LIMITS, addRateLimitHeaders } from "@/lib/rateLimit";
 import { logError } from "@/lib/logger";
 import { validateImageFile, validateImageMagicBytesFromBuffer } from "@/lib/fileValidation";
+import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 
 // Ensure this route runs on Node.js runtime (not Edge)
 export const runtime = "nodejs";
 
-// POST /api/upload/browser - Upload a photo from browser (no API key needed)
+// POST /api/upload/browser - Upload a photo from browser
 export async function POST(request: NextRequest) {
   // Rate limiting for uploads
   const rateCheck = checkAndGetRateLimitResponse(request, RATE_LIMITS.upload);
   if (!rateCheck.allowed) {
     return rateCheck.response;
   }
+
+  // Authentication
+  const authResult = await requireAuth();
+  if (isErrorResponse(authResult)) {
+    return authResult;
+  }
+  const { userId } = authResult;
 
   try {
     const formData = await request.formData();
@@ -94,6 +102,7 @@ export async function POST(request: NextRequest) {
       const result = await db
         .insert(photos)
         .values({
+          userId,
           speciesId: speciesId ? parseInt(speciesId) : null,
           filename: processed.filename,
           thumbnailFilename: processed.thumbnailFilename,
