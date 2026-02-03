@@ -1,7 +1,9 @@
 /**
  * Structured logging utility
- * In production, this can be extended to send logs to external services like Sentry
+ * In production, errors are automatically sent to Sentry for monitoring
  */
+
+import * as Sentry from "@sentry/nextjs";
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
@@ -88,13 +90,25 @@ export function logInfo(message: string, context?: LogContext) {
 
 /**
  * Log warning messages
+ * In production, warnings are also sent to Sentry for visibility
  */
 export function logWarning(message: string, context?: LogContext) {
   log('warn', message, context);
+
+  // Send warnings to Sentry in production (as breadcrumbs, not errors)
+  if (process.env.NODE_ENV === 'production') {
+    Sentry.addBreadcrumb({
+      category: 'warning',
+      message,
+      level: 'warning',
+      data: context,
+    });
+  }
 }
 
 /**
  * Log error messages with optional error object
+ * In production, errors are automatically sent to Sentry
  */
 export function logError(
   message: string,
@@ -103,10 +117,23 @@ export function logError(
 ) {
   log('error', message, context, error);
 
-  // In production, you would send to Sentry or similar here
-  // if (process.env.NODE_ENV === 'production' && process.env.SENTRY_DSN) {
-  //   Sentry.captureException(error, { extra: context });
-  // }
+  // Send errors to Sentry in production
+  if (process.env.NODE_ENV === 'production') {
+    if (error) {
+      Sentry.captureException(error, {
+        extra: {
+          message,
+          ...context,
+        },
+      });
+    } else {
+      // If no error object, capture as a message
+      Sentry.captureMessage(message, {
+        level: 'error',
+        extra: context,
+      });
+    }
+  }
 }
 
 /**

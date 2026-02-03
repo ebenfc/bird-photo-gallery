@@ -8,6 +8,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/webhook/clerk', // Clerk webhook endpoint
   '/u/(.*)',        // Public user galleries
   '/api/public/(.*)', // Public API endpoints
+  '/monitoring',    // Sentry tunnel route
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
