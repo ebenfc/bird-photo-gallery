@@ -569,3 +569,52 @@ Select "No, add the constraint without truncating the table" when prompted.
 
 - `src/app/u/CLAUDE.md` - Public profile routes documentation
 - `src/app/api/public/CLAUDE.md` - Public API endpoints documentation
+
+---
+
+## Activity Page Haikubox Setup Guidance (PR #53 - February 2026)
+
+**Improves UX for users who haven't configured their Haikubox device.**
+
+### Problem Solved
+
+Previously, when a user visited the Activity page without a Haikubox configured, they saw a vague "No Bird Detections Yet" message that said "Sync your Haikubox" without any guidance on how to actually set it up.
+
+### Solution
+
+The Activity page now detects whether the user has a Haikubox serial configured and shows an appropriate experience:
+
+**If Haikubox is NOT configured:**
+- Shows a friendly onboarding card explaining the Activity feature
+- Includes a feature preview (what users will see: species detection, counts, photo tracking)
+- Primary CTA button: "Set Up Haikubox" → links to `/resources`
+- Secondary link: "Don't have a Haikubox?" → links to haikubox.com
+- Skips the Haikubox API call to avoid unnecessary errors
+
+**If Haikubox IS configured:**
+- Shows normal activity list (unchanged behavior)
+
+### Implementation
+
+**State Management:**
+```typescript
+const [haikuboxConfigured, setHaikuboxConfigured] = useState<boolean | null>(null);
+
+useEffect(() => {
+  const checkHaikuboxSettings = async () => {
+    const res = await fetch("/api/settings");
+    const data = await res.json();
+    setHaikuboxConfigured(!!data.haikuboxSerial);
+  };
+  checkHaikuboxSettings();
+}, []);
+```
+
+**Conditional Rendering:**
+- `haikuboxConfigured === null` → Loading skeleton
+- `haikuboxConfigured === false` → Setup guidance card
+- `haikuboxConfigured === true` → Normal activity list
+
+### Key File Modified
+
+- `src/app/activity/page.tsx` - Added configuration check and setup guidance card
