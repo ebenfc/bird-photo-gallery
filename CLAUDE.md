@@ -407,13 +407,14 @@ export const runtime = "nodejs";
 **Railway**: ✅ Live at birdfeed.io (Production)
 - Custom domain configured with SSL certificate
 - CNAME points to `cjnyqfkl.up.railway.app`
+- Note: `postbuild` script skips DB push during build (internal URL not accessible)
 
 **Vercel**: ✅ Configured for PR previews
 - Project: `bird-photo-gallery`
 - Preview deployments on PRs
 - Cron job: Haikubox sync runs daily at 6am UTC
-- Analytics: Page views, visitors, referral sources (via `@vercel/analytics`)
-- Speed Insights: Core Web Vitals monitoring (via `@vercel/speed-insights`)
+- Analytics: Page views, visitors, referral sources (`@vercel/analytics`)
+- Speed Insights: Core Web Vitals monitoring (`@vercel/speed-insights`)
 
 **Clerk Production**: ✅ Fully configured
 - All 5 DNS records verified
@@ -467,7 +468,15 @@ export const runtime = "nodejs";
 
 **GitHub Automation**:
 - Dependabot: Weekly npm dependency updates (Mondays 9am ET)
-- Branch protection: Recommended for `main` branch (see GitHub settings)
+- PR Template: `.github/PULL_REQUEST_TEMPLATE.md` for consistent PR descriptions
+- Branch protection: Recommended for `main` branch
+
+**Sentry** (error monitoring):
+- SDK: `@sentry/nextjs` integrated
+- Error boundaries: `src/app/error.tsx`, `src/app/global-error.tsx`
+- Logger integration: `src/lib/logger.ts` auto-captures errors
+- Tunnel route: `/monitoring` (bypasses ad blockers)
+- Environment variables needed: `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`
 
 **Vercel** (preview deployments):
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - ✅ Configured
