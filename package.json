@@ -13,7 +13,7 @@
     "test:coverage": "jest --coverage",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
-    "postbuild": "drizzle-kit push"
+    "postbuild": "drizzle-kit push || echo 'DB push skipped (expected during Railway build phase)'"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.37.1",
