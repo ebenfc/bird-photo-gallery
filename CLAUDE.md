@@ -412,6 +412,8 @@ export const runtime = "nodejs";
 - Project: `bird-photo-gallery`
 - Preview deployments on PRs
 - Cron job: Haikubox sync runs daily at 6am UTC
+- Analytics: Page views, visitors, referral sources (via `@vercel/analytics`)
+- Speed Insights: Core Web Vitals monitoring (via `@vercel/speed-insights`)
 
 **Clerk Production**: ✅ Fully configured
 - All 5 DNS records verified
@@ -462,6 +464,10 @@ export const runtime = "nodejs";
 **GitHub Secrets** (for CI):
 - `CLERK_PUBLISHABLE_KEY` - ✅ Added
 - `CLERK_SECRET_KEY` - ✅ Added
+
+**GitHub Automation**:
+- Dependabot: Weekly npm dependency updates (Mondays 9am ET)
+- Branch protection: Recommended for `main` branch (see GitHub settings)
 
 **Vercel** (preview deployments):
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - ✅ Configured
