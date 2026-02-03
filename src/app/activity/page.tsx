@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import PropertyStatsWidget from "@/components/stats/PropertyStatsWidget";
 import SpeciesActivityList from "@/components/activity/SpeciesActivityList";
 import UnassignedSpeciesModal from "@/components/activity/UnassignedSpeciesModal";
@@ -21,6 +22,9 @@ export default function ActivityPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Haikubox configuration state
+  const [haikuboxConfigured, setHaikuboxConfigured] = useState<boolean | null>(null);
+
   // Mobile filter toggle state
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [activeFilters, setActiveFilters] = useState<ActiveFilters>({ rarity: false, photo: false });
@@ -29,6 +33,20 @@ export default function ActivityPage() {
   const [unassignedModalOpen, setUnassignedModalOpen] = useState(false);
   const [selectedUnassigned, setSelectedUnassigned] =
     useState<SpeciesActivityData | null>(null);
+
+  // Check if Haikubox is configured
+  useEffect(() => {
+    const checkHaikuboxSettings = async () => {
+      try {
+        const res = await fetch("/api/settings");
+        const data = await res.json();
+        setHaikuboxConfigured(!!data.haikuboxSerial);
+      } catch {
+        setHaikuboxConfigured(false);
+      }
+    };
+    checkHaikuboxSettings();
+  }, []);
 
   // Fetch activity data - extracted to callback for reuse after creating species
   const fetchActivityData = useCallback(async () => {
@@ -75,9 +93,14 @@ export default function ActivityPage() {
     }
   }, []);
 
+  // Only fetch activity data when Haikubox is configured
   useEffect(() => {
-    fetchActivityData();
-  }, [fetchActivityData]);
+    if (haikuboxConfigured === true) {
+      fetchActivityData();
+    } else if (haikuboxConfigured === false) {
+      setLoading(false);
+    }
+  }, [haikuboxConfigured, fetchActivityData]);
 
   // Handler for clicking on unassigned species
   const handleUnassignedClick = (data: SpeciesActivityData) => {
@@ -125,6 +148,101 @@ export default function ActivityPage() {
 
   // Count active filters for the badge
   const activeFilterCount = (activeFilters.rarity ? 1 : 0) + (activeFilters.photo ? 1 : 0);
+
+  // Loading state while checking Haikubox configuration
+  if (haikuboxConfigured === null) {
+    return (
+      <div className="pnw-texture min-h-screen">
+        <div className="hidden sm:block mb-8">
+          <div className="h-9 w-32 bg-[var(--mist-100)] rounded-[var(--radius-md)] animate-pulse mb-2" />
+          <div className="h-5 w-80 bg-[var(--mist-100)] rounded-[var(--radius-md)] animate-pulse" />
+        </div>
+        <div className="h-64 bg-[var(--mist-100)] rounded-[var(--radius-lg)] animate-pulse" />
+      </div>
+    );
+  }
+
+  // Setup guidance when Haikubox is not configured
+  if (haikuboxConfigured === false) {
+    return (
+      <div className="pnw-texture min-h-screen">
+        {/* Desktop header */}
+        <div className="hidden sm:block mb-8">
+          <h1 className="text-3xl font-bold text-[var(--forest-900)] tracking-tight mb-2">
+            Activity
+          </h1>
+          <p className="text-[var(--mist-600)]">
+            Bird species automatically detected by your Haikubox device on the property.
+          </p>
+        </div>
+
+        {/* Mobile header */}
+        <div className="sm:hidden mb-4">
+          <h1 className="text-2xl font-bold text-[var(--forest-900)] tracking-tight">
+            Activity
+          </h1>
+        </div>
+
+        {/* Setup Guidance Card */}
+        <div className="bg-white rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] border border-[var(--border-light)] overflow-hidden">
+          <div className="text-center py-12 px-6">
+            {/* Icon */}
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-[var(--sky-100)] to-[var(--moss-100)] flex items-center justify-center">
+              <svg className="w-10 h-10 text-[var(--forest-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                  d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+              </svg>
+            </div>
+
+            <h2 className="text-xl font-bold text-[var(--forest-900)] mb-3">
+              Connect Your Haikubox
+            </h2>
+            <p className="text-[var(--mist-600)] max-w-md mx-auto mb-6">
+              Track which bird species visit your property automatically. Connect your Haikubox device
+              to see detection data, species activity, and more.
+            </p>
+
+            {/* Feature preview */}
+            <div className="bg-[var(--mist-50)] rounded-[var(--radius-md)] p-4 mb-6 max-w-sm mx-auto">
+              <p className="text-sm font-medium text-[var(--forest-800)] mb-2">
+                With Haikubox, you&apos;ll see:
+              </p>
+              <ul className="text-sm text-[var(--mist-600)] text-left space-y-1">
+                <li>• Species detected on your property this year</li>
+                <li>• Detection counts and last heard times</li>
+                <li>• Which species you&apos;ve photographed vs. only heard</li>
+              </ul>
+            </div>
+
+            <Link
+              href="/resources"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-b from-[var(--forest-500)] to-[var(--forest-600)] text-white font-semibold rounded-[var(--radius-lg)] shadow-[var(--shadow-sm)] hover:from-[var(--forest-600)] hover:to-[var(--forest-700)] transition-all duration-[var(--timing-fast)] active:scale-95"
+            >
+              Set Up Haikubox
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+
+        {/* Don't have a Haikubox? */}
+        <div className="mt-6 text-center">
+          <p className="text-sm text-[var(--mist-500)]">
+            Don&apos;t have a Haikubox?{" "}
+            <a
+              href="https://haikubox.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[var(--moss-600)] hover:text-[var(--moss-700)] underline"
+            >
+              Learn more about it
+            </a>
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pnw-texture min-h-screen">
