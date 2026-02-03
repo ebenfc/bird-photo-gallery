@@ -496,3 +496,76 @@ export const runtime = "nodejs";
 
 ### Key File Modified
 - `src/components/layout/Header.tsx` - Added UserButton and sign-in links
+
+---
+
+## Public Gallery Sharing Feature (PR #52 - February 2026)
+
+**Enables users to share their bird photo gallery via a public, username-based URL.**
+
+### Overview
+
+Users can create a unique username and share their gallery publicly at `/u/[username]`. Visitors get read-only access to the Feed and Species pages without authentication.
+
+**Production Example:** `https://birdfeed.io/u/yourname`
+
+### User Settings
+
+Located on the Resources page:
+- **Username input** - Unique identifier for public URL (3-30 chars, lowercase alphanumeric + hyphens)
+- **Public gallery toggle** - Enable/disable public access
+- **Copy link button** - Copy public URL to clipboard
+- **Privacy tip** - Recommends not using real name or email
+
+### What Visitors Can See (Read-Only)
+
+- Feed page (all photos)
+- Species directory
+- Species detail pages
+- Filter and sort controls work normally
+
+### What Visitors Cannot See
+
+- Activity page (Haikubox detections - location-sensitive)
+- Resources page (settings)
+- Edit/create/delete functionality
+- Favorite toggle
+- Haikubox detection data on photos
+
+### Database Fields
+
+Added to `users` table:
+- `username` (text, unique, nullable) - Public URL identifier
+- `is_public_gallery_enabled` (boolean, default false)
+
+### Key Files
+
+**Settings:**
+- `src/components/settings/PublicGallerySettings.tsx` - Username + toggle form
+- `src/app/api/settings/profile/route.ts` - GET/PATCH profile settings
+- `src/app/api/settings/profile/check-username/route.ts` - Username availability check
+
+**Public Routes:**
+- `src/app/u/[username]/` - Public gallery pages (layout, feed, species)
+- `src/app/api/public/gallery/[username]/` - Public API endpoints
+
+**Authentication:**
+- `src/proxy.ts` - Added `/u/(.*)` and `/api/public/(.*)` to public routes
+
+**Component Changes:**
+- `src/components/gallery/PhotoModal.tsx` - Added `readOnly` prop
+- `src/components/layout/PublicHeader.tsx` - Minimal header for public pages
+
+### Database Migration
+
+When adding the username columns to production:
+```bash
+DATABASE_URL="postgresql://postgres:[PASSWORD]@[HOST].proxy.rlwy.net:[PORT]/railway" npm run db:push
+```
+
+Select "No, add the constraint without truncating the table" when prompted.
+
+### Documentation
+
+- `src/app/u/CLAUDE.md` - Public profile routes documentation
+- `src/app/api/public/CLAUDE.md` - Public API endpoints documentation

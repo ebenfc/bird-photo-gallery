@@ -9,7 +9,8 @@ Components are organized by feature area.
 | `activity/` | Haikubox activity page components |
 | `gallery/` | Photo gallery and modal components |
 | `landing/` | Public landing page for unauthenticated users |
-| `layout/` | Header, navigation |
+| `layout/` | Header, navigation, PublicHeader |
+| `settings/` | User settings forms (public gallery) |
 | `species/` | Species cards and forms |
 | `stats/` | Property stats widget |
 | `suggestions/` | AI suggestion components |
@@ -30,9 +31,16 @@ Mobile species page uses circular FAB instead of button in header.
 ### Photo Modal (`gallery/PhotoModal.tsx`)
 Key behaviors:
 - `defaultToFullscreen` prop - Opens directly in fullscreen (used on Species detail page)
+- `readOnly` prop - Hides all edit controls (used for public gallery views)
 - Swipe gestures - Left/right to navigate (50px minimum distance)
 - Preserves view state - Swipe in fullscreen stays in fullscreen
 - Escape key - Closes modal (different behavior when `defaultToFullscreen`)
+
+### Public Header (`layout/PublicHeader.tsx`)
+Minimal header for public gallery pages:
+- Shows "[Name]'s Bird Feed" with Feed/Species tabs
+- No auth UI or edit buttons
+- Includes "Create your own Bird Feed" CTA link
 
 ## UI Components (`ui/`)
 
