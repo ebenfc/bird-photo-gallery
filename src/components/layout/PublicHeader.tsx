@@ -31,30 +31,11 @@ export default function PublicHeader({ username, displayName }: PublicHeaderProp
           <div className="flex items-center gap-3">
             <Link
               href={`/u/${username}`}
-              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+              className="hover:opacity-80 transition-opacity"
             >
-              {/* Bird icon */}
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--moss-400)] to-[var(--forest-500)]
-                flex items-center justify-center shadow-sm">
-                <svg
-                  className="w-5 h-5 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 19.5v-15m0 0l-6.75 6.75M12 4.5l6.75 6.75"
-                  />
-                </svg>
-              </div>
-              <div>
-                <h1 className="font-bold text-[var(--forest-900)] text-lg leading-tight">
-                  {displayName}&apos;s Bird Feed
-                </h1>
-              </div>
+              <h1 className="font-bold text-[var(--forest-900)] text-lg leading-tight">
+                {displayName}&apos;s Bird Feed
+              </h1>
             </Link>
           </div>
 
