@@ -20,10 +20,11 @@ Components are organized by feature area.
 ## Mobile-Responsive Patterns
 
 ### Collapsible Filters
-Mobile views use collapsible filter panels (Feed, Species, Activity pages):
+Mobile views use collapsible filter panels (Feed, Species, Activity, and Public Feed pages):
 - Filters hidden by default on mobile
 - "Filter" button with badge showing active filter count
 - Smooth slide-down animation on expand
+- Desktop filters always visible (no toggle)
 
 ### Floating Action Button (FAB)
 Mobile species page uses circular FAB instead of button in header.
