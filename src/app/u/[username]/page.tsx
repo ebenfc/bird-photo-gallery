@@ -24,6 +24,10 @@ export default function PublicFeedPage() {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [selectedRarities, setSelectedRarities] = useState<Rarity[]>([]);
   const [sortOption, setSortOption] = useState<SortOption>("recent_upload");
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+  // Count active filters for the badge
+  const activeFilterCount = (selectedSpecies ? 1 : 0) + (showFavoritesOnly ? 1 : 0) + selectedRarities.length;
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -100,8 +104,58 @@ export default function PublicFeedPage() {
 
   return (
     <div className="pb-16 md:pb-0">
-      {/* Filters */}
-      <div className="mb-6">
+      {/* Mobile filter toggle button */}
+      <div className="sm:hidden mb-4">
+        <button
+          onClick={() => setShowMobileFilters(!showMobileFilters)}
+          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-semibold
+            rounded-[var(--radius-lg)] border
+            transition-all duration-[var(--timing-fast)] active:scale-95
+            ${showMobileFilters || activeFilterCount > 0
+              ? "bg-gradient-to-b from-[var(--forest-500)] to-[var(--forest-600)] text-white border-[var(--forest-600)]"
+              : "bg-white text-[var(--forest-700)] border-[var(--mist-200)] hover:border-[var(--moss-300)]"
+            }`}
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+          </svg>
+          Filter
+          {activeFilterCount > 0 && (
+            <span className="ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full bg-white/20">
+              {activeFilterCount}
+            </span>
+          )}
+          <svg
+            className={`w-4 h-4 transition-transform duration-200 ${showMobileFilters ? "rotate-180" : ""}`}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Mobile filters - collapsible */}
+      <div className={`sm:hidden overflow-hidden transition-all duration-300 ease-out
+        ${showMobileFilters ? "max-h-96 opacity-100 mb-4" : "max-h-0 opacity-0"}`}>
+        <div className="bg-white/80 backdrop-blur-sm rounded-[var(--radius-xl)] p-4 shadow-[var(--shadow-sm)] border border-[var(--border)]">
+          <GalleryFilters
+            species={speciesList}
+            selectedSpecies={selectedSpecies}
+            onSpeciesChange={setSelectedSpecies}
+            showFavoritesOnly={showFavoritesOnly}
+            onFavoritesChange={setShowFavoritesOnly}
+            selectedRarities={selectedRarities}
+            onRarityChange={setSelectedRarities}
+            sortOption={sortOption}
+            onSortChange={(sort) => setSortOption(sort as SortOption)}
+          />
+        </div>
+      </div>
+
+      {/* Desktop filters - always visible */}
+      <div className="hidden sm:block mb-6">
         <GalleryFilters
           species={speciesList}
           selectedSpecies={selectedSpecies}
