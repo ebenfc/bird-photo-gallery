@@ -1,0 +1,30 @@
+# Dependabot configuration
+# Automatically creates PRs for dependency updates
+# Docs: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates
+
+version: 2
+updates:
+  # Check npm dependencies weekly
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/New_York"
+    # Limit open PRs to avoid overwhelming the repo
+    open-pull-requests-limit: 5
+    # Group minor and patch updates together to reduce PR noise
+    groups:
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    # Prefix for PR titles
+    commit-message:
+      prefix: "deps"
+    # Labels to add to PRs
+    labels:
+      - "dependencies"
