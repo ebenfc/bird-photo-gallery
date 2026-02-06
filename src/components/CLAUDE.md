@@ -26,6 +26,12 @@ Mobile views use collapsible filter panels (Feed, Species, Activity, and Public 
 - Smooth slide-down animation on expand
 - Desktop filters always visible (no toggle)
 
+### SpeciesCard (`species/SpeciesCard.tsx`)
+Shared card component used by both authenticated and public species directories:
+- `linkPrefix` prop controls the link target (default: `"/species"`, public view uses `"/u/{username}/species"`)
+- `onEdit` prop conditionally shows the edit button (authenticated only)
+- `HeardBadge` only shows when Haikubox data is present (excluded from public API)
+
 ### Floating Action Button (FAB)
 Mobile species page uses circular FAB instead of button in header.
 

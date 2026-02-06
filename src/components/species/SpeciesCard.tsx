@@ -10,9 +10,10 @@ interface SpeciesCardProps {
   species: Species;
   onEdit?: () => void;
   index?: number;
+  linkPrefix?: string;
 }
 
-export default function SpeciesCard({ species, onEdit, index = 0 }: SpeciesCardProps) {
+export default function SpeciesCard({ species, onEdit, index = 0, linkPrefix = "/species" }: SpeciesCardProps) {
   // Use cover photo if set, otherwise fall back to latest photo
   const displayPhoto = species.coverPhoto || species.latestPhoto;
   const thumbnailUrl = displayPhoto?.thumbnailUrl || null;
@@ -30,7 +31,7 @@ export default function SpeciesCard({ species, onEdit, index = 0 }: SpeciesCardP
       style={{ animationDelay: `${animationDelay}ms` }}
     >
       {/* Image - clickable to view photos */}
-      <Link href={`/species/${species.id}`}>
+      <Link href={`${linkPrefix}/${species.id}`}>
         <div className="aspect-[4/3] bg-gradient-to-br from-[var(--moss-50)] to-[var(--mist-50)]
           relative cursor-pointer overflow-hidden">
           {thumbnailUrl ? (
@@ -67,7 +68,7 @@ export default function SpeciesCard({ species, onEdit, index = 0 }: SpeciesCardP
       {/* Content */}
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">
-          <Link href={`/species/${species.id}`} className="flex-1 min-w-0 group/link">
+          <Link href={`${linkPrefix}/${species.id}`} className="flex-1 min-w-0 group/link">
             <h3 className="font-bold text-[var(--forest-900)]
               group-hover/link:text-[var(--forest-700)]
               truncate transition-colors">
