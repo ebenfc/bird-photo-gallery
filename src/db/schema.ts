@@ -40,7 +40,9 @@ export const species = pgTable("species", {
     .defaultNow(),
   // Note: deletedAt column for soft deletes requires migration - uncomment after running db:push
   // deletedAt: timestamp("deleted_at", { withTimezone: true }),
-});
+}, (table) => ({
+  userIdIdx: index("species_user_id_idx").on(table.userId),
+}));
 
 // Photos Table
 export const photos = pgTable("photos", {
@@ -60,7 +62,11 @@ export const photos = pgTable("photos", {
   notes: text("notes"),
   // Note: deletedAt column for soft deletes requires migration - uncomment after running db:push
   // deletedAt: timestamp("deleted_at", { withTimezone: true }),
-});
+}, (table) => ({
+  userIdIdx: index("photos_user_id_idx").on(table.userId),
+  speciesIdIdx: index("photos_species_id_idx").on(table.speciesId),
+  uploadDateIdx: index("photos_upload_date_idx").on(table.uploadDate),
+}));
 
 // Relations
 export const speciesRelations = relations(species, ({ many }) => ({
@@ -88,7 +94,10 @@ export const haikuboxDetections = pgTable("haikubox_detections", {
   syncedAt: timestamp("synced_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+}, (table) => ({
+  userIdIdx: index("haikubox_detections_user_id_idx").on(table.userId),
+  userSpeciesYearUnique: unique("haikubox_detections_user_species_year").on(table.userId, table.speciesCommonName, table.dataYear),
+}));
 
 // Haikubox Sync Log Table - Tracks sync history for monitoring
 export const haikuboxSyncLog = pgTable("haikubox_sync_log", {

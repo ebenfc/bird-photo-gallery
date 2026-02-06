@@ -87,42 +87,26 @@ export async function POST(request: NextRequest) {
       const matchedSpeciesId = speciesMap.get(normalized) || null;
       const lastHeard = recentMap.get(normalized) || null;
 
-      // Check if record exists for this species/year/user
-      const existing = await db
-        .select()
-        .from(haikuboxDetections)
-        .where(
-          and(
-            eq(haikuboxDetections.userId, userId),
-            eq(haikuboxDetections.speciesCommonName, birdName),
-            eq(haikuboxDetections.dataYear, currentYear)
-          )
-        )
-        .limit(1);
-
-      const existingRecord = existing[0];
-      if (existingRecord) {
-        // Update existing record
-        await db
-          .update(haikuboxDetections)
-          .set({
-            yearlyCount: detection.count,
-            speciesId: matchedSpeciesId,
-            lastHeardAt: lastHeard,
-            syncedAt: new Date(),
-          })
-          .where(eq(haikuboxDetections.id, existingRecord.id));
-      } else {
-        // Insert new record
-        await db.insert(haikuboxDetections).values({
+      // Upsert detection record (insert or update if already exists for this user/species/year)
+      await db
+        .insert(haikuboxDetections)
+        .values({
           userId,
           speciesCommonName: birdName,
           speciesId: matchedSpeciesId,
           yearlyCount: detection.count,
           lastHeardAt: lastHeard,
           dataYear: currentYear,
+        })
+        .onConflictDoUpdate({
+          target: [haikuboxDetections.userId, haikuboxDetections.speciesCommonName, haikuboxDetections.dataYear],
+          set: {
+            yearlyCount: detection.count,
+            speciesId: matchedSpeciesId,
+            lastHeardAt: lastHeard,
+            syncedAt: new Date(),
+          },
         });
-      }
       processed++;
     }
 

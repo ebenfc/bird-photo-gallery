@@ -6,8 +6,11 @@ import { eq, sql } from "drizzle-orm";
 
 export const runtime = "nodejs";
 
-// GET /api/debug/auth - Debug authentication state
+// GET /api/debug/auth - Debug authentication state (development only)
 export async function GET() {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
   const debug: Record<string, unknown> = {};
 
   try {

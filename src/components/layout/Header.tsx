@@ -101,6 +101,7 @@ export default function Header() {
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-current={isActive ? "page" : undefined}
                   className={`px-4 py-2.5 rounded-[var(--radius-lg)] text-sm font-semibold
                     transition-all duration-[var(--timing-fast)]
                     ${isActive
@@ -145,6 +146,8 @@ export default function Header() {
                 transition-all duration-[var(--timing-fast)]
                 active:scale-95"
               aria-label="Toggle menu"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-menu"
             >
               {mobileMenuOpen ? (
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -162,7 +165,7 @@ export default function Header() {
 
       {/* Mobile Navigation Menu */}
       {mobileMenuOpen && (
-        <div className="sm:hidden border-t border-white/10 animate-fade-in">
+        <div id="mobile-menu" className="sm:hidden border-t border-white/10 animate-fade-in">
           <nav className="px-4 py-3 space-y-1">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
@@ -171,6 +174,7 @@ export default function Header() {
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-current={isActive ? "page" : undefined}
                   className={`flex items-center gap-3 px-4 py-3.5
                     rounded-[var(--radius-lg)] text-base font-semibold
                     transition-all duration-[var(--timing-fast)]

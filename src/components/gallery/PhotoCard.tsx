@@ -21,6 +21,8 @@ export default function PhotoCard({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       className="group relative aspect-square rounded-[var(--radius-xl)] overflow-hidden cursor-pointer
         bg-gradient-to-br from-[var(--moss-50)] to-[var(--mist-50)]
         shadow-[var(--shadow-sm)]
@@ -29,9 +31,12 @@ export default function PhotoCard({
         hover:shadow-[var(--shadow-xl)] hover:ring-2 hover:ring-[var(--moss-300)]
         hover:-translate-y-1
         active:scale-[0.98] active:shadow-[var(--shadow-md)]
+        focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--moss-500)]
         animate-fade-in-up"
       style={{ animationDelay: `${animationDelay}ms` }}
       onClick={onClick}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } }}
+      aria-label={`View ${photo.species?.commonName || "bird"} photo${photo.isFavorite ? " (favorited)" : ""}`}
     >
       <Image
         src={photo.thumbnailUrl}

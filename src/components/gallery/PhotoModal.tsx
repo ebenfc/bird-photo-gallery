@@ -337,6 +337,7 @@ export default function PhotoModal({
             {/* Navigation in fullscreen */}
             {onNavigate && canNavigate.prev && (
               <button
+                aria-label="Previous photo"
                 onClick={(e) => {
                   e.stopPropagation();
                   isNavigatingRef.current = true;
@@ -355,6 +356,7 @@ export default function PhotoModal({
             )}
             {onNavigate && canNavigate.next && (
               <button
+                aria-label="Next photo"
                 onClick={(e) => {
                   e.stopPropagation();
                   isNavigatingRef.current = true;
@@ -436,6 +438,7 @@ export default function PhotoModal({
           {/* Navigation arrows */}
           {onNavigate && canNavigate.prev && (
             <button
+              aria-label="Previous photo"
               onClick={(e) => {
                 e.stopPropagation();
                 isNavigatingRef.current = true;
@@ -456,6 +459,7 @@ export default function PhotoModal({
           )}
           {onNavigate && canNavigate.next && (
             <button
+              aria-label="Next photo"
               onClick={(e) => {
                 e.stopPropagation();
                 isNavigatingRef.current = true;

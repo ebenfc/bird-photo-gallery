@@ -28,6 +28,14 @@ const { userId } = authResult;
 .where(eq(photos.userId, userId))
 ```
 
+## Indexes
+
+Tables with performance indexes:
+- `photos`: `user_id`, `species_id`, `upload_date`
+- `species`: `user_id`
+- `haikuboxDetections`: `user_id`, unique on `(user_id, species_common_name, data_year)`
+- `haikuboxActivityLog`: unique on `(species_common_name, detected_at)`, `(species_common_name, hour_of_day)`, `detected_at`
+
 ## Key Relationships
 
 - `photos.speciesId` → `species.id` (cascade delete)
