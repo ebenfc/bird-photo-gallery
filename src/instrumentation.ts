@@ -27,8 +27,8 @@ export const onRequestError = async (
     renderSource?: string;
   }
 ) => {
-  // Only import Sentry when needed to avoid issues during build
-  if (process.env.NODE_ENV === "production" && process.env.SENTRY_DSN) {
+  // Only capture errors in production
+  if (process.env.NODE_ENV === "production") {
     const Sentry = await import("@sentry/nextjs");
     Sentry.captureException(err, {
       extra: {

@@ -56,3 +56,6 @@ run-migration.mjs
 
 # Keep upload directory structure
 !/public/uploads/.gitkeep
+
+# Sentry Config File
+.env.sentry-build-plugin
