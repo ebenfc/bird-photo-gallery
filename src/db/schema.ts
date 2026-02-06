@@ -170,3 +170,34 @@ export const appSettings = pgTable("app_settings", {
 // App Settings Type exports
 export type AppSetting = typeof appSettings.$inferSelect;
 export type NewAppSetting = typeof appSettings.$inferInsert;
+
+// Current agreement version - bump this number when the agreement text changes
+// to require all users to re-accept
+export const CURRENT_AGREEMENT_VERSION = 1;
+
+// User Agreements Table - Tracks when users accepted which version of the agreement
+export const userAgreements = pgTable("user_agreements", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  agreementVersion: integer("agreement_version").notNull(),
+  acceptedAt: timestamp("accepted_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+}, (table) => ({
+  userVersionUnique: unique().on(table.userId, table.agreementVersion),
+  userIdIdx: index("user_agreements_user_id_idx").on(table.userId),
+}));
+
+// User Agreements Relations
+export const userAgreementsRelations = relations(userAgreements, ({ one }) => ({
+  user: one(users, {
+    fields: [userAgreements.userId],
+    references: [users.id],
+  }),
+}));
+
+// User Agreement Type exports
+export type UserAgreement = typeof userAgreements.$inferSelect;
+export type NewUserAgreement = typeof userAgreements.$inferInsert;
