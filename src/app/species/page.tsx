@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Species, SpeciesResponse, Rarity } from "@/types";
 import SpeciesCard from "@/components/species/SpeciesCard";
 import SpeciesForm from "@/components/species/SpeciesForm";
 import Button from "@/components/ui/Button";
+
+type SpeciesSortOption = "alpha" | "photo_count" | "recent_added" | "recent_taken";
 
 export default function SpeciesDirectory() {
   const [species, setSpecies] = useState<Species[]>([]);
@@ -13,10 +15,11 @@ export default function SpeciesDirectory() {
   const [editingSpecies, setEditingSpecies] = useState<Species | null>(null);
   const [selectedRarities, setSelectedRarities] = useState<Rarity[]>([]);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [sortOption, setSortOption] = useState<SpeciesSortOption>("alpha");
 
-  const fetchSpecies = async () => {
+  const fetchSpecies = useCallback(async () => {
     try {
-      const res = await fetch("/api/species");
+      const res = await fetch(`/api/species?sort=${sortOption}`);
       const data: SpeciesResponse = await res.json();
       setSpecies(data.species || []);
     } catch (err) {
@@ -24,11 +27,11 @@ export default function SpeciesDirectory() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [sortOption]);
 
   useEffect(() => {
     fetchSpecies();
-  }, []);
+  }, [fetchSpecies]);
 
   const handleCreateSpecies = async (data: {
     commonName: string;
@@ -99,8 +102,18 @@ export default function SpeciesDirectory() {
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className="bg-gradient-to-br from-[var(--moss-50)] to-[var(--mist-50)] rounded-2xl aspect-[4/3] animate-pulse"
-            />
+              className="bg-white rounded-[var(--radius-xl)] overflow-hidden shadow-[var(--shadow-sm)] ring-1 ring-[var(--border)]"
+            >
+              <div className="aspect-[4/3] bg-gradient-to-br from-[var(--moss-50)] to-[var(--mist-50)] animate-pulse" />
+              <div className="p-4 space-y-3">
+                <div className="h-5 w-3/4 bg-[var(--mist-200)] rounded animate-pulse" />
+                <div className="h-4 w-1/2 bg-[var(--mist-100)] rounded animate-pulse" />
+                <div className="flex gap-2">
+                  <div className="h-6 w-16 bg-[var(--mist-100)] rounded-full animate-pulse" />
+                  <div className="h-6 w-20 bg-[var(--mist-100)] rounded-full animate-pulse" />
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -141,22 +154,35 @@ export default function SpeciesDirectory() {
             Your complete directory of bird species, from common backyard visitors to rare sightings.
           </p>
         </div>
-        <Button onClick={() => setShowForm(true)}>
-          <svg
-            className="w-4 h-4 mr-2"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+        <div className="flex items-center gap-3">
+          <select
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value as SpeciesSortOption)}
+            className="px-3 py-2 bg-white border border-[var(--border-light)] rounded-[var(--radius-md)]
+              text-sm text-[var(--forest-700)] focus:outline-none focus:ring-2 focus:ring-[var(--moss-500)]"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
-          Add Species
-        </Button>
+            <option value="alpha">A-Z</option>
+            <option value="photo_count">Most Photos</option>
+            <option value="recent_added">Recently Added</option>
+            <option value="recent_taken">Recently Photographed</option>
+          </select>
+          <Button onClick={() => setShowForm(true)}>
+            <svg
+              className="w-4 h-4 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Add Species
+          </Button>
+        </div>
       </div>
 
       {/* Mobile header - compact with filter toggle */}
@@ -203,6 +229,20 @@ export default function SpeciesDirectory() {
       <div className={`sm:hidden overflow-hidden transition-all duration-300 ease-out
         ${showMobileFilters ? "max-h-96 opacity-100 mb-4" : "max-h-0 opacity-0"}`}>
         <div className="bg-white/80 backdrop-blur-sm rounded-[var(--radius-xl)] p-4 shadow-[var(--shadow-sm)] border border-[var(--border)]">
+          {/* Sort dropdown inside mobile filters */}
+          <div className="mb-3">
+            <select
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value as SpeciesSortOption)}
+              className="w-full px-3 py-2 bg-white border border-[var(--border-light)] rounded-[var(--radius-md)]
+                text-sm text-[var(--forest-700)] focus:outline-none focus:ring-2 focus:ring-[var(--moss-500)]"
+            >
+              <option value="alpha">A-Z</option>
+              <option value="photo_count">Most Photos</option>
+              <option value="recent_added">Recently Added</option>
+              <option value="recent_taken">Recently Photographed</option>
+            </select>
+          </div>
           <div className="flex flex-wrap items-center gap-2">
             {rarityOptions.map((opt) => {
               const isSelected = selectedRarities.includes(opt.value);

@@ -2,10 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
 import { Species, Rarity } from "@/types";
-import RarityBadge from "@/components/ui/RarityBadge";
+import SpeciesCard from "@/components/species/SpeciesCard";
 
 type SpeciesSortOption = "alpha" | "photo_count" | "recent_added" | "recent_taken";
 
@@ -17,7 +15,7 @@ export default function PublicSpeciesPage() {
   const [loading, setLoading] = useState(true);
   const [sortOption, setSortOption] = useState<SpeciesSortOption>("alpha");
   const [selectedRarities, setSelectedRarities] = useState<Rarity[]>([]);
-  const [showFilters, setShowFilters] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const fetchSpecies = useCallback(async () => {
     setLoading(true);
@@ -46,194 +44,241 @@ export default function PublicSpeciesPage() {
     ? speciesList.filter((s) => selectedRarities.includes(s.rarity))
     : speciesList;
 
+  // Single-select rarity toggle (matching authenticated view)
   const toggleRarity = (rarity: Rarity) => {
-    setSelectedRarities((prev) =>
-      prev.includes(rarity)
-        ? prev.filter((r) => r !== rarity)
-        : [...prev, rarity]
-    );
+    if (selectedRarities.includes(rarity)) {
+      setSelectedRarities([]);
+    } else {
+      setSelectedRarities([rarity]);
+    }
   };
+
+  const rarityOptions: { value: Rarity; label: string }[] = [
+    { value: "common", label: "Common" },
+    { value: "uncommon", label: "Uncommon" },
+    { value: "rare", label: "Rare" },
+  ];
+
+  const activeFilterCount = selectedRarities.length;
 
   return (
     <div className="pb-16 md:pb-0">
-      {/* Header with filters */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      {/* Desktop header */}
+      <div className="hidden sm:flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-xl font-bold text-[var(--forest-900)]">
-            Species ({filteredSpecies.length})
+          <h2 className="text-2xl font-bold text-[var(--forest-900)] tracking-tight">
+            Species
           </h2>
+          <p className="text-[var(--mist-600)] mt-1">
+            {speciesList.length} species in this gallery
+          </p>
         </div>
+        <select
+          value={sortOption}
+          onChange={(e) => setSortOption(e.target.value as SpeciesSortOption)}
+          className="px-3 py-2 bg-white border border-[var(--border-light)] rounded-[var(--radius-md)]
+            text-sm text-[var(--forest-700)] focus:outline-none focus:ring-2 focus:ring-[var(--moss-500)]"
+        >
+          <option value="alpha">A-Z</option>
+          <option value="photo_count">Most Photos</option>
+          <option value="recent_added">Recently Added</option>
+          <option value="recent_taken">Recently Photographed</option>
+        </select>
+      </div>
 
-        <div className="flex items-center gap-3">
-          {/* Sort dropdown */}
-          <select
-            value={sortOption}
-            onChange={(e) => setSortOption(e.target.value as SpeciesSortOption)}
-            className="px-3 py-2 bg-white border border-[var(--border-light)] rounded-[var(--radius-md)]
-              text-sm text-[var(--forest-700)] focus:outline-none focus:ring-2 focus:ring-[var(--moss-500)]"
-          >
-            <option value="alpha">A-Z</option>
-            <option value="photo_count">Most Photos</option>
-            <option value="recent_added">Recently Added</option>
-            <option value="recent_taken">Recently Photographed</option>
-          </select>
-
-          {/* Filter toggle (mobile) */}
+      {/* Mobile header - compact with filter toggle */}
+      <div className="sm:hidden mb-4">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-2xl font-bold text-[var(--forest-900)] tracking-tight">
+            Species
+          </h2>
           <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="sm:hidden p-2 bg-white border border-[var(--border-light)] rounded-[var(--radius-md)]"
+            onClick={() => setShowMobileFilters(!showMobileFilters)}
+            className={`flex items-center gap-1.5 px-3 py-2 text-sm font-semibold
+              rounded-[var(--radius-lg)] border
+              transition-all duration-[var(--timing-fast)] active:scale-95
+              ${showMobileFilters || activeFilterCount > 0
+                ? "bg-gradient-to-b from-[var(--forest-500)] to-[var(--forest-600)] text-white border-[var(--forest-600)]"
+                : "bg-white text-[var(--forest-700)] border-[var(--mist-200)] hover:border-[var(--moss-300)]"
+              }`}
           >
-            <svg className="w-5 h-5 text-[var(--mist-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+            Filter
+            {activeFilterCount > 0 && (
+              <span className="ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full bg-white/20">
+                {activeFilterCount}
+              </span>
+            )}
+            <svg
+              className={`w-4 h-4 transition-transform duration-200 ${showMobileFilters ? "rotate-180" : ""}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
         </div>
+        <p className="text-xs text-[var(--mist-500)]">
+          {speciesList.length} species in this gallery
+        </p>
       </div>
 
-      {/* Rarity filters */}
-      <div className={`mb-6 ${showFilters ? "block" : "hidden sm:block"}`}>
-        <div className="flex flex-wrap gap-2">
-          {(["common", "uncommon", "rare"] as Rarity[]).map((rarity) => (
+      {/* Mobile filters - collapsible */}
+      <div className={`sm:hidden overflow-hidden transition-all duration-300 ease-out
+        ${showMobileFilters ? "max-h-96 opacity-100 mb-4" : "max-h-0 opacity-0"}`}>
+        <div className="bg-white/80 backdrop-blur-sm rounded-[var(--radius-xl)] p-4 shadow-[var(--shadow-sm)] border border-[var(--border)]">
+          {/* Sort dropdown inside mobile filters */}
+          <div className="mb-3">
+            <select
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value as SpeciesSortOption)}
+              className="w-full px-3 py-2 bg-white border border-[var(--border-light)] rounded-[var(--radius-md)]
+                text-sm text-[var(--forest-700)] focus:outline-none focus:ring-2 focus:ring-[var(--moss-500)]"
+            >
+              <option value="alpha">A-Z</option>
+              <option value="photo_count">Most Photos</option>
+              <option value="recent_added">Recently Added</option>
+              <option value="recent_taken">Recently Photographed</option>
+            </select>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {rarityOptions.map((opt) => {
+              const isSelected = selectedRarities.includes(opt.value);
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => toggleRarity(opt.value)}
+                  className={`px-4 py-2 text-sm font-semibold
+                    rounded-[var(--radius-full)] border-2
+                    shadow-[var(--shadow-xs)]
+                    transition-all duration-[var(--timing-fast)]
+                    active:scale-95
+                    ${isSelected
+                      ? "bg-gradient-to-b from-[var(--moss-500)] to-[var(--moss-600)] text-white border-[var(--moss-600)] shadow-[var(--shadow-moss)]"
+                      : "bg-white text-[var(--mist-500)] border-[var(--mist-200)] hover:border-[var(--moss-300)] hover:text-[var(--forest-700)] hover:shadow-[var(--shadow-sm)]"
+                    }`}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+            {selectedRarities.length > 0 && (
+              <button
+                onClick={() => setSelectedRarities([])}
+                className="px-4 py-2 text-sm font-semibold text-[var(--mist-500)]
+                  hover:text-[var(--forest-700)] hover:bg-[var(--mist-50)]
+                  rounded-[var(--radius-full)]
+                  transition-all duration-[var(--timing-fast)]
+                  active:scale-95"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Rarity Filters - always visible */}
+      <div className="hidden sm:flex flex-wrap items-center gap-2 mb-6">
+        {rarityOptions.map((opt) => {
+          const isSelected = selectedRarities.includes(opt.value);
+          return (
             <button
-              key={rarity}
-              onClick={() => toggleRarity(rarity)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all
-                ${
-                  selectedRarities.includes(rarity)
-                    ? rarity === "common"
-                      ? "bg-green-100 text-green-800 ring-2 ring-green-300"
-                      : rarity === "uncommon"
-                      ? "bg-yellow-100 text-yellow-800 ring-2 ring-yellow-300"
-                      : "bg-purple-100 text-purple-800 ring-2 ring-purple-300"
-                    : "bg-[var(--mist-100)] text-[var(--mist-600)] hover:bg-[var(--mist-200)]"
+              key={opt.value}
+              onClick={() => toggleRarity(opt.value)}
+              className={`px-4 py-2 text-sm font-semibold
+                rounded-[var(--radius-full)] border-2
+                shadow-[var(--shadow-xs)]
+                transition-all duration-[var(--timing-fast)]
+                active:scale-95
+                ${isSelected
+                  ? "bg-gradient-to-b from-[var(--moss-500)] to-[var(--moss-600)] text-white border-[var(--moss-600)] shadow-[var(--shadow-moss)]"
+                  : "bg-white text-[var(--mist-500)] border-[var(--mist-200)] hover:border-[var(--moss-300)] hover:text-[var(--forest-700)] hover:shadow-[var(--shadow-sm)]"
                 }`}
             >
-              {rarity.charAt(0).toUpperCase() + rarity.slice(1)}
+              {opt.label}
             </button>
-          ))}
-          {selectedRarities.length > 0 && (
-            <button
-              onClick={() => setSelectedRarities([])}
-              className="px-3 py-1.5 text-sm text-[var(--mist-500)] hover:text-[var(--forest-700)]"
-            >
-              Clear filters
-            </button>
-          )}
-        </div>
+          );
+        })}
+        {selectedRarities.length > 0 && (
+          <button
+            onClick={() => setSelectedRarities([])}
+            className="px-4 py-2 text-sm font-semibold text-[var(--mist-500)]
+              hover:text-[var(--forest-700)] hover:bg-[var(--mist-50)]
+              rounded-[var(--radius-full)]
+              transition-all duration-[var(--timing-fast)]
+              active:scale-95"
+          >
+            Clear
+          </button>
+        )}
       </div>
 
       {/* Loading state */}
       {loading && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[...Array(6)].map((_, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className="h-32 bg-[var(--mist-100)] rounded-[var(--radius-lg)] animate-pulse"
-            />
+              className="bg-white rounded-[var(--radius-xl)] overflow-hidden shadow-[var(--shadow-sm)] ring-1 ring-[var(--border)]"
+            >
+              <div className="aspect-[4/3] bg-gradient-to-br from-[var(--moss-50)] to-[var(--mist-50)] animate-pulse" />
+              <div className="p-4 space-y-3">
+                <div className="h-5 w-3/4 bg-[var(--mist-200)] rounded animate-pulse" />
+                <div className="h-4 w-1/2 bg-[var(--mist-100)] rounded animate-pulse" />
+                <div className="flex gap-2">
+                  <div className="h-6 w-16 bg-[var(--mist-100)] rounded-full animate-pulse" />
+                  <div className="h-6 w-20 bg-[var(--mist-100)] rounded-full animate-pulse" />
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       )}
 
       {/* Species Grid */}
-      {!loading && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredSpecies.map((species) => (
-            <Link
+      {!loading && filteredSpecies.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredSpecies.map((species, index) => (
+            <SpeciesCard
               key={species.id}
-              href={`/u/${username}/species/${species.id}`}
-              className="group bg-white rounded-[var(--radius-lg)] border border-[var(--border-light)]
-                overflow-hidden hover:shadow-[var(--shadow-md)] hover:border-[var(--moss-300)]
-                transition-all duration-[var(--timing-fast)]"
-            >
-              <div className="flex">
-                {/* Thumbnail */}
-                <div className="relative w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0 bg-[var(--mist-100)]">
-                  {(species.coverPhoto || species.latestPhoto) ? (
-                    <Image
-                      src={species.coverPhoto?.thumbnailUrl || species.latestPhoto?.thumbnailUrl || ""}
-                      alt={species.commonName}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      sizes="112px"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <svg
-                        className="w-8 h-8 text-[var(--mist-300)]"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                    </div>
-                  )}
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 p-3 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <h3 className="font-semibold text-[var(--forest-900)] truncate
-                        group-hover:text-[var(--moss-700)] transition-colors">
-                        {species.commonName}
-                      </h3>
-                      {species.scientificName && (
-                        <p className="text-xs text-[var(--mist-500)] italic truncate">
-                          {species.scientificName}
-                        </p>
-                      )}
-                    </div>
-                    <RarityBadge rarity={species.rarity} size="sm" />
-                  </div>
-
-                  <div className="mt-2 flex items-center gap-3 text-xs text-[var(--mist-500)]">
-                    <span className="flex items-center gap-1">
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      {species.photoCount} {species.photoCount === 1 ? "photo" : "photos"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </Link>
+              species={species}
+              linkPrefix={`/u/${username}/species`}
+              index={index}
+            />
           ))}
         </div>
       )}
 
       {/* Empty State */}
       {!loading && filteredSpecies.length === 0 && (
-        <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--mist-100)]
-            flex items-center justify-center">
-            <svg
-              className="w-8 h-8 text-[var(--mist-400)]"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-              />
+        <div className="text-center py-20 px-4">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-[var(--moss-100)] to-[var(--forest-100)] flex items-center justify-center">
+            <svg className="w-10 h-10 text-[var(--forest-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-[var(--forest-900)] mb-1">
+          <h3 className="text-lg font-medium text-[var(--forest-800)] mb-2">
             No species found
           </h3>
-          <p className="text-[var(--mist-600)]">
+          <p className="text-[var(--mist-500)] mb-6 max-w-sm mx-auto">
             {selectedRarities.length > 0
-              ? "Try adjusting your filters"
+              ? "No species match the selected rarity filter"
               : "This gallery doesn't have any species yet"}
           </p>
+          {selectedRarities.length > 0 && (
+            <button
+              onClick={() => setSelectedRarities([])}
+              className="px-4 py-2 text-sm font-semibold text-[var(--forest-700)]
+                bg-white border border-[var(--mist-200)] rounded-[var(--radius-full)]
+                hover:border-[var(--moss-300)] transition-all"
+            >
+              Clear Filter
+            </button>
+          )}
         </div>
       )}
     </div>
