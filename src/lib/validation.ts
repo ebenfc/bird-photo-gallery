@@ -46,6 +46,7 @@ export const SpeciesUpdateSchema = z.object({
 // Photo update validation
 export const PhotoUpdateSchema = z.object({
   speciesId: z.number().int().positive().optional().nullable(),
+  replacePhotoId: z.number().int().positive().optional().nullable(),
   isFavorite: z.boolean().optional(),
   notes: z.string()
     .max(500, 'Notes must be 500 characters or less')
