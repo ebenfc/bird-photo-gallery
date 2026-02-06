@@ -64,5 +64,11 @@ Minimal header for public gallery pages:
 
 ## UI Components (`ui/`)
 
-Reusable primitives: buttons, inputs, modals, badges, loading states.
+Reusable primitives: buttons, inputs, modals, badges, loading states, toast notifications.
 Use these instead of creating one-off styled elements.
+
+### Toast Notifications (`ui/Toast.tsx`)
+- `ToastProvider` wraps the app in `layout.tsx` (authenticated section only)
+- `useToast()` hook returns `{ showToast(message, type) }`
+- Types: `"success"`, `"error"`, `"info"` (default)
+- Auto-dismisses after 4 seconds; uses `aria-live="polite"` for screen readers
