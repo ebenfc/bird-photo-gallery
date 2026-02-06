@@ -44,6 +44,13 @@ Shared card component used by both authenticated and public species directories:
 - `linkPrefix` prop controls the link target (default: `"/species"`, public view uses `"/u/{username}/species"`)
 - `onEdit` prop conditionally shows the edit button (authenticated only)
 - `HeardBadge` only shows when Haikubox data is present (excluded from public API)
+- Photo count pill shows `"X of 8"` progress or `"Curated"` checkmark badge at limit
+
+### SwapPicker (`species/SwapPicker.tsx`)
+Reusable photo swap picker used in UploadModal and SpeciesAssignModal:
+- 4-column grid of thumbnails; selected photo gets red-tinted overlay with swap icon
+- Shows favorite heart indicator and warning when favorited photo selected
+- Props: `photos`, `selectedPhotoId`, `onSelect`, `loading`
 
 ### Floating Action Button (FAB)
 Mobile species page uses circular FAB instead of button in header.

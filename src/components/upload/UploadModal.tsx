@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import Image from "next/image";
-import { Species, Rarity } from "@/types";
+import { Species, Rarity, Photo, PhotosResponse } from "@/types";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
+import SwapPicker from "@/components/species/SwapPicker";
+import { SPECIES_PHOTO_LIMIT } from "@/config/limits";
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -40,6 +42,11 @@ export default function UploadModal({
   const [individualPhotoData, setIndividualPhotoData] = useState<{ speciesId: string; notes: string }[]>([]);
   const [isDragging, setIsDragging] = useState(false);
 
+  // Swap picker state (for curated species)
+  const [speciesPhotos, setSpeciesPhotos] = useState<Photo[]>([]);
+  const [replacePhotoId, setReplacePhotoId] = useState<number | null>(null);
+  const [loadingSpeciesPhotos, setLoadingSpeciesPhotos] = useState(false);
+
   // New species form state
   const [showNewSpeciesForm, setShowNewSpeciesForm] = useState(false);
   const [newSpeciesName, setNewSpeciesName] = useState("");
@@ -64,6 +71,9 @@ export default function UploadModal({
     setNewScientificName("");
     setNewRarity("common");
     setIsDragging(false);
+    setSpeciesPhotos([]);
+    setReplacePhotoId(null);
+    setLoadingSpeciesPhotos(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -198,11 +208,58 @@ export default function UploadModal({
     }
   };
 
+  // --- Curated species logic ---
+  const activeSpeciesId = sameSpeciesForAll
+    ? selectedSpeciesId
+    : (individualPhotoData[currentPhotoIndex]?.speciesId || "");
+  const activeSpecies = activeSpeciesId
+    ? species.find((s) => s.id === parseInt(activeSpeciesId))
+    : null;
+  const isSpeciesAtLimit =
+    activeSpecies && (activeSpecies.photoCount || 0) >= SPECIES_PHOTO_LIMIT;
+
+  // Batch limit message: when "same for all" and species can't fit all photos
+  const batchLimitMessage = (() => {
+    if (!sameSpeciesForAll || selectedFiles.length <= 1 || !activeSpecies) return null;
+    const count = activeSpecies.photoCount || 0;
+    const room = SPECIES_PHOTO_LIMIT - count;
+    if (room >= selectedFiles.length) return null;
+    if (room <= 0) {
+      return `Your ${activeSpecies.commonName} gallery is curated to ${SPECIES_PHOTO_LIMIT} photos. Switch to "Assign individually" to swap photos one at a time.`;
+    }
+    return `Your ${activeSpecies.commonName} gallery has room for ${room} more photo${room !== 1 ? "s" : ""}. Switch to "Assign individually" to choose which photos go here.`;
+  })();
+
+  // Fetch photos for the selected species when it's at the limit
+  useEffect(() => {
+    if (!isSpeciesAtLimit || !activeSpeciesId) {
+      setSpeciesPhotos([]);
+      setReplacePhotoId(null);
+      return;
+    }
+    let cancelled = false;
+    setLoadingSpeciesPhotos(true);
+    fetch(`/api/photos?speciesId=${activeSpeciesId}&limit=${SPECIES_PHOTO_LIMIT}`)
+      .then((res) => res.json())
+      .then((data: PhotosResponse) => {
+        if (!cancelled) {
+          setSpeciesPhotos(data.photos);
+          setReplacePhotoId(null);
+        }
+      })
+      .catch((err) => console.error("Failed to fetch species photos:", err))
+      .finally(() => {
+        if (!cancelled) setLoadingSpeciesPhotos(false);
+      });
+    return () => { cancelled = true; };
+  }, [activeSpeciesId, isSpeciesAtLimit]);
+
   const uploadSingleFile = (
     file: File,
     speciesId: string,
     fileNotes: string,
-    index: number
+    index: number,
+    fileReplacePhotoId?: number | null
   ): Promise<number> => {
     return new Promise((resolve, reject) => {
       const formData = new FormData();
@@ -212,6 +269,9 @@ export default function UploadModal({
       }
       if (fileNotes.trim()) {
         formData.append("notes", fileNotes.trim());
+      }
+      if (fileReplacePhotoId) {
+        formData.append("replacePhotoId", fileReplacePhotoId.toString());
       }
 
       const xhr = new XMLHttpRequest();
@@ -272,7 +332,9 @@ export default function UploadModal({
           fileNotes = individualPhotoData[index].notes;
         }
 
-        return uploadSingleFile(file, fileSpeciesId, fileNotes, index);
+        // Pass replacePhotoId for single upload or same-for-all mode
+        const fileReplaceId = sameSpeciesForAll ? replacePhotoId : null;
+        return uploadSingleFile(file, fileSpeciesId, fileNotes, index, fileReplaceId);
       });
 
       const photoIds = await Promise.all(uploadPromises);
@@ -543,11 +605,17 @@ export default function UploadModal({
                     <option value="">Select species...</option>
                     {species
                       .sort((a, b) => a.commonName.localeCompare(b.commonName))
-                      .map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.commonName}
-                        </option>
-                      ))}
+                      .map((s) => {
+                        const count = s.photoCount || 0;
+                        const label = count >= SPECIES_PHOTO_LIMIT
+                          ? `${s.commonName} (Curated)`
+                          : `${s.commonName} (${count} of ${SPECIES_PHOTO_LIMIT})`;
+                        return (
+                          <option key={s.id} value={s.id}>
+                            {label}
+                          </option>
+                        );
+                      })}
                   </Select>
                   <button
                     onClick={() => setShowNewSpeciesForm(true)}
@@ -626,6 +694,39 @@ export default function UploadModal({
                   >
                     {creatingSpecies ? "Creating..." : "Create & Select"}
                   </Button>
+                </div>
+              )}
+
+              {/* Batch limit message */}
+              {batchLimitMessage && (
+                <div className="p-4 bg-[var(--moss-50)] border border-[var(--moss-200)] rounded-xl animate-fade-in">
+                  <p className="text-sm text-[var(--forest-600)]">{batchLimitMessage}</p>
+                </div>
+              )}
+
+              {/* Swap picker for curated species (single photo or same-for-all with 1 photo) */}
+              {isSpeciesAtLimit && !batchLimitMessage && (
+                <div className="space-y-3 animate-fade-in">
+                  <div className="p-4 bg-[var(--moss-50)] border border-[var(--moss-200)] rounded-xl">
+                    <h3 className="font-semibold text-[var(--forest-800)] mb-1">
+                      Upgrade your gallery
+                    </h3>
+                    <p className="text-sm text-[var(--forest-600)]">
+                      Your {activeSpecies?.commonName} gallery is curated to {SPECIES_PHOTO_LIMIT} photos.
+                      Choose one to replace with this new shot.
+                    </p>
+                  </div>
+                  {loadingSpeciesPhotos ? (
+                    <div className="flex items-center justify-center py-6">
+                      <div className="w-6 h-6 border-2 border-[var(--moss-300)] border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  ) : (
+                    <SwapPicker
+                      photos={speciesPhotos}
+                      selectedPhotoId={replacePhotoId}
+                      onSelect={setReplacePhotoId}
+                    />
+                  )}
                 </div>
               )}
 
@@ -778,8 +879,16 @@ export default function UploadModal({
               <Button variant="secondary" onClick={handleClose} className="flex-1">
                 Cancel
               </Button>
-              <Button onClick={handleUpload} className="flex-1">
-                {selectedFiles.length === 1 ? "Upload Photo" : `Upload ${selectedFiles.length} Photos`}
+              <Button
+                onClick={handleUpload}
+                className="flex-1"
+                disabled={!!(isSpeciesAtLimit && !replacePhotoId) || !!batchLimitMessage}
+              >
+                {isSpeciesAtLimit && replacePhotoId
+                  ? "Swap & Upload"
+                  : selectedFiles.length === 1
+                    ? "Upload Photo"
+                    : `Upload ${selectedFiles.length} Photos`}
               </Button>
             </div>
           </div>
