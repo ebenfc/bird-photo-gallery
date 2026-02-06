@@ -58,9 +58,10 @@ Key behaviors:
 
 ### Public Header (`layout/PublicHeader.tsx`)
 Minimal header for public gallery pages:
-- Shows "[Name]'s Bird Feed" with Feed/Species tabs
+- Shows "[Name]'s Bird Feed" title with Feed/Species tabs
+- No logo icon (intentionally removed pending brand finalization)
 - No auth UI or edit buttons
-- Includes "Create your own Bird Feed" CTA link
+- Includes "Create your own Bird Feed" CTA link (desktop only)
 
 ## UI Components (`ui/`)
 
