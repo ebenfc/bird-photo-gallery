@@ -17,6 +17,19 @@ Components are organized by feature area.
 | `ui/` | Reusable UI primitives |
 | `upload/` | Photo upload components |
 
+## Activity Components (`activity/`)
+
+| Component | Purpose |
+|-----------|---------|
+| `HaikuboxSetupCard` | Inline setup flow for connecting a Haikubox (two paths: own device or public device) |
+| `SyncStatusBar` | Shows last sync time + "Sync Now" button with cooldown |
+| `SpeciesActivityList` | Filterable/sortable list of detected species |
+| `SpeciesActivityRow` | Individual species row with detection count, rarity, photo status |
+| `SpeciesActivityFilters` | Rarity and photo status filter controls |
+| `UnassignedSpeciesModal` | Modal for creating a species entry from an unmatched detection |
+| `ActiveNowWidget` | Real-time activity display |
+| `ActivityTimeline` | Timeline view of detections |
+
 ## Mobile-Responsive Patterns
 
 ### Collapsible Filters
