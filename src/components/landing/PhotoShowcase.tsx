@@ -1,10 +1,10 @@
 import Image from "next/image";
 
 const showcasePhotos = [
-  { src: "/landing/showcase-1.jpg", alt: "Blue Jay perched on a branch" },
-  { src: "/landing/showcase-2.jpg", alt: "American Robin standing in the grass" },
-  { src: "/landing/showcase-4.jpg", alt: "Black-capped Chickadee on a branch" },
-  { src: "/landing/showcase-6.jpg", alt: "American Goldfinch on wildflowers" },
+  { src: "/landing/showcase-1.jpg", alt: "Blue Jay perched on a branch", commonName: "Blue Jay", scientificName: "Cyanocitta cristata" },
+  { src: "/landing/showcase-2.jpg", alt: "American Robin standing in the grass", commonName: "American Robin", scientificName: "Turdus migratorius" },
+  { src: "/landing/showcase-4.jpg", alt: "Black-capped Chickadee on a branch", commonName: "Black-capped Chickadee", scientificName: "Poecile atricapillus" },
+  { src: "/landing/showcase-6.jpg", alt: "American Goldfinch on wildflowers", commonName: "American Goldfinch", scientificName: "Spinus tristis" },
 ];
 
 export default function PhotoShowcase() {
@@ -36,8 +36,19 @@ export default function PhotoShowcase() {
                 className="object-cover transition-transform duration-[var(--timing-normal)] group-hover:scale-105"
                 sizes="(max-width: 768px) 50vw, 33vw"
               />
-              {/* Hover overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-[var(--timing-fast)]" />
+              {/* Species name overlay - matches logged-in gallery hover */}
+              <div className="absolute bottom-0 left-0 right-0
+                bg-gradient-to-t from-[var(--forest-950)]/90 via-[var(--forest-950)]/60 to-transparent
+                p-3.5 pt-12
+                opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0
+                transition-all duration-[var(--timing-normal)]">
+                <p className="text-white text-sm font-semibold truncate drop-shadow-sm">
+                  {photo.commonName}
+                </p>
+                <p className="text-white/75 text-xs italic truncate">
+                  {photo.scientificName}
+                </p>
+              </div>
             </div>
           ))}
         </div>
