@@ -71,9 +71,22 @@ export default function Header() {
           {/* Logo - with proper touch target for mobile */}
           <Link
             href="/"
-            className="flex items-center -ml-2 pl-2 pr-3 py-2
+            className="flex items-center gap-2 -ml-2 pl-2 pr-3 py-2
               active:opacity-80 transition-opacity"
           >
+            <svg
+              className="w-6 h-6 sm:w-7 sm:h-7 text-white"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              {/* Bird silhouette */}
+              <ellipse cx="11" cy="14" rx="6.5" ry="4.5" />
+              <circle cx="17" cy="8" r="3" />
+              <path d="M5 12C7 8.5 11 7 14.5 8L12.5 10C10 11 7.5 12 5 12Z" />
+              <path d="M5.5 12L2 10.5L3 14Z" />
+              <path d="M19.5 7L22.5 8L19.5 9.5Z" />
+            </svg>
             <span className="font-bold text-base sm:text-lg text-white tracking-tight">
               Bird Feed
             </span>

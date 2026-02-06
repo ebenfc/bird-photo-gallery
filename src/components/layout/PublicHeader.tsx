@@ -31,8 +31,21 @@ export default function PublicHeader({ username, displayName }: PublicHeaderProp
           <div className="flex items-center gap-3">
             <Link
               href={`/u/${username}`}
-              className="hover:opacity-80 transition-opacity"
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
+              <svg
+                className="w-6 h-6 text-[var(--forest-900)]"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                {/* Bird silhouette */}
+                <ellipse cx="11" cy="14" rx="6.5" ry="4.5" />
+                <circle cx="17" cy="8" r="3" />
+                <path d="M5 12C7 8.5 11 7 14.5 8L12.5 10C10 11 7.5 12 5 12Z" />
+                <path d="M5.5 12L2 10.5L3 14Z" />
+                <path d="M19.5 7L22.5 8L19.5 9.5Z" />
+              </svg>
               <h1 className="font-bold text-[var(--forest-900)] text-lg leading-tight">
                 {displayName}&apos;s Bird Feed
               </h1>
