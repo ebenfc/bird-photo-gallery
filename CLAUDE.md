@@ -472,11 +472,13 @@ export const runtime = "nodejs";
 - Branch protection: Recommended for `main` branch
 
 **Sentry** (error monitoring):
-- SDK: `@sentry/nextjs` integrated
+- SDK: `@sentry/nextjs` v10+ with official wizard setup
+- DSN hardcoded in config files (not env vars)
+- Config files: `sentry.server.config.ts`, `sentry.edge.config.ts`, `src/instrumentation-client.ts`
 - Error boundaries: `src/app/error.tsx`, `src/app/global-error.tsx`
-- Logger integration: `src/lib/logger.ts` auto-captures errors
+- Session replay: enabled (10% normal, 100% on error)
 - Tunnel route: `/monitoring` (bypasses ad blockers)
-- Environment variables needed: `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`
+- Source maps: uploaded via `withSentryConfig` in `next.config.ts`
 
 **Vercel** (preview deployments):
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - ✅ Configured

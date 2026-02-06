@@ -61,6 +61,20 @@ type Rarity = "common" | "uncommon" | "rare";
 
 Rarity is user-defined, not auto-assigned. Unassigned Haikubox detections show as "Unassigned" in the UI.
 
+## Query Patterns
+
+**Batch loading** — Use `inArray()` and `selectDistinctOn()` for batch queries instead of N+1 `Promise.all()` loops:
+
+```typescript
+// Good: Drizzle query builder with selectDistinctOn
+const latestPhotos = await db
+  .selectDistinctOn([photos.speciesId], { ... })
+  .from(photos)
+  .where(inArray(photos.speciesId, speciesIds));
+```
+
+**Avoid raw SQL for array parameters** — `db.execute(sql`...`)` with `ANY(${array})` fails silently due to array serialization issues. Always use Drizzle's `inArray()` instead.
+
 ## Commands
 
 ```bash
