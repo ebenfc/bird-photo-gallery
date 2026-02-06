@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import AgreementText from "./AgreementText";
 
 export default function AgreementForm() {
-  const router = useRouter();
   const [accepting, setAccepting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
@@ -29,9 +27,10 @@ export default function AgreementForm() {
       });
 
       if (res.ok) {
-        // Refresh the root layout so it re-checks agreement status
-        router.refresh();
-        router.push("/");
+        // Full page navigation to cleanly reload the layout,
+        // which will now see the agreement as accepted
+        window.location.href = "/";
+        return;
       } else {
         const data = await res.json();
         setError(data.error || "Failed to accept agreement. Please try again.");
