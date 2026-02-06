@@ -4,8 +4,8 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { Species, Rarity, Photo, PhotosResponse } from "@/types";
 import Button from "@/components/ui/Button";
-import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
+import SpeciesForm from "@/components/species/SpeciesForm";
 import SwapPicker from "@/components/species/SwapPicker";
 import { SPECIES_PHOTO_LIMIT } from "@/config/limits";
 
@@ -49,10 +49,6 @@ export default function UploadModal({
 
   // New species form state
   const [showNewSpeciesForm, setShowNewSpeciesForm] = useState(false);
-  const [newSpeciesName, setNewSpeciesName] = useState("");
-  const [newScientificName, setNewScientificName] = useState("");
-  const [newRarity, setNewRarity] = useState<Rarity>("common");
-  const [creatingSpecies, setCreatingSpecies] = useState(false);
 
   const resetModal = useCallback(() => {
     setStep("select");
@@ -67,9 +63,6 @@ export default function UploadModal({
     setCurrentPhotoIndex(0);
     setIndividualPhotoData([]);
     setShowNewSpeciesForm(false);
-    setNewSpeciesName("");
-    setNewScientificName("");
-    setNewRarity("common");
     setIsDragging(false);
     setSpeciesPhotos([]);
     setReplacePhotoId(null);
@@ -169,43 +162,31 @@ export default function UploadModal({
     }
   }, []);
 
-  const handleCreateSpecies = async () => {
-    if (!newSpeciesName.trim()) {
-      setError("Species name is required");
-      return;
+  const handleCreateSpecies = async (data: {
+    commonName: string;
+    scientificName?: string;
+    description?: string;
+    rarity?: Rarity;
+  }) => {
+    const res = await fetch("/api/species", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        commonName: data.commonName,
+        scientificName: data.scientificName,
+        description: data.description,
+        rarity: data.rarity || "common",
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to create species");
     }
 
-    setCreatingSpecies(true);
-    setError(null);
-
-    try {
-      const res = await fetch("/api/species", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          commonName: newSpeciesName.trim(),
-          scientificName: newScientificName.trim() || undefined,
-          rarity: newRarity,
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to create species");
-      }
-
-      const { species: newSpecies } = await res.json();
-      onSpeciesCreated();
-      setSelectedSpeciesId(newSpecies.id.toString());
-      setShowNewSpeciesForm(false);
-      setNewSpeciesName("");
-      setNewScientificName("");
-      setNewRarity("common");
-    } catch (err) {
-      console.error("Failed to create species:", err);
-      setError("Failed to create species. Please try again.");
-    } finally {
-      setCreatingSpecies(false);
-    }
+    const { species: newSpecies } = await res.json();
+    onSpeciesCreated();
+    setSelectedSpeciesId(newSpecies.id.toString());
+    // SpeciesForm calls onClose() after onSubmit resolves, which closes the form
   };
 
   // --- Curated species logic ---
@@ -232,26 +213,33 @@ export default function UploadModal({
 
   // Fetch photos for the selected species when it's at the limit
   useEffect(() => {
-    if (!isSpeciesAtLimit || !activeSpeciesId) {
-      setSpeciesPhotos([]);
-      setReplacePhotoId(null);
-      return;
-    }
+    if (!isSpeciesAtLimit || !activeSpeciesId) return;
+
     let cancelled = false;
-    setLoadingSpeciesPhotos(true);
-    fetch(`/api/photos?speciesId=${activeSpeciesId}&limit=${SPECIES_PHOTO_LIMIT}`)
-      .then((res) => res.json())
-      .then((data: PhotosResponse) => {
+
+    const fetchPhotos = async () => {
+      setLoadingSpeciesPhotos(true);
+      try {
+        const res = await fetch(`/api/photos?speciesId=${activeSpeciesId}&limit=${SPECIES_PHOTO_LIMIT}`);
+        const data: PhotosResponse = await res.json();
         if (!cancelled) {
           setSpeciesPhotos(data.photos);
           setReplacePhotoId(null);
         }
-      })
-      .catch((err) => console.error("Failed to fetch species photos:", err))
-      .finally(() => {
+      } catch (err) {
+        console.error("Failed to fetch species photos:", err);
+      } finally {
         if (!cancelled) setLoadingSpeciesPhotos(false);
-      });
-    return () => { cancelled = true; };
+      }
+    };
+
+    fetchPhotos();
+
+    return () => {
+      cancelled = true;
+      setSpeciesPhotos([]);
+      setReplacePhotoId(null);
+    };
   }, [activeSpeciesId, isSpeciesAtLimit]);
 
   const uploadSingleFile = (
@@ -578,124 +566,68 @@ export default function UploadModal({
               )}
 
               {/* Species Selection */}
-              {!showNewSpeciesForm ? (
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-[var(--forest-700)]">
-                    Species {selectedFiles.length > 1 && sameSpeciesForAll ? "(applies to all)" : ""} (optional)
-                  </label>
-                  <Select
-                    value={sameSpeciesForAll ? selectedSpeciesId : (individualPhotoData[currentPhotoIndex]?.speciesId || "")}
-                    onChange={(e) => {
-                      if (sameSpeciesForAll) {
-                        setSelectedSpeciesId(e.target.value);
-                      } else {
-                        setIndividualPhotoData((prev) => {
-                          const updated = [...prev];
-                          const existing = updated[currentPhotoIndex] ?? { speciesId: "", notes: "" };
-                          updated[currentPhotoIndex] = {
-                            ...existing,
-                            speciesId: e.target.value,
-                            notes: updated[currentPhotoIndex]?.notes ?? "",
-                          };
-                          return updated;
-                        });
-                      }
-                    }}
-                  >
-                    <option value="">Select species...</option>
-                    {species
-                      .sort((a, b) => a.commonName.localeCompare(b.commonName))
-                      .map((s) => {
-                        const count = s.photoCount || 0;
-                        const label = count >= SPECIES_PHOTO_LIMIT
-                          ? `${s.commonName} (Curated)`
-                          : `${s.commonName} (${count} of ${SPECIES_PHOTO_LIMIT})`;
-                        return (
-                          <option key={s.id} value={s.id}>
-                            {label}
-                          </option>
-                        );
-                      })}
-                  </Select>
-                  <button
-                    onClick={() => setShowNewSpeciesForm(true)}
-                    className="w-full flex items-center justify-center gap-2 p-3
-                      text-sm font-semibold text-[var(--forest-700)]
-                      border-2 border-dashed border-[var(--moss-200)]
-                      rounded-[var(--radius-lg)]
-                      hover:border-[var(--moss-400)] hover:bg-[var(--moss-50)]
-                      transition-all duration-[var(--timing-fast)]
-                      active:scale-[0.98]"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    Create New Species
-                  </button>
-                </div>
-              ) : (
-                /* New Species Form */
-                <div className="space-y-3 p-4 bg-gradient-to-br from-[var(--moss-50)] to-[var(--mist-50)]
-                  rounded-[var(--radius-xl)] border border-[var(--moss-200)]
-                  shadow-[var(--shadow-sm)] animate-fade-in">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-[var(--forest-700)]">New Species</span>
-                    <button
-                      onClick={() => setShowNewSpeciesForm(false)}
-                      className="text-xs font-medium text-[var(--mist-500)] hover:text-[var(--mist-700)]
-                        transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                  <Input
-                    placeholder="Common name (e.g., Bald Eagle)"
-                    value={newSpeciesName}
-                    onChange={(e) => setNewSpeciesName(e.target.value)}
-                  />
-                  <Input
-                    placeholder="Scientific name (optional)"
-                    value={newScientificName}
-                    onChange={(e) => setNewScientificName(e.target.value)}
-                  />
-                  <div>
-                    <label className="block text-xs font-semibold text-[var(--mist-600)] mb-2">
-                      Rarity
-                    </label>
-                    <div className="flex gap-2">
-                      {(["common", "uncommon", "rare"] as const).map((r) => (
-                        <button
-                          key={r}
-                          type="button"
-                          onClick={() => setNewRarity(r)}
-                          className={`flex-1 px-3 py-2 rounded-[var(--radius-md)] border-2
-                            text-xs font-semibold
-                            transition-all duration-[var(--timing-fast)]
-                            active:scale-95
-                            ${newRarity === r
-                              ? r === "common"
-                                ? "bg-[var(--mist-100)] border-[var(--mist-300)] text-[var(--mist-700)]"
-                                : r === "uncommon"
-                                ? "bg-gradient-to-br from-[var(--amber-50)] to-[var(--amber-100)] border-[var(--amber-300)] text-[var(--amber-700)]"
-                                : "bg-gradient-to-br from-red-50 to-rose-100 border-red-300 text-red-700"
-                              : "bg-white border-[var(--mist-200)] text-[var(--mist-500)] hover:border-[var(--mist-300)]"
-                            }`}
-                        >
-                          {r.charAt(0).toUpperCase() + r.slice(1)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <Button
-                    onClick={handleCreateSpecies}
-                    disabled={!newSpeciesName.trim() || creatingSpecies}
-                    size="sm"
-                    className="w-full"
-                  >
-                    {creatingSpecies ? "Creating..." : "Create & Select"}
-                  </Button>
-                </div>
-              )}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-[var(--forest-700)]">
+                  Species {selectedFiles.length > 1 && sameSpeciesForAll ? "(applies to all)" : ""} (optional)
+                </label>
+                <Select
+                  value={sameSpeciesForAll ? selectedSpeciesId : (individualPhotoData[currentPhotoIndex]?.speciesId || "")}
+                  onChange={(e) => {
+                    if (sameSpeciesForAll) {
+                      setSelectedSpeciesId(e.target.value);
+                    } else {
+                      setIndividualPhotoData((prev) => {
+                        const updated = [...prev];
+                        const existing = updated[currentPhotoIndex] ?? { speciesId: "", notes: "" };
+                        updated[currentPhotoIndex] = {
+                          ...existing,
+                          speciesId: e.target.value,
+                          notes: updated[currentPhotoIndex]?.notes ?? "",
+                        };
+                        return updated;
+                      });
+                    }
+                  }}
+                >
+                  <option value="">Select species...</option>
+                  {species
+                    .sort((a, b) => a.commonName.localeCompare(b.commonName))
+                    .map((s) => {
+                      const count = s.photoCount || 0;
+                      const label = count >= SPECIES_PHOTO_LIMIT
+                        ? `${s.commonName} (Curated)`
+                        : `${s.commonName} (${count} of ${SPECIES_PHOTO_LIMIT})`;
+                      return (
+                        <option key={s.id} value={s.id}>
+                          {label}
+                        </option>
+                      );
+                    })}
+                </Select>
+                <button
+                  onClick={() => setShowNewSpeciesForm(true)}
+                  className="w-full flex items-center justify-center gap-2 p-3
+                    text-sm font-semibold text-[var(--forest-700)]
+                    border-2 border-dashed border-[var(--moss-200)]
+                    rounded-[var(--radius-lg)]
+                    hover:border-[var(--moss-400)] hover:bg-[var(--moss-50)]
+                    transition-all duration-[var(--timing-fast)]
+                    active:scale-[0.98]"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Create New Species
+                </button>
+              </div>
+
+              {/* New Species Form (opens as modal on top) */}
+              <SpeciesForm
+                isOpen={showNewSpeciesForm}
+                onClose={() => setShowNewSpeciesForm(false)}
+                onSubmit={handleCreateSpecies}
+                title="New Species"
+              />
 
               {/* Batch limit message */}
               {batchLimitMessage && (

@@ -209,7 +209,7 @@ export default function SpeciesAssignModal({
         clearTimeout(lookupTimeoutRef.current);
       }
     };
-  }, [newCommonName]);
+  }, [newCommonName, newScientificName, scientificNameAutoFilled]);
 
   // Reset auto-fill flag when scientific name is manually cleared
   const handleScientificNameChange = (value: string) => {

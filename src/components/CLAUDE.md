@@ -52,6 +52,13 @@ Reusable photo swap picker used in UploadModal and SpeciesAssignModal:
 - Shows favorite heart indicator and warning when favorited photo selected
 - Props: `photos`, `selectedPhotoId`, `onSelect`, `loading`
 
+### SpeciesForm (`species/SpeciesForm.tsx`)
+Reusable modal for creating/editing species. Used on **both** the Species page and inside the Upload modal.
+- Has Wikipedia "Look up" button that auto-populates scientific name + description
+- Debounced auto-lookup (800ms) when typing a new species name
+- `onSubmit` receives `{commonName, scientificName?, description?, rarity?}` — the **parent** handles the API call
+- After `onSubmit` resolves, SpeciesForm calls `onClose()` automatically
+
 ### Floating Action Button (FAB)
 Mobile species page uses circular FAB instead of button in header.
 
