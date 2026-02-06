@@ -56,15 +56,28 @@ export default function HeroSection() {
 
           {/* Hero image */}
           <div className="relative animate-fade-in-up" style={{ animationDelay: "150ms" }}>
-            <div className="relative aspect-[4/3] rounded-[var(--radius-2xl)] overflow-hidden shadow-[var(--shadow-2xl)] ring-1 ring-black/5">
+            <div className="group relative aspect-[4/3] rounded-[var(--radius-2xl)] overflow-hidden shadow-[var(--shadow-2xl)] ring-1 ring-black/5">
               <Image
                 src="/landing/hero-bird.jpg"
                 alt="Northern Cardinal perched on a holly branch"
                 fill
-                className="object-cover"
+                className="object-cover transition-transform duration-[var(--timing-normal)] group-hover:scale-105"
                 priority
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
+              {/* Species name overlay - matches gallery hover */}
+              <div className="absolute bottom-0 left-0 right-0
+                bg-gradient-to-t from-[var(--forest-950)]/90 via-[var(--forest-950)]/60 to-transparent
+                p-3.5 pt-12
+                opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0
+                transition-all duration-[var(--timing-normal)]">
+                <p className="text-white text-sm font-semibold truncate drop-shadow-sm">
+                  Northern Cardinal
+                </p>
+                <p className="text-white/75 text-xs italic truncate">
+                  Cardinalis cardinalis
+                </p>
+              </div>
             </div>
             {/* Decorative elements */}
             <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-gradient-to-br from-[var(--moss-200)] to-[var(--forest-200)] rounded-full blur-2xl opacity-60" />
