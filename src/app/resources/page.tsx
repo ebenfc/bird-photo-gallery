@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import PublicGallerySettings from "@/components/settings/PublicGallerySettings";
 
 export default function ResourcesPage() {
@@ -13,6 +14,8 @@ export default function ResourcesPage() {
     message: string;
   } | null>(null);
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  const [showSyncOption, setShowSyncOption] = useState(false);
 
   // Load existing serial on mount
   useEffect(() => {
@@ -75,8 +78,7 @@ export default function ResourcesPage() {
 
       if (data.success) {
         setSaveStatus("✓ Settings saved successfully!");
-        // Clear save status after 3 seconds
-        setTimeout(() => setSaveStatus(null), 3000);
+        setShowSyncOption(true);
       } else {
         setSaveStatus(data.error || "Failed to save");
       }
@@ -84,6 +86,24 @@ export default function ResourcesPage() {
       setSaveStatus("Network error. Please try again.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSyncNow = async () => {
+    setSyncing(true);
+    try {
+      const res = await fetch("/api/haikubox/sync", { method: "POST" });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSaveStatus(`✓ Synced! Found ${data.processed} species.`);
+      } else {
+        setSaveStatus("Sync failed — your data will sync automatically within 24 hours.");
+      }
+    } catch {
+      setSaveStatus("Sync failed — your data will sync automatically within 24 hours.");
+    } finally {
+      setSyncing(false);
+      setShowSyncOption(false);
     }
   };
 
@@ -233,7 +253,11 @@ export default function ResourcesPage() {
                             transition-all duration-[var(--timing-fast)]"
                         />
                         <p className="text-xs text-[var(--mist-600)] mt-1.5">
-                          Find your serial number on your Haikubox device or in the Haikubox app
+                          Find your serial number on your Haikubox device or in the Haikubox app.{" "}
+                          You can also set up your Haikubox from the{" "}
+                          <Link href="/activity" className="text-[var(--moss-600)] hover:text-[var(--moss-700)] underline">
+                            Activity page
+                          </Link>.
                         </p>
                       </div>
 
@@ -275,6 +299,24 @@ export default function ResourcesPage() {
                       {saveStatus && (
                         <div className="p-3 rounded-[var(--radius-md)] bg-blue-50 text-blue-800 border border-blue-200 text-sm font-medium">
                           {saveStatus}
+                          {showSyncOption && (
+                            <div className="mt-2 flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                              <button
+                                onClick={handleSyncNow}
+                                disabled={syncing}
+                                className="text-[var(--moss-700)] underline hover:text-[var(--moss-800)] font-semibold disabled:opacity-50"
+                              >
+                                {syncing ? "Syncing..." : "Sync data now"}
+                              </button>
+                              <span className="text-[var(--mist-400)]">or</span>
+                              <Link
+                                href="/activity"
+                                className="text-[var(--moss-700)] underline hover:text-[var(--moss-800)] font-semibold"
+                              >
+                                Go to Activity page
+                              </Link>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
