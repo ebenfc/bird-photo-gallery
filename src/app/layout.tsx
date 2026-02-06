@@ -8,6 +8,7 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import { hasAcceptedCurrentAgreement } from "@/lib/agreement";
 import AgreementForm from "@/components/agreement/AgreementForm";
+import { ToastProvider } from "@/components/ui/Toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -54,12 +55,18 @@ export default async function RootLayout({
           {isAuthenticated ? (
             hasAcceptedAgreement ? (
               // User is authenticated and has accepted the agreement — show full app
-              <>
+              <ToastProvider>
+                <a
+                  href="#main-content"
+                  className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded"
+                >
+                  Skip to content
+                </a>
                 <Header />
-                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+                <main id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
                   {children}
                 </main>
-              </>
+              </ToastProvider>
             ) : (
               // User is authenticated but hasn't accepted — show agreement gate
               <div className="pnw-texture min-h-screen flex items-center justify-center py-12 px-4">

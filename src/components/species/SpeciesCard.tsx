@@ -95,6 +95,7 @@ export default function SpeciesCard({ species, onEdit, index = 0, linkPrefix = "
                 transition-all duration-[var(--timing-fast)]
                 active:scale-90"
               title="Edit species"
+              aria-label="Edit species"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}

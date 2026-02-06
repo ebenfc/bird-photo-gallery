@@ -9,10 +9,12 @@ import GalleryFilters from "@/components/gallery/GalleryFilters";
 import SpeciesAssignModal from "@/components/species/SpeciesAssignModal";
 import UploadModal from "@/components/upload/UploadModal";
 import Button from "@/components/ui/Button";
+import { useToast } from "@/components/ui/Toast";
 
 function GalleryContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { showToast } = useToast();
 
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [species, setSpecies] = useState<Species[]>([]);
@@ -69,10 +71,11 @@ function GalleryContent() {
     } catch (err) {
       console.error(err);
       setPhotos([]);
+      showToast("Failed to load photos. Please try again.", "error");
     } finally {
       setLoading(false);
     }
-  }, [selectedSpecies, showFavoritesOnly, selectedRarities, sortOption]);
+  }, [selectedSpecies, showFavoritesOnly, selectedRarities, sortOption, showToast]);
 
   // Handle sort change
   const handleSortChange = (newSort: string) => {
@@ -90,6 +93,7 @@ function GalleryContent() {
     } catch (err) {
       console.error(err);
       setSpecies([]);
+      showToast("Failed to load species filter.", "error");
     }
   };
 

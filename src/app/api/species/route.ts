@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { species, photos, haikuboxDetections, Rarity } from "@/db/schema";
-import { eq, sql, desc, asc, and } from "drizzle-orm";
+import { eq, sql, desc, asc, and, inArray } from "drizzle-orm";
 import { getThumbnailUrl } from "@/lib/storage";
 import { checkAndGetRateLimitResponse, RATE_LIMITS, addRateLimitHeaders } from "@/lib/rateLimit";
 import { logError } from "@/lib/logger";
@@ -69,78 +69,81 @@ export async function GET(request: NextRequest) {
       .groupBy(species.id)
       .orderBy(...getOrderBy());
 
-    // Get cover photo, latest photo thumbnail, and Haikubox detection data for each species
+    // Batch-load cover photos, latest photos, and Haikubox detections (avoids N+1 queries)
     const currentYear = new Date().getFullYear();
-    const speciesWithExtras = await Promise.all(
-      result.map(async (s) => {
-        // Get cover photo if set
-        let coverPhoto = null;
-        if (s.coverPhotoId) {
-          const cover = await db
-            .select({
-              id: photos.id,
-              thumbnailFilename: photos.thumbnailFilename,
-            })
-            .from(photos)
-            .where(and(
-              eq(photos.id, s.coverPhotoId),
-              eq(photos.userId, userId)
-            ))
-            .limit(1);
-          if (cover[0]) {
-            coverPhoto = {
-              id: cover[0].id,
-              thumbnailUrl: getThumbnailUrl(cover[0].thumbnailFilename),
-            };
-          }
-        }
+    const speciesIds = result.map((s) => s.id);
 
-        // Get latest photo as fallback
-        const latestPhotoResult = await db
-          .select({
-            id: photos.id,
-            thumbnailFilename: photos.thumbnailFilename,
-          })
-          .from(photos)
-          .where(and(
-            eq(photos.speciesId, s.id),
-            eq(photos.userId, userId)
-          ))
-          .orderBy(desc(photos.uploadDate))
-          .limit(1);
+    // 1. Batch fetch cover photos for species that have one set
+    const coverPhotoIds = result
+      .map((s) => s.coverPhotoId)
+      .filter((id): id is number => id !== null);
 
-        const latestPhoto = latestPhotoResult[0]
-          ? {
-              id: latestPhotoResult[0].id,
-              thumbnailUrl: getThumbnailUrl(latestPhotoResult[0].thumbnailFilename),
-            }
-          : null;
+    const coverPhotosMap = new Map<number, { id: number; thumbnailUrl: string }>();
+    if (coverPhotoIds.length > 0) {
+      const coverPhotos = await db
+        .select({ id: photos.id, thumbnailFilename: photos.thumbnailFilename })
+        .from(photos)
+        .where(and(inArray(photos.id, coverPhotoIds), eq(photos.userId, userId)));
+      for (const cp of coverPhotos) {
+        coverPhotosMap.set(cp.id, { id: cp.id, thumbnailUrl: getThumbnailUrl(cp.thumbnailFilename) });
+      }
+    }
 
-        // Get Haikubox detection data for this species
-        const detection = await db
-          .select({
-            yearlyCount: haikuboxDetections.yearlyCount,
-            lastHeardAt: haikuboxDetections.lastHeardAt,
-          })
-          .from(haikuboxDetections)
-          .where(
-            and(
-              eq(haikuboxDetections.speciesId, s.id),
-              eq(haikuboxDetections.userId, userId),
-              eq(haikuboxDetections.dataYear, currentYear)
-            )
+    // 2. Batch fetch latest photo per species (one query using DISTINCT ON)
+    const latestPhotosMap = new Map<number, { id: number; thumbnailUrl: string }>();
+    if (speciesIds.length > 0) {
+      const latestPhotos = await db.execute(sql`
+        SELECT DISTINCT ON (species_id) id, species_id, thumbnail_filename
+        FROM photos
+        WHERE species_id = ANY(${speciesIds}) AND user_id = ${userId}
+        ORDER BY species_id, upload_date DESC
+      `);
+      for (const row of latestPhotos.rows) {
+        const r = row as { id: number; species_id: number; thumbnail_filename: string };
+        latestPhotosMap.set(r.species_id, {
+          id: r.id,
+          thumbnailUrl: getThumbnailUrl(r.thumbnail_filename),
+        });
+      }
+    }
+
+    // 3. Batch fetch Haikubox detections for all species this year
+    const detectionsMap = new Map<number, { yearlyCount: number; lastHeardAt: Date | null }>();
+    if (speciesIds.length > 0) {
+      const detections = await db
+        .select({
+          speciesId: haikuboxDetections.speciesId,
+          yearlyCount: haikuboxDetections.yearlyCount,
+          lastHeardAt: haikuboxDetections.lastHeardAt,
+        })
+        .from(haikuboxDetections)
+        .where(
+          and(
+            inArray(haikuboxDetections.speciesId, speciesIds),
+            eq(haikuboxDetections.userId, userId),
+            eq(haikuboxDetections.dataYear, currentYear)
           )
-          .limit(1);
+        );
+      for (const d of detections) {
+        if (d.speciesId !== null) {
+          detectionsMap.set(d.speciesId, { yearlyCount: d.yearlyCount, lastHeardAt: d.lastHeardAt });
+        }
+      }
+    }
 
-        return {
-          ...s,
-          coverPhoto,
-          latestPhoto,
-          haikuboxYearlyCount: detection[0]?.yearlyCount || null,
-          haikuboxLastHeard: detection[0]?.lastHeardAt || null,
-        };
-      })
-    );
+    // Combine results in memory
+    const speciesWithExtras = result.map((s) => {
+      const coverPhoto = s.coverPhotoId ? (coverPhotosMap.get(s.coverPhotoId) || null) : null;
+      const latestPhoto = latestPhotosMap.get(s.id) || null;
+      const detection = detectionsMap.get(s.id);
+      return {
+        ...s,
+        coverPhoto,
+        latestPhoto,
+        haikuboxYearlyCount: detection?.yearlyCount || null,
+        haikuboxLastHeard: detection?.lastHeardAt || null,
+      };
+    });
 
     const response = NextResponse.json({ species: speciesWithExtras });
     return addRateLimitHeaders(response, rateCheck.result, RATE_LIMITS.read);

@@ -5,6 +5,7 @@ import { eq, and } from "drizzle-orm";
 import {
   getThumbnailUrl,
   getOriginalUrl,
+  deletePhotoFiles,
 } from "@/lib/storage";
 import { checkAndGetRateLimitResponse, RATE_LIMITS, addRateLimitHeaders } from "@/lib/rateLimit";
 import { logError } from "@/lib/logger";
@@ -222,6 +223,17 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     if (result.length === 0) {
       return NextResponse.json({ error: "Photo not found" }, { status: 404 });
+    }
+
+    // Clean up storage files (best-effort — don't fail the request if this errors)
+    const deleted = result[0];
+    if (deleted) {
+      deletePhotoFiles(deleted.filename, deleted.thumbnailFilename).catch((err) =>
+        logError("Failed to clean up storage files", err instanceof Error ? err : new Error(String(err)), {
+          route: "/api/photos/[id]",
+          method: "DELETE",
+        })
+      );
     }
 
     const response = NextResponse.json({ success: true, message: "Photo deleted" });

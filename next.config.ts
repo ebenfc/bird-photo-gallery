@@ -45,6 +45,10 @@ const nextConfig: NextConfig = {
           {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=(), payment=()'
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' https://*.supabase.co data: blob:; connect-src 'self' https://*.clerk.accounts.dev https://*.supabase.co https://va.vercel-scripts.com; font-src 'self'; frame-src 'self' https://*.clerk.accounts.dev;"
           }
         ]
       },

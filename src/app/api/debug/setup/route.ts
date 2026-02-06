@@ -5,8 +5,11 @@ import { sql } from "drizzle-orm";
 
 export const runtime = "nodejs";
 
-// POST /api/debug/setup - Create users table and insert current user
+// POST /api/debug/setup - Create users table and insert current user (development only)
 export async function POST() {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
   try {
     // Get Clerk auth state
     const authResult = await auth();
