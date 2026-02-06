@@ -59,7 +59,7 @@ export default function HeroSection() {
             <div className="relative aspect-[4/3] rounded-[var(--radius-2xl)] overflow-hidden shadow-[var(--shadow-2xl)] ring-1 ring-black/5">
               <Image
                 src="/landing/hero-bird.jpg"
-                alt="Beautiful bird photography"
+                alt="Northern Cardinal perched on a holly branch"
                 fill
                 className="object-cover"
                 priority

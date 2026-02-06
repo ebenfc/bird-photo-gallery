@@ -1,10 +1,10 @@
 import Image from "next/image";
 
 const showcasePhotos = [
-  { src: "/landing/showcase-1.jpg", alt: "Colorful bird perched on branch" },
-  { src: "/landing/showcase-2.jpg", alt: "Bird in flight" },
-  { src: "/landing/showcase-4.jpg", alt: "Hummingbird hovering" },
-  { src: "/landing/showcase-6.jpg", alt: "Songbird singing" },
+  { src: "/landing/showcase-1.jpg", alt: "Blue Jay perched on a branch" },
+  { src: "/landing/showcase-2.jpg", alt: "American Robin standing in the grass" },
+  { src: "/landing/showcase-4.jpg", alt: "Black-capped Chickadee on a branch" },
+  { src: "/landing/showcase-6.jpg", alt: "American Goldfinch on wildflowers" },
 ];
 
 export default function PhotoShowcase() {
