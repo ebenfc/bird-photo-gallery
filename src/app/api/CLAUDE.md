@@ -42,6 +42,7 @@ This is required for database access (pg driver) and sharp (image processing).
 | `/upload`, `/upload/browser` | Photo upload (API and browser) |
 | `/haikubox/*` | Haikubox device integration |
 | `/settings` | App settings (Haikubox serial) |
+| `/agreement` | User agreement acceptance |
 | `/settings/profile` | User profile (username, public gallery toggle) |
 | `/public/gallery/[username]/*` | Public gallery read-only APIs |
 | `/activity/*` | Species activity data |

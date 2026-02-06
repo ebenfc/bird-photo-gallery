@@ -7,6 +7,7 @@ Components are organized by feature area.
 | Folder | Purpose |
 |--------|---------|
 | `activity/` | Haikubox activity page components |
+| `agreement/` | User agreement gate (form + text content) |
 | `gallery/` | Photo gallery and modal components |
 | `landing/` | Public landing page for unauthenticated users |
 | `layout/` | Header, navigation, PublicHeader |

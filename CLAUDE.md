@@ -569,3 +569,52 @@ Select "No, add the constraint without truncating the table" when prompted.
 
 - `src/app/u/CLAUDE.md` - Public profile routes documentation
 - `src/app/api/public/CLAUDE.md` - Public API endpoints documentation
+
+---
+
+## User Agreement Feature (PR #62 - February 2026)
+
+**All users must accept a versioned user agreement before accessing the app.**
+
+### How It Works
+
+1. Root layout (`src/app/layout.tsx`) checks if the authenticated user has accepted the current agreement version
+2. If **not accepted** → renders the agreement form instead of the normal app (no Header, no navigation)
+3. If **accepted** → renders normal app with Header and content
+4. Unauthenticated users (landing page, sign-in, sign-up) are unaffected
+
+### Versioning
+
+- `CURRENT_AGREEMENT_VERSION` constant in `src/db/schema.ts` (currently `1`)
+- To require re-acceptance after updating terms: bump this number
+- Old acceptance records stay in DB as audit trail
+- All users (including existing) get prompted when version changes
+
+### Agreement Content
+
+5 sections covering:
+1. Photo Ownership & Rights
+2. Data & Privacy
+3. Acceptable Use
+4. Service & Availability
+5. Changes to Agreement
+
+Content lives in `src/components/agreement/AgreementText.tsx` — edit this file to update the agreement text.
+
+### Database
+
+New `user_agreements` table:
+- `userId` (FK → users.id, cascade delete)
+- `agreementVersion` (integer)
+- `acceptedAt` (timestamp)
+- Unique constraint on `(userId, agreementVersion)`
+
+### Key Files
+
+- `src/db/schema.ts` — `userAgreements` table + `CURRENT_AGREEMENT_VERSION`
+- `src/lib/agreement.ts` — `hasAcceptedCurrentAgreement()`, `acceptAgreement()`
+- `src/app/api/agreement/route.ts` — POST endpoint to record acceptance
+- `src/components/agreement/AgreementText.tsx` — Agreement content
+- `src/components/agreement/AgreementForm.tsx` — Scrollable form with accept button
+- `src/app/agreement/page.tsx` — Standalone agreement page route
+- `src/app/layout.tsx` — Agreement gate logic (3-way: accepted / not accepted / unauthenticated)
