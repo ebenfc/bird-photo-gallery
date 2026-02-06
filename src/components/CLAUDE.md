@@ -45,6 +45,13 @@ Shared card component used by both authenticated and public species directories:
 - `onEdit` prop conditionally shows the edit button (authenticated only)
 - `HeardBadge` only shows when Haikubox data is present (excluded from public API)
 
+### SpeciesForm (`species/SpeciesForm.tsx`)
+Reusable modal for creating/editing species. Used on **both** the Species page and inside the Upload modal.
+- Has Wikipedia "Look up" button that auto-populates scientific name + description
+- Debounced auto-lookup (800ms) when typing a new species name
+- `onSubmit` receives `{commonName, scientificName?, description?, rarity?}` — the **parent** handles the API call
+- After `onSubmit` resolves, SpeciesForm calls `onClose()` automatically
+
 ### Floating Action Button (FAB)
 Mobile species page uses circular FAB instead of button in header.
 
