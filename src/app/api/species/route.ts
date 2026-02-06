@@ -92,18 +92,26 @@ export async function GET(request: NextRequest) {
     // 2. Batch fetch latest photo per species (one query using DISTINCT ON)
     const latestPhotosMap = new Map<number, { id: number; thumbnailUrl: string }>();
     if (speciesIds.length > 0) {
-      const latestPhotos = await db.execute(sql`
-        SELECT DISTINCT ON (species_id) id, species_id, thumbnail_filename
-        FROM photos
-        WHERE species_id = ANY(${speciesIds}) AND user_id = ${userId}
-        ORDER BY species_id, upload_date DESC
-      `);
-      for (const row of latestPhotos.rows) {
-        const r = row as { id: number; species_id: number; thumbnail_filename: string };
-        latestPhotosMap.set(r.species_id, {
-          id: r.id,
-          thumbnailUrl: getThumbnailUrl(r.thumbnail_filename),
-        });
+      const latestPhotos = await db
+        .selectDistinctOn([photos.speciesId], {
+          id: photos.id,
+          speciesId: photos.speciesId,
+          thumbnailFilename: photos.thumbnailFilename,
+        })
+        .from(photos)
+        .where(and(
+          inArray(photos.speciesId, speciesIds),
+          eq(photos.userId, userId)
+        ))
+        .orderBy(photos.speciesId, desc(photos.uploadDate));
+
+      for (const row of latestPhotos) {
+        if (row.speciesId !== null) {
+          latestPhotosMap.set(row.speciesId, {
+            id: row.id,
+            thumbnailUrl: getThumbnailUrl(row.thumbnailFilename),
+          });
+        }
       }
     }
 

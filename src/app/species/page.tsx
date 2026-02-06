@@ -16,14 +16,22 @@ export default function SpeciesDirectory() {
   const [selectedRarities, setSelectedRarities] = useState<Rarity[]>([]);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [sortOption, setSortOption] = useState<SpeciesSortOption>("alpha");
+  const [error, setError] = useState<string | null>(null);
 
   const fetchSpecies = useCallback(async () => {
     try {
+      setError(null);
       const res = await fetch(`/api/species?sort=${sortOption}`);
+      if (!res.ok) {
+        console.error("Species API error:", res.status);
+        setError("Failed to load species. Please try refreshing the page.");
+        return;
+      }
       const data: SpeciesResponse = await res.json();
       setSpecies(data.species || []);
     } catch (err) {
       console.error("Failed to fetch species:", err);
+      setError("Failed to load species. Please try refreshing the page.");
     } finally {
       setLoading(false);
     }
@@ -316,7 +324,20 @@ export default function SpeciesDirectory() {
         )}
       </div>
 
-      {species.length === 0 ? (
+      {error ? (
+        <div className="text-center py-20 px-4">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-red-50 flex items-center justify-center">
+            <svg className="w-10 h-10 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-[var(--forest-800)] mb-2">
+            Something went wrong
+          </h3>
+          <p className="text-[var(--mist-500)] mb-6 max-w-sm mx-auto">{error}</p>
+          <Button onClick={() => fetchSpecies()}>Try Again</Button>
+        </div>
+      ) : species.length === 0 ? (
         <div className="text-center py-20 px-4">
           <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-[var(--moss-100)] to-[var(--forest-100)] flex items-center justify-center">
             <svg className="w-10 h-10 text-[var(--forest-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
