@@ -59,6 +59,15 @@ This is required for database access (pg driver) and sharp (image processing).
 
 Serial number is stored in `app_settings` table (key: `haikubox_serial`).
 
+## Photo Limits
+
+Per-species photo limit (8) and unassigned inbox cap (24) defined in `src/config/limits.ts`.
+Server-side helpers in `src/lib/photoLimits.ts`: `checkSpeciesLimit()`, `checkUnassignedLimit()`.
+
+- Upload and PATCH routes return **409** with `code: "SPECIES_AT_LIMIT"` or `"UNASSIGNED_AT_LIMIT"` when at capacity
+- Photo swaps use `db.transaction()` for atomic delete-old + insert/update-new
+- `replacePhotoId` parameter triggers swap; clears `coverPhotoId` if swapped photo was cover
+
 ## Debug Endpoints
 
 Available in all environments:

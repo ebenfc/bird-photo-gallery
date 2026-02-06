@@ -56,7 +56,7 @@ export async function storeActivityLogs(
         })
         .onConflictDoNothing();
       stored++;
-    } catch (error) {
+    } catch {
       // Skip any insert errors silently (likely constraint violations)
       console.debug("Skipped activity log:", detection.species, detection.timestamp);
     }

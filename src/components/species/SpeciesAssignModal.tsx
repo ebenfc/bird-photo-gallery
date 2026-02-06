@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
-import { Photo, Species, Rarity, HaikuboxDetection } from "@/types";
+import { Photo, Species, Rarity, HaikuboxDetection, PhotosResponse } from "@/types";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import RarityBadge from "@/components/ui/RarityBadge";
 import HeardBadge from "@/components/ui/HeardBadge";
+import SwapPicker from "@/components/species/SwapPicker";
+import { SPECIES_PHOTO_LIMIT } from "@/config/limits";
 
 interface BirdLookupResult {
   commonName: string;
@@ -99,7 +101,7 @@ interface SpeciesAssignModalProps {
   species: Species[];
   isOpen: boolean;
   onClose: () => void;
-  onAssign: (photoId: number, speciesId: number) => Promise<void>;
+  onAssign: (photoId: number, speciesId: number, replacePhotoId?: number) => Promise<void>;
   onCreateAndAssign: (
     photoId: number,
     speciesData: { commonName: string; scientificName?: string; rarity?: Rarity }
@@ -127,6 +129,12 @@ export default function SpeciesAssignModal({
   const [newRarity, setNewRarity] = useState<Rarity>("common");
   const [loading, setLoading] = useState(false);
   const [recentDetections, setRecentDetections] = useState<HaikuboxDetection[]>([]);
+
+  // Swap picker state (shown when a curated species is selected)
+  const [swapSpeciesId, setSwapSpeciesId] = useState<number | null>(null);
+  const [swapPhotos, setSwapPhotos] = useState<Photo[]>([]);
+  const [swapSelectedId, setSwapSelectedId] = useState<number | null>(null);
+  const [loadingSwapPhotos, setLoadingSwapPhotos] = useState(false);
 
   // Name validation and lookup states
   const [nameValidation, setNameValidation] = useState<NameValidation>({ isValid: true, suggestions: [], errors: [] });
@@ -201,7 +209,7 @@ export default function SpeciesAssignModal({
         clearTimeout(lookupTimeoutRef.current);
       }
     };
-  }, [newCommonName]);
+  }, [newCommonName, newScientificName, scientificNameAutoFilled]);
 
   // Reset auto-fill flag when scientific name is manually cleared
   const handleScientificNameChange = (value: string) => {
@@ -239,11 +247,46 @@ export default function SpeciesAssignModal({
   );
 
   const handleAssign = async (speciesId: number) => {
+    // Check if species is at the photo limit
+    const targetSpecies = species.find(s => s.id === speciesId);
+    if (targetSpecies && (targetSpecies.photoCount || 0) >= SPECIES_PHOTO_LIMIT) {
+      // Show swap picker instead of assigning directly
+      setSwapSpeciesId(speciesId);
+      setSwapSelectedId(null);
+      setLoadingSwapPhotos(true);
+      try {
+        const res = await fetch(`/api/photos?speciesId=${speciesId}&limit=${SPECIES_PHOTO_LIMIT}`);
+        if (res.ok) {
+          const data: PhotosResponse = await res.json();
+          setSwapPhotos(data.photos);
+        }
+      } catch (err) {
+        console.error("Failed to fetch species photos:", err);
+      } finally {
+        setLoadingSwapPhotos(false);
+      }
+      return;
+    }
+
+    // Not at limit — assign directly
     setLoading(true);
     try {
       await onAssign(photo.id, speciesId);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSwapConfirm = async () => {
+    if (!swapSpeciesId || !swapSelectedId) return;
+    setLoading(true);
+    try {
+      await onAssign(photo.id, swapSpeciesId, swapSelectedId);
+    } finally {
+      setLoading(false);
+      setSwapSpeciesId(null);
+      setSwapPhotos([]);
+      setSwapSelectedId(null);
     }
   };
 
@@ -317,7 +360,58 @@ export default function SpeciesAssignModal({
 
         {/* Species selection */}
         <div className="flex-1 overflow-auto p-4">
-          {!showNewForm ? (
+          {swapSpeciesId ? (
+            /* Swap picker view */
+            <div className="space-y-4">
+              {/* Back button */}
+              <button
+                onClick={() => {
+                  setSwapSpeciesId(null);
+                  setSwapPhotos([]);
+                  setSwapSelectedId(null);
+                }}
+                className="flex items-center gap-1.5 text-sm text-[var(--mist-500)] hover:text-[var(--forest-700)] transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to species
+              </button>
+
+              {/* Upgrade card */}
+              <div className="p-4 bg-[var(--moss-50)] border border-[var(--moss-200)] rounded-xl">
+                <h3 className="font-semibold text-[var(--forest-800)] mb-1">
+                  Upgrade your gallery
+                </h3>
+                <p className="text-sm text-[var(--forest-600)]">
+                  Your {species.find(s => s.id === swapSpeciesId)?.commonName} gallery is curated to {SPECIES_PHOTO_LIMIT} photos. Pick one to swap out for this new shot.
+                </p>
+              </div>
+
+              {/* Swap picker */}
+              {loadingSwapPhotos ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="w-6 h-6 border-2 border-[var(--moss-300)] border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : (
+                <SwapPicker
+                  photos={swapPhotos}
+                  selectedPhotoId={swapSelectedId}
+                  onSelect={setSwapSelectedId}
+                  loading={loading}
+                />
+              )}
+
+              {/* Confirm button */}
+              <Button
+                onClick={handleSwapConfirm}
+                disabled={!swapSelectedId || loading}
+                className="w-full"
+              >
+                {loading ? "Swapping..." : "Swap Photo"}
+              </Button>
+            </div>
+          ) : !showNewForm ? (
             <>
               {/* Search */}
               <div className="mb-4">
@@ -456,8 +550,21 @@ export default function SpeciesAssignModal({
                           </p>
                         )}
                       </div>
-                      <span className="text-sm text-[var(--mist-400)] px-2 py-1 bg-[var(--mist-50)] rounded-full">
-                        {s.photoCount || 0}
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1 flex-shrink-0 ${
+                        (s.photoCount || 0) >= SPECIES_PHOTO_LIMIT
+                          ? "bg-[var(--moss-100)] text-[var(--moss-700)]"
+                          : "bg-[var(--mist-50)] text-[var(--mist-400)]"
+                      }`}>
+                        {(s.photoCount || 0) >= SPECIES_PHOTO_LIMIT ? (
+                          <>
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                            </svg>
+                            Curated
+                          </>
+                        ) : (
+                          `${s.photoCount || 0} of ${SPECIES_PHOTO_LIMIT}`
+                        )}
                       </span>
                     </button>
                   ))
@@ -613,7 +720,7 @@ export default function SpeciesAssignModal({
         </div>
 
         {/* Footer with skip */}
-        {showSkip && onSkip && !showNewForm && (
+        {showSkip && onSkip && !showNewForm && !swapSpeciesId && (
           <div className="p-4 border-t border-[var(--mist-100)] bg-[var(--mist-50)]">
             <button
               onClick={onSkip}

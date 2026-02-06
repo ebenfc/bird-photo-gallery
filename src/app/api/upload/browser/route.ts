@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processUploadedImage } from "@/lib/image";
 import { db } from "@/db";
-import { photos } from "@/db/schema";
+import { photos, species } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 import { checkAndGetRateLimitResponse, RATE_LIMITS, addRateLimitHeaders } from "@/lib/rateLimit";
 import { logError } from "@/lib/logger";
 import { validateImageFile, validateImageMagicBytesFromBuffer } from "@/lib/fileValidation";
 import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
+import { deletePhotoFiles } from "@/lib/storage";
+import { checkSpeciesLimit, checkUnassignedLimit } from "@/lib/photoLimits";
+import { SPECIES_PHOTO_LIMIT, UNASSIGNED_PHOTO_LIMIT } from "@/config/limits";
 
 // Ensure this route runs on Node.js runtime (not Edge)
 export const runtime = "nodejs";
@@ -30,6 +34,7 @@ export async function POST(request: NextRequest) {
     const photo = formData.get("photo") as File | null;
     const speciesId = formData.get("speciesId") as string | null;
     const notes = formData.get("notes") as string | null;
+    const replacePhotoIdStr = formData.get("replacePhotoId") as string | null;
 
     if (!photo) {
       return NextResponse.json({ error: "No photo provided" }, { status: 400 });
@@ -52,13 +57,56 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate speciesId if provided
+    // Parse and validate speciesId
+    let parsedSpeciesId: number | null = null;
     if (speciesId) {
-      const parsedId = parseInt(speciesId, 10);
-      if (isNaN(parsedId) || parsedId <= 0) {
+      parsedSpeciesId = parseInt(speciesId, 10);
+      if (isNaN(parsedSpeciesId) || parsedSpeciesId <= 0) {
         return NextResponse.json(
           { error: "Invalid species ID" },
           { status: 400 }
+        );
+      }
+    }
+
+    // Parse and validate replacePhotoId
+    let parsedReplaceId: number | null = null;
+    if (replacePhotoIdStr) {
+      parsedReplaceId = parseInt(replacePhotoIdStr, 10);
+      if (isNaN(parsedReplaceId) || parsedReplaceId <= 0) {
+        return NextResponse.json(
+          { error: "Invalid replace photo ID" },
+          { status: 400 }
+        );
+      }
+    }
+
+    // --- Photo limit checks ---
+    if (parsedSpeciesId) {
+      const limitCheck = await checkSpeciesLimit(parsedSpeciesId, userId, parsedReplaceId);
+      if (!limitCheck.allowed) {
+        return NextResponse.json(
+          {
+            error: limitCheck.error,
+            code: "SPECIES_AT_LIMIT",
+            currentCount: limitCheck.currentCount,
+            limit: SPECIES_PHOTO_LIMIT,
+          },
+          { status: 409 }
+        );
+      }
+    } else {
+      // Uploading without species — check unassigned inbox limit
+      const unassignedCheck = await checkUnassignedLimit(userId);
+      if (!unassignedCheck.allowed) {
+        return NextResponse.json(
+          {
+            error: unassignedCheck.error,
+            code: "UNASSIGNED_AT_LIMIT",
+            currentCount: unassignedCheck.currentCount,
+            limit: UNASSIGNED_PHOTO_LIMIT,
+          },
+          { status: 409 }
         );
       }
     }
@@ -96,27 +144,110 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to process image" }, { status: 500 });
     }
 
-    // Save to database
+    // Save to database (with optional swap via transaction)
     let insertedPhoto;
-    try {
-      const result = await db
-        .insert(photos)
-        .values({
-          userId,
-          speciesId: speciesId ? parseInt(speciesId) : null,
-          filename: processed.filename,
-          thumbnailFilename: processed.thumbnailFilename,
-          originalDateTaken: processed.originalDateTaken,
-          notes: notes?.trim() || null,
-        })
-        .returning();
+    let oldPhotoFiles: { filename: string; thumbnailFilename: string } | null = null;
 
-      insertedPhoto = result[0];
+    try {
+      if (parsedReplaceId && parsedSpeciesId) {
+        // Atomic swap: delete old photo + insert new one in a transaction
+        const txResult = await db.transaction(async (tx) => {
+          // Verify the replacement photo belongs to this user and species
+          const [oldPhoto] = await tx
+            .select({
+              id: photos.id,
+              filename: photos.filename,
+              thumbnailFilename: photos.thumbnailFilename,
+              speciesId: photos.speciesId,
+            })
+            .from(photos)
+            .where(and(eq(photos.id, parsedReplaceId), eq(photos.userId, userId)));
+
+          if (!oldPhoto) {
+            throw new Error("REPLACE_PHOTO_NOT_FOUND");
+          }
+          if (oldPhoto.speciesId !== parsedSpeciesId) {
+            throw new Error("REPLACE_PHOTO_WRONG_SPECIES");
+          }
+
+          // Clear coverPhotoId if the replaced photo was the cover
+          const [speciesRecord] = await tx
+            .select({ coverPhotoId: species.coverPhotoId })
+            .from(species)
+            .where(eq(species.id, parsedSpeciesId));
+
+          if (speciesRecord?.coverPhotoId === parsedReplaceId) {
+            await tx
+              .update(species)
+              .set({ coverPhotoId: null })
+              .where(eq(species.id, parsedSpeciesId));
+          }
+
+          // Delete the old photo from DB
+          await tx.delete(photos).where(eq(photos.id, parsedReplaceId));
+
+          // Insert the new photo
+          const [newPhoto] = await tx
+            .insert(photos)
+            .values({
+              userId,
+              speciesId: parsedSpeciesId,
+              filename: processed.filename,
+              thumbnailFilename: processed.thumbnailFilename,
+              originalDateTaken: processed.originalDateTaken,
+              notes: notes?.trim() || null,
+            })
+            .returning();
+
+          return {
+            newPhoto,
+            oldFilename: oldPhoto.filename,
+            oldThumbFilename: oldPhoto.thumbnailFilename,
+          };
+        });
+
+        insertedPhoto = txResult.newPhoto;
+        oldPhotoFiles = {
+          filename: txResult.oldFilename,
+          thumbnailFilename: txResult.oldThumbFilename,
+        };
+      } else {
+        // Normal insert (no swap needed)
+        const result = await db
+          .insert(photos)
+          .values({
+            userId,
+            speciesId: parsedSpeciesId,
+            filename: processed.filename,
+            thumbnailFilename: processed.thumbnailFilename,
+            originalDateTaken: processed.originalDateTaken,
+            notes: notes?.trim() || null,
+          })
+          .returning();
+
+        insertedPhoto = result[0];
+      }
+
       if (!insertedPhoto) {
         throw new Error("Failed to insert photo record - no result returned");
       }
     } catch (dbError) {
-      logError("Failed to save photo to database", dbError instanceof Error ? dbError : new Error(String(dbError)), {
+      const errorMsg = dbError instanceof Error ? dbError.message : String(dbError);
+
+      if (errorMsg === "REPLACE_PHOTO_NOT_FOUND") {
+        return NextResponse.json(
+          { error: "The photo you selected to swap out was not found" },
+          { status: 400 }
+        );
+      }
+      if (errorMsg === "REPLACE_PHOTO_WRONG_SPECIES") {
+        return NextResponse.json(
+          { error: "The photo you selected to swap out belongs to a different species" },
+          { status: 400 }
+        );
+      }
+
+      logError("Failed to save photo to database", dbError instanceof Error ? dbError : new Error(errorMsg), {
         route: "/api/upload/browser",
         method: "POST",
         step: "database_insert"
@@ -124,13 +255,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to save photo" }, { status: 500 });
     }
 
+    // Clean up old photo files from storage (fire-and-forget, outside transaction)
+    if (oldPhotoFiles) {
+      deletePhotoFiles(oldPhotoFiles.filename, oldPhotoFiles.thumbnailFilename).catch((err) =>
+        logError("Failed to clean up swapped photo files", err instanceof Error ? err : new Error(String(err)), {
+          route: "/api/upload/browser",
+          method: "POST",
+          step: "storage_cleanup",
+        })
+      );
+    }
+
     const response = NextResponse.json({
       success: true,
       photoId: insertedPhoto.id,
       needsSpecies: !speciesId,
-      message: speciesId
-        ? "Photo uploaded successfully"
-        : "Photo uploaded - species assignment needed",
+      message: parsedReplaceId
+        ? "Photo swapped successfully"
+        : speciesId
+          ? "Photo uploaded successfully"
+          : "Photo uploaded - species assignment needed",
     });
 
     return addRateLimitHeaders(response, rateCheck.result, RATE_LIMITS.upload);

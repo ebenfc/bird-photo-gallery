@@ -129,11 +129,11 @@ function GalleryContent() {
   };
 
   // Handle species assignment
-  const handleAssignSpecies = async (photoId: number, speciesId: number) => {
+  const handleAssignSpecies = async (photoId: number, speciesId: number, replacePhotoId?: number) => {
     await fetch(`/api/photos/${photoId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ speciesId }),
+      body: JSON.stringify({ speciesId, ...(replacePhotoId ? { replacePhotoId } : {}) }),
     });
 
     // Refresh photos and species

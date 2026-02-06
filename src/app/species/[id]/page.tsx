@@ -8,6 +8,7 @@ import PhotoModal from "@/components/gallery/PhotoModal";
 import Button from "@/components/ui/Button";
 import RarityBadge from "@/components/ui/RarityBadge";
 import ActivityTimeline from "@/components/activity/ActivityTimeline";
+import { SPECIES_PHOTO_LIMIT } from "@/config/limits";
 
 interface SpeciesPageProps {
   params: Promise<{ id: string }>;
@@ -179,9 +180,26 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
 
       {/* Photo count */}
       <div className="mb-4">
-        <h2 className="text-lg font-semibold text-[var(--forest-900)]">
-          Photos ({photos.length})
-        </h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg font-semibold text-[var(--forest-900)]">
+            {photos.length >= SPECIES_PHOTO_LIMIT
+              ? "Your Gallery — Curated"
+              : `Your Gallery (${photos.length} of ${SPECIES_PHOTO_LIMIT})`}
+          </h2>
+          {photos.length >= SPECIES_PHOTO_LIMIT && (
+            <span className="flex items-center gap-1 px-2 py-0.5 bg-[var(--moss-100)] text-[var(--moss-700)] text-xs font-medium rounded-full">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+              </svg>
+              {SPECIES_PHOTO_LIMIT} of {SPECIES_PHOTO_LIMIT}
+            </span>
+          )}
+        </div>
+        {photos.length >= SPECIES_PHOTO_LIMIT && (
+          <p className="text-sm text-[var(--mist-500)] mt-1">
+            Showing your {SPECIES_PHOTO_LIMIT} best shots. Upload a new photo to swap one out.
+          </p>
+        )}
       </div>
 
       {/* Photo Grid - same layout for mobile and desktop */}
@@ -211,10 +229,10 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
             </svg>
           </div>
           <h3 className="text-lg font-semibold text-[var(--forest-900)] mb-1">
-            No photos yet
+            Start your collection
           </h3>
           <p className="text-[var(--mist-600)]">
-            Upload some photos and assign them to this species
+            Room for {SPECIES_PHOTO_LIMIT} of your best shots. Upload photos and assign them to this species.
           </p>
         </div>
       )}
