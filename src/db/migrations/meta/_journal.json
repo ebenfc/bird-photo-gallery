@@ -15,6 +15,13 @@
       "when": 1768872415278,
       "tag": "0001_equal_jocasta",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1770056331854,
+      "tag": "0002_warm_wrecking_crew",
+      "breakpoints": true
     }
   ]
 }
