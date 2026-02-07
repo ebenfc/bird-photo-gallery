@@ -83,6 +83,11 @@ export const config = {
     syncMaxRequests: getEnvVarAsNumber('RATE_LIMIT_SYNC_MAX', 5),
   },
 
+  // Slack Webhooks
+  slack: {
+    supportWebhookUrl: getOptionalEnvVar('SLACK_WEBHOOK_SUPPORT'),
+  },
+
   // Caching
   cache: {
     speciesTtlSeconds: getEnvVarAsNumber('CACHE_SPECIES_TTL', 600), // 10 minutes

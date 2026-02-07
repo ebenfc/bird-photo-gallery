@@ -15,6 +15,7 @@ Components are organized by feature area.
 | `species/` | Species cards and forms |
 | `stats/` | Property stats widget |
 | `suggestions/` | AI suggestion components |
+| `support/` | Issue reporting (ReportIssueButton, ReportIssueModal) |
 | `ui/` | Reusable UI primitives |
 | `upload/` | Photo upload components |
 

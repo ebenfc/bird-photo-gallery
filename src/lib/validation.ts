@@ -182,6 +182,17 @@ export function validateSearchParams<T>(
   return validateRequest(schema, params);
 }
 
+// Issue report validation
+export const ReportIssueSchema = z.object({
+  issueType: z.enum(['bug', 'feature_request', 'question', 'other']),
+  description: z.string()
+    .min(10, 'Please provide at least 10 characters')
+    .max(1000, 'Description must be 1000 characters or less')
+    .transform(s => s.trim()),
+  pageUrl: z.string().url().max(500),
+  userAgent: z.string().max(500).optional(),
+});
+
 // Type exports for use in API routes
 export type SpeciesInput = z.infer<typeof SpeciesSchema>;
 export type SpeciesUpdateInput = z.infer<typeof SpeciesUpdateSchema>;
@@ -191,3 +202,4 @@ export type HaikuboxSyncInput = z.infer<typeof HaikuboxSyncSchema>;
 export type PhotosQueryInput = z.infer<typeof PhotosQuerySchema>;
 export type SpeciesQueryInput = z.infer<typeof SpeciesQuerySchema>;
 export type BirdLookupInput = z.infer<typeof BirdLookupSchema>;
+export type ReportIssueInput = z.infer<typeof ReportIssueSchema>;
