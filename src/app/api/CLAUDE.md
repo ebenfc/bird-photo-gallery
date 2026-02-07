@@ -51,6 +51,7 @@ This is required for database access (pg driver) and sharp (image processing).
 | `/activity/*` | Species activity data |
 | `/suggestions` | AI-powered suggestions |
 | `/webhook/clerk` | Clerk user sync |
+| `/support/report` | Issue reporting (POST → Slack webhook) |
 | `/debug/*` | Development debugging |
 
 ## Haikubox Integration
