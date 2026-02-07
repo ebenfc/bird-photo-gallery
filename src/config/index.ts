@@ -55,11 +55,6 @@ export const config = {
     syncKey: getOptionalEnvVar('HAIKUBOX_SYNC_KEY'),
   },
 
-  // API Authentication
-  api: {
-    key: getOptionalEnvVar('API_KEY'),
-  },
-
   // File Upload
   upload: {
     maxSizeBytes: getEnvVarAsNumber('UPLOAD_MAX_SIZE', 20 * 1024 * 1024), // 20MB

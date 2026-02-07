@@ -88,7 +88,6 @@ postgresql://postgres:PASSWORD@postgres.railway.internal:5432/railway
 DATABASE_URL=${{Postgres.DATABASE_URL}}
 SUPABASE_URL=https://vbojxtgnalidhsnjccrn.supabase.co
 SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZib2p4dGduYWxpZGhzbmpjY3JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MTc2MTYsImV4cCI6MjA4NDE5MzYxNn0.bSvmWz9_xhmVD3UzzjJlbWCMaqkSeBVwBD-6q4WhpKo
-API_KEY=<your-api-key>
 HAIKUBOX_SERIAL=<your-serial>
 ```
 

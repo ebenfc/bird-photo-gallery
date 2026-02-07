@@ -19,8 +19,6 @@ A modern, full-stack web application for managing and organizing bird photograph
 - 📝 **Photo Notes**: Add custom notes and observations to each photo
 - 🔎 **Wikipedia Integration**: Fetch species information automatically
 - 🗂️ **Activity Timeline**: See when each species was photographed over time
-- 🔐 **API Key Authentication**: Secure API endpoints with key-based auth
-
 ## Tech Stack
 
 ### Frontend
@@ -73,8 +71,6 @@ A modern, full-stack web application for managing and organizing bird photograph
    - `SUPABASE_URL`: Your Supabase project URL
    - `SUPABASE_ANON_KEY`: Supabase anonymous key
    - `HAIKUBOX_SERIAL`: Your Haikubox serial number (optional)
-   - `API_KEY`: Create a secure key for API authentication
-
 4. **Set up the database**
    ```bash
    # Push schema to database
@@ -149,7 +145,6 @@ bird-photo-gallery/
 │   ├── lib/                  # Utility libraries
 │   │   ├── validation.ts     # Zod schemas (✅ tested)
 │   │   ├── image.ts          # Image processing (✅ tested)
-│   │   ├── auth.ts           # API authentication
 │   │   ├── supabase.ts       # Supabase client
 │   │   ├── wikipedia.ts      # Wikipedia API integration
 │   │   ├── activity.ts       # Activity tracking
@@ -164,14 +159,6 @@ bird-photo-gallery/
 ```
 
 ## API Documentation
-
-### Authentication
-
-All API endpoints require an `X-API-Key` header:
-
-```bash
-curl -H "X-API-Key: your-api-key" http://localhost:3000/api/photos
-```
 
 ### Key Endpoints
 
@@ -261,8 +248,6 @@ See [TESTING.md](TESTING.md) for detailed testing guide and expansion priorities
    - `SUPABASE_URL`
    - `SUPABASE_ANON_KEY`
    - `HAIKUBOX_SERIAL`
-   - `API_KEY`
-
 3. **Deploy**
    - Railway automatically builds and deploys on push
 
@@ -291,8 +276,6 @@ See [.env.example](.env.example) for all available configuration options.
 - `DATABASE_URL` - PostgreSQL connection string
 - `SUPABASE_URL` - Supabase project URL
 - `SUPABASE_ANON_KEY` - Supabase anonymous key
-- `API_KEY` - Secure key for API authentication
-
 **Optional:**
 - `HAIKUBOX_SERIAL` - Haikubox device serial (for auto-sync)
 - `SENTRY_DSN` - Sentry DSN for error tracking
@@ -300,7 +283,7 @@ See [.env.example](.env.example) for all available configuration options.
 ### Security Settings
 
 The app includes built-in security features:
-- API key authentication on all endpoints
+- Clerk authentication on all endpoints
 - Rate limiting (in-memory, 100 req/15min per IP)
 - Security headers (HSTS, X-Frame-Options, Permissions-Policy)
 - Input validation on all API routes
