@@ -7,6 +7,7 @@ Components are organized by feature area.
 | Folder | Purpose |
 |--------|---------|
 | `activity/` | Haikubox activity page components |
+| `discover/` | Discover page: BookmarkButton, GalleryCard, DiscoverFilters |
 | `gallery/` | Photo gallery and modal components |
 | `landing/` | Public landing page for unauthenticated users |
 | `layout/` | Header, navigation, PublicHeader |
@@ -76,6 +77,15 @@ Minimal header for public gallery pages:
 - No logo icon (intentionally removed pending brand finalization)
 - No auth UI or edit buttons
 - Includes "Create your own Bird Feed" CTA link (desktop only)
+- Accepts `children` prop for rendering BookmarkButton
+
+## Discover Components (`discover/`)
+
+| Component | Purpose |
+|-----------|---------|
+| `BookmarkButton` | Bookmark toggle on public gallery pages. Uses `useAuth()` — only renders for authenticated users viewing someone else's gallery. |
+| `GalleryCard` | Card for gallery listings in Discover directory. Shows display name, location, species/photo counts. Links to `/u/[username]`. |
+| `DiscoverFilters` | State dropdown + A-Z/Random sort toggle for browsing the gallery directory. |
 
 ## UI Components (`ui/`)
 
