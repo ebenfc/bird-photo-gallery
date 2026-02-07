@@ -61,7 +61,8 @@ export default function AppearanceSettings() {
 
   // Prevent hydration mismatch — useTheme() returns undefined during SSR
   useEffect(() => {
-    setMounted(true);
+    const markMounted = () => setMounted(true);
+    markMounted();
   }, []);
 
   if (!mounted) {

@@ -28,17 +28,21 @@ export function SkinProvider({ children }: { children: React.ReactNode }) {
 
   // Read from localStorage on mount
   useEffect(() => {
-    try {
-      const storedSkin = localStorage.getItem(SKIN_STORAGE_KEY) as Skin | null;
-      if (storedSkin && ["default", "bold", "retro"].includes(storedSkin)) {
-        setSkinState(storedSkin);
+    const loadStoredPreferences = () => {
+      try {
+        const storedSkin = localStorage.getItem(SKIN_STORAGE_KEY) as Skin | null;
+        if (storedSkin && ["default", "bold", "retro"].includes(storedSkin)) {
+          setSkinState(storedSkin);
+        }
+        const unlocked = localStorage.getItem(RETRO_UNLOCK_KEY) === "true";
+        setRetroUnlocked(unlocked);
+      } catch {
+        // localStorage not available
       }
-      const unlocked = localStorage.getItem(RETRO_UNLOCK_KEY) === "true";
-      setRetroUnlocked(unlocked);
-    } catch {
-      // localStorage not available
-    }
-    setMounted(true);
+      setMounted(true);
+    };
+
+    loadStoredPreferences();
   }, []);
 
   // Sync data-skin attribute to <html> whenever skin changes
