@@ -49,7 +49,9 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' https://*.supabase.co data: blob:; connect-src 'self' https://*.clerk.accounts.dev https://*.supabase.co https://va.vercel-scripts.com; font-src 'self'; frame-src 'self' https://*.clerk.accounts.dev;"
+            // Clerk domains: *.clerk.accounts.dev (dev) + clerk.birdfeed.io (prod)
+            // Also: img.clerk.com (avatars), challenges.cloudflare.com (bot protection)
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://clerk.birdfeed.io https://challenges.cloudflare.com https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' https://*.supabase.co https://img.clerk.com data: blob:; connect-src 'self' https://*.clerk.accounts.dev https://clerk.birdfeed.io https://*.supabase.co https://va.vercel-scripts.com; font-src 'self'; frame-src 'self' https://*.clerk.accounts.dev https://clerk.birdfeed.io https://challenges.cloudflare.com; worker-src 'self' blob:;"
           }
         ]
       },
