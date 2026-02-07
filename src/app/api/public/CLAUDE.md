@@ -7,6 +7,7 @@ Read-only API endpoints for public gallery access. No authentication required.
 
 | Route | Method | Description |
 |-------|--------|-------------|
+| `/api/public/discover` | GET | Browse directory-listed galleries |
 | `/api/public/gallery/[username]` | GET | Profile info (name, counts) |
 | `/api/public/gallery/[username]/photos` | GET | List photos with filtering |
 | `/api/public/gallery/[username]/species` | GET | List species |
@@ -42,7 +43,16 @@ Supports same filters as authenticated `/api/photos`:
 ## Query Parameters (Species Endpoint)
 - `sort` - Sort order (alpha, photo_count, recent_added, recent_taken)
 
+## Discover Endpoint
+
+`GET /api/public/discover` — browse galleries where `isPublicGalleryEnabled=true` AND `isDirectoryListed=true`.
+
+Query params: `state` (2-letter code), `sort` (alpha|random), `page`, `limit`.
+Returns: username, displayName, city, state, speciesCount, photoCount, pagination metadata.
+No auth required. Never sorts by popularity.
+
 ## Files
+- `discover/route.ts` - Browse directory-listed galleries
 - `gallery/[username]/route.ts` - Profile info
 - `gallery/[username]/photos/route.ts` - Photos list
 - `gallery/[username]/species/route.ts` - Species list

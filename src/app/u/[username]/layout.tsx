@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getUserByUsername } from "@/lib/user";
 import PublicHeader from "@/components/layout/PublicHeader";
+import BookmarkButton from "@/components/discover/BookmarkButton";
 
 interface PublicGalleryLayoutProps {
   children: React.ReactNode;
@@ -27,7 +28,9 @@ export default async function PublicGalleryLayout({
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)]">
-      <PublicHeader username={username} displayName={displayName} />
+      <PublicHeader username={username} displayName={displayName}>
+        <BookmarkButton username={username} />
+      </PublicHeader>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {children}
       </main>

@@ -16,6 +16,7 @@ All tables defined in `schema.ts`.
 | `haikuboxDetections` | Aggregated yearly detection counts |
 | `haikuboxActivityLog` | Individual detection timestamps |
 | `haikuboxSyncLog` | Sync operation history |
+| `bookmarks` | Saved galleries (private, per-user) |
 | `appSettings` | User settings (key-value pairs) |
 
 ## Data Isolation
@@ -35,18 +36,24 @@ Tables with performance indexes:
 - `species`: `user_id`
 - `haikuboxDetections`: `user_id`, unique on `(user_id, species_common_name, data_year)`
 - `haikuboxActivityLog`: unique on `(species_common_name, detected_at)`, `(species_common_name, hour_of_day)`, `detected_at`
+- `bookmarks`: `user_id`, unique on `(user_id, bookmarked_user_id)`
 
 ## Key Relationships
 
 - `photos.speciesId` → `species.id` (cascade delete)
 - `haikuboxDetections.speciesId` → `species.id` (set null on delete)
-- All tables have `userId` → `users.id` (cascade delete)
+- `bookmarks.userId` → `users.id` (cascade delete)
+- `bookmarks.bookmarkedUserId` → `users.id` (cascade delete)
+- All other tables have `userId` → `users.id` (cascade delete)
 
 ## Users Table
 
 The `users` table includes public gallery sharing fields:
 - `username` (text, unique, nullable) - Public URL identifier (e.g., `/u/eben`)
 - `isPublicGalleryEnabled` (boolean, default false) - Controls public gallery visibility
+- `isDirectoryListed` (boolean, default false) - Opt-in to Discover directory
+- `city` (text, nullable) - Free-text city name
+- `state` (text, nullable) - 2-letter US state code
 
 Use `src/lib/user.ts` functions for user operations:
 - `getUserByUsername(username)` - Lookup by public username

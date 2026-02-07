@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 interface ProfileSettings {
   username: string | null;
   isPublicGalleryEnabled: boolean;
+  isDirectoryListed: boolean;
   displayName: string | null;
 }
 
@@ -13,6 +14,7 @@ export default function PublicGallerySettings() {
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState("");
   const [isPublicEnabled, setIsPublicEnabled] = useState(false);
+  const [isDirectoryListed, setIsDirectoryListed] = useState(false);
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState<{
     available: boolean;
@@ -35,6 +37,7 @@ export default function PublicGallerySettings() {
           setSettings(data);
           setUsername(data.username || "");
           setIsPublicEnabled(data.isPublicGalleryEnabled);
+          setIsDirectoryListed(data.isDirectoryListed);
         }
       } catch (error) {
         console.error("Failed to load profile settings:", error);
@@ -107,6 +110,7 @@ export default function PublicGallerySettings() {
         body: JSON.stringify({
           username: username || null,
           isPublicGalleryEnabled: isPublicEnabled,
+          isDirectoryListed,
         }),
       });
 
@@ -119,6 +123,7 @@ export default function PublicGallerySettings() {
                 ...prev,
                 username: data.username,
                 isPublicGalleryEnabled: data.isPublicGalleryEnabled,
+                isDirectoryListed: data.isDirectoryListed,
               }
             : null
         );
@@ -155,7 +160,8 @@ export default function PublicGallerySettings() {
 
   const hasChanges =
     username !== (settings?.username || "") ||
-    isPublicEnabled !== settings?.isPublicGalleryEnabled;
+    isPublicEnabled !== settings?.isPublicGalleryEnabled ||
+    isDirectoryListed !== settings?.isDirectoryListed;
 
   const canSave =
     hasChanges &&
@@ -264,7 +270,11 @@ export default function PublicGallerySettings() {
           type="button"
           role="switch"
           aria-checked={isPublicEnabled}
-          onClick={() => setIsPublicEnabled(!isPublicEnabled)}
+          onClick={() => {
+            const newValue = !isPublicEnabled;
+            setIsPublicEnabled(newValue);
+            if (!newValue) setIsDirectoryListed(false);
+          }}
           disabled={!username && !isPublicEnabled}
           className={`relative inline-flex h-6 w-11 items-center rounded-full
             transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2
@@ -283,6 +293,40 @@ export default function PublicGallerySettings() {
           />
         </button>
       </div>
+
+      {/* Directory Listing Toggle (only shown when public gallery is enabled) */}
+      {isPublicEnabled && (
+        <div className="flex items-center justify-between py-3 px-4 bg-[var(--mist-50)] rounded-[var(--radius-md)]">
+          <div>
+            <label className="text-sm font-medium text-[var(--forest-900)]">
+              List in Discover directory
+            </label>
+            <p className="text-xs text-[var(--mist-500)] mt-0.5">
+              Let other birders find your gallery by browsing the directory
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={isDirectoryListed}
+            onClick={() => setIsDirectoryListed(!isDirectoryListed)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full
+              transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2
+              focus:ring-[var(--moss-500)] focus:ring-offset-2 cursor-pointer
+              ${
+                isDirectoryListed
+                  ? "bg-[var(--moss-500)]"
+                  : "bg-[var(--mist-300)]"
+              }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm
+                transition duration-200 ease-in-out
+                ${isDirectoryListed ? "translate-x-6" : "translate-x-1"}`}
+            />
+          </button>
+        </div>
+      )}
 
       {/* Public URL Preview */}
       {settings?.username && settings.isPublicGalleryEnabled && (

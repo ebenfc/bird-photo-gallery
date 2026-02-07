@@ -44,6 +44,10 @@ This is required for database access (pg driver) and sharp (image processing).
 | `/settings` | App settings (Haikubox serial) |
 | `/settings/profile` | User profile (username, public gallery toggle) |
 | `/public/gallery/[username]/*` | Public gallery read-only APIs |
+| `/public/discover` | Browse directory-listed galleries |
+| `/bookmarks` | GET (list) + POST (create) bookmarks |
+| `/bookmarks/[username]` | DELETE bookmark |
+| `/bookmarks/check/[username]` | Check if gallery is bookmarked |
 | `/activity/*` | Species activity data |
 | `/suggestions` | AI-powered suggestions |
 | `/webhook/clerk` | Clerk user sync |

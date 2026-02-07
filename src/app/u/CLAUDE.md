@@ -16,6 +16,7 @@ All pages fetch from `/api/public/gallery/[username]/*` endpoints (not the authe
 ### Layout
 Uses `PublicHeader` component with minimal navigation (Feed | Species tabs only).
 No Clerk auth UI, no edit/upload buttons.
+`BookmarkButton` rendered as child of `PublicHeader` for authenticated visitors.
 
 ### Security
 - Routes are public (added to Clerk middleware's `isPublicRoute` matcher in `src/proxy.ts`)

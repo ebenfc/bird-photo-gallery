@@ -81,6 +81,7 @@ src/
 ├── app/              # Next.js pages and API routes
 │   ├── api/          # Backend endpoints
 │   ├── activity/     # Haikubox activity page
+│   ├── discover/     # Gallery discovery & bookmarks
 │   ├── resources/    # External resources page
 │   └── species/      # Species directory
 ├── components/       # React components
@@ -95,6 +96,7 @@ src/
 - `src/db/schema.ts` - Database schema (Drizzle ORM)
 - `src/lib/validation.ts` - Zod schemas for all data validation
 - `src/lib/auth.ts` - API key authentication
+- `src/config/usStates.ts` - US state codes for location settings
 - `drizzle.config.ts` - Database configuration
 - `.env.local` - Environment variables (never commit)
 
@@ -586,3 +588,42 @@ Select "No, add the constraint without truncating the table" when prompted.
 
 - `src/app/u/CLAUDE.md` - Public profile routes documentation
 - `src/app/api/public/CLAUDE.md` - Public API endpoints documentation
+
+---
+
+## Gallery Discovery & Bookmarking Feature (PR #TBD - February 2026)
+
+**Non-social gallery discovery: browse public galleries by location and privately bookmark favorites.**
+
+### Design Philosophy
+
+Intentionally non-social — no metrics, popularity sorting, follower counts, or engagement features. Users control their discoverability with a separate `isDirectoryListed` toggle (independent of `isPublicGalleryEnabled`).
+
+### Database Changes
+
+Added to `users` table: `city` (text), `state` (2-letter US code), `isDirectoryListed` (boolean).
+New `bookmarks` table: `(userId, bookmarkedUserId)` with unique constraint + cascade deletes.
+
+### Discover Page (`/discover`)
+
+Two tabs:
+- **Browse** — Directory of galleries where `isDirectoryListed=true`. Filterable by US state, sortable alphabetically or randomly. Never sorted by popularity.
+- **Saved** — Private bookmarks list. Only visible to the authenticated user.
+
+### Bookmarking
+
+- BookmarkButton appears on public gallery pages for authenticated visitors
+- Private — no one can see your bookmarks
+- Bookmarks API: `POST /api/bookmarks`, `DELETE /api/bookmarks/[username]`, `GET /api/bookmarks`, `GET /api/bookmarks/check/[username]`
+
+### Location Settings
+
+City + US state dropdown on Resources page (`LocationSettings` component). State validated against `src/config/usStates.ts` (50 states + DC).
+
+### Key Files
+
+- `src/app/discover/page.tsx` — Discover page with Browse/Saved tabs
+- `src/components/discover/` — BookmarkButton, GalleryCard, DiscoverFilters
+- `src/components/settings/LocationSettings.tsx` — City/state settings form
+- `src/app/api/bookmarks/` — Bookmarks CRUD endpoints
+- `src/app/api/public/discover/route.ts` — Public browse directory endpoint

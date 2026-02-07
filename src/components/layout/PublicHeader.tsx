@@ -6,9 +6,10 @@ import { usePathname } from "next/navigation";
 interface PublicHeaderProps {
   username: string;
   displayName: string;
+  children?: React.ReactNode;
 }
 
-export default function PublicHeader({ username, displayName }: PublicHeaderProps) {
+export default function PublicHeader({ username, displayName, children }: PublicHeaderProps) {
   const pathname = usePathname();
 
   const navItems = [
@@ -75,12 +76,13 @@ export default function PublicHeader({ username, displayName }: PublicHeaderProp
             })}
           </nav>
 
-          {/* Create your own CTA */}
-          <div className="hidden md:block">
+          {/* Bookmark button + Create your own CTA */}
+          <div className="flex items-center gap-3">
+            {children}
             <Link
               href="/"
-              className="text-sm text-[var(--mist-500)] hover:text-[var(--forest-600)]
-                transition-colors flex items-center gap-1"
+              className="hidden md:flex text-sm text-[var(--mist-500)] hover:text-[var(--forest-600)]
+                transition-colors items-center gap-1"
             >
               <span>Create your own</span>
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

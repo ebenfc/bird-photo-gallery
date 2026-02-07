@@ -14,6 +14,10 @@ export const users = pgTable("users", {
   // Public gallery sharing fields
   username: text("username").unique(), // URL-safe username for public profile (e.g., /u/eben)
   isPublicGalleryEnabled: boolean("is_public_gallery_enabled").notNull().default(false),
+  // Discovery directory fields
+  city: text("city"), // Free-text city name, e.g. "Portland"
+  state: text("state"), // 2-letter US state code, e.g. "OR"
+  isDirectoryListed: boolean("is_directory_listed").notNull().default(false), // Opt-in to browse directory
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -210,3 +214,38 @@ export const userAgreementsRelations = relations(userAgreements, ({ one }) => ({
 // User Agreement Type exports
 export type UserAgreement = typeof userAgreements.$inferSelect;
 export type NewUserAgreement = typeof userAgreements.$inferInsert;
+
+// Bookmarks Table - Private gallery bookmarks for discovery feature
+export const bookmarks = pgTable("bookmarks", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  bookmarkedUserId: text("bookmarked_user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+}, (table) => ({
+  userBookmarkUnique: unique().on(table.userId, table.bookmarkedUserId),
+  userIdIdx: index("bookmarks_user_id_idx").on(table.userId),
+}));
+
+// Bookmarks Relations
+export const bookmarksRelations = relations(bookmarks, ({ one }) => ({
+  user: one(users, {
+    fields: [bookmarks.userId],
+    references: [users.id],
+    relationName: "userBookmarks",
+  }),
+  bookmarkedUser: one(users, {
+    fields: [bookmarks.bookmarkedUserId],
+    references: [users.id],
+    relationName: "bookmarkedBy",
+  }),
+}));
+
+// Bookmark Type exports
+export type Bookmark = typeof bookmarks.$inferSelect;
+export type NewBookmark = typeof bookmarks.$inferInsert;

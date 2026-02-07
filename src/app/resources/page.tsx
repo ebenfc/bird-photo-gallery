@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import PublicGallerySettings from "@/components/settings/PublicGallerySettings";
+import LocationSettings from "@/components/settings/LocationSettings";
 
 export default function ResourcesPage() {
   // Haikubox connection form state
@@ -203,6 +204,27 @@ export default function ResourcesPage() {
           </div>
           <div className="p-5 sm:p-6">
             <PublicGallerySettings />
+          </div>
+        </section>
+
+        {/* Location & Directory Section */}
+        <section className="bg-white rounded-[var(--radius-lg)] shadow-[var(--shadow-md)]
+          border border-[var(--border-light)] overflow-hidden mb-8">
+          <div className="bg-gradient-to-r from-[var(--moss-50)] to-[var(--forest-50)]
+            border-b border-[var(--border-light)] px-5 sm:px-6 py-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-[var(--forest-900)] mb-1 flex items-center gap-2">
+              <svg className="w-6 h-6 text-[var(--moss-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Location
+            </h2>
+            <p className="text-sm sm:text-base text-[var(--mist-600)]">
+              Set your location for the Discover directory
+            </p>
+          </div>
+          <div className="p-5 sm:p-6">
+            <LocationSettings />
           </div>
         </section>
 
