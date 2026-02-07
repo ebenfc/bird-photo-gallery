@@ -64,6 +64,84 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
     }
   };
 
+  const handleDateChange = async (id: number, date: string | null) => {
+    try {
+      await fetch(`/api/photos/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ originalDateTaken: date }),
+      });
+
+      setPhotos((prev) =>
+        prev.map((p) =>
+          p.id === id
+            ? { ...p, originalDateTaken: date, dateTakenSource: "manual" as const }
+            : p
+        )
+      );
+      if (selectedPhoto?.id === id) {
+        setSelectedPhoto((prev) =>
+          prev ? { ...prev, originalDateTaken: date, dateTakenSource: "manual" as const } : null
+        );
+      }
+    } catch (err) {
+      console.error("Failed to update date:", err);
+    }
+  };
+
+  const handleNotesChange = async (id: number, notes: string | null) => {
+    try {
+      await fetch(`/api/photos/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notes }),
+      });
+
+      setPhotos((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, notes } : p))
+      );
+      if (selectedPhoto?.id === id) {
+        setSelectedPhoto((prev) => (prev ? { ...prev, notes } : null));
+      }
+    } catch (err) {
+      console.error("Failed to update notes:", err);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await fetch(`/api/photos/${id}`, {
+        method: "DELETE",
+      });
+
+      setPhotos((prev) => prev.filter((p) => p.id !== id));
+      setSelectedPhoto(null);
+    } catch (err) {
+      console.error("Failed to delete photo:", err);
+    }
+  };
+
+  const handleSetCoverPhoto = async (photoId: number, speciesId: number): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/species/${speciesId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ coverPhotoId: photoId }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Failed to set cover photo:", errorData.error);
+        return false;
+      }
+
+      return true;
+    } catch (err) {
+      console.error("Failed to set cover photo:", err);
+      return false;
+    }
+  };
+
   const handleNavigate = (direction: "prev" | "next") => {
     if (!selectedPhoto) return;
     const currentIndex = photos.findIndex((p) => p.id === selectedPhoto.id);
@@ -243,7 +321,11 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
         onFavoriteToggle={handleFavoriteToggle}
         onNavigate={handleNavigate}
         canNavigate={canNavigate}
-        defaultToFullscreen={true}
+        onDateChange={handleDateChange}
+        onNotesChange={handleNotesChange}
+        onDelete={handleDelete}
+        onSetCoverPhoto={handleSetCoverPhoto}
+        defaultToFullscreen={false}
       />
     </div>
   );
