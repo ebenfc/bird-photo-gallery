@@ -102,7 +102,7 @@ export default function SpeciesActivityFilters({
       `}>
         <div className={`
           sm:bg-transparent sm:backdrop-blur-none sm:rounded-none sm:p-0 sm:shadow-none sm:border-0
-          bg-white/80 backdrop-blur-sm rounded-[var(--radius-xl)] p-4 shadow-[var(--shadow-sm)] border border-[var(--border)]
+          bg-[var(--card-bg)]/80 backdrop-blur-sm rounded-[var(--radius-xl)] p-4 shadow-[var(--shadow-sm)] border border-[var(--border)]
         `}>
           <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-2">
             {/* Mobile only: Sort dropdown inside filter panel */}
@@ -140,7 +140,7 @@ export default function SpeciesActivityFilters({
                       ${
                         isSelected
                           ? "bg-gradient-to-b from-[var(--moss-500)] to-[var(--moss-600)] text-white border-[var(--moss-600)] shadow-[var(--shadow-moss)]"
-                          : "bg-white text-[var(--mist-500)] border-[var(--mist-200)] hover:border-[var(--moss-300)] hover:text-[var(--forest-700)] hover:shadow-[var(--shadow-sm)]"
+                          : "bg-[var(--card-bg)] text-[var(--mist-500)] border-[var(--mist-200)] hover:border-[var(--moss-300)] hover:text-[var(--forest-700)] hover:shadow-[var(--shadow-sm)]"
                       }`}
                   >
                     {opt.label}
@@ -173,7 +173,7 @@ export default function SpeciesActivityFilters({
                       ${
                         isSelected
                           ? "bg-gradient-to-b from-[var(--sky-500)] to-[var(--sky-600)] text-white border-[var(--sky-600)] shadow-[0_2px_8px_rgba(14,165,233,0.3)]"
-                          : "bg-white text-[var(--mist-500)] border-[var(--mist-200)] hover:border-[var(--sky-300)] hover:text-[var(--sky-700)] hover:shadow-[var(--shadow-sm)]"
+                          : "bg-[var(--card-bg)] text-[var(--mist-500)] border-[var(--mist-200)] hover:border-[var(--sky-300)] hover:text-[var(--sky-700)] hover:shadow-[var(--shadow-sm)]"
                       }`}
                   >
                     {opt.label}

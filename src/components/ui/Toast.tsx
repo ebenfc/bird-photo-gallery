@@ -95,7 +95,7 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: number)
       <span>{toast.message}</span>
       <button
         onClick={() => onDismiss(toast.id)}
-        className="ml-1 p-1 hover:bg-white/20 rounded-full transition-colors shrink-0"
+        className="ml-1 p-1 hover:bg-[var(--card-bg)]/20 rounded-full transition-colors shrink-0"
         aria-label="Dismiss"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

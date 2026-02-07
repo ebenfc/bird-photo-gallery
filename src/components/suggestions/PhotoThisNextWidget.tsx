@@ -50,7 +50,7 @@ export default function PhotoThisNextWidget() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl shadow-sm border border-[var(--mist-100)] p-6 animate-pulse">
+      <div className="bg-[var(--card-bg)] rounded-2xl shadow-sm border border-[var(--mist-100)] p-6 animate-pulse">
         <div className="h-6 w-40 bg-[var(--mist-100)] rounded mb-4" />
         <div className="space-y-3">
           <div className="h-8 bg-[var(--mist-50)] rounded" />
@@ -83,9 +83,9 @@ export default function PhotoThisNextWidget() {
   const scoreColor = getScoreColor(suggestion.score);
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-[var(--mist-100)] overflow-hidden">
+    <div className="bg-[var(--card-bg)] rounded-2xl shadow-sm border border-[var(--mist-100)] overflow-hidden">
       {/* Header */}
-      <div className="px-6 py-4 bg-gradient-to-r from-[var(--moss-50)] to-[var(--forest-50)] border-b border-[var(--mist-100)]">
+      <div className="px-6 py-4 bg-gradient-to-r from-[var(--surface-moss)] to-[var(--surface-forest)] border-b border-[var(--mist-100)]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <svg
@@ -107,7 +107,7 @@ export default function PhotoThisNextWidget() {
                 d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
               />
             </svg>
-            <h3 className="font-semibold text-[var(--forest-900)]">
+            <h3 className="font-semibold text-[var(--text-primary)]">
               Photo This Next!
             </h3>
           </div>
@@ -117,10 +117,10 @@ export default function PhotoThisNextWidget() {
 
       {/* Content */}
       <div className="p-6">
-        <div className="p-4 rounded-xl bg-gradient-to-br from-[var(--forest-50)] to-[var(--moss-50)]">
+        <div className="p-4 rounded-xl bg-gradient-to-br from-[var(--surface-forest)] to-[var(--surface-moss)]">
           {/* Species name with rarity badge */}
           <div className="flex items-center gap-2 mb-2 flex-wrap">
-            <h4 className="text-xl font-bold text-[var(--forest-900)]">
+            <h4 className="text-xl font-bold text-[var(--text-primary)]">
               {suggestion.commonName}
             </h4>
             <RarityBadge rarity={suggestion.rarity} />
@@ -136,10 +136,10 @@ export default function PhotoThisNextWidget() {
           {/* Priority score */}
           <div className="mb-4">
             <div className="flex justify-between items-center mb-1.5">
-              <span className="text-sm font-medium text-[var(--forest-800)]">
+              <span className="text-sm font-medium text-[var(--text-label)]">
                 Priority Score
               </span>
-              <span className="text-sm font-bold text-[var(--forest-900)]">
+              <span className="text-sm font-bold text-[var(--text-primary)]">
                 {suggestion.score}/100
               </span>
             </div>
@@ -153,7 +153,7 @@ export default function PhotoThisNextWidget() {
 
           {/* Stats grid */}
           <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="text-center p-3 rounded-lg bg-white/60 border border-[var(--mist-100)]">
+            <div className="text-center p-3 rounded-lg bg-[var(--card-bg)]/60 border border-[var(--mist-100)]">
               <div className="text-xl font-bold text-[var(--sky-700)]">
                 {suggestion.yearlyCount.toLocaleString()}
               </div>
@@ -162,7 +162,7 @@ export default function PhotoThisNextWidget() {
                 <span>Detections</span>
               </div>
             </div>
-            <div className="text-center p-3 rounded-lg bg-white/60 border border-[var(--mist-100)]">
+            <div className="text-center p-3 rounded-lg bg-[var(--card-bg)]/60 border border-[var(--mist-100)]">
               <div className="text-xl font-bold text-[var(--moss-700)]">
                 {suggestion.photoCount}
               </div>
@@ -174,8 +174,8 @@ export default function PhotoThisNextWidget() {
           </div>
 
           {/* Reason */}
-          <div className="p-3 bg-white/80 rounded-lg border border-[var(--mist-200)] mb-4">
-            <p className="text-sm text-[var(--forest-800)]">
+          <div className="p-3 bg-[var(--card-bg)]/80 rounded-lg border border-[var(--mist-200)] mb-4">
+            <p className="text-sm text-[var(--text-label)]">
               <span className="font-medium">Why priority?</span> {suggestion.reason}
             </p>
           </div>
@@ -214,10 +214,10 @@ export default function PhotoThisNextWidget() {
                   key={s.id}
                   href={`/species/${s.id}`}
                   className="flex items-center justify-between p-2 rounded-lg
-                    bg-[var(--mist-50)] hover:bg-[var(--moss-50)]
+                    bg-[var(--mist-50)] hover:bg-[var(--surface-moss)]
                     transition-colors group"
                 >
-                  <span className="text-sm text-[var(--forest-800)] group-hover:text-[var(--moss-700)]">
+                  <span className="text-sm text-[var(--text-label)] group-hover:text-[var(--moss-700)]">
                     {s.commonName}
                   </span>
                   <span className="text-xs font-medium text-[var(--mist-600)]">

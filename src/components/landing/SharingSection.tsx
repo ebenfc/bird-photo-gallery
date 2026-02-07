@@ -63,10 +63,10 @@ const sharingFeatures = [
 
 export default function SharingSection() {
   return (
-    <section className="py-16 sm:py-24 bg-white">
+    <section className="py-16 sm:py-24 bg-[var(--card-bg)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12 sm:mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-[var(--forest-900)] tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] tracking-tight">
             Share what you love
           </h2>
           <p className="mt-4 text-lg text-[var(--mist-600)] max-w-2xl mx-auto">
@@ -81,7 +81,7 @@ export default function SharingSection() {
           {sharingFeatures.map((feature, index) => (
             <div
               key={feature.title}
-              className="group p-6 sm:p-8 bg-white rounded-[var(--radius-2xl)] shadow-[var(--shadow-sm)] ring-1 ring-[var(--border)]
+              className="group p-6 sm:p-8 bg-[var(--card-bg)] rounded-[var(--radius-2xl)] shadow-[var(--shadow-sm)] ring-1 ring-[var(--border)]
                 hover:shadow-[var(--shadow-lg)] hover:ring-[var(--moss-200)]
                 transition-all duration-[var(--timing-fast)]
                 animate-fade-in-up"
@@ -90,7 +90,7 @@ export default function SharingSection() {
               {/* Icon */}
               <div
                 className="w-12 h-12 flex items-center justify-center rounded-[var(--radius-lg)]
-                bg-gradient-to-br from-[var(--moss-50)] to-[var(--forest-50)]
+                bg-gradient-to-br from-[var(--surface-moss)] to-[var(--surface-forest)]
                 text-[var(--forest-600)] ring-1 ring-[var(--moss-200)]
                 group-hover:from-[var(--moss-100)] group-hover:to-[var(--forest-100)]
                 transition-colors duration-[var(--timing-fast)]"
@@ -99,7 +99,7 @@ export default function SharingSection() {
               </div>
 
               {/* Content */}
-              <h3 className="mt-5 text-lg font-semibold text-[var(--forest-900)]">
+              <h3 className="mt-5 text-lg font-semibold text-[var(--text-primary)]">
                 {feature.title}
               </h3>
               <p className="mt-2 text-[var(--mist-600)] leading-relaxed">

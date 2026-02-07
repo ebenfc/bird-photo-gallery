@@ -77,7 +77,7 @@ export default function BookmarkButton({ username }: BookmarkButtonProps) {
         ${
           bookmarked
             ? "bg-[var(--moss-100)] text-[var(--moss-700)] border border-[var(--moss-300)] hover:bg-[var(--moss-200)]"
-            : "bg-white text-[var(--forest-700)] border border-[var(--border-light)] hover:bg-[var(--mist-50)] hover:border-[var(--moss-300)]"
+            : "bg-[var(--card-bg)] text-[var(--forest-700)] border border-[var(--border-light)] hover:bg-[var(--mist-50)] hover:border-[var(--moss-300)]"
         }
         ${toggling ? "opacity-50 cursor-not-allowed" : ""}`}
     >

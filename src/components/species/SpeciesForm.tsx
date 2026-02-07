@@ -229,7 +229,7 @@ export default function SpeciesForm({
               />
             </svg>
           </div>
-          <h2 className="text-xl font-semibold text-[var(--forest-900)]">{title}</h2>
+          <h2 className="text-xl font-semibold text-[var(--text-primary)]">{title}</h2>
         </div>
 
         <div className="space-y-5">
@@ -294,7 +294,7 @@ export default function SpeciesForm({
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
               className="block w-full px-4 py-2.5 border border-[var(--mist-200)] rounded-xl shadow-sm
-                bg-white text-[var(--foreground)] placeholder-[var(--mist-400)]
+                bg-[var(--card-bg)] text-[var(--foreground)] placeholder-[var(--mist-400)]
                 focus:outline-none focus:ring-2 focus:ring-[var(--moss-400)] focus:border-[var(--moss-400)]
                 hover:border-[var(--mist-300)] transition-colors text-sm resize-none"
             />
@@ -316,8 +316,8 @@ export default function SpeciesForm({
                         ? "bg-slate-100 border-slate-300 text-slate-700"
                         : r === "uncommon"
                         ? "bg-amber-50 border-amber-300 text-amber-700"
-                        : "bg-red-50 border-red-300 text-red-700"
-                      : "bg-white border-[var(--mist-200)] text-[var(--mist-500)] hover:border-[var(--mist-300)]"
+                        : "bg-[var(--error-bg)] border-[var(--error-border)] text-[var(--error-text)]"
+                      : "bg-[var(--card-bg)] border-[var(--mist-200)] text-[var(--mist-500)] hover:border-[var(--mist-300)]"
                   }`}
                 >
                   {r.charAt(0).toUpperCase() + r.slice(1)}
@@ -328,7 +328,7 @@ export default function SpeciesForm({
         </div>
 
         {error && commonName.trim() && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2">
+          <div className="mt-4 p-3 bg-[var(--error-bg)] border border-[var(--error-border)] rounded-xl flex items-center gap-2">
             <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -338,7 +338,7 @@ export default function SpeciesForm({
 
         {/* Delete confirmation */}
         {showDeleteConfirm && onDelete && (
-          <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+          <div className="mt-6 p-4 bg-[var(--error-bg)] border border-[var(--error-border)] rounded-xl">
             <div className="flex items-center gap-2 mb-2">
               <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

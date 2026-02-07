@@ -47,7 +47,7 @@ export default function ActivityTimeline({ speciesName, compact = false }: Activ
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl shadow-sm border border-[var(--mist-100)] p-4 animate-pulse">
+      <div className="bg-[var(--card-bg)] rounded-2xl shadow-sm border border-[var(--mist-100)] p-4 animate-pulse">
         <div className="h-5 w-40 bg-[var(--mist-100)] rounded mb-4" />
         <div className="h-24 bg-[var(--mist-50)] rounded" />
       </div>
@@ -92,7 +92,7 @@ export default function ActivityTimeline({ speciesName, compact = false }: Activ
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-[var(--mist-100)] overflow-hidden">
+    <div className="bg-[var(--card-bg)] rounded-2xl shadow-sm border border-[var(--mist-100)] overflow-hidden">
       {/* Header */}
       <div className="px-4 py-3 bg-gradient-to-r from-[var(--amber-50)] to-[var(--orange-50)] border-b border-[var(--mist-100)]">
         <div className="flex items-center justify-between">
@@ -110,7 +110,7 @@ export default function ActivityTimeline({ speciesName, compact = false }: Activ
                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <h3 className="font-semibold text-[var(--forest-900)]">Activity Timeline</h3>
+            <h3 className="font-semibold text-[var(--text-primary)]">Activity Timeline</h3>
           </div>
           <span className="text-xs text-[var(--mist-500)]">
             {pattern.totalDetections.toLocaleString()} detections

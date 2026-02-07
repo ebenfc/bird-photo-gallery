@@ -36,7 +36,7 @@ export default function ActiveNowWidget() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl shadow-sm border border-[var(--mist-100)] p-6 animate-pulse">
+      <div className="bg-[var(--card-bg)] rounded-2xl shadow-sm border border-[var(--mist-100)] p-6 animate-pulse">
         <div className="h-6 w-40 bg-[var(--mist-100)] rounded mb-4" />
         <div className="space-y-3">
           {[1, 2, 3, 4, 5].map((i) => (
@@ -56,7 +56,7 @@ export default function ActiveNowWidget() {
   const maxScore = Math.max(...data.activeSpecies.map((s) => s.activityScore));
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-[var(--mist-100)] overflow-hidden">
+    <div className="bg-[var(--card-bg)] rounded-2xl shadow-sm border border-[var(--mist-100)] overflow-hidden">
       {/* Header */}
       <div className="px-6 py-4 bg-gradient-to-r from-[var(--amber-50)] to-[var(--orange-50)] border-b border-[var(--mist-100)]">
         <div className="flex items-center justify-between">
@@ -74,7 +74,7 @@ export default function ActiveNowWidget() {
                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <h3 className="font-semibold text-[var(--forest-900)]">
+            <h3 className="font-semibold text-[var(--text-primary)]">
               Active Right Now
             </h3>
           </div>
@@ -104,7 +104,7 @@ export default function ActiveNowWidget() {
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--mist-50)] hover:bg-[var(--amber-50)] transition-colors cursor-pointer">
                   {/* Species name */}
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-[var(--forest-800)] group-hover:text-[var(--amber-700)] transition-colors">
+                    <div className="font-medium text-[var(--text-label)] group-hover:text-[var(--amber-700)] transition-colors">
                       {species.speciesName}
                     </div>
                     <div className="text-xs text-[var(--mist-500)] mt-0.5">

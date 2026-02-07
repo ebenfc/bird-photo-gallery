@@ -72,7 +72,7 @@ export default function SpeciesActivityRow({
         active:scale-[0.99]
         ${
           data.hasPhoto
-            ? "bg-gradient-to-br from-[var(--moss-50)] to-[var(--moss-100)/50] hover:from-[var(--moss-100)] hover:to-[var(--moss-100)]"
+            ? "bg-gradient-to-br from-[var(--surface-moss)] to-[var(--moss-100)/50] hover:from-[var(--moss-100)] hover:to-[var(--moss-100)]"
             : "bg-gradient-to-br from-[var(--sky-50)] to-[var(--sky-100)/50] hover:from-[var(--sky-100)] hover:to-[var(--sky-100)]"
         }
       `}
@@ -104,7 +104,7 @@ export default function SpeciesActivityRow({
 
         {/* Species Name */}
         <div className="flex-1 min-w-0">
-          <span className="text-base font-semibold text-[var(--forest-800)] truncate block">
+          <span className="text-base font-semibold text-[var(--text-label)] truncate block">
             {data.commonName}
           </span>
         </div>
@@ -148,7 +148,7 @@ export default function SpeciesActivityRow({
           )}
 
           {/* Species Name */}
-          <span className="text-base font-semibold text-[var(--forest-800)] flex-1 truncate">
+          <span className="text-base font-semibold text-[var(--text-label)] flex-1 truncate">
             {data.commonName}
           </span>
         </div>

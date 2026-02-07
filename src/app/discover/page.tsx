@@ -104,7 +104,7 @@ export default function DiscoverPage() {
     <div className="pnw-texture min-h-screen">
       {/* Desktop Header */}
       <div className="hidden sm:block mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-[var(--forest-900)] tracking-tight mb-2">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] tracking-tight mb-2">
           Discover
         </h1>
         <p className="text-[var(--mist-600)]">
@@ -115,14 +115,14 @@ export default function DiscoverPage() {
       {/* Mobile Header */}
       <div className="sm:hidden mb-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-[var(--forest-900)] tracking-tight">
+          <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">
             Discover
           </h1>
           {activeTab === "browse" && (
             <button
               onClick={() => setShowMobileFilters(!showMobileFilters)}
               className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium
-                text-[var(--forest-700)] bg-white border border-[var(--border-light)]
+                text-[var(--forest-700)] bg-[var(--card-bg)] border border-[var(--border-light)]
                 rounded-[var(--radius-md)] hover:bg-[var(--mist-50)]
                 transition-all duration-[var(--timing-fast)]"
             >
@@ -192,7 +192,7 @@ export default function DiscoverPage() {
             className={`sm:hidden overflow-hidden transition-all duration-300 ease-in-out
               ${showMobileFilters ? "max-h-40 mb-4" : "max-h-0"}`}
           >
-            <div className="p-4 bg-white rounded-[var(--radius-lg)] shadow-[var(--shadow-sm)]
+            <div className="p-4 bg-[var(--card-bg)] rounded-[var(--radius-lg)] shadow-[var(--shadow-sm)]
               border border-[var(--border-light)]">
               <DiscoverFilters
                 selectedState={selectedState}
@@ -207,7 +207,7 @@ export default function DiscoverPage() {
           {browseLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="animate-pulse p-5 rounded-[var(--radius-lg)] bg-white
+                <div key={i} className="animate-pulse p-5 rounded-[var(--radius-lg)] bg-[var(--card-bg)]
                   border border-[var(--border-light)]">
                   <div className="h-6 bg-[var(--mist-100)] rounded w-3/4 mb-3" />
                   <div className="h-4 bg-[var(--mist-100)] rounded w-1/2 mb-3" />
@@ -222,7 +222,7 @@ export default function DiscoverPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              <h3 className="text-lg font-semibold text-[var(--forest-900)] mb-2">
+              <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
                 No galleries found
               </h3>
               <p className="text-[var(--mist-500)] max-w-sm mx-auto">
@@ -234,7 +234,7 @@ export default function DiscoverPage() {
                 <button
                   onClick={() => handleStateChange("")}
                   className="mt-4 px-4 py-2 text-sm font-medium text-[var(--moss-700)]
-                    bg-[var(--moss-50)] rounded-[var(--radius-md)] hover:bg-[var(--moss-100)]
+                    bg-[var(--surface-moss)] rounded-[var(--radius-md)] hover:bg-[var(--moss-100)]
                     transition-all duration-[var(--timing-fast)]"
                 >
                   Clear filter
@@ -261,7 +261,7 @@ export default function DiscoverPage() {
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
                     className="px-4 py-2 text-sm font-medium text-[var(--forest-700)]
-                      bg-white border border-[var(--border-light)] rounded-[var(--radius-md)]
+                      bg-[var(--card-bg)] border border-[var(--border-light)] rounded-[var(--radius-md)]
                       hover:bg-[var(--mist-50)] disabled:opacity-50 disabled:cursor-not-allowed
                       transition-all duration-[var(--timing-fast)]"
                   >
@@ -274,7 +274,7 @@ export default function DiscoverPage() {
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
                     className="px-4 py-2 text-sm font-medium text-[var(--forest-700)]
-                      bg-white border border-[var(--border-light)] rounded-[var(--radius-md)]
+                      bg-[var(--card-bg)] border border-[var(--border-light)] rounded-[var(--radius-md)]
                       hover:bg-[var(--mist-50)] disabled:opacity-50 disabled:cursor-not-allowed
                       transition-all duration-[var(--timing-fast)]"
                   >
@@ -293,7 +293,7 @@ export default function DiscoverPage() {
           {savedLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="animate-pulse p-5 rounded-[var(--radius-lg)] bg-white
+                <div key={i} className="animate-pulse p-5 rounded-[var(--radius-lg)] bg-[var(--card-bg)]
                   border border-[var(--border-light)]">
                   <div className="h-6 bg-[var(--mist-100)] rounded w-3/4 mb-3" />
                   <div className="h-4 bg-[var(--mist-100)] rounded w-1/2 mb-3" />
@@ -308,7 +308,7 @@ export default function DiscoverPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                   d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
               </svg>
-              <h3 className="text-lg font-semibold text-[var(--forest-900)] mb-2">
+              <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
                 No saved galleries
               </h3>
               <p className="text-[var(--mist-500)] max-w-sm mx-auto">
@@ -318,7 +318,7 @@ export default function DiscoverPage() {
               <button
                 onClick={() => setActiveTab("browse")}
                 className="mt-4 px-4 py-2 text-sm font-medium text-[var(--moss-700)]
-                  bg-[var(--moss-50)] rounded-[var(--radius-md)] hover:bg-[var(--moss-100)]
+                  bg-[var(--surface-moss)] rounded-[var(--radius-md)] hover:bg-[var(--moss-100)]
                   transition-all duration-[var(--timing-fast)]"
               >
                 Browse galleries

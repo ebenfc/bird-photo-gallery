@@ -5,7 +5,7 @@ export default function HeroSection() {
   return (
     <section className="relative overflow-hidden">
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[var(--moss-50)] via-[var(--forest-50)] to-[var(--mist-50)]" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[var(--surface-moss)] via-[var(--forest-50)] to-[var(--mist-50)]" />
 
       {/* Subtle texture overlay */}
       <div className="absolute inset-0 pnw-texture opacity-50" />
@@ -14,7 +14,7 @@ export default function HeroSection() {
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Text content */}
           <div className="text-center lg:text-left animate-fade-in-up">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[var(--forest-900)] tracking-tight leading-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[var(--text-primary)] tracking-tight leading-tight">
               Your bird photography, beautifully organized and shared
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-[var(--mist-600)] max-w-xl mx-auto lg:mx-0">
@@ -40,11 +40,11 @@ export default function HeroSection() {
               <Link
                 href="/sign-in"
                 className="inline-flex items-center justify-center px-8 py-4 text-base font-semibold
-                  bg-white text-[var(--forest-800)]
+                  bg-[var(--card-bg)] text-[var(--text-label)]
                   border-2 border-[var(--mist-200)]
                   rounded-[var(--radius-xl)]
                   shadow-[var(--shadow-sm)]
-                  hover:bg-[var(--moss-50)] hover:border-[var(--moss-300)]
+                  hover:bg-[var(--surface-moss)] hover:border-[var(--moss-300)]
                   hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5
                   active:scale-[0.96]
                   transition-all duration-[var(--timing-fast)]"

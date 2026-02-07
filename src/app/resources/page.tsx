@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import PublicGallerySettings from "@/components/settings/PublicGallerySettings";
 import LocationSettings from "@/components/settings/LocationSettings";
+import AppearanceSettings from "@/components/settings/AppearanceSettings";
 
 export default function ResourcesPage() {
   // Haikubox connection form state
@@ -178,7 +179,7 @@ export default function ResourcesPage() {
     <div className="pnw-texture min-h-screen">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-[var(--forest-900)] tracking-tight mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] tracking-tight mb-2">
             Resources
           </h1>
           <p className="text-[var(--mist-600)]">
@@ -188,11 +189,11 @@ export default function ResourcesPage() {
         </div>
 
         {/* Public Gallery Section */}
-        <section className="bg-white rounded-[var(--radius-lg)] shadow-[var(--shadow-md)]
+        <section className="bg-[var(--card-bg)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)]
           border border-[var(--border-light)] overflow-hidden mb-8">
-          <div className="bg-gradient-to-r from-[var(--moss-50)] to-[var(--forest-50)]
+          <div className="bg-gradient-to-r from-[var(--surface-moss)] to-[var(--surface-forest)]
             border-b border-[var(--border-light)] px-5 sm:px-6 py-4">
-            <h2 className="text-xl sm:text-2xl font-bold text-[var(--forest-900)] mb-1 flex items-center gap-2">
+            <h2 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-1 flex items-center gap-2">
               <svg className="w-6 h-6 text-[var(--moss-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
               </svg>
@@ -208,11 +209,11 @@ export default function ResourcesPage() {
         </section>
 
         {/* Location & Directory Section */}
-        <section className="bg-white rounded-[var(--radius-lg)] shadow-[var(--shadow-md)]
+        <section className="bg-[var(--card-bg)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)]
           border border-[var(--border-light)] overflow-hidden mb-8">
-          <div className="bg-gradient-to-r from-[var(--moss-50)] to-[var(--forest-50)]
+          <div className="bg-gradient-to-r from-[var(--surface-moss)] to-[var(--surface-forest)]
             border-b border-[var(--border-light)] px-5 sm:px-6 py-4">
-            <h2 className="text-xl sm:text-2xl font-bold text-[var(--forest-900)] mb-1 flex items-center gap-2">
+            <h2 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-1 flex items-center gap-2">
               <svg className="w-6 h-6 text-[var(--moss-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -228,17 +229,37 @@ export default function ResourcesPage() {
           </div>
         </section>
 
+        {/* Appearance Section */}
+        <section className="bg-[var(--card-bg)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)]
+          border border-[var(--border-light)] overflow-hidden mb-8">
+          <div className="bg-gradient-to-r from-[var(--surface-moss)] to-[var(--surface-forest)]
+            border-b border-[var(--border-light)] px-5 sm:px-6 py-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-1 flex items-center gap-2">
+              <svg className="w-6 h-6 text-[var(--moss-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+              </svg>
+              Appearance
+            </h2>
+            <p className="text-sm sm:text-base text-[var(--mist-600)]">
+              Choose how Bird Feed looks for you
+            </p>
+          </div>
+          <div className="p-5 sm:p-6">
+            <AppearanceSettings />
+          </div>
+        </section>
+
         {/* Resource Sections */}
         <div className="space-y-8">
           {resources.map((section, idx) => (
             <section
               key={idx}
-              className="bg-white rounded-[var(--radius-lg)] shadow-[var(--shadow-md)]
+              className="bg-[var(--card-bg)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)]
                 border border-[var(--border-light)] overflow-hidden"
             >
-              <div className="bg-gradient-to-r from-[var(--forest-50)] to-[var(--moss-50)]
+              <div className="bg-gradient-to-r from-[var(--surface-forest)] to-[var(--surface-moss)]
                 border-b border-[var(--border-light)] px-5 sm:px-6 py-4">
-                <h2 className="text-xl sm:text-2xl font-bold text-[var(--forest-900)] mb-1">
+                <h2 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-1">
                   {section.title}
                 </h2>
                 <p className="text-sm sm:text-base text-[var(--mist-600)]">
@@ -249,9 +270,9 @@ export default function ResourcesPage() {
               <div className="p-5 sm:p-6">
                 {/* Haikubox Connection Form (special case for Haikubox section) */}
                 {section.title === "Haikubox Setup" && (
-                  <div className="mb-6 p-5 bg-gradient-to-br from-[var(--sky-50)] to-[var(--moss-50)]
+                  <div className="mb-6 p-5 bg-gradient-to-br from-[var(--sky-50)] to-[var(--surface-moss)]
                     rounded-[var(--radius-lg)] border border-[var(--sky-200)]">
-                    <h3 className="font-semibold text-[var(--forest-900)] mb-3 flex items-center gap-2">
+                    <h3 className="font-semibold text-[var(--text-primary)] mb-3 flex items-center gap-2">
                       <svg className="w-5 h-5 text-[var(--sky-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -261,7 +282,7 @@ export default function ResourcesPage() {
 
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-[var(--forest-900)] mb-2">
+                        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
                           Haikubox Serial Number
                         </label>
                         <input
@@ -270,7 +291,7 @@ export default function ResourcesPage() {
                           onChange={(e) => setHaikuboxSerial(e.target.value)}
                           placeholder="e.g., 1000000066e59043"
                           className="w-full px-4 py-2.5 border border-[var(--border-light)] rounded-[var(--radius-md)]
-                            text-[var(--forest-900)] bg-white
+                            text-[var(--text-primary)] bg-[var(--card-bg)]
                             focus:outline-none focus:ring-2 focus:ring-[var(--moss-500)] focus:border-transparent
                             transition-all duration-[var(--timing-fast)]"
                         />
@@ -289,7 +310,7 @@ export default function ResourcesPage() {
                           disabled={!haikuboxSerial || testing}
                           className="px-4 py-2.5 border-2 border-[var(--moss-600)] text-[var(--moss-700)]
                             rounded-[var(--radius-md)] font-medium
-                            hover:bg-[var(--moss-50)] disabled:opacity-50 disabled:cursor-not-allowed
+                            hover:bg-[var(--surface-moss)] disabled:opacity-50 disabled:cursor-not-allowed
                             transition-all duration-[var(--timing-fast)] active:scale-95"
                         >
                           {testing ? "Testing..." : "Test Connection"}
@@ -311,15 +332,15 @@ export default function ResourcesPage() {
                       {testStatus && (
                         <div className={`p-3 rounded-[var(--radius-md)] text-sm font-medium ${
                           testStatus.success
-                            ? "bg-green-50 text-green-800 border border-green-200"
-                            : "bg-red-50 text-red-800 border border-red-200"
+                            ? "bg-[var(--success-bg)] text-[var(--success-text)] border border-[var(--success-border)]"
+                            : "bg-[var(--error-bg)] text-[var(--error-text)] border border-[var(--error-border)]"
                         }`}>
                           {testStatus.message}
                         </div>
                       )}
 
                       {saveStatus && (
-                        <div className="p-3 rounded-[var(--radius-md)] bg-blue-50 text-blue-800 border border-blue-200 text-sm font-medium">
+                        <div className="p-3 rounded-[var(--radius-md)] bg-[var(--info-bg)] text-[var(--info-text)] border border-[var(--info-border)] text-sm font-medium">
                           {saveStatus}
                           {showSyncOption && (
                             <div className="mt-2 flex flex-col sm:flex-row items-start sm:items-center gap-2">
@@ -355,7 +376,7 @@ export default function ResourcesPage() {
                       className="block group"
                     >
                       <div className="flex items-start gap-3 p-4 rounded-[var(--radius-md)]
-                        bg-[var(--bg-secondary)] hover:bg-[var(--forest-50)]
+                        bg-[var(--bg-secondary)] hover:bg-[var(--surface-forest)]
                         border border-[var(--border-light)] hover:border-[var(--moss-300)]
                         transition-all duration-[var(--timing-fast)]
                         hover:shadow-[var(--shadow-sm)]">
@@ -379,7 +400,7 @@ export default function ResourcesPage() {
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-[var(--forest-900)] mb-1
+                          <h3 className="font-semibold text-[var(--text-primary)] mb-1
                             group-hover:text-[var(--moss-700)] transition-colors duration-[var(--timing-fast)]">
                             {link.name}
                           </h3>
@@ -397,10 +418,10 @@ export default function ResourcesPage() {
         </div>
 
       {/* Footer Note */}
-      <div className="mt-8 p-4 bg-[var(--moss-50)] rounded-[var(--radius-md)]
+      <div className="mt-8 p-4 bg-[var(--surface-moss)] rounded-[var(--radius-md)]
         border border-[var(--moss-200)]">
         <p className="text-sm text-[var(--mist-600)] text-center">
-          <span className="font-semibold text-[var(--forest-900)]">Note:</span> Bird Feed
+          <span className="font-semibold text-[var(--text-primary)]">Note:</span> Bird Feed
           is designed for organizing and cataloguing your bird photos, not for detailed species
           identification or research. These external resources complement Bird Feed by providing
           expert identification tools and comprehensive species information.

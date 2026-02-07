@@ -30,12 +30,12 @@ export default function GalleryCard({
       href={`/u/${username}`}
       className="block group"
     >
-      <div className="p-5 rounded-[var(--radius-lg)] bg-white
+      <div className="p-5 rounded-[var(--radius-lg)] bg-[var(--card-bg)]
         border border-[var(--border-light)] hover:border-[var(--moss-300)]
         shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)]
         transition-all duration-[var(--timing-fast)]">
         {/* Display Name */}
-        <h3 className="font-semibold text-[var(--forest-900)] text-lg
+        <h3 className="font-semibold text-[var(--text-primary)] text-lg
           group-hover:text-[var(--moss-700)] transition-colors duration-[var(--timing-fast)]">
           {displayName}
         </h3>

@@ -21,7 +21,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               ref={ref}
               className={`
                 peer block w-full px-4 py-3.5 pt-6
-                bg-white text-[var(--foreground)] placeholder-transparent
+                bg-[var(--card-bg)] text-[var(--foreground)] placeholder-transparent
                 border-2 border-[var(--mist-200)] rounded-[var(--radius-lg)]
                 shadow-[var(--shadow-inset-sm)]
                 transition-all duration-[var(--timing-fast)]
@@ -75,7 +75,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-semibold text-[var(--forest-800)] mb-2">
+          <label className="block text-sm font-semibold text-[var(--text-label)] mb-2">
             {label}
           </label>
         )}
@@ -83,7 +83,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           className={`
             block w-full px-4 py-3
-            bg-white text-[var(--foreground)] placeholder-[var(--mist-400)]
+            bg-[var(--card-bg)] text-[var(--foreground)] placeholder-[var(--mist-400)]
             border-2 border-[var(--mist-200)] rounded-[var(--radius-lg)]
             shadow-[var(--shadow-inset-sm)]
             transition-all duration-[var(--timing-fast)]

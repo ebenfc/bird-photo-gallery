@@ -37,7 +37,7 @@ export default function HeardBadge({
 
   return (
     <span
-      className={`inline-flex items-center font-medium rounded-full border bg-[var(--sky-50)] text-[var(--sky-700)] border-[var(--sky-200)] ${sizeClasses[size]}`}
+      className={`inline-flex items-center font-medium rounded-full border bg-[var(--surface-sky)] text-[var(--sky-700)] border-[var(--sky-200)] ${sizeClasses[size]}`}
       title={
         lastHeard
           ? `Last heard: ${new Date(lastHeard).toLocaleDateString()}`

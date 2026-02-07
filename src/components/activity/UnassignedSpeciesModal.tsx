@@ -155,7 +155,7 @@ export default function UnassignedSpeciesModal({
             </svg>
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-[var(--forest-900)]">
+            <h2 className="text-xl font-semibold text-[var(--text-primary)]">
               Assign Species
             </h2>
             <p className="text-sm text-[var(--mist-500)]">
@@ -170,7 +170,7 @@ export default function UnassignedSpeciesModal({
             <label className="block text-sm font-medium text-[var(--mist-700)] mb-1.5">
               Common Name
             </label>
-            <div className="px-4 py-2.5 bg-[var(--mist-50)] border border-[var(--mist-200)] rounded-xl text-[var(--forest-800)] font-medium">
+            <div className="px-4 py-2.5 bg-[var(--mist-50)] border border-[var(--mist-200)] rounded-xl text-[var(--text-label)] font-medium">
               {detectionCommonName}
             </div>
             <p className="mt-1 text-xs text-[var(--mist-500)]">
@@ -218,7 +218,7 @@ export default function UnassignedSpeciesModal({
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
               className="block w-full px-4 py-2.5 border border-[var(--mist-200)] rounded-xl shadow-sm
-                bg-white text-[var(--foreground)] placeholder-[var(--mist-400)]
+                bg-[var(--card-bg)] text-[var(--foreground)] placeholder-[var(--mist-400)]
                 focus:outline-none focus:ring-2 focus:ring-[var(--moss-400)] focus:border-[var(--moss-400)]
                 hover:border-[var(--mist-300)] transition-colors text-sm resize-none"
             />
@@ -244,8 +244,8 @@ export default function UnassignedSpeciesModal({
                         ? "bg-slate-100 border-slate-300 text-slate-700 shadow-sm"
                         : r === "uncommon"
                         ? "bg-amber-50 border-amber-300 text-amber-700 shadow-sm"
-                        : "bg-red-50 border-red-300 text-red-700 shadow-sm"
-                      : "bg-white border-[var(--mist-200)] text-[var(--mist-500)] hover:border-[var(--mist-300)]"
+                        : "bg-[var(--error-bg)] border-[var(--error-border)] text-[var(--error-text)] shadow-sm"
+                      : "bg-[var(--card-bg)] border-[var(--mist-200)] text-[var(--mist-500)] hover:border-[var(--mist-300)]"
                   }`}
                 >
                   {r.charAt(0).toUpperCase() + r.slice(1)}
@@ -257,7 +257,7 @@ export default function UnassignedSpeciesModal({
 
         {/* Error message */}
         {error && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2">
+          <div className="mt-4 p-3 bg-[var(--error-bg)] border border-[var(--error-border)] rounded-xl flex items-center gap-2">
             <svg
               className="w-5 h-5 text-red-500 flex-shrink-0"
               fill="none"

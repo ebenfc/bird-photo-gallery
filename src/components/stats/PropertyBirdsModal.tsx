@@ -161,7 +161,7 @@ export default function PropertyBirdsModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-[var(--radius-xl)] shadow-[var(--shadow-2xl)] w-full max-w-2xl max-h-[85vh] flex flex-col animate-fade-in-up">
+      <div className="relative bg-[var(--card-bg)] rounded-[var(--radius-xl)] shadow-[var(--shadow-2xl)] w-full max-w-2xl max-h-[85vh] flex flex-col animate-fade-in-up">
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-[var(--border)]">
           <div className="flex items-center gap-3">
@@ -181,7 +181,7 @@ export default function PropertyBirdsModal({
               </svg>
             </div>
             <div>
-              <h2 className="text-lg font-bold text-[var(--forest-900)]">
+              <h2 className="text-lg font-bold text-[var(--text-primary)]">
                 Birds on Your Property
               </h2>
               <p className="text-sm text-[var(--mist-500)]">
@@ -191,7 +191,7 @@ export default function PropertyBirdsModal({
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-[var(--mist-400)] hover:text-[var(--forest-700)] hover:bg-[var(--moss-50)] rounded-[var(--radius-md)] transition-colors"
+            className="p-2 text-[var(--mist-400)] hover:text-[var(--forest-700)] hover:bg-[var(--surface-moss)] rounded-[var(--radius-md)] transition-colors"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -252,14 +252,14 @@ export default function PropertyBirdsModal({
                     <div
                       key={bird.commonName}
                       className={`flex items-center justify-between py-2 px-3 rounded-[var(--radius-md)] ${
-                        hasPhoto ? "bg-[var(--moss-50)]" : "bg-[var(--sky-50)]"
+                        hasPhoto ? "bg-[var(--surface-moss)]" : "bg-[var(--surface-sky)]"
                       }`}
                     >
                       <div className="flex items-center gap-2">
                         <span className={hasPhoto ? "text-[var(--moss-500)]" : "text-[var(--sky-500)]"}>
                           {hasPhoto ? "✓" : "◌"}
                         </span>
-                        <span className="text-[var(--forest-800)]">{bird.commonName}</span>
+                        <span className="text-[var(--text-label)]">{bird.commonName}</span>
                       </div>
                       <span className="text-sm text-[var(--mist-500)]">
                         ({formatCount(bird.yearlyCount)}x heard)
@@ -292,7 +292,7 @@ export default function PropertyBirdsModal({
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
                               <span className="text-lg">🎧</span>
-                              <span className="font-semibold text-[var(--forest-900)]">
+                              <span className="font-semibold text-[var(--text-primary)]">
                                 {bird.commonName}
                               </span>
                             </div>
@@ -335,7 +335,7 @@ export default function PropertyBirdsModal({
                       >
                         <div className="flex items-center gap-2">
                           <span className="text-[var(--mist-400)]">•</span>
-                          <span className="text-[var(--forest-800)]">{bird.commonName}</span>
+                          <span className="text-[var(--text-label)]">{bird.commonName}</span>
                         </div>
                         <span className="text-sm text-[var(--mist-500)]">
                           ({formatCount(bird.yearlyCount)}x)
@@ -399,11 +399,11 @@ export default function PropertyBirdsModal({
                 capturedBirds.map((bird) => (
                   <div
                     key={bird.commonName}
-                    className="flex items-center justify-between py-2 px-3 rounded-[var(--radius-md)] bg-[var(--moss-50)]"
+                    className="flex items-center justify-between py-2 px-3 rounded-[var(--radius-md)] bg-[var(--surface-moss)]"
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-[var(--moss-500)]">✓</span>
-                      <span className="text-[var(--forest-800)]">{bird.commonName}</span>
+                      <span className="text-[var(--text-label)]">{bird.commonName}</span>
                     </div>
                     <span className="text-sm text-[var(--mist-500)]">
                       ({formatCount(bird.yearlyCount)}x heard)

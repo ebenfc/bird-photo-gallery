@@ -21,7 +21,7 @@ export default function Error({
   return (
     <div className="min-h-[50vh] flex items-center justify-center">
       <div className="text-center px-4">
-        <h2 className="text-2xl font-semibold text-[var(--forest-900)] mb-4">
+        <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-4">
           Something went wrong
         </h2>
         <p className="text-[var(--mist-600)] mb-6">

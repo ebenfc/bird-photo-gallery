@@ -169,7 +169,7 @@ export default function ActivityPage() {
       <div className="pnw-texture min-h-screen">
         {/* Desktop header */}
         <div className="hidden sm:block mb-8">
-          <h1 className="text-3xl font-bold text-[var(--forest-900)] tracking-tight mb-2">
+          <h1 className="text-3xl font-bold text-[var(--text-primary)] tracking-tight mb-2">
             Activity
           </h1>
           <p className="text-[var(--mist-600)]">
@@ -179,7 +179,7 @@ export default function ActivityPage() {
 
         {/* Mobile header */}
         <div className="sm:hidden mb-4">
-          <h1 className="text-2xl font-bold text-[var(--forest-900)] tracking-tight">
+          <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">
             Activity
           </h1>
         </div>
@@ -198,7 +198,7 @@ export default function ActivityPage() {
     <div className="pnw-texture min-h-screen">
       {/* Desktop header */}
       <div className="hidden sm:block mb-8">
-        <h1 className="text-3xl font-bold text-[var(--forest-900)] tracking-tight mb-2">
+        <h1 className="text-3xl font-bold text-[var(--text-primary)] tracking-tight mb-2">
           Activity
         </h1>
         <p className="text-[var(--mist-600)]">
@@ -209,7 +209,7 @@ export default function ActivityPage() {
       {/* Mobile header - compact with filter toggle */}
       <div className="sm:hidden mb-4">
         <div className="flex items-center justify-between mb-2">
-          <h1 className="text-2xl font-bold text-[var(--forest-900)] tracking-tight">
+          <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">
             Activity
           </h1>
           <button
@@ -219,7 +219,7 @@ export default function ActivityPage() {
               transition-all duration-[var(--timing-fast)] active:scale-95
               ${showMobileFilters || activeFilterCount > 0
                 ? "bg-gradient-to-b from-[var(--forest-500)] to-[var(--forest-600)] text-white border-[var(--forest-600)]"
-                : "bg-white text-[var(--forest-700)] border-[var(--mist-200)] hover:border-[var(--moss-300)]"
+                : "bg-[var(--card-bg)] text-[var(--forest-700)] border-[var(--mist-200)] hover:border-[var(--moss-300)]"
               }`}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -227,7 +227,7 @@ export default function ActivityPage() {
             </svg>
             Filter
             {activeFilterCount > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full bg-white/20">
+              <span className="ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full bg-[var(--card-bg)]/20">
                 {activeFilterCount}
               </span>
             )}
@@ -258,7 +258,7 @@ export default function ActivityPage() {
 
       {/* Error state */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-[var(--radius-lg)] p-4 mb-8">
+        <div className="bg-[var(--error-bg)] border border-[var(--error-border)] rounded-[var(--radius-lg)] p-4 mb-8">
           <div className="flex items-start gap-3">
             <svg
               className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"

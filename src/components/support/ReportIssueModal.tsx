@@ -128,7 +128,7 @@ export default function ReportIssueModal({
             </svg>
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-[var(--forest-900)]">
+            <h2 className="text-xl font-semibold text-[var(--text-primary)]">
               Report an Issue
             </h2>
             <p className="text-sm text-[var(--mist-500)]">
@@ -151,8 +151,8 @@ export default function ReportIssueModal({
                   onClick={() => setIssueType(type.value)}
                   className={`px-3 py-2.5 rounded-xl border text-left transition-all ${
                     issueType === type.value
-                      ? "bg-[var(--moss-50)] border-[var(--moss-400)] text-[var(--forest-800)] shadow-sm"
-                      : "bg-white border-[var(--mist-200)] text-[var(--mist-600)] hover:border-[var(--mist-300)]"
+                      ? "bg-[var(--surface-moss)] border-[var(--moss-400)] text-[var(--text-label)] shadow-sm"
+                      : "bg-[var(--card-bg)] border-[var(--mist-200)] text-[var(--mist-600)] hover:border-[var(--mist-300)]"
                   }`}
                 >
                   <span className="text-sm font-medium block">
@@ -179,7 +179,7 @@ export default function ReportIssueModal({
               }}
               rows={4}
               className="block w-full px-4 py-2.5 border border-[var(--mist-200)] rounded-xl shadow-sm
-                bg-white text-[var(--foreground)] placeholder-[var(--mist-400)]
+                bg-[var(--card-bg)] text-[var(--foreground)] placeholder-[var(--mist-400)]
                 focus:outline-none focus:ring-2 focus:ring-[var(--moss-400)] focus:border-[var(--moss-400)]
                 hover:border-[var(--mist-300)] transition-colors text-sm resize-none"
             />
@@ -202,7 +202,7 @@ export default function ReportIssueModal({
 
         {/* Error message */}
         {error && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2">
+          <div className="mt-4 p-3 bg-[var(--error-bg)] border border-[var(--error-border)] rounded-xl flex items-center gap-2">
             <svg
               className="w-5 h-5 text-red-500 flex-shrink-0"
               fill="none"

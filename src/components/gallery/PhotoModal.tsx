@@ -408,8 +408,8 @@ export default function PhotoModal({
             {/* Close button */}
             <button
               onClick={(e) => { e.stopPropagation(); onClose(); }}
-              className="p-3 bg-white/10 backdrop-blur-md rounded-full
-                text-white/80 hover:text-white hover:bg-white/20
+              className="p-3 bg-[var(--card-bg)]/10 backdrop-blur-md rounded-full
+                text-white/80 hover:text-white hover:bg-[var(--card-bg)]/20
                 shadow-[var(--shadow-lg)]
                 transition-all duration-[var(--timing-fast)]
                 hover:scale-105 active:scale-95"
@@ -422,8 +422,8 @@ export default function PhotoModal({
             {/* Fullscreen button (desktop) */}
             <button
               onClick={(e) => { e.stopPropagation(); setIsFullscreen(true); }}
-              className="hidden lg:flex p-3 bg-white/10 backdrop-blur-md rounded-full
-                text-white/80 hover:text-white hover:bg-white/20
+              className="hidden lg:flex p-3 bg-[var(--card-bg)]/10 backdrop-blur-md rounded-full
+                text-white/80 hover:text-white hover:bg-[var(--card-bg)]/20
                 shadow-[var(--shadow-lg)]
                 transition-all duration-[var(--timing-fast)]
                 hover:scale-105 active:scale-95"
@@ -446,8 +446,8 @@ export default function PhotoModal({
                 onNavigate("prev");
               }}
               className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-3.5
-                bg-white/10 backdrop-blur-md rounded-full
-                text-white/80 hover:text-white hover:bg-white/20
+                bg-[var(--card-bg)]/10 backdrop-blur-md rounded-full
+                text-white/80 hover:text-white hover:bg-[var(--card-bg)]/20
                 shadow-[var(--shadow-lg)]
                 transition-all duration-[var(--timing-fast)]
                 hover:scale-110 hover:-translate-x-1 active:scale-95"
@@ -467,8 +467,8 @@ export default function PhotoModal({
                 onNavigate("next");
               }}
               className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-3.5
-                bg-white/10 backdrop-blur-md rounded-full
-                text-white/80 hover:text-white hover:bg-white/20
+                bg-[var(--card-bg)]/10 backdrop-blur-md rounded-full
+                text-white/80 hover:text-white hover:bg-[var(--card-bg)]/20
                 shadow-[var(--shadow-lg)]
                 transition-all duration-[var(--timing-fast)]
                 hover:scale-110 hover:translate-x-1 active:scale-95"
@@ -498,7 +498,7 @@ export default function PhotoModal({
         </div>
 
         {/* Mobile: Collapsible details panel */}
-        <div className={`lg:hidden bg-white rounded-t-[var(--radius-2xl)] shadow-[var(--shadow-2xl)]
+        <div className={`lg:hidden bg-[var(--card-bg)] rounded-t-[var(--radius-2xl)] shadow-[var(--shadow-2xl)]
           transition-all duration-300 ease-out overflow-hidden
           ${isDetailsExpanded ? "max-h-[50vh]" : "max-h-20"}`}>
           {/* Collapse/Expand handle */}
@@ -508,7 +508,7 @@ export default function PhotoModal({
           >
             <div className="flex items-center gap-3">
               <div>
-                <h2 className="font-bold text-[var(--forest-900)]">
+                <h2 className="font-bold text-[var(--text-primary)]">
                   {photo.species?.commonName || "Species Unassigned"}
                 </h2>
                 {photo.species?.scientificName && (
@@ -575,7 +575,7 @@ export default function PhotoModal({
 
             {/* Haikubox detection stats - mobile */}
             {detection && detection.yearlyCount > 0 && (
-              <div className="mb-4 p-3 bg-gradient-to-br from-[var(--sky-50)] to-[var(--moss-50)]
+              <div className="mb-4 p-3 bg-gradient-to-br from-[var(--sky-50)] to-[var(--surface-moss)]
                 rounded-[var(--radius-md)] border border-[var(--sky-100)]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -592,7 +592,7 @@ export default function PhotoModal({
                         d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
                       />
                     </svg>
-                    <span className="text-xs font-semibold text-[var(--forest-800)]">Heard on Property</span>
+                    <span className="text-xs font-semibold text-[var(--text-label)]">Heard on Property</span>
                   </div>
                   <div className="flex items-baseline gap-1">
                     <span className="text-lg font-bold text-[var(--sky-700)]">
@@ -613,15 +613,15 @@ export default function PhotoModal({
 
             {/* Date info cards */}
             <div className="grid grid-cols-2 gap-2 mb-4">
-              <div className="p-3 bg-[var(--moss-50)] rounded-[var(--radius-md)]">
+              <div className="p-3 bg-[var(--surface-moss)] rounded-[var(--radius-md)]">
                 <span className="text-xs text-[var(--mist-500)] uppercase">Uploaded</span>
-                <p className="text-sm font-semibold text-[var(--forest-800)]">
+                <p className="text-sm font-semibold text-[var(--text-label)]">
                   {formatDate(photo.uploadDate)}
                 </p>
               </div>
               <div className="p-3 bg-[var(--mist-50)] rounded-[var(--radius-md)]">
                 <span className="text-xs text-[var(--mist-500)] uppercase">Taken</span>
-                <p className="text-sm font-semibold text-[var(--forest-800)]">
+                <p className="text-sm font-semibold text-[var(--text-label)]">
                   {photo.originalDateTaken ? formatDate(photo.originalDateTaken) : "Not set"}
                 </p>
               </div>
@@ -631,7 +631,7 @@ export default function PhotoModal({
             {photo.notes && (
               <div className="p-3 bg-[var(--bark-50)] rounded-[var(--radius-md)]">
                 <span className="text-xs text-[var(--bark-500)] uppercase font-medium">Notes</span>
-                <p className="text-sm text-[var(--forest-800)] mt-1 leading-relaxed">
+                <p className="text-sm text-[var(--text-label)] mt-1 leading-relaxed">
                   {photo.notes}
                 </p>
               </div>
@@ -640,13 +640,13 @@ export default function PhotoModal({
         </div>
 
         {/* Desktop: Full sidebar */}
-        <div className="hidden lg:block lg:w-[340px] bg-white lg:rounded-l-[var(--radius-2xl)] p-6 overflow-auto
+        <div className="hidden lg:block lg:w-[340px] bg-[var(--card-bg)] lg:rounded-l-[var(--radius-2xl)] p-6 overflow-auto
           shadow-[var(--shadow-2xl)] animate-slide-in-right">
           <div className="flex items-start justify-between mb-5">
             <div className="flex-1">
               {photo.species ? (
                 <>
-                  <h2 className="text-xl font-bold text-[var(--forest-900)] tracking-tight">
+                  <h2 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
                     {photo.species.commonName}
                   </h2>
                   {photo.species.scientificName && (
@@ -709,7 +709,7 @@ export default function PhotoModal({
               <button
                 onClick={handleFavorite}
                 className={`p-2.5 rounded-full transition-all duration-[var(--timing-fast)]
-                  hover:bg-[var(--moss-50)] active:scale-90
+                  hover:bg-[var(--surface-moss)] active:scale-90
                   ${justFavorited ? "animate-heart-beat" : ""}`}
               >
                 <svg
@@ -734,7 +734,7 @@ export default function PhotoModal({
 
           {/* Haikubox detection stats */}
           {detection && detection.yearlyCount > 0 && (
-            <div className="mb-4 p-4 bg-gradient-to-br from-[var(--sky-50)] to-[var(--moss-50)]
+            <div className="mb-4 p-4 bg-gradient-to-br from-[var(--sky-50)] to-[var(--surface-moss)]
               rounded-[var(--radius-lg)] border border-[var(--sky-100)]">
               <div className="flex items-center gap-2 mb-2">
                 <svg
@@ -750,7 +750,7 @@ export default function PhotoModal({
                     d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
                   />
                 </svg>
-                <span className="text-sm font-semibold text-[var(--forest-800)]">
+                <span className="text-sm font-semibold text-[var(--text-label)]">
                   Heard on Property
                 </span>
               </div>
@@ -780,8 +780,8 @@ export default function PhotoModal({
                 hover:shadow-[var(--shadow-sm)]
                 active:scale-[0.98] transition-all disabled:opacity-50
                 ${coverPhotoSet
-                  ? "text-[var(--moss-600)] bg-gradient-to-br from-[var(--moss-100)] to-[var(--moss-50)] border-[var(--moss-300)]"
-                  : "text-[var(--forest-600)] bg-gradient-to-br from-[var(--forest-50)] to-[var(--moss-50)] border-[var(--forest-200)] hover:border-[var(--forest-300)]"}`}
+                  ? "text-[var(--moss-600)] bg-gradient-to-br from-[var(--moss-100)] to-[var(--surface-moss)] border-[var(--moss-300)]"
+                  : "text-[var(--forest-600)] bg-gradient-to-br from-[var(--surface-forest)] to-[var(--surface-moss)] border-[var(--forest-200)] hover:border-[var(--forest-300)]"}`}
             >
               {isSettingCover ? "Setting cover photo..." : coverPhotoSet ? "Cover photo set!" : "Set as species cover photo"}
             </button>
@@ -789,7 +789,7 @@ export default function PhotoModal({
 
           <div className="space-y-3">
             {/* Upload date card */}
-            <div className="flex items-center gap-3 p-3.5 bg-gradient-to-br from-[var(--moss-50)] to-[var(--forest-50)]
+            <div className="flex items-center gap-3 p-3.5 bg-gradient-to-br from-[var(--surface-moss)] to-[var(--surface-forest)]
               rounded-[var(--radius-lg)] shadow-[var(--shadow-xs)]">
               <div className="w-9 h-9 rounded-full bg-[var(--moss-100)] flex items-center justify-center">
                 <svg className="w-4 h-4 text-[var(--moss-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -798,7 +798,7 @@ export default function PhotoModal({
               </div>
               <div>
                 <span className="text-xs font-medium text-[var(--mist-500)] uppercase tracking-wide">Uploaded</span>
-                <p className="text-[var(--forest-800)] font-semibold text-sm">
+                <p className="text-[var(--text-label)] font-semibold text-sm">
                   {formatDate(photo.uploadDate)}
                 </p>
               </div>
@@ -860,7 +860,7 @@ export default function PhotoModal({
                       </button>
                     </div>
                   ) : (
-                    <p className="text-[var(--forest-800)] font-semibold text-sm">
+                    <p className="text-[var(--text-label)] font-semibold text-sm">
                       {photo.originalDateTaken ? formatDate(photo.originalDateTaken) : "Not set"}
                     </p>
                   )}
@@ -876,7 +876,7 @@ export default function PhotoModal({
                       setIsEditingDate(true);
                     }}
                     className="p-2 text-[var(--mist-400)] hover:text-[var(--moss-600)]
-                      hover:bg-[var(--moss-50)] rounded-full transition-all"
+                      hover:bg-[var(--surface-moss)] rounded-full transition-all"
                     title="Edit date"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -965,7 +965,7 @@ export default function PhotoModal({
                   </div>
                 </div>
               ) : (
-                <p className="text-[var(--forest-800)] text-sm leading-relaxed">
+                <p className="text-[var(--text-label)] text-sm leading-relaxed">
                   {photo.notes || <span className="text-[var(--mist-400)] italic">No notes added</span>}
                 </p>
               )}
@@ -998,7 +998,7 @@ export default function PhotoModal({
             onClick={(e) => { e.stopPropagation(); setShowOverflowMenu(false); }}
           />
           <div
-            className="absolute right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] bg-white rounded-[var(--radius-lg)]
+            className="absolute right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] bg-[var(--card-bg)] rounded-[var(--radius-lg)]
               shadow-[var(--shadow-2xl)] border border-[var(--border)] py-1 min-w-[180px] animate-fade-in-scale"
           >
             {photo.species && (
@@ -1010,7 +1010,7 @@ export default function PhotoModal({
                   onClose();
                 }}
                 className="w-full px-4 py-2.5 text-left text-sm text-[var(--forest-700)]
-                  hover:bg-[var(--moss-50)] flex items-center gap-2"
+                  hover:bg-[var(--surface-moss)] flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -1027,7 +1027,7 @@ export default function PhotoModal({
                   onChangeSpecies(photo);
                 }}
                 className="w-full px-4 py-2.5 text-left text-sm text-[var(--forest-700)]
-                  hover:bg-[var(--moss-50)] flex items-center gap-2"
+                  hover:bg-[var(--surface-moss)] flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
@@ -1044,7 +1044,7 @@ export default function PhotoModal({
                 }}
                 disabled={isSettingCover}
                 className="w-full px-4 py-2.5 text-left text-sm text-[var(--forest-700)]
-                  hover:bg-[var(--moss-50)] flex items-center gap-2 disabled:opacity-50"
+                  hover:bg-[var(--surface-moss)] flex items-center gap-2 disabled:opacity-50"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -1079,7 +1079,7 @@ export default function PhotoModal({
       {showDeleteConfirm && (
         <div className="absolute inset-0 z-60 flex items-center justify-center p-4 animate-fade-in">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowDeleteConfirm(false)} />
-          <div className="relative bg-white rounded-[var(--radius-2xl)] shadow-[var(--shadow-2xl)] p-6 max-w-sm w-full
+          <div className="relative bg-[var(--card-bg)] rounded-[var(--radius-2xl)] shadow-[var(--shadow-2xl)] p-6 max-w-sm w-full
             animate-fade-in-scale">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
@@ -1087,12 +1087,12 @@ export default function PhotoModal({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-[var(--forest-900)]">Delete this photo?</h3>
+              <h3 className="text-lg font-bold text-[var(--text-primary)]">Delete this photo?</h3>
             </div>
 
             <div className="mb-6 text-sm text-[var(--mist-600)]">
               <p className="mb-2">This will permanently delete:</p>
-              <ul className="list-disc list-inside space-y-1 text-[var(--forest-800)]">
+              <ul className="list-disc list-inside space-y-1 text-[var(--text-label)]">
                 <li>Photo of {photo.species?.commonName || "Unknown species"}</li>
                 {photo.originalDateTaken && (
                   <li>Taken on {formatDate(photo.originalDateTaken)}</li>
@@ -1105,7 +1105,7 @@ export default function PhotoModal({
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 className="flex-1 px-4 py-3 text-sm font-semibold text-[var(--forest-700)]
-                  bg-white border-2 border-[var(--mist-200)]
+                  bg-[var(--card-bg)] border-2 border-[var(--mist-200)]
                   rounded-[var(--radius-lg)] shadow-[var(--shadow-sm)]
                   hover:bg-[var(--mist-50)] hover:border-[var(--mist-300)]
                   active:scale-[0.98] transition-all"
