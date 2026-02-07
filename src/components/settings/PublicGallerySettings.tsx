@@ -182,7 +182,7 @@ export default function PublicGallerySettings() {
     <div className="space-y-5">
       {/* Username Input */}
       <div>
-        <label className="block text-sm font-medium text-[var(--forest-900)] mb-2">
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           Username
         </label>
         <div className="relative">
@@ -196,7 +196,7 @@ export default function PublicGallerySettings() {
             placeholder="your-username"
             maxLength={30}
             className={`w-full pl-10 pr-10 py-2.5 border rounded-[var(--radius-md)]
-              text-[var(--forest-900)] bg-white
+              text-[var(--text-primary)] bg-[var(--card-bg)]
               focus:outline-none focus:ring-2 focus:border-transparent
               transition-all duration-[var(--timing-fast)]
               ${
@@ -259,7 +259,7 @@ export default function PublicGallerySettings() {
       {/* Public Gallery Toggle */}
       <div className="flex items-center justify-between py-3 px-4 bg-[var(--mist-50)] rounded-[var(--radius-md)]">
         <div>
-          <label className="text-sm font-medium text-[var(--forest-900)]">
+          <label className="text-sm font-medium text-[var(--text-primary)]">
             Make my feed public
           </label>
           <p className="text-xs text-[var(--mist-500)] mt-0.5">
@@ -298,7 +298,7 @@ export default function PublicGallerySettings() {
       {isPublicEnabled && (
         <div className="flex items-center justify-between py-3 px-4 bg-[var(--mist-50)] rounded-[var(--radius-md)]">
           <div>
-            <label className="text-sm font-medium text-[var(--forest-900)]">
+            <label className="text-sm font-medium text-[var(--text-primary)]">
               List in Discover directory
             </label>
             <p className="text-xs text-[var(--mist-500)] mt-0.5">
@@ -330,12 +330,12 @@ export default function PublicGallerySettings() {
 
       {/* Public URL Preview */}
       {settings?.username && settings.isPublicGalleryEnabled && (
-        <div className="p-4 bg-gradient-to-br from-[var(--moss-50)] to-[var(--forest-50)]
+        <div className="p-4 bg-gradient-to-br from-[var(--surface-moss)] to-[var(--surface-forest)]
           rounded-[var(--radius-md)] border border-[var(--moss-200)]">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p className="text-xs font-medium text-[var(--moss-700)] mb-1">Your public feed</p>
-              <p className="text-sm text-[var(--forest-800)] font-mono truncate">
+              <p className="text-sm text-[var(--text-label)] font-mono truncate">
                 {publicUrl}
               </p>
             </div>
@@ -346,7 +346,7 @@ export default function PublicGallerySettings() {
                 ${
                   copied
                     ? "bg-green-100 text-green-700 border border-green-200"
-                    : "bg-white text-[var(--forest-700)] border border-[var(--border-light)] hover:bg-[var(--mist-50)] hover:border-[var(--moss-300)]"
+                    : "bg-[var(--card-bg)] text-[var(--forest-700)] border border-[var(--border-light)] hover:bg-[var(--mist-50)] hover:border-[var(--moss-300)]"
                 }`}
             >
               {copied ? (

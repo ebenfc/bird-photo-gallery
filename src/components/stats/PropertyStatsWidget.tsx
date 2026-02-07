@@ -29,7 +29,7 @@ export default function PropertyStatsWidget() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl shadow-sm border border-[var(--mist-100)] p-6 animate-pulse">
+      <div className="bg-[var(--card-bg)] rounded-2xl shadow-sm border border-[var(--mist-100)] p-6 animate-pulse">
         <div className="h-6 w-40 bg-[var(--mist-100)] rounded mb-4" />
         <div className="grid grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => (
@@ -51,18 +51,18 @@ export default function PropertyStatsWidget() {
       : 0;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-[var(--mist-100)] overflow-hidden">
+    <div className="bg-[var(--card-bg)] rounded-2xl shadow-sm border border-[var(--mist-100)] overflow-hidden">
         {/* Stats Grid */}
         <div className="p-6">
           <div className="grid grid-cols-3 gap-4">
-            <div className="text-center p-3 rounded-xl bg-[var(--sky-50)]">
+            <div className="text-center p-3 rounded-xl bg-[var(--surface-sky)]">
               <div className="text-2xl font-bold text-[var(--sky-700)]">
                 {stats.totalHeard}
               </div>
               <div className="text-xs text-[var(--mist-500)]">Species Heard</div>
             </div>
             <Link href="/species">
-              <div className="text-center p-3 rounded-xl bg-[var(--moss-50)]
+              <div className="text-center p-3 rounded-xl bg-[var(--surface-moss)]
                 hover:bg-[var(--moss-100)] cursor-pointer
                 transition-all duration-[var(--timing-fast)] hover:scale-105 active:scale-95
                 hover:shadow-[var(--shadow-sm)]">
@@ -72,7 +72,7 @@ export default function PropertyStatsWidget() {
                 <div className="text-xs text-[var(--mist-500)]">Photographed</div>
               </div>
             </Link>
-            <div className="text-center p-3 rounded-xl bg-[var(--forest-50)]">
+            <div className="text-center p-3 rounded-xl bg-[var(--surface-forest)]">
               <div className="text-2xl font-bold text-[var(--forest-700)]">
                 {captureRate}%
               </div>

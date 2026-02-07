@@ -312,15 +312,15 @@ export default function SpeciesAssignModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-[var(--forest-950)]/80 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col border border-[var(--mist-100)]">
+      <div className="relative bg-[var(--card-bg)] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col border border-[var(--mist-100)]">
         {/* Accent top border */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[var(--forest-600)] via-[var(--moss-500)] to-[var(--forest-600)]" />
 
         {/* Header */}
-        <div className="p-4 border-b border-[var(--mist-100)] bg-gradient-to-r from-[var(--moss-50)] to-[var(--mist-50)]">
+        <div className="p-4 border-b border-[var(--mist-100)] bg-gradient-to-r from-[var(--surface-moss)] to-[var(--mist-50)]">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-[var(--forest-900)]">
+              <h2 className="text-lg font-semibold text-[var(--text-primary)]">
                 Assign Species
               </h2>
               {queuePosition && (
@@ -331,7 +331,7 @@ export default function SpeciesAssignModal({
             </div>
             <button
               onClick={onClose}
-              className="p-2 text-[var(--mist-400)] hover:text-[var(--mist-600)] hover:bg-white/50 rounded-xl transition-all"
+              className="p-2 text-[var(--mist-400)] hover:text-[var(--mist-600)] hover:bg-[var(--card-bg)]/50 rounded-xl transition-all"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -342,7 +342,7 @@ export default function SpeciesAssignModal({
 
         {/* Photo preview */}
         <div className="p-4 bg-[var(--mist-50)]">
-          <div className="relative w-full h-48 rounded-xl overflow-hidden bg-white shadow-inner">
+          <div className="relative w-full h-48 rounded-xl overflow-hidden bg-[var(--card-bg)] shadow-inner">
             <Image
               src={photo.originalUrl}
               alt="Photo to assign"
@@ -379,8 +379,8 @@ export default function SpeciesAssignModal({
               </button>
 
               {/* Upgrade card */}
-              <div className="p-4 bg-[var(--moss-50)] border border-[var(--moss-200)] rounded-xl">
-                <h3 className="font-semibold text-[var(--forest-800)] mb-1">
+              <div className="p-4 bg-[var(--surface-moss)] border border-[var(--moss-200)] rounded-xl">
+                <h3 className="font-semibold text-[var(--text-label)] mb-1">
                   Upgrade your gallery
                 </h3>
                 <p className="text-sm text-[var(--forest-600)]">
@@ -449,7 +449,7 @@ export default function SpeciesAssignModal({
                           key={`recent-${s.id}`}
                           onClick={() => handleAssign(s.id)}
                           disabled={loading}
-                          className="w-full flex items-center gap-3 p-3 rounded-xl border border-[var(--sky-200)] bg-[var(--sky-50)]/50 hover:border-[var(--sky-400)] hover:bg-[var(--sky-50)] transition-all text-left disabled:opacity-50"
+                          className="w-full flex items-center gap-3 p-3 rounded-xl border border-[var(--sky-200)] bg-[var(--surface-sky)]/50 hover:border-[var(--sky-400)] hover:bg-[var(--surface-sky)] transition-all text-left disabled:opacity-50"
                         >
                           {s.latestPhoto ? (
                             <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 ring-1 ring-[var(--sky-200)]">
@@ -479,7 +479,7 @@ export default function SpeciesAssignModal({
                           )}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <p className="font-medium text-[var(--forest-900)] truncate">
+                              <p className="font-medium text-[var(--text-primary)] truncate">
                                 {s.commonName}
                               </p>
                               <RarityBadge rarity={s.rarity} size="sm" />
@@ -519,7 +519,7 @@ export default function SpeciesAssignModal({
                       key={s.id}
                       onClick={() => handleAssign(s.id)}
                       disabled={loading}
-                      className="w-full flex items-center gap-3 p-3 rounded-xl border border-[var(--mist-200)] hover:border-[var(--moss-400)] hover:bg-[var(--moss-50)] transition-all text-left disabled:opacity-50"
+                      className="w-full flex items-center gap-3 p-3 rounded-xl border border-[var(--mist-200)] hover:border-[var(--moss-400)] hover:bg-[var(--surface-moss)] transition-all text-left disabled:opacity-50"
                     >
                       {s.latestPhoto ? (
                         <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 ring-1 ring-[var(--mist-100)]">
@@ -531,7 +531,7 @@ export default function SpeciesAssignModal({
                           />
                         </div>
                       ) : (
-                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[var(--moss-50)] to-[var(--mist-50)] flex items-center justify-center flex-shrink-0">
+                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[var(--surface-moss)] to-[var(--mist-50)] flex items-center justify-center flex-shrink-0">
                           <svg className="w-6 h-6 text-[var(--mist-400)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
@@ -539,7 +539,7 @@ export default function SpeciesAssignModal({
                       )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <p className="font-medium text-[var(--forest-900)] truncate">
+                          <p className="font-medium text-[var(--text-primary)] truncate">
                             {s.commonName}
                           </p>
                           <RarityBadge rarity={s.rarity} size="sm" />
@@ -574,7 +574,7 @@ export default function SpeciesAssignModal({
               {/* Add new species button */}
               <button
                 onClick={() => setShowNewForm(true)}
-                className="w-full flex items-center justify-center gap-2 p-3 rounded-xl border-2 border-dashed border-[var(--moss-200)] text-[var(--forest-700)] hover:border-[var(--moss-400)] hover:bg-[var(--moss-50)] transition-all"
+                className="w-full flex items-center justify-center gap-2 p-3 rounded-xl border-2 border-dashed border-[var(--moss-200)] text-[var(--forest-700)] hover:border-[var(--moss-400)] hover:bg-[var(--surface-moss)] transition-all"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -622,7 +622,7 @@ export default function SpeciesAssignModal({
                   </div>
                 )}
                 {lookupResult && !lookupLoading && (
-                  <div className="mt-2 p-2 bg-[var(--moss-50)] border border-[var(--moss-200)] rounded-lg">
+                  <div className="mt-2 p-2 bg-[var(--surface-moss)] border border-[var(--moss-200)] rounded-lg">
                     <div className="flex items-center gap-2">
                       <svg className="w-4 h-4 text-[var(--moss-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -682,8 +682,8 @@ export default function SpeciesAssignModal({
                             ? "bg-slate-100 border-slate-300 text-slate-700"
                             : rarity === "uncommon"
                             ? "bg-amber-50 border-amber-300 text-amber-700"
-                            : "bg-red-50 border-red-300 text-red-700"
-                          : "bg-white border-[var(--mist-200)] text-[var(--mist-500)] hover:border-[var(--mist-300)]"
+                            : "bg-[var(--error-bg)] border-[var(--error-border)] text-[var(--error-text)]"
+                          : "bg-[var(--card-bg)] border-[var(--mist-200)] text-[var(--mist-500)] hover:border-[var(--mist-300)]"
                       }`}
                     >
                       {rarity.charAt(0).toUpperCase() + rarity.slice(1)}

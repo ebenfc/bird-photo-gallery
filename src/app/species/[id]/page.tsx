@@ -88,7 +88,7 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
     return (
       <div>
         <div className="h-8 w-48 bg-[var(--mist-200)] rounded-[var(--radius-md)] animate-pulse mb-6" />
-        <div className="bg-white rounded-[var(--radius-lg)] border border-[var(--border-light)] p-5 sm:p-6 mb-6">
+        <div className="bg-[var(--card-bg)] rounded-[var(--radius-lg)] border border-[var(--border-light)] p-5 sm:p-6 mb-6">
           <div className="space-y-3">
             <div className="h-8 w-2/3 bg-[var(--mist-200)] rounded animate-pulse" />
             <div className="h-5 w-1/3 bg-[var(--mist-100)] rounded animate-pulse" />
@@ -99,7 +99,7 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
-              className="aspect-square bg-gradient-to-br from-[var(--moss-50)] to-[var(--mist-50)] rounded-[var(--radius-lg)] animate-pulse"
+              className="aspect-square bg-gradient-to-br from-[var(--surface-moss)] to-[var(--mist-50)] rounded-[var(--radius-lg)] animate-pulse"
             />
           ))}
         </div>
@@ -110,7 +110,7 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
   if (!species) {
     return (
       <div className="text-center py-16">
-        <h2 className="text-xl font-semibold text-[var(--forest-900)] mb-2">
+        <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">
           Species not found
         </h2>
         <Link href="/species">
@@ -135,11 +135,11 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
       </Link>
 
       {/* Species Header Card */}
-      <div className="bg-white rounded-[var(--radius-lg)] border border-[var(--border-light)]
+      <div className="bg-[var(--card-bg)] rounded-[var(--radius-lg)] border border-[var(--border-light)]
         p-5 sm:p-6 mb-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[var(--forest-900)] mb-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] mb-1">
               {species.commonName}
             </h1>
             {species.scientificName && (
@@ -181,7 +181,7 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
       {/* Photo count */}
       <div className="mb-4">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg font-semibold text-[var(--forest-900)]">
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">
             {photos.length >= SPECIES_PHOTO_LIMIT
               ? "Your Gallery — Curated"
               : `Your Gallery (${photos.length} of ${SPECIES_PHOTO_LIMIT})`}
@@ -228,7 +228,7 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
               />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-[var(--forest-900)] mb-1">
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">
             Start your collection
           </h3>
           <p className="text-[var(--mist-600)]">

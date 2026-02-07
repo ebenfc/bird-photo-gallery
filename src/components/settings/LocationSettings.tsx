@@ -88,7 +88,7 @@ export default function LocationSettings() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* City Input */}
         <div>
-          <label className="block text-sm font-medium text-[var(--forest-900)] mb-2">
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
             City
           </label>
           <input
@@ -98,7 +98,7 @@ export default function LocationSettings() {
             placeholder="e.g. Portland"
             maxLength={100}
             className="w-full px-4 py-2.5 border border-[var(--border-light)] rounded-[var(--radius-md)]
-              text-[var(--forest-900)] bg-white
+              text-[var(--text-primary)] bg-[var(--card-bg)]
               focus:outline-none focus:ring-2 focus:ring-[var(--moss-500)] focus:border-transparent
               transition-all duration-[var(--timing-fast)]"
           />
@@ -106,14 +106,14 @@ export default function LocationSettings() {
 
         {/* State Dropdown */}
         <div>
-          <label className="block text-sm font-medium text-[var(--forest-900)] mb-2">
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
             State
           </label>
           <select
             value={state}
             onChange={(e) => setState(e.target.value)}
             className="w-full px-4 py-2.5 border border-[var(--border-light)] rounded-[var(--radius-md)]
-              text-[var(--forest-900)] bg-white
+              text-[var(--text-primary)] bg-[var(--card-bg)]
               focus:outline-none focus:ring-2 focus:ring-[var(--moss-500)] focus:border-transparent
               transition-all duration-[var(--timing-fast)]"
           >

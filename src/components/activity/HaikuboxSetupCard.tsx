@@ -114,7 +114,7 @@ export default function HaikuboxSetupCard({
   };
 
   return (
-    <div className="bg-white rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] border border-[var(--border-light)] overflow-hidden">
+    <div className="bg-[var(--card-bg)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] border border-[var(--border-light)] overflow-hidden">
       <div className="text-center pt-10 pb-6 px-6">
         {/* Icon */}
         <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-[var(--sky-100)] to-[var(--moss-100)] flex items-center justify-center">
@@ -133,7 +133,7 @@ export default function HaikuboxSetupCard({
           </svg>
         </div>
 
-        <h2 className="text-xl font-bold text-[var(--forest-900)] mb-3">
+        <h2 className="text-xl font-bold text-[var(--text-primary)] mb-3">
           Connect a Haikubox
         </h2>
         <p className="text-[var(--mist-600)] max-w-md mx-auto mb-8">
@@ -150,7 +150,7 @@ export default function HaikuboxSetupCard({
             <button
               onClick={() => setPath("own")}
               className="group p-5 rounded-[var(--radius-lg)] border-2 border-[var(--mist-200)]
-                bg-[var(--bg-secondary)] hover:border-[var(--moss-400)] hover:bg-[var(--moss-50)]
+                bg-[var(--bg-secondary)] hover:border-[var(--moss-400)] hover:bg-[var(--surface-moss)]
                 transition-all duration-[var(--timing-fast)] text-left"
             >
               <div className="w-10 h-10 mb-3 rounded-[var(--radius-md)] bg-gradient-to-br from-[var(--moss-100)] to-[var(--moss-200)] flex items-center justify-center">
@@ -168,7 +168,7 @@ export default function HaikuboxSetupCard({
                   />
                 </svg>
               </div>
-              <h3 className="font-semibold text-[var(--forest-900)] mb-1">
+              <h3 className="font-semibold text-[var(--text-primary)] mb-1">
                 I have a Haikubox
               </h3>
               <p className="text-sm text-[var(--mist-500)]">
@@ -180,7 +180,7 @@ export default function HaikuboxSetupCard({
             <button
               onClick={() => setPath("public")}
               className="group p-5 rounded-[var(--radius-lg)] border-2 border-[var(--mist-200)]
-                bg-[var(--bg-secondary)] hover:border-[var(--sky-400)] hover:bg-[var(--sky-50)]
+                bg-[var(--bg-secondary)] hover:border-[var(--sky-400)] hover:bg-[var(--surface-sky)]
                 transition-all duration-[var(--timing-fast)] text-left"
             >
               <div className="w-10 h-10 mb-3 rounded-[var(--radius-md)] bg-gradient-to-br from-[var(--sky-100)] to-[var(--sky-200)] flex items-center justify-center">
@@ -198,7 +198,7 @@ export default function HaikuboxSetupCard({
                   />
                 </svg>
               </div>
-              <h3 className="font-semibold text-[var(--forest-900)] mb-1">
+              <h3 className="font-semibold text-[var(--text-primary)] mb-1">
                 Find a public Haikubox
               </h3>
               <p className="text-sm text-[var(--mist-500)]">
@@ -306,8 +306,8 @@ export default function HaikuboxSetupCard({
             </button>
 
             {/* Instructions for finding a public Haikubox */}
-            <div className="bg-gradient-to-br from-[var(--sky-50)] to-[var(--moss-50)] rounded-[var(--radius-lg)] border border-[var(--sky-200)] p-5 mb-6">
-              <h3 className="font-semibold text-[var(--forest-900)] mb-3">
+            <div className="bg-gradient-to-br from-[var(--sky-50)] to-[var(--surface-moss)] rounded-[var(--radius-lg)] border border-[var(--sky-200)] p-5 mb-6">
+              <h3 className="font-semibold text-[var(--text-primary)] mb-3">
                 How to find a public Haikubox
               </h3>
               <p className="text-sm text-[var(--mist-600)] mb-4">
@@ -428,7 +428,7 @@ function SerialInputForm({
     <div className="space-y-4">
       {/* Serial input */}
       <div>
-        <label className="block text-sm font-medium text-[var(--forest-900)] mb-2">
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           Haikubox Serial Number
         </label>
         <input
@@ -437,7 +437,7 @@ function SerialInputForm({
           onChange={(e) => setSerial(e.target.value)}
           placeholder="e.g., 1000000066e59043"
           className="w-full px-4 py-2.5 border border-[var(--border-light)] rounded-[var(--radius-md)]
-            text-[var(--forest-900)] bg-white
+            text-[var(--text-primary)] bg-[var(--card-bg)]
             focus:outline-none focus:ring-2 focus:ring-[var(--moss-500)] focus:border-transparent
             transition-all duration-[var(--timing-fast)]"
         />
@@ -514,8 +514,8 @@ function SerialInputForm({
         <div
           className={`p-3 rounded-[var(--radius-md)] text-sm font-medium ${
             testResult.success
-              ? "bg-green-50 text-green-800 border border-green-200"
-              : "bg-red-50 text-red-800 border border-red-200"
+              ? "bg-[var(--success-bg)] text-[var(--success-text)] border border-[var(--success-border)]"
+              : "bg-[var(--error-bg)] text-[var(--error-text)] border border-[var(--error-border)]"
           }`}
         >
           {testResult.success ? (
@@ -546,8 +546,8 @@ function SerialInputForm({
         <div
           className={`p-3 rounded-[var(--radius-md)] text-sm font-medium ${
             saveResult.success
-              ? "bg-green-50 text-green-800 border border-green-200"
-              : "bg-red-50 text-red-800 border border-red-200"
+              ? "bg-[var(--success-bg)] text-[var(--success-text)] border border-[var(--success-border)]"
+              : "bg-[var(--error-bg)] text-[var(--error-text)] border border-[var(--error-border)]"
           }`}
         >
           {saveResult.success && (

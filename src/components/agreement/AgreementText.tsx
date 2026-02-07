@@ -1,7 +1,7 @@
 export default function AgreementText() {
   return (
     <>
-      <h2 className="text-base font-bold text-[var(--forest-900)]">
+      <h2 className="text-base font-bold text-[var(--text-primary)]">
         Bird Feed User Agreement
       </h2>
       <p className="text-xs text-[var(--mist-500)]">
@@ -13,7 +13,7 @@ export default function AgreementText() {
         to the following terms. Please read them carefully.
       </p>
 
-      <h3 className="text-sm font-semibold text-[var(--forest-900)] mt-4">
+      <h3 className="text-sm font-semibold text-[var(--text-primary)] mt-4">
         1. Photo Ownership &amp; Rights
       </h3>
       <ul className="list-disc pl-5 space-y-1">
@@ -42,7 +42,7 @@ export default function AgreementText() {
         </li>
       </ul>
 
-      <h3 className="text-sm font-semibold text-[var(--forest-900)] mt-4">
+      <h3 className="text-sm font-semibold text-[var(--text-primary)] mt-4">
         2. Data &amp; Privacy
       </h3>
       <ul className="list-disc pl-5 space-y-1">
@@ -75,7 +75,7 @@ export default function AgreementText() {
         </li>
       </ul>
 
-      <h3 className="text-sm font-semibold text-[var(--forest-900)] mt-4">
+      <h3 className="text-sm font-semibold text-[var(--text-primary)] mt-4">
         3. Acceptable Use
       </h3>
       <ul className="list-disc pl-5 space-y-1">
@@ -95,7 +95,7 @@ export default function AgreementText() {
         </li>
       </ul>
 
-      <h3 className="text-sm font-semibold text-[var(--forest-900)] mt-4">
+      <h3 className="text-sm font-semibold text-[var(--text-primary)] mt-4">
         4. Service &amp; Availability
       </h3>
       <ul className="list-disc pl-5 space-y-1">
@@ -115,7 +115,7 @@ export default function AgreementText() {
         </li>
       </ul>
 
-      <h3 className="text-sm font-semibold text-[var(--forest-900)] mt-4">
+      <h3 className="text-sm font-semibold text-[var(--text-primary)] mt-4">
         5. Changes to This Agreement
       </h3>
       <p>

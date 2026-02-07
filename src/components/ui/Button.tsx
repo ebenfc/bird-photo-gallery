@@ -28,17 +28,17 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         active:from-[var(--moss-600)] active:to-[var(--moss-700)]
       `,
       secondary: `
-        bg-white text-[var(--forest-800)] font-medium
+        bg-[var(--card-bg)] text-[var(--text-label)] font-medium
         border-2 border-[var(--mist-200)]
         shadow-[var(--shadow-sm)]
-        hover:bg-[var(--moss-50)] hover:border-[var(--moss-300)]
+        hover:bg-[var(--surface-moss)] hover:border-[var(--moss-300)]
         hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5
         focus-visible:ring-[var(--moss-400)]
         active:bg-[var(--moss-100)] active:border-[var(--moss-400)]
       `,
       ghost: `
         text-[var(--mist-600)] font-medium
-        hover:text-[var(--forest-700)] hover:bg-[var(--moss-50)]
+        hover:text-[var(--forest-700)] hover:bg-[var(--surface-moss)]
         focus-visible:ring-[var(--moss-400)]
         active:bg-[var(--moss-100)]
       `,

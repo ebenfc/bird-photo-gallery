@@ -156,7 +156,7 @@ export default function SpeciesActivityList({
             d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
           />
         </svg>
-        <h3 className="text-lg font-semibold text-[var(--forest-800)] mb-2">
+        <h3 className="text-lg font-semibold text-[var(--text-label)] mb-2">
           No Bird Detections Yet
         </h3>
         <p className="text-[var(--mist-600)] max-w-md mx-auto">
@@ -196,7 +196,7 @@ export default function SpeciesActivityList({
               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
             />
           </svg>
-          <h3 className="text-lg font-semibold text-[var(--forest-800)] mb-2">
+          <h3 className="text-lg font-semibold text-[var(--text-label)] mb-2">
             No Species Match These Filters
           </h3>
           <p className="text-[var(--mist-600)] max-w-md mx-auto">

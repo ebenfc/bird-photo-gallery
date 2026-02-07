@@ -56,7 +56,7 @@ export default function Modal({
       {/* Modal container with elegant entrance */}
       <div
         className={`
-          relative bg-white rounded-[var(--radius-2xl)] w-full ${sizes[size]} max-h-[90vh] overflow-hidden
+          relative bg-[var(--card-bg)] rounded-[var(--radius-2xl)] w-full ${sizes[size]} max-h-[90vh] overflow-hidden
           shadow-[var(--shadow-2xl)]
           border border-[var(--mist-100)]
           animate-fade-in-scale

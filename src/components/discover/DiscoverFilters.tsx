@@ -23,7 +23,7 @@ export default function DiscoverFilters({
           value={selectedState}
           onChange={(e) => onStateChange(e.target.value)}
           className="w-full px-4 py-2.5 border border-[var(--border-light)] rounded-[var(--radius-md)]
-            text-[var(--forest-900)] bg-white text-sm
+            text-[var(--text-primary)] bg-[var(--card-bg)] text-sm
             focus:outline-none focus:ring-2 focus:ring-[var(--moss-500)] focus:border-transparent
             transition-all duration-[var(--timing-fast)]"
         >
@@ -44,7 +44,7 @@ export default function DiscoverFilters({
             ${
               sort === "alpha"
                 ? "bg-[var(--moss-100)] text-[var(--moss-700)]"
-                : "bg-white text-[var(--mist-500)] hover:text-[var(--forest-700)] hover:bg-[var(--mist-50)]"
+                : "bg-[var(--card-bg)] text-[var(--mist-500)] hover:text-[var(--forest-700)] hover:bg-[var(--mist-50)]"
             }`}
         >
           A-Z
@@ -56,7 +56,7 @@ export default function DiscoverFilters({
             ${
               sort === "random"
                 ? "bg-[var(--moss-100)] text-[var(--moss-700)]"
-                : "bg-white text-[var(--mist-500)] hover:text-[var(--forest-700)] hover:bg-[var(--mist-50)]"
+                : "bg-[var(--card-bg)] text-[var(--mist-500)] hover:text-[var(--forest-700)] hover:bg-[var(--mist-50)]"
             }`}
         >
           Random

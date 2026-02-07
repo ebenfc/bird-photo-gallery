@@ -24,7 +24,7 @@ export default function PhotoCard({
       role="button"
       tabIndex={0}
       className="group relative aspect-square rounded-[var(--radius-xl)] overflow-hidden cursor-pointer
-        bg-gradient-to-br from-[var(--moss-50)] to-[var(--mist-50)]
+        bg-gradient-to-br from-[var(--surface-moss)] to-[var(--mist-50)]
         shadow-[var(--shadow-sm)]
         ring-1 ring-[var(--border)]
         transition-all duration-[var(--timing-normal)]
@@ -52,7 +52,7 @@ export default function PhotoCard({
 
       {/* Favorite badge with animation */}
       {photo.isFavorite && (
-        <div className="absolute top-2.5 right-2.5 bg-white/95 backdrop-blur-sm rounded-full p-1.5
+        <div className="absolute top-2.5 right-2.5 bg-[var(--card-bg)]/95 backdrop-blur-sm rounded-full p-1.5
           shadow-[var(--shadow-md)] ring-1 ring-white/50
           transition-transform duration-[var(--timing-fast)]
           group-hover:scale-110">

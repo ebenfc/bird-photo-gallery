@@ -48,7 +48,7 @@ export default function AboutPage() {
     <div className="pnw-texture min-h-screen pb-24 sm:pb-0">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-[var(--forest-900)] tracking-tight mb-2">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] tracking-tight mb-2">
           About Us
         </h1>
         <p className="text-[var(--mist-600)]">
@@ -57,11 +57,11 @@ export default function AboutPage() {
       </div>
 
       {/* Who We Are */}
-      <section className="bg-white rounded-[var(--radius-lg)] shadow-[var(--shadow-md)]
+      <section className="bg-[var(--card-bg)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)]
         border border-[var(--border-light)] overflow-hidden mb-8">
-        <div className="bg-gradient-to-r from-[var(--moss-50)] to-[var(--forest-50)]
+        <div className="bg-gradient-to-r from-[var(--surface-moss)] to-[var(--surface-forest)]
           border-b border-[var(--border-light)] px-5 sm:px-6 py-4">
-          <h2 className="text-xl sm:text-2xl font-bold text-[var(--forest-900)] mb-1 flex items-center gap-2">
+          <h2 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-1 flex items-center gap-2">
             <svg className="w-6 h-6 text-[var(--moss-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
@@ -88,11 +88,11 @@ export default function AboutPage() {
       </section>
 
       {/* How to Use Bird Feed */}
-      <section className="bg-white rounded-[var(--radius-lg)] shadow-[var(--shadow-md)]
+      <section className="bg-[var(--card-bg)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)]
         border border-[var(--border-light)] overflow-hidden mb-8">
-        <div className="bg-gradient-to-r from-[var(--forest-50)] to-[var(--moss-50)]
+        <div className="bg-gradient-to-r from-[var(--surface-forest)] to-[var(--surface-moss)]
           border-b border-[var(--border-light)] px-5 sm:px-6 py-4">
-          <h2 className="text-xl sm:text-2xl font-bold text-[var(--forest-900)] mb-1 flex items-center gap-2">
+          <h2 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-1 flex items-center gap-2">
             <svg className="w-6 h-6 text-[var(--moss-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
             </svg>
@@ -116,7 +116,7 @@ export default function AboutPage() {
                   {item.icon}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-[var(--forest-900)] mb-1">
+                  <h3 className="font-semibold text-[var(--text-primary)] mb-1">
                     {item.title}
                   </h3>
                   <p className="text-sm text-[var(--mist-600)] leading-relaxed">
@@ -130,12 +130,12 @@ export default function AboutPage() {
       </section>
 
       {/* Disclaimer */}
-      <div className="mt-8 p-4 bg-[var(--moss-50)] rounded-[var(--radius-md)]
+      <div className="mt-8 p-4 bg-[var(--surface-moss)] rounded-[var(--radius-md)]
         border border-[var(--moss-200)]">
         <p className="text-sm text-[var(--mist-600)] text-center leading-relaxed">
-          Bird Feed was built in the <span className="font-semibold text-[var(--forest-900)]">Pacific Northwest</span> by
+          Bird Feed was built in the <span className="font-semibold text-[var(--text-primary)]">Pacific Northwest</span> by
           backyard bird enthusiasts and was proudly vibe-coded
-          with <span className="font-semibold text-[var(--forest-900)]">Claude</span>, Anthropic&apos;s AI assistant.
+          with <span className="font-semibold text-[var(--text-primary)]">Claude</span>, Anthropic&apos;s AI assistant.
           We&apos;re not professionals &mdash; just folks who love birds and thought it&apos;d be fun to build something.
         </p>
       </div>

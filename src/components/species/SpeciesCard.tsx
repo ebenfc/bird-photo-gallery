@@ -23,7 +23,7 @@ export default function SpeciesCard({ species, onEdit, index = 0, linkPrefix = "
 
   return (
     <div
-      className="group bg-white rounded-[var(--radius-xl)] overflow-hidden
+      className="group bg-[var(--card-bg)] rounded-[var(--radius-xl)] overflow-hidden
         shadow-[var(--shadow-sm)] ring-1 ring-[var(--border)]
         hover:shadow-[var(--shadow-xl)] hover:ring-[var(--moss-200)]
         hover:-translate-y-1
@@ -33,7 +33,7 @@ export default function SpeciesCard({ species, onEdit, index = 0, linkPrefix = "
     >
       {/* Image - clickable to view photos */}
       <Link href={`${linkPrefix}/${species.id}`}>
-        <div className="aspect-[4/3] bg-gradient-to-br from-[var(--moss-50)] to-[var(--mist-50)]
+        <div className="aspect-[4/3] bg-gradient-to-br from-[var(--surface-moss)] to-[var(--mist-50)]
           relative cursor-pointer overflow-hidden">
           {thumbnailUrl ? (
             <Image
@@ -70,7 +70,7 @@ export default function SpeciesCard({ species, onEdit, index = 0, linkPrefix = "
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">
           <Link href={`${linkPrefix}/${species.id}`} className="flex-1 min-w-0 group/link">
-            <h3 className="font-bold text-[var(--forest-900)]
+            <h3 className="font-bold text-[var(--text-primary)]
               group-hover/link:text-[var(--forest-700)]
               truncate transition-colors">
               {species.commonName}
@@ -91,7 +91,7 @@ export default function SpeciesCard({ species, onEdit, index = 0, linkPrefix = "
                 onEdit();
               }}
               className="p-2.5 text-[var(--mist-400)]
-                hover:text-[var(--forest-700)] hover:bg-[var(--moss-50)]
+                hover:text-[var(--forest-700)] hover:bg-[var(--surface-moss)]
                 rounded-[var(--radius-md)]
                 transition-all duration-[var(--timing-fast)]
                 active:scale-90"
@@ -121,7 +121,7 @@ export default function SpeciesCard({ species, onEdit, index = 0, linkPrefix = "
           {/* Photo count pill */}
           {(species.photoCount || 0) >= SPECIES_PHOTO_LIMIT ? (
             <div className="flex items-center gap-1.5 px-2.5 py-1
-              bg-gradient-to-br from-[var(--moss-100)] to-[var(--moss-50)]
+              bg-gradient-to-br from-[var(--moss-100)] to-[var(--surface-moss)]
               rounded-full shadow-[var(--shadow-xs)]">
               <svg className="w-3.5 h-3.5 text-[var(--moss-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
@@ -132,7 +132,7 @@ export default function SpeciesCard({ species, onEdit, index = 0, linkPrefix = "
             </div>
           ) : (
             <div className="flex items-center gap-1.5 px-2.5 py-1
-              bg-gradient-to-br from-[var(--moss-50)] to-[var(--forest-50)]
+              bg-gradient-to-br from-[var(--surface-moss)] to-[var(--surface-forest)]
               rounded-full shadow-[var(--shadow-xs)]">
               <svg className="w-4 h-4 text-[var(--moss-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}

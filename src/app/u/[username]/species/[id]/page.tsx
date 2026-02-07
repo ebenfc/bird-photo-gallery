@@ -99,11 +99,11 @@ export default function PublicSpeciesDetailPage() {
 
       {/* Species Header */}
       {species && (
-        <div className="bg-white rounded-[var(--radius-lg)] border border-[var(--border-light)]
+        <div className="bg-[var(--card-bg)] rounded-[var(--radius-lg)] border border-[var(--border-light)]
           p-5 sm:p-6 mb-6">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-[var(--forest-900)] mb-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] mb-1">
                 {species.commonName}
               </h1>
               {species.scientificName && (
@@ -140,7 +140,7 @@ export default function PublicSpeciesDetailPage() {
 
       {/* Photo count */}
       <div className="mb-4">
-        <h2 className="text-lg font-semibold text-[var(--forest-900)]">
+        <h2 className="text-lg font-semibold text-[var(--text-primary)]">
           Photos ({species?.photoCount || 0})
         </h2>
       </div>
@@ -172,7 +172,7 @@ export default function PublicSpeciesDetailPage() {
               />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-[var(--forest-900)] mb-1">
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">
             No photos yet
           </h3>
           <p className="text-[var(--mist-600)]">
@@ -187,7 +187,7 @@ export default function PublicSpeciesDetailPage() {
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className="px-4 py-2 bg-white border border-[var(--border-light)] rounded-[var(--radius-md)]
+            className="px-4 py-2 bg-[var(--card-bg)] border border-[var(--border-light)] rounded-[var(--radius-md)]
               text-sm font-medium text-[var(--forest-700)] hover:bg-[var(--mist-50)]
               disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
@@ -199,7 +199,7 @@ export default function PublicSpeciesDetailPage() {
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            className="px-4 py-2 bg-white border border-[var(--border-light)] rounded-[var(--radius-md)]
+            className="px-4 py-2 bg-[var(--card-bg)] border border-[var(--border-light)] rounded-[var(--radius-md)]
               text-sm font-medium text-[var(--forest-700)] hover:bg-[var(--mist-50)]
               disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >

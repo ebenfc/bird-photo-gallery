@@ -113,7 +113,7 @@ export default function PublicFeedPage() {
             transition-all duration-[var(--timing-fast)] active:scale-95
             ${showMobileFilters || activeFilterCount > 0
               ? "bg-gradient-to-b from-[var(--forest-500)] to-[var(--forest-600)] text-white border-[var(--forest-600)]"
-              : "bg-white text-[var(--forest-700)] border-[var(--mist-200)] hover:border-[var(--moss-300)]"
+              : "bg-[var(--card-bg)] text-[var(--forest-700)] border-[var(--mist-200)] hover:border-[var(--moss-300)]"
             }`}
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -121,7 +121,7 @@ export default function PublicFeedPage() {
           </svg>
           Filter
           {activeFilterCount > 0 && (
-            <span className="ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full bg-white/20">
+            <span className="ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full bg-[var(--card-bg)]/20">
               {activeFilterCount}
             </span>
           )}
@@ -139,7 +139,7 @@ export default function PublicFeedPage() {
       {/* Mobile filters - collapsible */}
       <div className={`sm:hidden overflow-hidden transition-all duration-300 ease-out
         ${showMobileFilters ? "max-h-96 opacity-100 mb-4" : "max-h-0 opacity-0"}`}>
-        <div className="bg-white/80 backdrop-blur-sm rounded-[var(--radius-xl)] p-4 shadow-[var(--shadow-sm)] border border-[var(--border)]">
+        <div className="bg-[var(--card-bg)]/80 backdrop-blur-sm rounded-[var(--radius-xl)] p-4 shadow-[var(--shadow-sm)] border border-[var(--border)]">
           <GalleryFilters
             species={speciesList}
             selectedSpecies={selectedSpecies}
@@ -196,7 +196,7 @@ export default function PublicFeedPage() {
               />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-[var(--forest-900)] mb-1">
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">
             No photos found
           </h3>
           <p className="text-[var(--mist-600)]">
@@ -213,7 +213,7 @@ export default function PublicFeedPage() {
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className="px-4 py-2 bg-white border border-[var(--border-light)] rounded-[var(--radius-md)]
+            className="px-4 py-2 bg-[var(--card-bg)] border border-[var(--border-light)] rounded-[var(--radius-md)]
               text-sm font-medium text-[var(--forest-700)] hover:bg-[var(--mist-50)]
               disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
@@ -225,7 +225,7 @@ export default function PublicFeedPage() {
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            className="px-4 py-2 bg-white border border-[var(--border-light)] rounded-[var(--radius-md)]
+            className="px-4 py-2 bg-[var(--card-bg)] border border-[var(--border-light)] rounded-[var(--radius-md)]
               text-sm font-medium text-[var(--forest-700)] hover:bg-[var(--mist-50)]
               disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >

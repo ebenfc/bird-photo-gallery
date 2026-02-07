@@ -85,6 +85,30 @@
   --border: #e4e4e7;
   --border-light: #f4f4f5;
 
+  /* Semantic text colors */
+  --text-primary: #022c22;
+  --text-secondary: #064e3b;
+  --text-label: #065f46;
+
+  /* Semantic surface tints */
+  --surface-forest: #ecfdf5;
+  --surface-moss: #f0fdfa;
+  --surface-sky: #f0f9ff;
+
+  /* Status feedback colors */
+  --success-bg: #f0fdf4;
+  --success-text: #166534;
+  --success-border: #bbf7d0;
+  --error-bg: #fef2f2;
+  --error-text: #991b1b;
+  --error-border: #fecaca;
+  --info-bg: #eff6ff;
+  --info-text: #1e40af;
+  --info-border: #bfdbfe;
+  --warning-bg: #fffbeb;
+  --warning-text: #92400e;
+  --warning-border: #fde68a;
+
   /* === ELEVATION / SHADOW SYSTEM === */
   /* Modern, subtle shadows with emerald undertones */
   --shadow-xs: 0 1px 2px rgba(6, 95, 70, 0.04);
@@ -125,6 +149,80 @@
   --radius-xl: 20px;
   --radius-2xl: 24px;
   --radius-full: 9999px;
+}
+
+/* === DARK MODE === */
+[data-mode="dark"] {
+  /* Base colors */
+  --background: #0d1117;
+  --background-warm: #111820;
+  --foreground: #e6edf3;
+  --foreground-muted: #8b949e;
+  --card-bg: #161b22;
+  --border: #30363d;
+  --border-light: #21262d;
+
+  /* Semantic text */
+  --text-primary: #e6edf3;
+  --text-secondary: #c9d1d9;
+  --text-label: #b1bac4;
+
+  /* Semantic surfaces */
+  --surface-forest: #0d2818;
+  --surface-moss: #0d2822;
+  --surface-sky: #0d1d30;
+
+  /* Mist palette — inverted for dark surfaces and text */
+  --mist-50: #0d1117;
+  --mist-100: #161b22;
+  --mist-200: #21262d;
+  --mist-300: #30363d;
+  --mist-400: #484f58;
+  --mist-500: #6e7681;
+  --mist-600: #8b949e;
+  --mist-700: #b1bac4;
+  --mist-800: #c9d1d9;
+  --mist-900: #e6edf3;
+
+  /* Bark palette — inverted for dark warm neutrals */
+  --bark-50: #1c1917;
+  --bark-100: #292524;
+  --bark-200: #44403c;
+  --bark-300: #57534e;
+  --bark-400: #78716c;
+  --bark-500: #a8a29e;
+  --bark-600: #d6d3d1;
+  --bark-700: #e7e5e4;
+  --bark-800: #f5f5f4;
+  --bark-900: #fafaf9;
+
+  /* Shadows — darker, less colored */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-xl: 0 16px 40px rgba(0, 0, 0, 0.5);
+  --shadow-2xl: 0 24px 56px rgba(0, 0, 0, 0.55);
+  --shadow-moss: 0 4px 16px rgba(20, 184, 166, 0.12);
+  --shadow-moss-lg: 0 8px 24px rgba(20, 184, 166, 0.15);
+  --shadow-forest: 0 4px 16px rgba(16, 185, 129, 0.10);
+  --shadow-amber: 0 4px 16px rgba(245, 158, 11, 0.12);
+  --shadow-inset-sm: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+  --shadow-inset-md: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  /* Status feedback */
+  --success-bg: #0d2818;
+  --success-text: #3fb950;
+  --success-border: #1b4332;
+  --error-bg: #2d1215;
+  --error-text: #f85149;
+  --error-border: #5c2124;
+  --info-bg: #0d1d30;
+  --info-text: #58a6ff;
+  --info-border: #1d3461;
+  --warning-bg: #2d2006;
+  --warning-text: #e3b341;
+  --warning-border: #5c4813;
 }
 
 @theme inline {
@@ -203,7 +301,7 @@ body {
 
 /* Warm text colors */
 h1, h2, h3, h4, h5, h6 {
-  color: var(--forest-950);
+  color: var(--text-primary);
   letter-spacing: -0.01em;
 }
 
@@ -498,4 +596,29 @@ h1, h2, h3, h4, h5, h6 {
 /* Error glow */
 .error-glow {
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15), var(--shadow-md);
+}
+
+/* === DARK MODE OVERRIDES === */
+[data-mode="dark"] .paper-texture {
+  background: linear-gradient(180deg, var(--background) 0%, var(--background-warm) 100%);
+}
+
+[data-mode="dark"] .pnw-texture {
+  background-image:
+    radial-gradient(ellipse at 20% 10%, rgba(16, 185, 129, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(20, 184, 166, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(100, 116, 139, 0.02) 0%, transparent 70%);
+}
+
+[data-mode="dark"] ::selection {
+  background: rgba(20, 184, 166, 0.3);
+  color: #e6edf3;
+}
+
+[data-mode="dark"] .success-glow {
+  box-shadow: 0 0 0 3px rgba(63, 185, 80, 0.15), var(--shadow-md);
+}
+
+[data-mode="dark"] .error-glow {
+  box-shadow: 0 0 0 3px rgba(248, 81, 73, 0.15), var(--shadow-md);
 }

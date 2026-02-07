@@ -66,7 +66,7 @@ export default function PublicSpeciesPage() {
       {/* Desktop header */}
       <div className="hidden sm:flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-2xl font-bold text-[var(--forest-900)] tracking-tight">
+          <h2 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">
             Species
           </h2>
           <p className="text-[var(--mist-600)] mt-1">
@@ -76,7 +76,7 @@ export default function PublicSpeciesPage() {
         <select
           value={sortOption}
           onChange={(e) => setSortOption(e.target.value as SpeciesSortOption)}
-          className="px-3 py-2 bg-white border border-[var(--border-light)] rounded-[var(--radius-md)]
+          className="px-3 py-2 bg-[var(--card-bg)] border border-[var(--border-light)] rounded-[var(--radius-md)]
             text-sm text-[var(--forest-700)] focus:outline-none focus:ring-2 focus:ring-[var(--moss-500)]"
         >
           <option value="alpha">A-Z</option>
@@ -89,7 +89,7 @@ export default function PublicSpeciesPage() {
       {/* Mobile header - compact with filter toggle */}
       <div className="sm:hidden mb-4">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-2xl font-bold text-[var(--forest-900)] tracking-tight">
+          <h2 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">
             Species
           </h2>
           <button
@@ -99,7 +99,7 @@ export default function PublicSpeciesPage() {
               transition-all duration-[var(--timing-fast)] active:scale-95
               ${showMobileFilters || activeFilterCount > 0
                 ? "bg-gradient-to-b from-[var(--forest-500)] to-[var(--forest-600)] text-white border-[var(--forest-600)]"
-                : "bg-white text-[var(--forest-700)] border-[var(--mist-200)] hover:border-[var(--moss-300)]"
+                : "bg-[var(--card-bg)] text-[var(--forest-700)] border-[var(--mist-200)] hover:border-[var(--moss-300)]"
               }`}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -107,7 +107,7 @@ export default function PublicSpeciesPage() {
             </svg>
             Filter
             {activeFilterCount > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full bg-white/20">
+              <span className="ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full bg-[var(--card-bg)]/20">
                 {activeFilterCount}
               </span>
             )}
@@ -129,13 +129,13 @@ export default function PublicSpeciesPage() {
       {/* Mobile filters - collapsible */}
       <div className={`sm:hidden overflow-hidden transition-all duration-300 ease-out
         ${showMobileFilters ? "max-h-96 opacity-100 mb-4" : "max-h-0 opacity-0"}`}>
-        <div className="bg-white/80 backdrop-blur-sm rounded-[var(--radius-xl)] p-4 shadow-[var(--shadow-sm)] border border-[var(--border)]">
+        <div className="bg-[var(--card-bg)]/80 backdrop-blur-sm rounded-[var(--radius-xl)] p-4 shadow-[var(--shadow-sm)] border border-[var(--border)]">
           {/* Sort dropdown inside mobile filters */}
           <div className="mb-3">
             <select
               value={sortOption}
               onChange={(e) => setSortOption(e.target.value as SpeciesSortOption)}
-              className="w-full px-3 py-2 bg-white border border-[var(--border-light)] rounded-[var(--radius-md)]
+              className="w-full px-3 py-2 bg-[var(--card-bg)] border border-[var(--border-light)] rounded-[var(--radius-md)]
                 text-sm text-[var(--forest-700)] focus:outline-none focus:ring-2 focus:ring-[var(--moss-500)]"
             >
               <option value="alpha">A-Z</option>
@@ -158,7 +158,7 @@ export default function PublicSpeciesPage() {
                     active:scale-95
                     ${isSelected
                       ? "bg-gradient-to-b from-[var(--moss-500)] to-[var(--moss-600)] text-white border-[var(--moss-600)] shadow-[var(--shadow-moss)]"
-                      : "bg-white text-[var(--mist-500)] border-[var(--mist-200)] hover:border-[var(--moss-300)] hover:text-[var(--forest-700)] hover:shadow-[var(--shadow-sm)]"
+                      : "bg-[var(--card-bg)] text-[var(--mist-500)] border-[var(--mist-200)] hover:border-[var(--moss-300)] hover:text-[var(--forest-700)] hover:shadow-[var(--shadow-sm)]"
                     }`}
                 >
                   {opt.label}
@@ -196,7 +196,7 @@ export default function PublicSpeciesPage() {
                 active:scale-95
                 ${isSelected
                   ? "bg-gradient-to-b from-[var(--moss-500)] to-[var(--moss-600)] text-white border-[var(--moss-600)] shadow-[var(--shadow-moss)]"
-                  : "bg-white text-[var(--mist-500)] border-[var(--mist-200)] hover:border-[var(--moss-300)] hover:text-[var(--forest-700)] hover:shadow-[var(--shadow-sm)]"
+                  : "bg-[var(--card-bg)] text-[var(--mist-500)] border-[var(--mist-200)] hover:border-[var(--moss-300)] hover:text-[var(--forest-700)] hover:shadow-[var(--shadow-sm)]"
                 }`}
             >
               {opt.label}
@@ -223,9 +223,9 @@ export default function PublicSpeciesPage() {
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className="bg-white rounded-[var(--radius-xl)] overflow-hidden shadow-[var(--shadow-sm)] ring-1 ring-[var(--border)]"
+              className="bg-[var(--card-bg)] rounded-[var(--radius-xl)] overflow-hidden shadow-[var(--shadow-sm)] ring-1 ring-[var(--border)]"
             >
-              <div className="aspect-[4/3] bg-gradient-to-br from-[var(--moss-50)] to-[var(--mist-50)] animate-pulse" />
+              <div className="aspect-[4/3] bg-gradient-to-br from-[var(--surface-moss)] to-[var(--mist-50)] animate-pulse" />
               <div className="p-4 space-y-3">
                 <div className="h-5 w-3/4 bg-[var(--mist-200)] rounded animate-pulse" />
                 <div className="h-4 w-1/2 bg-[var(--mist-100)] rounded animate-pulse" />
@@ -261,7 +261,7 @@ export default function PublicSpeciesPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
-          <h3 className="text-lg font-medium text-[var(--forest-800)] mb-2">
+          <h3 className="text-lg font-medium text-[var(--text-label)] mb-2">
             No species found
           </h3>
           <p className="text-[var(--mist-500)] mb-6 max-w-sm mx-auto">
@@ -273,7 +273,7 @@ export default function PublicSpeciesPage() {
             <button
               onClick={() => setSelectedRarities([])}
               className="px-4 py-2 text-sm font-semibold text-[var(--forest-700)]
-                bg-white border border-[var(--mist-200)] rounded-[var(--radius-full)]
+                bg-[var(--card-bg)] border border-[var(--mist-200)] rounded-[var(--radius-full)]
                 hover:border-[var(--moss-300)] transition-all"
             >
               Clear Filter

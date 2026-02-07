@@ -44,7 +44,7 @@ export default function AgreementForm() {
 
   return (
     <div
-      className="bg-white rounded-[var(--radius-2xl)] shadow-[var(--shadow-2xl)]
+      className="bg-[var(--card-bg)] rounded-[var(--radius-2xl)] shadow-[var(--shadow-2xl)]
         border border-[var(--mist-100)] overflow-hidden"
     >
       {/* Top gradient accent */}
@@ -53,7 +53,7 @@ export default function AgreementForm() {
       <div className="p-6 sm:p-8">
         {/* Header */}
         <div className="text-center mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-[var(--forest-900)] mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] mb-2">
             Welcome to Bird Feed
           </h1>
           <p className="text-[var(--mist-600)]">
@@ -66,7 +66,7 @@ export default function AgreementForm() {
           onScroll={handleScroll}
           className="max-h-96 overflow-y-auto border border-[var(--border-light)]
             rounded-[var(--radius-md)] p-5 mb-6 bg-[var(--mist-50)]
-            text-sm text-[var(--forest-800)] leading-relaxed space-y-4"
+            text-sm text-[var(--text-label)] leading-relaxed space-y-4"
         >
           <AgreementText />
         </div>
@@ -74,7 +74,7 @@ export default function AgreementForm() {
         {/* Error message */}
         {error && (
           <div
-            className="mb-4 p-3 rounded-[var(--radius-md)] bg-red-50 text-red-800
+            className="mb-4 p-3 rounded-[var(--radius-md)] bg-[var(--error-bg)] text-[var(--error-text)]
               border border-red-200 text-sm font-medium"
           >
             {error}

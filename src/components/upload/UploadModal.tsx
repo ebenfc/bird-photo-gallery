@@ -356,7 +356,7 @@ export default function UploadModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-[var(--radius-2xl)] shadow-[var(--shadow-2xl)] w-full max-w-lg max-h-[90vh]
+      <div className="relative bg-[var(--card-bg)] rounded-[var(--radius-2xl)] shadow-[var(--shadow-2xl)] w-full max-w-lg max-h-[90vh]
         overflow-hidden flex flex-col border border-[var(--mist-100)]
         animate-fade-in-scale">
         {/* Top accent border */}
@@ -364,9 +364,9 @@ export default function UploadModal({
           rounded-t-[var(--radius-2xl)]" />
 
         {/* Header */}
-        <div className="p-5 border-b border-[var(--border)] bg-gradient-to-r from-[var(--moss-50)] to-[var(--mist-50)]">
+        <div className="p-5 border-b border-[var(--border)] bg-gradient-to-r from-[var(--surface-moss)] to-[var(--mist-50)]">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-[var(--forest-900)]">
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">
               {step === "select" && "Upload Photos"}
               {step === "preview" && (selectedFiles.length > 1 ? `Upload ${selectedFiles.length} Photos` : "Photo Details")}
               {step === "uploading" && "Uploading..."}
@@ -376,7 +376,7 @@ export default function UploadModal({
               <button
                 onClick={handleClose}
                 className="p-2.5 text-[var(--mist-400)] hover:text-[var(--mist-600)]
-                  hover:bg-white/70 rounded-[var(--radius-lg)]
+                  hover:bg-[var(--card-bg)]/70 rounded-[var(--radius-lg)]
                   transition-all duration-[var(--timing-fast)]
                   active:scale-90"
               >
@@ -410,8 +410,8 @@ export default function UploadModal({
                 className={`border-2 border-dashed rounded-[var(--radius-xl)] p-10 cursor-pointer
                   transition-all duration-[var(--timing-fast)]
                   ${isDragging
-                    ? "border-[var(--moss-500)] bg-[var(--moss-50)] scale-[1.02]"
-                    : "border-[var(--moss-300)] hover:border-[var(--moss-500)] hover:bg-[var(--moss-50)]"
+                    ? "border-[var(--moss-500)] bg-[var(--surface-moss)] scale-[1.02]"
+                    : "border-[var(--moss-300)] hover:border-[var(--moss-500)] hover:bg-[var(--surface-moss)]"
                   }`}
               >
                 <div className={`w-20 h-20 mx-auto mb-5 rounded-full
@@ -427,7 +427,7 @@ export default function UploadModal({
                       d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-medium text-[var(--forest-800)] mb-2">
+                <h3 className="text-lg font-medium text-[var(--text-label)] mb-2">
                   Select Photos
                 </h3>
                 <p className="text-sm text-[var(--mist-500)] mb-1">
@@ -444,7 +444,7 @@ export default function UploadModal({
               </div>
 
               {error && (
-                <div className="mt-4 p-3.5 bg-red-50 border border-red-200 rounded-[var(--radius-lg)]
+                <div className="mt-4 p-3.5 bg-[var(--error-bg)] border border-[var(--error-border)] rounded-[var(--radius-lg)]
                   animate-fade-in">
                   <p className="text-sm text-red-600 font-medium">{error}</p>
                 </div>
@@ -516,7 +516,7 @@ export default function UploadModal({
                     onClick={() => setSameSpeciesForAll(true)}
                     className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
                       sameSpeciesForAll
-                        ? "bg-white text-[var(--forest-700)] shadow-sm"
+                        ? "bg-[var(--card-bg)] text-[var(--forest-700)] shadow-sm"
                         : "text-[var(--mist-500)] hover:text-[var(--mist-700)]"
                     }`}
                   >
@@ -527,7 +527,7 @@ export default function UploadModal({
                     onClick={() => setSameSpeciesForAll(false)}
                     className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
                       !sameSpeciesForAll
-                        ? "bg-white text-[var(--forest-700)] shadow-sm"
+                        ? "bg-[var(--card-bg)] text-[var(--forest-700)] shadow-sm"
                         : "text-[var(--mist-500)] hover:text-[var(--mist-700)]"
                     }`}
                   >
@@ -538,12 +538,12 @@ export default function UploadModal({
 
               {/* Individual Photo Navigation */}
               {selectedFiles.length > 1 && !sameSpeciesForAll && (
-                <div className="flex items-center justify-between p-3 bg-[var(--moss-50)] rounded-xl">
+                <div className="flex items-center justify-between p-3 bg-[var(--surface-moss)] rounded-xl">
                   <button
                     type="button"
                     onClick={() => setCurrentPhotoIndex((i) => Math.max(0, i - 1))}
                     disabled={currentPhotoIndex === 0}
-                    className="p-1 text-[var(--forest-600)] disabled:text-[var(--mist-300)] hover:bg-white/50 rounded-lg transition-all"
+                    className="p-1 text-[var(--forest-600)] disabled:text-[var(--mist-300)] hover:bg-[var(--card-bg)]/50 rounded-lg transition-all"
                   >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -556,7 +556,7 @@ export default function UploadModal({
                     type="button"
                     onClick={() => setCurrentPhotoIndex((i) => Math.min(selectedFiles.length - 1, i + 1))}
                     disabled={currentPhotoIndex === selectedFiles.length - 1}
-                    className="p-1 text-[var(--forest-600)] disabled:text-[var(--mist-300)] hover:bg-white/50 rounded-lg transition-all"
+                    className="p-1 text-[var(--forest-600)] disabled:text-[var(--mist-300)] hover:bg-[var(--card-bg)]/50 rounded-lg transition-all"
                   >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -610,7 +610,7 @@ export default function UploadModal({
                     text-sm font-semibold text-[var(--forest-700)]
                     border-2 border-dashed border-[var(--moss-200)]
                     rounded-[var(--radius-lg)]
-                    hover:border-[var(--moss-400)] hover:bg-[var(--moss-50)]
+                    hover:border-[var(--moss-400)] hover:bg-[var(--surface-moss)]
                     transition-all duration-[var(--timing-fast)]
                     active:scale-[0.98]"
                 >
@@ -631,7 +631,7 @@ export default function UploadModal({
 
               {/* Batch limit message */}
               {batchLimitMessage && (
-                <div className="p-4 bg-[var(--moss-50)] border border-[var(--moss-200)] rounded-xl animate-fade-in">
+                <div className="p-4 bg-[var(--surface-moss)] border border-[var(--moss-200)] rounded-xl animate-fade-in">
                   <p className="text-sm text-[var(--forest-600)]">{batchLimitMessage}</p>
                 </div>
               )}
@@ -639,8 +639,8 @@ export default function UploadModal({
               {/* Swap picker for curated species (single photo or same-for-all with 1 photo) */}
               {isSpeciesAtLimit && !batchLimitMessage && (
                 <div className="space-y-3 animate-fade-in">
-                  <div className="p-4 bg-[var(--moss-50)] border border-[var(--moss-200)] rounded-xl">
-                    <h3 className="font-semibold text-[var(--forest-800)] mb-1">
+                  <div className="p-4 bg-[var(--surface-moss)] border border-[var(--moss-200)] rounded-xl">
+                    <h3 className="font-semibold text-[var(--text-label)] mb-1">
                       Upgrade your gallery
                     </h3>
                     <p className="text-sm text-[var(--forest-600)]">
@@ -688,7 +688,7 @@ export default function UploadModal({
                   rows={2}
                   className="block w-full px-4 py-3 border-2 border-[var(--mist-200)]
                     rounded-[var(--radius-lg)] text-sm
-                    bg-white text-[var(--foreground)] placeholder-[var(--mist-400)]
+                    bg-[var(--card-bg)] text-[var(--foreground)] placeholder-[var(--mist-400)]
                     shadow-[var(--shadow-inset-sm)]
                     focus:outline-none focus:border-[var(--moss-400)]
                     focus:shadow-[var(--shadow-moss),var(--shadow-inset-sm)]
@@ -698,7 +698,7 @@ export default function UploadModal({
               </div>
 
               {error && (
-                <div className="p-3.5 bg-red-50 border border-red-200 rounded-[var(--radius-lg)]
+                <div className="p-3.5 bg-[var(--error-bg)] border border-[var(--error-border)] rounded-[var(--radius-lg)]
                   animate-fade-in">
                   <p className="text-sm text-red-600 font-medium">{error}</p>
                 </div>
@@ -718,7 +718,7 @@ export default function UploadModal({
                   <path d="M12 3C10.5 3 9 4 8.5 5.5C8 7 8 8.5 8.5 10C7 10.5 5.5 11 4 11C3 11 2 11.5 2 12.5C2 13 2.5 13.5 3 13.5C4 13.5 5 13 6 12.5C7 14.5 8.5 16 10.5 17C10 17.5 9 18 8.5 19C8 19.5 8 20 8.5 20.5C9 21 9.5 21 10 20.5C11 19.5 12 18.5 13 18C14 18.5 15 19 15.5 19C14.5 17.5 14 16.5 14 15.5C16 14 18 12 19 9.5C19.5 8 20 6.5 19.5 5C19 3.5 17.5 2.5 16 3C14.5 3.5 13.5 4.5 13 6C12.5 5 12.5 4 12 3Z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-[var(--forest-800)] mb-4">
+              <h3 className="text-lg font-medium text-[var(--text-label)] mb-4">
                 Uploading {selectedFiles.length === 1 ? "photo" : `${selectedFiles.length} photos`}...
               </h3>
 
@@ -778,7 +778,7 @@ export default function UploadModal({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-[var(--forest-800)] mb-2">
+              <h3 className="text-lg font-medium text-[var(--text-label)] mb-2">
                 {uploadedPhotoIds.length === 1
                   ? "Photo uploaded successfully!"
                   : `${uploadedPhotoIds.length} photos uploaded successfully!`}

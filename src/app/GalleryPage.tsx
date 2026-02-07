@@ -301,7 +301,7 @@ function GalleryContent() {
       {/* Desktop header */}
       <div className="hidden sm:flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-[var(--forest-900)] tracking-tight">
+          <h1 className="text-3xl font-bold text-[var(--text-primary)] tracking-tight">
             Feed
           </h1>
           <p className="text-[var(--mist-600)] mt-1">
@@ -312,7 +312,7 @@ function GalleryContent() {
           <button
             onClick={() => router.push('/species')}
             className="text-sm font-semibold text-[var(--forest-700)] px-4 py-1.5
-              bg-gradient-to-br from-[var(--moss-50)] to-[var(--forest-50)]
+              bg-gradient-to-br from-[var(--surface-moss)] to-[var(--surface-forest)]
               rounded-full shadow-[var(--shadow-xs)] ring-1 ring-[var(--border)]
               hover:shadow-[var(--shadow-sm)] hover:ring-[var(--moss-300)]
               transition-all duration-[var(--timing-fast)] active:scale-95 cursor-pointer"
@@ -320,7 +320,7 @@ function GalleryContent() {
             {species.filter(s => s.photoCount && s.photoCount > 0).length} species
           </button>
           <span className="text-sm font-semibold text-[var(--forest-700)] px-4 py-1.5
-            bg-gradient-to-br from-[var(--moss-50)] to-[var(--forest-50)]
+            bg-gradient-to-br from-[var(--surface-moss)] to-[var(--surface-forest)]
             rounded-full shadow-[var(--shadow-xs)] ring-1 ring-[var(--border)]">
             {photos.length} photo{photos.length !== 1 ? "s" : ""}
           </span>
@@ -336,7 +336,7 @@ function GalleryContent() {
       {/* Mobile header - compact with filter toggle */}
       <div className="sm:hidden mb-4">
         <div className="flex items-center justify-between mb-2">
-          <h1 className="text-2xl font-bold text-[var(--forest-900)] tracking-tight">
+          <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">
             Feed
           </h1>
           <button
@@ -346,7 +346,7 @@ function GalleryContent() {
               transition-all duration-[var(--timing-fast)] active:scale-95
               ${showMobileFilters || activeFilterCount > 0
                 ? "bg-gradient-to-b from-[var(--forest-500)] to-[var(--forest-600)] text-white border-[var(--forest-600)]"
-                : "bg-white text-[var(--forest-700)] border-[var(--mist-200)] hover:border-[var(--moss-300)]"
+                : "bg-[var(--card-bg)] text-[var(--forest-700)] border-[var(--mist-200)] hover:border-[var(--moss-300)]"
               }`}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -354,7 +354,7 @@ function GalleryContent() {
             </svg>
             Filter
             {activeFilterCount > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full bg-white/20">
+              <span className="ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full bg-[var(--card-bg)]/20">
                 {activeFilterCount}
               </span>
             )}
@@ -383,7 +383,7 @@ function GalleryContent() {
       {/* Mobile filters - collapsible */}
       <div className={`sm:hidden overflow-hidden transition-all duration-300 ease-out
         ${showMobileFilters ? "max-h-96 opacity-100 mb-4" : "max-h-0 opacity-0"}`}>
-        <div className="bg-white/80 backdrop-blur-sm rounded-[var(--radius-xl)] p-4 shadow-[var(--shadow-sm)] border border-[var(--border)]">
+        <div className="bg-[var(--card-bg)]/80 backdrop-blur-sm rounded-[var(--radius-xl)] p-4 shadow-[var(--shadow-sm)] border border-[var(--border)]">
           <GalleryFilters
             species={species}
             selectedSpecies={selectedSpecies}

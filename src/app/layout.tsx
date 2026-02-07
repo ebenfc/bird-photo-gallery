@@ -10,6 +10,7 @@ import AgreementForm from "@/components/agreement/AgreementForm";
 import { ToastProvider } from "@/components/ui/Toast";
 import ReportIssueButton from "@/components/support/ReportIssueButton";
 import SentryUserIdentifier from "@/components/SentryUserIdentifier";
+import ThemeProvider from "@/components/providers/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -57,39 +58,49 @@ export default async function RootLayout({
 
   return (
     <ClerkProvider afterSignOutUrl="/">
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
+        <head>
+          {/* Prevent flash of wrong skin on page load */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `try{var s=localStorage.getItem("birdfeed-skin");if(s)document.documentElement.setAttribute("data-skin",s)}catch(e){}`,
+            }}
+          />
+        </head>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[var(--background)] min-h-screen paper-texture`}
         >
-          <SentryUserIdentifier />
-          {isAuthenticated ? (
-            hasAcceptedAgreement ? (
-              // User is authenticated and has accepted the agreement — show full app
-              <ToastProvider>
-                <a
-                  href="#main-content"
-                  className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded"
-                >
-                  Skip to content
-                </a>
-                <Header />
-                <main id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-                  {children}
-                </main>
-                <ReportIssueButton />
-              </ToastProvider>
-            ) : (
-              // User is authenticated but hasn't accepted — show agreement gate
-              <div className="pnw-texture min-h-screen flex items-center justify-center py-12 px-4">
-                <div className="w-full max-w-2xl">
-                  <AgreementForm />
+          <ThemeProvider>
+            <SentryUserIdentifier />
+            {isAuthenticated ? (
+              hasAcceptedAgreement ? (
+                // User is authenticated and has accepted the agreement — show full app
+                <ToastProvider>
+                  <a
+                    href="#main-content"
+                    className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-[var(--card-bg)] focus:text-black focus:rounded"
+                  >
+                    Skip to content
+                  </a>
+                  <Header />
+                  <main id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+                    {children}
+                  </main>
+                  <ReportIssueButton />
+                </ToastProvider>
+              ) : (
+                // User is authenticated but hasn't accepted — show agreement gate
+                <div className="pnw-texture min-h-screen flex items-center justify-center py-12 px-4">
+                  <div className="w-full max-w-2xl">
+                    <AgreementForm />
+                  </div>
                 </div>
-              </div>
-            )
-          ) : (
-            // Not authenticated — landing page, sign-in, sign-up get full-width layout
-            <>{children}</>
-          )}
+              )
+            ) : (
+              // Not authenticated — landing page, sign-in, sign-up get full-width layout
+              <>{children}</>
+            )}
+          </ThemeProvider>
           <Analytics />
         </body>
       </html>

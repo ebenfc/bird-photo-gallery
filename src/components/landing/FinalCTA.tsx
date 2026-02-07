@@ -18,10 +18,10 @@ export default function FinalCTA() {
           <Link
             href="/sign-up"
             className="inline-flex items-center justify-center px-8 py-4 text-base font-semibold
-              bg-white text-[var(--forest-900)]
+              bg-[var(--card-bg)] text-[var(--text-primary)]
               rounded-[var(--radius-xl)]
               shadow-[var(--shadow-lg)]
-              hover:bg-[var(--moss-50)]
+              hover:bg-[var(--surface-moss)]
               hover:shadow-[var(--shadow-xl)] hover:-translate-y-0.5
               active:scale-[0.96]
               transition-all duration-[var(--timing-fast)]"

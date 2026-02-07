@@ -157,9 +157,9 @@ export default function SyncStatusBar({ onSyncComplete }: SyncStatusBarProps) {
           onClick={handleSync}
           disabled={syncing || onCooldown}
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold
-            bg-white text-[var(--forest-700)] border border-[var(--mist-200)]
+            bg-[var(--card-bg)] text-[var(--forest-700)] border border-[var(--mist-200)]
             rounded-[var(--radius-md)] shadow-[var(--shadow-xs)]
-            hover:bg-[var(--moss-50)] hover:border-[var(--moss-300)]
+            hover:bg-[var(--surface-moss)] hover:border-[var(--moss-300)]
             disabled:opacity-50 disabled:cursor-not-allowed
             transition-all duration-[var(--timing-fast)] active:scale-95"
         >

@@ -36,7 +36,7 @@ export default async function PublicGalleryLayout({
       </main>
 
       {/* Mobile CTA footer */}
-      <footer className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[var(--border-light)]
+      <footer className="md:hidden fixed bottom-0 left-0 right-0 bg-[var(--card-bg)] border-t border-[var(--border-light)]
         py-3 px-4 text-center">
         <Link
           href="/"

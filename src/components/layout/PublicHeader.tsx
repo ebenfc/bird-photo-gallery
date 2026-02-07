@@ -25,7 +25,7 @@ export default function PublicHeader({ username, displayName, children }: Public
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[var(--border-light)]">
+    <header className="sticky top-0 z-40 bg-[var(--card-bg)] backdrop-blur-sm border-b border-[var(--border-light)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Gallery Title */}
@@ -35,7 +35,7 @@ export default function PublicHeader({ username, displayName, children }: Public
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <svg
-                className="w-6 h-6 text-[var(--forest-900)]"
+                className="w-6 h-6 text-[var(--text-primary)]"
                 viewBox="0 0 24 24"
                 fill="currentColor"
                 aria-hidden="true"
@@ -47,7 +47,7 @@ export default function PublicHeader({ username, displayName, children }: Public
                 <path d="M5.5 12L2 10.5L3 14Z" />
                 <path d="M19.5 7L22.5 8L19.5 9.5Z" />
               </svg>
-              <h1 className="font-bold text-[var(--forest-900)] text-lg leading-tight">
+              <h1 className="font-bold text-[var(--text-primary)] text-lg leading-tight">
                 {displayName}&apos;s Bird Feed
               </h1>
             </Link>
