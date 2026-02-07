@@ -56,7 +56,7 @@ export default function FeaturesSection() {
             Simple tools for birders
           </h2>
           <p className="mt-4 text-lg text-[var(--mist-600)] max-w-2xl mx-auto">
-            Everything you need to catalogue your bird photography. Nothing you don&apos;t.
+            Everything you need to catalogue and curate your bird photography. Nothing you don&apos;t.
           </p>
         </div>
 
@@ -91,12 +91,6 @@ export default function FeaturesSection() {
           ))}
         </div>
 
-        {/* Optional Haikubox mention */}
-        <div className="mt-12 sm:mt-16 text-center">
-          <p className="text-sm text-[var(--mist-500)]">
-            Have a Haikubox? Connect it to automatically track which birds visit your property.
-          </p>
-        </div>
       </div>
     </section>
   );

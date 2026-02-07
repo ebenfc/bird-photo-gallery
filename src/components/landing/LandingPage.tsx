@@ -1,6 +1,7 @@
 import HeroSection from "./HeroSection";
 import PhotoShowcase from "./PhotoShowcase";
 import FeaturesSection from "./FeaturesSection";
+import SharingSection from "./SharingSection";
 import FinalCTA from "./FinalCTA";
 
 export default function LandingPage() {
@@ -9,6 +10,7 @@ export default function LandingPage() {
       <HeroSection />
       <PhotoShowcase />
       <FeaturesSection />
+      <SharingSection />
       <FinalCTA />
     </div>
   );
