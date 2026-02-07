@@ -4,10 +4,12 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton, SignedIn, SignedOut, SignOutButton } from "@clerk/nextjs";
+import ReportIssueModal from "@/components/support/ReportIssueModal";
 
 export default function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [reportIssueOpen, setReportIssueOpen] = useState(false);
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -213,6 +215,25 @@ export default function Header() {
                 <span>Sign in</span>
               </Link>
             </SignedOut>
+            {/* Report Issue button for mobile */}
+            <SignedIn>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setReportIssueOpen(true);
+                }}
+                className="flex items-center gap-3 px-4 py-3.5 w-full
+                  rounded-[var(--radius-lg)] text-base font-semibold
+                  text-[var(--moss-200)] hover:text-white hover:bg-white/10
+                  transition-all duration-[var(--timing-fast)]
+                  active:scale-[0.98]"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 21v-18M3 3h12.5l-2 4 2 4H3" />
+                </svg>
+                <span>Report Issue</span>
+              </button>
+            </SignedIn>
             {/* Sign out button for mobile (shown when signed in) */}
             <SignedIn>
               <SignOutButton>
@@ -236,6 +257,13 @@ export default function Header() {
 
       {/* Accent bar at bottom */}
       <div className="h-1 bg-gradient-to-r from-[var(--moss-500)] via-[var(--forest-600)] to-[var(--moss-500)]" />
+
+      {/* Report Issue Modal (mobile) */}
+      <ReportIssueModal
+        isOpen={reportIssueOpen}
+        onClose={() => setReportIssueOpen(false)}
+        pageUrl={typeof window !== "undefined" ? window.location.href : pathname}
+      />
     </header>
   );
 }
