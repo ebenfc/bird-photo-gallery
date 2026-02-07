@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton, SignedIn, SignedOut } from "@clerk/nextjs";
+import { UserButton, SignedIn, SignedOut, SignOutButton } from "@clerk/nextjs";
 
 export default function Header() {
   const pathname = usePathname();
@@ -119,7 +119,6 @@ export default function Header() {
           <div className="flex items-center gap-2">
             <SignedIn>
               <UserButton
-                afterSignOutUrl="/"
                 appearance={{
                   elements: {
                     avatarBox: "w-8 h-8 sm:w-9 sm:h-9",
@@ -205,6 +204,23 @@ export default function Header() {
                 <span>Sign in</span>
               </Link>
             </SignedOut>
+            {/* Sign out button for mobile (shown when signed in) */}
+            <SignedIn>
+              <SignOutButton>
+                <button
+                  className="flex items-center gap-3 px-4 py-3.5 w-full
+                    rounded-[var(--radius-lg)] text-base font-semibold
+                    text-[var(--moss-200)] hover:text-white hover:bg-white/10
+                    transition-all duration-[var(--timing-fast)]
+                    active:scale-[0.98]"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span>Sign out</span>
+                </button>
+              </SignOutButton>
+            </SignedIn>
           </nav>
         </div>
       )}
