@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import { hasAcceptedCurrentAgreement } from "@/lib/agreement";
@@ -32,14 +31,22 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { userId } = await auth();
+  let userId: string | null = null;
+  try {
+    const authResult = await auth();
+    userId = authResult.userId;
+  } catch {
+    // Middleware didn't run for this route (e.g., static file paths like
+    // /_vercel/insights/script.js). Treat as unauthenticated.
+    userId = null;
+  }
   const isAuthenticated = !!userId;
 
   // Check if the authenticated user has accepted the current agreement
   let hasAcceptedAgreement = false;
   if (isAuthenticated) {
     try {
-      hasAcceptedAgreement = await hasAcceptedCurrentAgreement(userId);
+      hasAcceptedAgreement = await hasAcceptedCurrentAgreement(userId!);
     } catch {
       // If check fails (e.g., user not in DB yet), treat as not accepted.
       // They'll see the agreement page and can accept once their account
@@ -84,7 +91,6 @@ export default async function RootLayout({
             <>{children}</>
           )}
           <Analytics />
-          <SpeedInsights />
         </body>
       </html>
     </ClerkProvider>
