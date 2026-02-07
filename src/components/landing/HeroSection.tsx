@@ -15,11 +15,11 @@ export default function HeroSection() {
           {/* Text content */}
           <div className="text-center lg:text-left animate-fade-in-up">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[var(--forest-900)] tracking-tight leading-tight">
-              Catalogue your bird photography
+              Your bird photography, beautifully organized and shared
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-[var(--mist-600)] max-w-xl mx-auto lg:mx-0">
-              A simple, focused tool for birders to organize their favorite bird photos by species.
-              Upload, tag, and curate your personal collection.
+              A simple, focused tool for birders to organize their favorite bird photos by
+              species — and share them with the birding community on their own terms.
             </p>
 
             {/* CTAs */}

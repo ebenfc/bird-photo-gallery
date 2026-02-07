@@ -16,7 +16,7 @@ export default function PhotoShowcase() {
             Build your personal collection
           </h2>
           <p className="mt-4 text-lg text-[var(--mist-600)] max-w-2xl mx-auto">
-            Every birder has their favorite shots. Create a beautiful gallery organized by the species you love.
+            Every birder has their favorite shots. Create a beautiful gallery organized by the species you love — then share it with a unique link.
           </p>
         </div>
 
