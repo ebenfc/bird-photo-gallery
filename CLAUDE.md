@@ -591,7 +591,7 @@ Select "No, add the constraint without truncating the table" when prompted.
 
 ---
 
-## Gallery Discovery & Bookmarking Feature (PR #TBD - February 2026)
+## Gallery Discovery & Bookmarking Feature (PR #77 - February 2026)
 
 **Non-social gallery discovery: browse public galleries by location and privately bookmark favorites.**
 
