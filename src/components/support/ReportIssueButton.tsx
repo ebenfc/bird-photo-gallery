@@ -23,15 +23,14 @@ export default function ReportIssueButton() {
         onClick={handleOpen}
         aria-label="Report an issue"
         title="Report an issue"
-        className="fixed bottom-6 right-6 z-40
+        className="hidden sm:fixed sm:bottom-6 sm:right-6 z-40
           w-11 h-11 rounded-full
           bg-[var(--forest-700)] text-white
           shadow-lg hover:shadow-xl
           hover:bg-[var(--forest-600)]
           active:scale-95
           transition-all duration-200
-          flex items-center justify-center
-          sm:bottom-6 sm:right-6"
+          sm:flex items-center justify-center"
       >
         {/* Flag icon */}
         <svg
