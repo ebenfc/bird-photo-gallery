@@ -66,11 +66,13 @@ Mobile species page uses circular FAB instead of button in header.
 
 ### Photo Modal (`gallery/PhotoModal.tsx`)
 Key behaviors:
-- `defaultToFullscreen` prop - Opens directly in fullscreen (used on Species detail page)
+- All edit actions (notes, date, delete, cover photo) controlled via optional callback props — features hide when handlers aren't passed
+- Species page passes all management handlers; Feed page passes all + `onChangeSpecies`
+- `defaultToFullscreen` prop - Opens directly in fullscreen (Feed uses `false`, species page uses `false` for edit access)
 - `readOnly` prop - Hides all edit controls (used for public gallery views)
+- Layout: Notes card above compact date line (dates are single inline row, not cards)
 - Swipe gestures - Left/right to navigate (50px minimum distance)
 - Preserves view state - Swipe in fullscreen stays in fullscreen
-- Escape key - Closes modal (different behavior when `defaultToFullscreen`)
 
 ### Public Header (`layout/PublicHeader.tsx`)
 Minimal header for public gallery pages:
