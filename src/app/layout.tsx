@@ -10,6 +10,7 @@ import { hasAcceptedCurrentAgreement } from "@/lib/agreement";
 import AgreementForm from "@/components/agreement/AgreementForm";
 import { ToastProvider } from "@/components/ui/Toast";
 import ReportIssueButton from "@/components/support/ReportIssueButton";
+import SentryUserIdentifier from "@/components/SentryUserIdentifier";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -53,6 +54,7 @@ export default async function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[var(--background)] min-h-screen paper-texture`}
         >
+          <SentryUserIdentifier />
           {isAuthenticated ? (
             hasAcceptedAgreement ? (
               // User is authenticated and has accepted the agreement — show full app

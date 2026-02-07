@@ -119,18 +119,24 @@ export function logError(
 
   // Send errors to Sentry in production
   if (process.env.NODE_ENV === 'production') {
+    // If the calling code passed a userId in the context, attach it
+    // to the Sentry event so you can see which user was affected.
+    const userScope = context?.userId ? { user: { id: context.userId } } : {};
+
     if (error) {
       Sentry.captureException(error, {
         extra: {
           message,
           ...context,
         },
+        ...userScope,
       });
     } else {
       // If no error object, capture as a message
       Sentry.captureMessage(message, {
         level: 'error',
         extra: context,
+        ...userScope,
       });
     }
   }
