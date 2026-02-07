@@ -95,7 +95,6 @@ src/
 
 - `src/db/schema.ts` - Database schema (Drizzle ORM)
 - `src/lib/validation.ts` - Zod schemas for all data validation
-- `src/lib/auth.ts` - API key authentication
 - `src/config/usStates.ts` - US state codes for location settings
 - `drizzle.config.ts` - Database configuration
 - `.env.local` - Environment variables (never commit)
@@ -132,8 +131,6 @@ Required (defined in `.env.local`):
 - `DATABASE_URL` - PostgreSQL connection (Railway)
 - `SUPABASE_URL` - Supabase project URL
 - `SUPABASE_ANON_KEY` - Supabase anonymous key
-- `API_KEY` - API authentication key
-
 Optional:
 - `HAIKUBOX_SERIAL` - Haikubox device serial
 

@@ -122,11 +122,7 @@ Example:
 ## Next Steps to Expand Test Coverage
 
 ### High Priority (Security & Correctness)
-1. **Add tests for auth helpers** ([src/lib/auth.ts](src/lib/auth.ts))
-   - Test API key validation
-   - Test rate limiting logic
-
-2. **Test database query functions**
+1. **Test database query functions**
    - Mock the database layer
    - Test query building and data transformations
 
