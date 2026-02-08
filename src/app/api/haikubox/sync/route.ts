@@ -140,6 +140,9 @@ export async function POST(request: NextRequest) {
     return rateCheck.response;
   }
 
+  // Detect if Clerk middleware was bypassed (cron requests bypass Clerk in proxy.ts)
+  const isVercelCron = request.headers.get("user-agent")?.includes("vercel-cron") ?? false;
+
   // --- Cron path: sync ALL users with Haikubox serials ---
   if (isCronRequest(request)) {
     try {
@@ -199,6 +202,17 @@ export async function POST(request: NextRequest) {
       });
       return NextResponse.json({ error: "Cron sync failed" }, { status: 500 });
     }
+  }
+
+  // If this is a cron request that failed the secret check, return 401 directly.
+  // We can't fall through to requireAuth() because Clerk middleware was bypassed
+  // for cron requests (proxy.ts), so Clerk's auth() would throw.
+  if (isVercelCron) {
+    console.error("[cron-auth] Cron request failed secret verification", {
+      hasCronSecret: !!process.env.CRON_SECRET,
+      hasAuthHeader: !!request.headers.get("authorization"),
+    });
+    return NextResponse.json({ error: "Invalid cron secret" }, { status: 401 });
   }
 
   // --- Manual path: sync current authenticated user ---
