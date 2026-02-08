@@ -279,7 +279,7 @@ export default function PhotoModal({
   // Fullscreen mode - just the photo with swipe gestures
   if (isFullscreen) {
     return (
-      <div className="fixed inset-0 z-50 bg-black">
+      <div className="fixed inset-0 z-50 bg-black" onClick={handleFullscreenTap}>
         {/* Swipe container with dismiss transform */}
         <div
           ref={swipeContainerRef}
