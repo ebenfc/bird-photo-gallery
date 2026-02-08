@@ -4,6 +4,7 @@ import { useEffect, useCallback, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Photo } from "@/types";
+import { useSwipeGesture, SPRING_BACK_DURATION, COMPLETION_DURATION } from "@/hooks/useSwipeGesture";
 
 interface PhotoModalProps {
   photo: Photo | null;
@@ -19,6 +20,11 @@ interface PhotoModalProps {
   defaultToFullscreen?: boolean;
   /** When true, hides all edit controls (favorite, edit date, edit notes, delete, etc.) */
   readOnly?: boolean;
+  /** Adjacent photo URLs for peek effect during swipe navigation */
+  adjacentPhotos?: {
+    prev: { originalUrl: string; alt: string } | null;
+    next: { originalUrl: string; alt: string } | null;
+  };
 }
 
 export default function PhotoModal({
@@ -34,6 +40,7 @@ export default function PhotoModal({
   onSetCoverPhoto,
   defaultToFullscreen = false,
   readOnly = false,
+  adjacentPhotos,
 }: PhotoModalProps) {
   const [isEditingDate, setIsEditingDate] = useState(false);
   const [editDateValue, setEditDateValue] = useState("");
@@ -53,10 +60,6 @@ export default function PhotoModal({
   const [showFullscreenUI, setShowFullscreenUI] = useState(false);
   const [fullscreenUITimer, setFullscreenUITimer] = useState<NodeJS.Timeout | null>(null);
   const [showOverflowMenu, setShowOverflowMenu] = useState(false);
-
-  // Touch/swipe gesture state
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   // Track if we're navigating between photos (to preserve fullscreen/detail state)
   const isNavigatingRef = useRef(false);
@@ -201,43 +204,39 @@ export default function PhotoModal({
     }
   };
 
-  // Minimum swipe distance (in px) to trigger navigation
-  const minSwipeDistance = 50;
+  // Swipe gesture hook
+  const swipeContainerRef = useRef<HTMLDivElement>(null);
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    const touch = e.targetTouches[0];
-    if (touch) {
-      setTouchStart(touch.clientX);
-    }
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    const touch = e.targetTouches[0];
-    if (touch) {
-      setTouchEnd(touch.clientX);
-    }
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd || !onNavigate) return;
-
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe && canNavigate.next) {
-      // Swiped left = next photo - preserve current view state
+  const swipeState = useSwipeGesture({
+    containerRef: swipeContainerRef,
+    onNavigate: (direction) => {
+      if (!onNavigate) return;
       isNavigatingRef.current = true;
       wasFullscreenRef.current = isFullscreen;
-      onNavigate("next");
-    } else if (isRightSwipe && canNavigate.prev) {
-      // Swiped right = previous photo - preserve current view state
-      isNavigatingRef.current = true;
-      wasFullscreenRef.current = isFullscreen;
-      onNavigate("prev");
-    }
-  };
+      onNavigate(direction);
+    },
+    onDismiss: () => {
+      if (isFullscreen) {
+        if (defaultToFullscreen) {
+          onClose();
+        } else {
+          setIsFullscreen(false);
+        }
+      } else {
+        onClose();
+      }
+    },
+    onTap: () => {
+      if (isFullscreen) {
+        handleFullscreenTap();
+      } else if (typeof window !== "undefined" && window.innerWidth < 1024) {
+        setIsFullscreen(true);
+      }
+    },
+    canNavigate,
+    enabled: !!photo && !isEditingDate && !isEditingNotes && !showDeleteConfirm,
+    viewId: isFullscreen ? "fullscreen" : "detail",
+  });
 
   if (!photo) return null;
 
@@ -257,31 +256,100 @@ export default function PhotoModal({
     });
   };
 
-  // Fullscreen mode - just the photo
+  // Compute animation transition strings
+  const isSwipingX = swipeState.gesturePhase === "swiping-x";
+  const isSwipingY = swipeState.gesturePhase === "swiping-y";
+  const animDuration = swipeState.isAnimating
+    ? (swipeState.translateX === 0 && swipeState.translateY === 0
+        ? SPRING_BACK_DURATION
+        : COMPLETION_DURATION)
+    : 0;
+  const animEasing = swipeState.isAnimating
+    ? (swipeState.translateX === 0 && swipeState.translateY === 0
+        ? "cubic-bezier(0.175, 0.885, 0.32, 1.275)" // spring
+        : "cubic-bezier(0.16, 1, 0.3, 1)") // expo-out
+    : "";
+  const trackTransition = swipeState.isAnimating
+    ? `transform ${animDuration}ms ${animEasing}`
+    : "none";
+  const dismissTransition = swipeState.isAnimating && (isSwipingY || swipeState.translateY !== 0)
+    ? `transform ${animDuration}ms ${animEasing}, opacity ${animDuration}ms ${animEasing}`
+    : "none";
+
+  // Fullscreen mode - just the photo with swipe gestures
   if (isFullscreen) {
     return (
-      <div
-        className="fixed inset-0 z-50 bg-black flex items-center justify-center cursor-pointer"
-        onClick={handleFullscreenTap}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
-        <Image
-          src={photo.originalUrl}
-          alt={photo.species?.commonName || "Bird photo"}
-          fill
-          className="object-contain"
-          sizes="100vw"
-          priority
-        />
+      <div className="fixed inset-0 z-50 bg-black">
+        {/* Swipe container with dismiss transform */}
+        <div
+          ref={swipeContainerRef}
+          className="w-full h-full flex items-center justify-center cursor-pointer"
+          style={{
+            touchAction: "none",
+            transform: (isSwipingY || (swipeState.isAnimating && swipeState.translateY !== 0))
+              ? `translate3d(0, ${swipeState.translateY}px, 0) scale(${1 - Math.abs(swipeState.translateY) / 1500})`
+              : undefined,
+            opacity: (isSwipingY || (swipeState.isAnimating && swipeState.dismissOpacity < 1))
+              ? swipeState.dismissOpacity
+              : undefined,
+            transition: dismissTransition,
+          }}
+        >
+          {/* Photo track — prev / current / next for peek effect */}
+          <div className="relative w-full h-full overflow-hidden">
+            <div
+              style={{
+                transform: `translate3d(${swipeState.translateX}px, 0, 0)`,
+                willChange: isSwipingX ? "transform" : undefined,
+                transition: trackTransition,
+              }}
+              className="flex h-full"
+            >
+              {/* Previous photo (off-screen left) */}
+              <div className="flex-shrink-0 relative" style={{ width: "100vw", marginLeft: "-100vw" }}>
+                {adjacentPhotos?.prev && (
+                  <Image
+                    src={adjacentPhotos.prev.originalUrl}
+                    alt={adjacentPhotos.prev.alt}
+                    fill
+                    className="object-contain"
+                    sizes="100vw"
+                  />
+                )}
+              </div>
+              {/* Current photo */}
+              <div className="flex-shrink-0 relative" style={{ width: "100vw" }}>
+                <Image
+                  src={photo.originalUrl}
+                  alt={photo.species?.commonName || "Bird photo"}
+                  fill
+                  className="object-contain"
+                  sizes="100vw"
+                  priority
+                />
+              </div>
+              {/* Next photo (off-screen right) */}
+              <div className="flex-shrink-0 relative" style={{ width: "100vw" }}>
+                {adjacentPhotos?.next && (
+                  <Image
+                    src={adjacentPhotos.next.originalUrl}
+                    alt={adjacentPhotos.next.alt}
+                    fill
+                    className="object-contain"
+                    sizes="100vw"
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
         {/* UI elements - only shown when showFullscreenUI is true */}
         {showFullscreenUI && (
           <>
             {/* Subtle hint to exit */}
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2
               bg-black/50 text-white/70 text-sm rounded-full backdrop-blur-sm
-              animate-fade-in">
+              animate-fade-in z-10">
               Tap anywhere to exit fullscreen
             </div>
             {/* Navigation in fullscreen */}
@@ -295,7 +363,7 @@ export default function PhotoModal({
                   onNavigate("prev");
                   showUITemporarily();
                 }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 p-3
+                className="absolute left-4 top-1/2 -translate-y-1/2 p-3 z-10
                   bg-black/30 backdrop-blur-sm rounded-full text-white/80
                   hover:bg-black/50 transition-all animate-fade-in"
               >
@@ -314,7 +382,7 @@ export default function PhotoModal({
                   onNavigate("next");
                   showUITemporarily();
                 }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-3
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-3 z-10
                   bg-black/30 backdrop-blur-sm rounded-full text-white/80
                   hover:bg-black/50 transition-all animate-fade-in"
               >
@@ -350,19 +418,21 @@ export default function PhotoModal({
 
       {/* Content - different layout for mobile vs desktop */}
       <div className="relative flex flex-col lg:flex-row w-full h-full animate-fade-in-scale">
-        {/* Image container */}
+        {/* Image container with swipe gestures */}
         <div
-          className={`flex-1 flex items-center justify-center p-4 lg:p-8 relative transition-all duration-300
+          ref={swipeContainerRef}
+          className={`flex-1 flex items-center justify-center p-4 lg:p-8 relative
             ${!isDetailsExpanded ? "lg:flex-1" : ""}`}
-          onClick={() => {
-            // On mobile, tapping the image area toggles fullscreen
-            if (window.innerWidth < 1024) {
-              setIsFullscreen(true);
-            }
+          style={{
+            touchAction: "none",
+            transform: (isSwipingY || (swipeState.isAnimating && swipeState.translateY !== 0))
+              ? `translate3d(0, ${swipeState.translateY}px, 0) scale(${1 - Math.abs(swipeState.translateY) / 1500})`
+              : undefined,
+            opacity: (isSwipingY || (swipeState.isAnimating && swipeState.dismissOpacity < 1))
+              ? swipeState.dismissOpacity
+              : undefined,
+            transition: dismissTransition,
           }}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
         >
           {/* Top controls bar */}
           <div className="absolute top-4 left-4 right-4 z-20 flex justify-between items-center">
@@ -448,15 +518,52 @@ export default function PhotoModal({
             Tap photo for fullscreen
           </div>
 
-          <div className="relative w-full h-full max-w-4xl max-h-[50vh] lg:max-h-[80vh]">
-            <Image
-              src={photo.originalUrl}
-              alt={`${photo.species?.commonName || "Bird"} photo${photo.originalDateTaken ? `, taken ${formatDateShort(photo.originalDateTaken)}` : ""}${photo.isFavorite ? " (favorited)" : ""}`}
-              fill
-              className="object-contain cursor-pointer lg:cursor-default"
-              sizes="(max-width: 1024px) 100vw, 80vw"
-              priority
-            />
+          {/* Photo track — prev / current / next for peek effect */}
+          <div className="relative w-full h-full max-w-4xl max-h-[50vh] lg:max-h-[80vh] overflow-hidden">
+            <div
+              style={{
+                transform: `translate3d(${swipeState.translateX}px, 0, 0)`,
+                willChange: isSwipingX ? "transform" : undefined,
+                transition: trackTransition,
+              }}
+              className="flex h-full"
+            >
+              {/* Previous photo (off-screen left) */}
+              <div className="flex-shrink-0 relative h-full" style={{ width: "100%", marginLeft: "-100%" }}>
+                {adjacentPhotos?.prev && (
+                  <Image
+                    src={adjacentPhotos.prev.originalUrl}
+                    alt={adjacentPhotos.prev.alt}
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 1024px) 100vw, 80vw"
+                  />
+                )}
+              </div>
+              {/* Current photo */}
+              <div className="flex-shrink-0 relative h-full" style={{ width: "100%" }}>
+                <Image
+                  src={photo.originalUrl}
+                  alt={`${photo.species?.commonName || "Bird"} photo${photo.originalDateTaken ? `, taken ${formatDateShort(photo.originalDateTaken)}` : ""}${photo.isFavorite ? " (favorited)" : ""}`}
+                  fill
+                  className="object-contain cursor-pointer lg:cursor-default"
+                  sizes="(max-width: 1024px) 100vw, 80vw"
+                  priority
+                />
+              </div>
+              {/* Next photo (off-screen right) */}
+              <div className="flex-shrink-0 relative h-full" style={{ width: "100%" }}>
+                {adjacentPhotos?.next && (
+                  <Image
+                    src={adjacentPhotos.next.originalUrl}
+                    alt={adjacentPhotos.next.alt}
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 1024px) 100vw, 80vw"
+                  />
+                )}
+              </div>
+            </div>
           </div>
         </div>
 

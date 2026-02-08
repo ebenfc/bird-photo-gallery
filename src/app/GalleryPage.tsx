@@ -191,13 +191,27 @@ function GalleryContent() {
     }
   };
 
+  const currentPhotoIndex = selectedPhoto
+    ? photos.findIndex((p) => p.id === selectedPhoto.id)
+    : -1;
+
   const canNavigate = selectedPhoto
     ? {
-        prev: photos.findIndex((p) => p.id === selectedPhoto.id) > 0,
-        next:
-          photos.findIndex((p) => p.id === selectedPhoto.id) < photos.length - 1,
+        prev: currentPhotoIndex > 0,
+        next: currentPhotoIndex < photos.length - 1,
       }
     : { prev: false, next: false };
+
+  const adjacentPhotos = selectedPhoto && currentPhotoIndex >= 0
+    ? {
+        prev: currentPhotoIndex > 0
+          ? { originalUrl: photos[currentPhotoIndex - 1]!.originalUrl, alt: photos[currentPhotoIndex - 1]!.species?.commonName || "Bird photo" }
+          : null,
+        next: currentPhotoIndex < photos.length - 1
+          ? { originalUrl: photos[currentPhotoIndex + 1]!.originalUrl, alt: photos[currentPhotoIndex + 1]!.species?.commonName || "Bird photo" }
+          : null,
+      }
+    : undefined;
 
   const handleChangeSpecies = (photo: Photo) => {
     setPhotoToAssign(photo);
@@ -427,6 +441,7 @@ function GalleryContent() {
         onFavoriteToggle={handleFavoriteToggle}
         onNavigate={handleNavigate}
         canNavigate={canNavigate}
+        adjacentPhotos={adjacentPhotos}
         onChangeSpecies={handleChangeSpecies}
         onDateChange={handleDateChange}
         onNotesChange={handleNotesChange}
