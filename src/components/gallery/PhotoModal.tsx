@@ -216,15 +216,7 @@ export default function PhotoModal({
       onNavigate(direction);
     },
     onDismiss: () => {
-      if (isFullscreen) {
-        if (defaultToFullscreen) {
-          onClose();
-        } else {
-          setIsFullscreen(false);
-        }
-      } else {
-        onClose();
-      }
+      onClose();
     },
     onTap: () => {
       if (isFullscreen) {
@@ -417,22 +409,24 @@ export default function PhotoModal({
       </div>
 
       {/* Content - different layout for mobile vs desktop */}
-      <div className="relative flex flex-col lg:flex-row w-full h-full animate-fade-in-scale">
+      <div
+        className="relative flex flex-col lg:flex-row w-full h-full animate-fade-in-scale"
+        style={{
+          transform: (isSwipingY || (swipeState.isAnimating && swipeState.translateY !== 0))
+            ? `translate3d(0, ${swipeState.translateY}px, 0) scale(${1 - Math.abs(swipeState.translateY) / 1500})`
+            : undefined,
+          opacity: (isSwipingY || (swipeState.isAnimating && swipeState.dismissOpacity < 1))
+            ? swipeState.dismissOpacity
+            : undefined,
+          transition: dismissTransition,
+        }}
+      >
         {/* Image container with swipe gestures */}
         <div
           ref={swipeContainerRef}
           className={`flex-1 flex items-center justify-center p-4 lg:p-8 relative
             ${!isDetailsExpanded ? "lg:flex-1" : ""}`}
-          style={{
-            touchAction: "none",
-            transform: (isSwipingY || (swipeState.isAnimating && swipeState.translateY !== 0))
-              ? `translate3d(0, ${swipeState.translateY}px, 0) scale(${1 - Math.abs(swipeState.translateY) / 1500})`
-              : undefined,
-            opacity: (isSwipingY || (swipeState.isAnimating && swipeState.dismissOpacity < 1))
-              ? swipeState.dismissOpacity
-              : undefined,
-            transition: dismissTransition,
-          }}
+          style={{ touchAction: "none" }}
         >
           {/* Top controls bar */}
           <div className="absolute top-4 left-4 right-4 z-20 flex justify-between items-center">
