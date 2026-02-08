@@ -62,16 +62,21 @@ Two-dimensional theming via HTML attributes on `<html>`:
 | Default | PNW nature (green/teal) | Active |
 | Bold | Purple/electric blue | Active |
 | Field Guide | Cream/sage green/warm brown, Georgia serif headers | Active |
-| Retro | GeoCities navy/teal/yellow | Unlockable via easter egg |
+| Retro | GeoCities navy/teal/yellow | Active |
 
 ### How It Works
 All colors use CSS custom properties (`var(--forest-500)`, `var(--moss-300)`, etc.). Skin overrides in `globals.css` use `[data-skin="bold"]` / `[data-skin="fieldguide"]` / `[data-skin="retro"]` selectors to remap every variable. Components need zero changes — they inherit the active skin automatically.
 
-### Retro Unlock (Easter Egg)
-- **Desktop:** Konami Code (↑↑↓↓←→←→BA) — detected by `useKonamiCode` hook
-- **Mobile:** 7 rapid taps on the bird logo — detected by `useLogoTapUnlock` hook
-- Both triggers live in `Header.tsx` and call `unlockRetro()` from `SkinContext`
-- Once unlocked, the Retro card appears in Settings > Appearance
+### Easter Egg Infrastructure (Dormant)
+The easter egg unlock system is intact but currently dormant — no reward is wired to it.
+- **Desktop:** Konami Code (↑↑↓↓←→←→BA) — `useKonamiCode` hook
+- **Mobile:** 7 rapid taps on the bird logo — `useLogoTapUnlock` hook
+- Both hooks fire in `Header.tsx` but the callback is a no-op
+- `SkinContext` still exports `unlockRetro()` and `retroUnlocked` for future reuse
+- To re-enable: add reward logic to `handleRetroUnlock` in `Header.tsx`
+
+### Landing Page Theme Showcase
+Unauthenticated visitors can live-preview all 4 skins on the landing page (`ThemeShowcase` component). Their choice persists to localStorage and carries over into sign-up. Includes a light/dark mode toggle.
 
 ### Color Rules for New Components
 - Backgrounds: `var(--card-bg)`, `var(--background)` — never `bg-white`

@@ -5,8 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton, SignedIn, SignedOut, SignOutButton } from "@clerk/nextjs";
 import ReportIssueModal from "@/components/support/ReportIssueModal";
-import { useSkin } from "@/contexts/SkinContext";
-import { useToast } from "@/components/ui/Toast";
 import { useKonamiCode } from "@/hooks/useKonamiCode";
 import { useLogoTapUnlock } from "@/hooks/useLogoTapUnlock";
 
@@ -14,15 +12,9 @@ export default function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [reportIssueOpen, setReportIssueOpen] = useState(false);
-  const { retroUnlocked, unlockRetro } = useSkin();
-  const { showToast } = useToast();
-
-  // Easter egg unlock handler — shared by Konami Code + logo taps
-  const handleRetroUnlock = useCallback(() => {
-    if (retroUnlocked) return;
-    unlockRetro();
-    showToast("You unlocked the Retro skin! Check Settings \u2192 Appearance.", "success");
-  }, [retroUnlocked, unlockRetro, showToast]);
+  // Easter egg infrastructure — dormant until a new reward is chosen.
+  // Re-wire this callback when ready (see SkinContext for unlockRetro()).
+  const handleRetroUnlock = useCallback(() => {}, []);
 
   useKonamiCode(handleRetroUnlock);
   const handleLogoTap = useLogoTapUnlock(handleRetroUnlock);
