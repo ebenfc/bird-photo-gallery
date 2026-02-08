@@ -129,8 +129,124 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Birding Resources */}
+      <section className="bg-[var(--card-bg)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)]
+        border border-[var(--border-light)] overflow-hidden mb-8">
+        <div className="bg-gradient-to-r from-[var(--surface-forest)] to-[var(--surface-moss)]
+          border-b border-[var(--border-light)] px-5 sm:px-6 py-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-1 flex items-center gap-2">
+            <svg className="w-6 h-6 text-[var(--moss-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            Birding Resources
+          </h2>
+          <p className="text-sm sm:text-base text-[var(--mist-600)]">
+            Tools and guides for bird identification and species information
+          </p>
+        </div>
+        <div className="p-5 sm:p-6 space-y-6">
+          {/* Bird Identification */}
+          <div>
+            <h3 className="font-semibold text-[var(--text-primary)] mb-3">Bird Identification</h3>
+            <div className="space-y-3">
+              {[
+                { name: "Merlin Bird ID", url: "https://merlin.allaboutbirds.org/", description: "Free app by Cornell Lab with photo ID, sound ID, and bird identification by answering simple questions" },
+                { name: "eBird", url: "https://ebird.org/", description: "Global database of bird observations with species information and range maps" },
+                { name: "iNaturalist", url: "https://www.inaturalist.org/", description: "Community-powered identification for all wildlife, including birds" },
+              ].map((link) => (
+                <a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer" className="block group">
+                  <div className="flex items-start gap-3 p-4 rounded-[var(--radius-md)]
+                    bg-[var(--bg-secondary)] hover:bg-[var(--surface-forest)]
+                    border border-[var(--border-light)] hover:border-[var(--moss-300)]
+                    transition-all duration-[var(--timing-fast)] hover:shadow-[var(--shadow-sm)]">
+                    <div className="flex-shrink-0 mt-0.5">
+                      <svg className="w-5 h-5 text-[var(--moss-600)] group-hover:text-[var(--moss-700)] transition-colors duration-[var(--timing-fast)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-[var(--text-primary)] mb-1 group-hover:text-[var(--moss-700)] transition-colors duration-[var(--timing-fast)]">{link.name}</h4>
+                      <p className="text-sm text-[var(--mist-600)] leading-relaxed">{link.description}</p>
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Species Information */}
+          <div>
+            <h3 className="font-semibold text-[var(--text-primary)] mb-3">Species Information</h3>
+            <div className="space-y-3">
+              {[
+                { name: "All About Birds", url: "https://www.allaboutbirds.org/", description: "Comprehensive species guides from Cornell Lab with photos, sounds, ID tips, and range maps" },
+                { name: "Audubon Field Guide", url: "https://www.audubon.org/bird-guide", description: "Detailed species profiles with conservation status and habitat information" },
+                { name: "What Bird", url: "https://www.whatbird.com/", description: "Bird identification guide with photos, songs, and detailed species information" },
+                { name: "Birds of the World", url: "https://birdsoftheworld.org/", description: "Comprehensive scientific encyclopedia (subscription required)" },
+              ].map((link) => (
+                <a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer" className="block group">
+                  <div className="flex items-start gap-3 p-4 rounded-[var(--radius-md)]
+                    bg-[var(--bg-secondary)] hover:bg-[var(--surface-forest)]
+                    border border-[var(--border-light)] hover:border-[var(--moss-300)]
+                    transition-all duration-[var(--timing-fast)] hover:shadow-[var(--shadow-sm)]">
+                    <div className="flex-shrink-0 mt-0.5">
+                      <svg className="w-5 h-5 text-[var(--moss-600)] group-hover:text-[var(--moss-700)] transition-colors duration-[var(--timing-fast)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-[var(--text-primary)] mb-1 group-hover:text-[var(--moss-700)] transition-colors duration-[var(--timing-fast)]">{link.name}</h4>
+                      <p className="text-sm text-[var(--mist-600)] leading-relaxed">{link.description}</p>
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Haikubox */}
+          <div>
+            <h3 className="font-semibold text-[var(--text-primary)] mb-3">Haikubox</h3>
+            <div className="space-y-3">
+              {[
+                { name: "Get a Haikubox", url: "https://haikubox.com/", description: "Purchase a Haikubox to automatically detect and identify birds visiting your yard 24/7" },
+                { name: "Haikubox API Documentation", url: "https://api.haikubox.com/docs", description: "Technical documentation for the Haikubox API" },
+              ].map((link) => (
+                <a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer" className="block group">
+                  <div className="flex items-start gap-3 p-4 rounded-[var(--radius-md)]
+                    bg-[var(--bg-secondary)] hover:bg-[var(--surface-forest)]
+                    border border-[var(--border-light)] hover:border-[var(--moss-300)]
+                    transition-all duration-[var(--timing-fast)] hover:shadow-[var(--shadow-sm)]">
+                    <div className="flex-shrink-0 mt-0.5">
+                      <svg className="w-5 h-5 text-[var(--moss-600)] group-hover:text-[var(--moss-700)] transition-colors duration-[var(--timing-fast)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-[var(--text-primary)] mb-1 group-hover:text-[var(--moss-700)] transition-colors duration-[var(--timing-fast)]">{link.name}</h4>
+                      <p className="text-sm text-[var(--mist-600)] leading-relaxed">{link.description}</p>
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Note about Bird Feed */}
+      <div className="p-4 bg-[var(--surface-moss)] rounded-[var(--radius-md)]
+        border border-[var(--moss-200)] mb-8">
+        <p className="text-sm text-[var(--mist-600)] text-center">
+          <span className="font-semibold text-[var(--text-primary)]">Note:</span> Bird Feed
+          is designed for organizing and cataloguing your bird photos, not for detailed species
+          identification or research. These external resources complement Bird Feed by providing
+          expert identification tools and comprehensive species information.
+        </p>
+      </div>
+
       {/* Disclaimer */}
-      <div className="mt-8 p-4 bg-[var(--surface-moss)] rounded-[var(--radius-md)]
+      <div className="p-4 bg-[var(--surface-moss)] rounded-[var(--radius-md)]
         border border-[var(--moss-200)]">
         <p className="text-sm text-[var(--mist-600)] text-center leading-relaxed">
           Bird Feed was built in the <span className="font-semibold text-[var(--text-primary)]">Pacific Northwest</span> by
