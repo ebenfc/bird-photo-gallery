@@ -11,7 +11,7 @@ Components are organized by feature area.
 | `gallery/` | Photo gallery and modal components |
 | `landing/` | Public landing page for unauthenticated users |
 | `layout/` | Header, navigation, PublicHeader |
-| `settings/` | User settings forms (public gallery, appearance/skin picker) |
+| `settings/` | User settings forms on /settings page (public gallery, location, appearance/skin picker) |
 | `species/` | Species cards and forms |
 | `stats/` | Property stats widget |
 | `suggestions/` | AI suggestion components |
@@ -23,7 +23,6 @@ Components are organized by feature area.
 
 | Component | Purpose |
 |-----------|---------|
-| `HaikuboxSetupCard` | Inline setup flow for connecting a Haikubox (two paths: own device or public device) |
 | `SyncStatusBar` | Shows last sync time + "Sync Now" button with cooldown |
 | `SpeciesActivityList` | Filterable/sortable list of detected species |
 | `SpeciesActivityRow` | Individual species row with detection count, rarity, photo status |

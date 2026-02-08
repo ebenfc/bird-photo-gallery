@@ -38,7 +38,7 @@ No Clerk auth UI, no edit/upload buttons.
 - Set as cover photo button
 - Haikubox detection data (location-sensitive)
 - Activity page entirely (not accessible)
-- Resources page entirely (not accessible)
+- Settings page entirely (not accessible)
 
 ## Files
 - `layout.tsx` - Server component that validates username and public gallery status

@@ -4,6 +4,15 @@ import { withSentryConfig } from "@sentry/nextjs";
 const nextConfig: NextConfig = {
   // Ensure native modules work properly in serverless environment
   serverExternalPackages: ['sharp', 'pg'],
+  async redirects() {
+    return [
+      {
+        source: '/resources',
+        destination: '/settings',
+        permanent: true,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

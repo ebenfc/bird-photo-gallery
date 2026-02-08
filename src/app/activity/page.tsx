@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import PropertyStatsWidget from "@/components/stats/PropertyStatsWidget";
 import SpeciesActivityList from "@/components/activity/SpeciesActivityList";
 import UnassignedSpeciesModal from "@/components/activity/UnassignedSpeciesModal";
-import HaikuboxSetupCard from "@/components/activity/HaikuboxSetupCard";
+import Link from "next/link";
 import SyncStatusBar from "@/components/activity/SyncStatusBar";
 import { SpeciesActivityData, Rarity } from "@/types";
 
@@ -184,12 +184,47 @@ export default function ActivityPage() {
           </h1>
         </div>
 
-        <HaikuboxSetupCard
-          onConnected={() => {
-            setHaikuboxConfigured(true);
-            fetchActivityData();
-          }}
-        />
+        <div className="bg-[var(--card-bg)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] border border-[var(--border-light)] overflow-hidden">
+          <div className="text-center pt-10 pb-8 px-6">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-[var(--sky-100)] to-[var(--moss-100)] flex items-center justify-center">
+              <svg className="w-10 h-10 text-[var(--forest-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-[var(--text-primary)] mb-3">
+              Connect a Haikubox
+            </h2>
+            <p className="text-[var(--mist-600)] max-w-md mx-auto mb-6">
+              Track which bird species visit your area automatically. Connect a
+              Haikubox device to see detection data, species activity, and more.
+            </p>
+            <Link
+              href="/settings"
+              className="inline-flex items-center gap-2 px-6 py-3
+                bg-gradient-to-b from-[var(--forest-500)] to-[var(--forest-600)]
+                text-white font-semibold rounded-[var(--radius-lg)] shadow-[var(--shadow-sm)]
+                hover:from-[var(--forest-600)] hover:to-[var(--forest-700)]
+                transition-all duration-[var(--timing-fast)] active:scale-95"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Set Up in Settings
+            </Link>
+            <p className="text-sm text-[var(--mist-500)] mt-4">
+              Don&apos;t know what a Haikubox is?{" "}
+              <a
+                href="https://haikubox.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--moss-600)] hover:text-[var(--moss-700)] underline"
+              >
+                Learn more
+              </a>
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
