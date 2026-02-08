@@ -1135,3 +1135,270 @@ h1, h2, h3, h4, h5, h6 {
 [data-skin="retro"][data-mode="dark"] .error-glow {
   box-shadow: 0 0 0 3px rgba(255, 68, 68, 0.2), var(--shadow-md);
 }
+
+/* ============================================================
+   FIELD GUIDE SKIN — Classic Sibley / Peterson field guide aesthetic
+   Warm, naturalistic, authoritative. Gouache on parchment.
+   ============================================================ */
+
+/* === FIELD GUIDE SKIN — LIGHT MODE === */
+[data-skin="fieldguide"] {
+  /* Base — cream parchment paper */
+  --background: #F5F1E8;
+  --background-warm: #EDE8DA;
+  --foreground: #3A3A3A;
+  --foreground-muted: #6B6258;
+  --card-bg: #FDFBF6;
+  --border: #D9D0C1;
+  --border-light: #E8E2D6;
+
+  /* Semantic text — warm browns */
+  --text-primary: #3A3A3A;
+  --text-secondary: #5C4A32;
+  --text-label: #8B6F47;
+
+  /* Semantic surfaces */
+  --surface-forest: #EEF2EB;
+  --surface-moss: #F2EDE4;
+  --surface-sky: #ECF0F4;
+
+  /* Sage green palette (replaces forest) */
+  --forest-50: #F2F5EF;
+  --forest-100: #E4EAE0;
+  --forest-200: #C9D5C0;
+  --forest-300: #ADBF9F;
+  --forest-400: #8FA37E;
+  --forest-500: #6B7F5C;
+  --forest-600: #56684A;
+  --forest-700: #45533C;
+  --forest-800: #364230;
+  --forest-900: #2A3325;
+  --forest-950: #1C231A;
+
+  /* Warm brown/umber palette (replaces moss) */
+  --moss-50: #F7F2EB;
+  --moss-100: #EDE4D6;
+  --moss-200: #DBC9AD;
+  --moss-300: #C9AE84;
+  --moss-400: #B08E5E;
+  --moss-500: #8B6F47;
+  --moss-600: #725A39;
+  --moss-700: #5C482E;
+  --moss-800: #473825;
+  --moss-900: #352A1C;
+
+  /* Warm gray palette (replaces mist) */
+  --mist-50: #F5F1E8;
+  --mist-100: #EDE8DA;
+  --mist-200: #D9D0C1;
+  --mist-300: #C2B6A4;
+  --mist-400: #A69888;
+  --mist-500: #8A7C6C;
+  --mist-600: #6B6258;
+  --mist-700: #524B42;
+  --mist-800: #3C362F;
+  --mist-900: #28231E;
+
+  /* Deep brown palette (replaces bark) */
+  --bark-50: #F5F0EA;
+  --bark-100: #E8DFD4;
+  --bark-200: #D4C7B6;
+  --bark-300: #BFAD96;
+  --bark-400: #A08A6C;
+  --bark-500: #7A6650;
+  --bark-600: #5E4E3C;
+  --bark-700: #483C2E;
+  --bark-800: #342B22;
+  --bark-900: #221C16;
+
+  /* Muted blue palette (replaces sky) */
+  --sky-50: #F0F3F6;
+  --sky-100: #DDE4EC;
+  --sky-200: #BBCAD8;
+  --sky-300: #94ACC0;
+  --sky-400: #6F8EA8;
+  --sky-500: #4A6B8A;
+  --sky-600: #3B5670;
+  --sky-700: #2F4458;
+  --sky-800: #243443;
+  --sky-900: #1A2630;
+
+  /* Warm ochre palette (replaces amber) */
+  --amber-50: #FDF8EE;
+  --amber-100: #F9EDCF;
+  --amber-200: #F2DA9F;
+  --amber-300: #E8C46E;
+  --amber-400: #DBAB44;
+  --amber-500: #C4942A;
+  --amber-600: #A07822;
+  --amber-700: #7C5D1B;
+  --amber-800: #5C4514;
+  --amber-900: #40300F;
+
+  /* Shadows — warm brown undertone, subtle depth */
+  --shadow-xs: 0 1px 2px rgba(92, 74, 50, 0.06);
+  --shadow-sm: 0 2px 4px rgba(92, 74, 50, 0.08), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 12px rgba(92, 74, 50, 0.10), 0 2px 4px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 8px 24px rgba(92, 74, 50, 0.12), 0 4px 8px rgba(0, 0, 0, 0.03);
+  --shadow-xl: 0 16px 40px rgba(92, 74, 50, 0.14), 0 8px 16px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 24px 56px rgba(92, 74, 50, 0.16), 0 12px 24px rgba(0, 0, 0, 0.05);
+  --shadow-moss: 0 4px 16px rgba(139, 111, 71, 0.20);
+  --shadow-moss-lg: 0 8px 24px rgba(139, 111, 71, 0.24);
+  --shadow-forest: 0 4px 16px rgba(107, 127, 92, 0.18);
+  --shadow-amber: 0 4px 16px rgba(196, 148, 42, 0.20);
+  --shadow-inset-sm: inset 0 1px 2px rgba(92, 74, 50, 0.08);
+  --shadow-inset-md: inset 0 2px 4px rgba(92, 74, 50, 0.10);
+
+  /* Border radii — book-like, subtle rounding */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+
+  /* Status feedback — muted naturalistic tones */
+  --success-bg: #EFF5ED;
+  --success-text: #3D5A34;
+  --success-border: #B8D4AE;
+  --error-bg: #F8F0EE;
+  --error-text: #8B3A2A;
+  --error-border: #E0B8AE;
+  --info-bg: #EDF1F5;
+  --info-text: #3B5670;
+  --info-border: #BBCAD8;
+  --warning-bg: #F9F4EA;
+  --warning-text: #7C5D1B;
+  --warning-border: #F2DA9F;
+}
+
+/* === FIELD GUIDE SKIN — DARK MODE === */
+[data-skin="fieldguide"][data-mode="dark"] {
+  /* Base — deep leather brown */
+  --background: #2C2416;
+  --background-warm: #32291C;
+  --foreground: #E8E0D5;
+  --foreground-muted: #A8998A;
+  --card-bg: #382F22;
+  --border: #4E4234;
+  --border-light: #40362A;
+
+  /* Semantic text — warm parchment tones */
+  --text-primary: #E8E0D5;
+  --text-secondary: #D0C4B4;
+  --text-label: #B8A890;
+
+  /* Semantic surfaces */
+  --surface-forest: #2A3224;
+  --surface-moss: #352C20;
+  --surface-sky: #263040;
+
+  /* Inverted mist palette (brown-tinted grays for dark mode) */
+  --mist-50: #2C2416;
+  --mist-100: #382F22;
+  --mist-200: #40362A;
+  --mist-300: #4E4234;
+  --mist-400: #6B5C4A;
+  --mist-500: #8A7C6C;
+  --mist-600: #A8998A;
+  --mist-700: #B8A890;
+  --mist-800: #D0C4B4;
+  --mist-900: #E8E0D5;
+
+  /* Inverted bark palette */
+  --bark-50: #2C2416;
+  --bark-100: #352C20;
+  --bark-200: #4A3D2E;
+  --bark-300: #5E4E3C;
+  --bark-400: #7A6650;
+  --bark-500: #A08A6C;
+  --bark-600: #BFAD96;
+  --bark-700: #D4C7B6;
+  --bark-800: #E8DFD4;
+  --bark-900: #F5F0EA;
+
+  /* Shadows — darker, warm undertone */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-xl: 0 16px 40px rgba(0, 0, 0, 0.5);
+  --shadow-2xl: 0 24px 56px rgba(0, 0, 0, 0.55);
+  --shadow-moss: 0 4px 16px rgba(139, 111, 71, 0.15);
+  --shadow-moss-lg: 0 8px 24px rgba(139, 111, 71, 0.18);
+  --shadow-forest: 0 4px 16px rgba(107, 127, 92, 0.12);
+  --shadow-amber: 0 4px 16px rgba(196, 148, 42, 0.12);
+  --shadow-inset-sm: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+  --shadow-inset-md: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  /* Status feedback — dark mode naturalistic */
+  --success-bg: #1E2E1A;
+  --success-text: #7DB370;
+  --success-border: #3D5A34;
+  --error-bg: #2E1A18;
+  --error-text: #D4776A;
+  --error-border: #8B3A2A;
+  --info-bg: #1A2636;
+  --info-text: #6F9CC0;
+  --info-border: #3B5670;
+  --warning-bg: #2E2610;
+  --warning-text: #D4A840;
+  --warning-border: #7C5D1B;
+}
+
+/* === FIELD GUIDE SKIN — CLASS OVERRIDES === */
+[data-skin="fieldguide"] .paper-texture {
+  background: linear-gradient(180deg, var(--background) 0%, var(--background-warm) 100%);
+}
+
+[data-skin="fieldguide"] .pnw-texture {
+  background-image:
+    radial-gradient(ellipse at 20% 10%, rgba(107, 127, 92, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(139, 111, 71, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(92, 74, 50, 0.02) 0%, transparent 70%);
+}
+
+[data-skin="fieldguide"] ::selection {
+  background: rgba(107, 127, 92, 0.25);
+  color: #3A3A3A;
+}
+
+[data-skin="fieldguide"] .success-glow {
+  box-shadow: 0 0 0 3px rgba(107, 127, 92, 0.18), var(--shadow-md);
+}
+
+[data-skin="fieldguide"] .error-glow {
+  box-shadow: 0 0 0 3px rgba(139, 58, 42, 0.18), var(--shadow-md);
+}
+
+/* Field Guide typography — serif headers, dignified spacing */
+[data-skin="fieldguide"] h1, [data-skin="fieldguide"] h2, [data-skin="fieldguide"] h3,
+[data-skin="fieldguide"] h4, [data-skin="fieldguide"] h5, [data-skin="fieldguide"] h6 {
+  font-family: Georgia, 'Times New Roman', serif;
+  letter-spacing: 0.01em;
+}
+
+/* Field Guide dark mode class overrides */
+[data-skin="fieldguide"][data-mode="dark"] .paper-texture {
+  background: linear-gradient(180deg, var(--background) 0%, var(--background-warm) 100%);
+}
+
+[data-skin="fieldguide"][data-mode="dark"] .pnw-texture {
+  background-image:
+    radial-gradient(ellipse at 20% 10%, rgba(107, 127, 92, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(139, 111, 71, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(92, 74, 50, 0.03) 0%, transparent 70%);
+}
+
+[data-skin="fieldguide"][data-mode="dark"] ::selection {
+  background: rgba(107, 127, 92, 0.35);
+  color: #E8E0D5;
+}
+
+[data-skin="fieldguide"][data-mode="dark"] .success-glow {
+  box-shadow: 0 0 0 3px rgba(125, 179, 112, 0.18), var(--shadow-md);
+}
+
+[data-skin="fieldguide"][data-mode="dark"] .error-glow {
+  box-shadow: 0 0 0 3px rgba(212, 119, 106, 0.18), var(--shadow-md);
+}
