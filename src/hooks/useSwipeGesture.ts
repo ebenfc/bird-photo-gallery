@@ -279,6 +279,7 @@ export function useSwipeGesture(config: SwipeGestureConfig): SwipeGestureState {
       s.translateX = 0;
       s.translateY = 0;
       s.dismissOpacity = 1;
+      scheduleUpdate();
     };
 
     const handleTouchMove = (e: TouchEvent) => {
