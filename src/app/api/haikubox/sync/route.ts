@@ -260,9 +260,78 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET /api/haikubox/sync - Get sync status
-export async function GET(_request: NextRequest) {
-  // Authentication
+// GET /api/haikubox/sync - Vercel Cron trigger (GET) or sync status (authenticated)
+export async function GET(request: NextRequest) {
+  // --- Cron path: Vercel cron makes GET requests ---
+  if (isCronRequest(request)) {
+    try {
+      const usersWithSerial = await db
+        .select({ userId: appSettings.userId })
+        .from(appSettings)
+        .where(eq(appSettings.key, "haikubox_serial"));
+
+      if (usersWithSerial.length === 0) {
+        logInfo("Haikubox cron: no users with configured serials");
+        return NextResponse.json({ success: true, message: "No users with Haikubox serials", synced: 0 });
+      }
+
+      const results: Array<{ userId: string; success: boolean; processed: number; error?: string }> = [];
+
+      for (const { userId } of usersWithSerial) {
+        if (!userId) continue;
+        try {
+          const result = await syncUserHaikubox(userId);
+          results.push({ userId, success: result.success, processed: result.processed, error: result.error });
+        } catch (error) {
+          const errorMsg = error instanceof Error ? error.message : "Unknown error";
+          logError("Haikubox cron sync error for user", error instanceof Error ? error : new Error(errorMsg), {
+            route: "/api/haikubox/sync",
+            method: "GET (cron)",
+            userId,
+          });
+          await logSync(userId, "yearly", "error", 0, errorMsg);
+          results.push({ userId, success: false, processed: 0, error: errorMsg });
+        }
+      }
+
+      invalidateHaikuboxCache();
+
+      const totalProcessed = results.reduce((sum, r) => sum + r.processed, 0);
+      const totalSuccess = results.filter(r => r.success).length;
+
+      logInfo("Haikubox cron completed", {
+        totalUsers: results.length,
+        successCount: totalSuccess,
+        totalProcessed,
+      });
+
+      return NextResponse.json({
+        success: true,
+        synced: results.length,
+        successCount: totalSuccess,
+        totalProcessed,
+        results,
+      });
+    } catch (error) {
+      logError("Haikubox cron fatal error", error instanceof Error ? error : new Error(String(error)), {
+        route: "/api/haikubox/sync",
+        method: "GET (cron)",
+      });
+      return NextResponse.json({ error: "Cron sync failed" }, { status: 500 });
+    }
+  }
+
+  // If this is a cron request that failed the secret check, return 401 directly.
+  // Clerk middleware was bypassed for cron requests (proxy.ts), so auth() would throw.
+  if (request.headers.get("user-agent")?.includes("vercel-cron")) {
+    console.error("[cron-auth] Cron request failed secret verification", {
+      hasCronSecret: !!process.env.CRON_SECRET,
+      hasAuthHeader: !!request.headers.get("authorization"),
+    });
+    return NextResponse.json({ error: "Invalid cron secret" }, { status: 401 });
+  }
+
+  // --- Authenticated path: return sync status for current user ---
   const authResult = await requireAuth();
   if (isErrorResponse(authResult)) {
     return authResult;
