@@ -210,7 +210,7 @@ export default function SpeciesForm({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="md">
+    <Modal isOpen={isOpen} onClose={handleClose} size="md" aria-label={title}>
       <form onSubmit={handleSubmit} className="p-6 pt-8">
         {/* Header with bird icon */}
         <div className="flex items-center gap-3 mb-6">

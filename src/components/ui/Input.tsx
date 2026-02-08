@@ -1,6 +1,6 @@
 "use client";
 
-import { InputHTMLAttributes, forwardRef, useState } from "react";
+import { InputHTMLAttributes, forwardRef, useState, useId } from "react";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -9,9 +9,12 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className = "", label, error, floatingLabel = false, ...props }, ref) => {
+  ({ className = "", label, error, floatingLabel = false, id: externalId, ...props }, ref) => {
     const [isFocused, setIsFocused] = useState(false);
     const hasValue = props.value !== undefined && props.value !== "";
+    const generatedId = useId();
+    const inputId = externalId || generatedId;
+    const errorId = `${inputId}-error`;
 
     if (floatingLabel && label) {
       return (
@@ -19,6 +22,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           <div className="relative">
             <input
               ref={ref}
+              id={inputId}
+              aria-invalid={error ? true : undefined}
+              aria-describedby={error ? errorId : undefined}
               className={`
                 peer block w-full px-4 py-3.5 pt-6
                 bg-[var(--card-bg)] text-[var(--foreground)] placeholder-transparent
@@ -44,6 +50,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               {...props}
             />
             <label
+              htmlFor={inputId}
               className={`
                 absolute left-4 transition-all duration-[var(--timing-fast)] pointer-events-none
                 ${isFocused || hasValue
@@ -61,8 +68,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             </label>
           </div>
           {error && (
-            <p className="mt-2 text-sm text-red-500 flex items-center gap-1.5 animate-fade-in">
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <p id={errorId} role="alert" className="mt-2 text-sm text-red-500 flex items-center gap-1.5 animate-fade-in">
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               {error}
@@ -75,12 +82,15 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-semibold text-[var(--text-label)] mb-2">
+          <label htmlFor={inputId} className="block text-sm font-semibold text-[var(--text-label)] mb-2">
             {label}
           </label>
         )}
         <input
           ref={ref}
+          id={inputId}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? errorId : undefined}
           className={`
             block w-full px-4 py-3
             bg-[var(--card-bg)] text-[var(--foreground)] placeholder-[var(--mist-400)]
@@ -97,8 +107,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           {...props}
         />
         {error && (
-          <p className="mt-2 text-sm text-red-500 flex items-center gap-1.5 animate-fade-in">
-            <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <p id={errorId} role="alert" className="mt-2 text-sm text-red-500 flex items-center gap-1.5 animate-fade-in">
+            <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             {error}

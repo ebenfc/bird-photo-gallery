@@ -88,6 +88,7 @@ export default function GalleryFilters({
         {/* Favorites button */}
         <button
           onClick={() => onFavoritesChange(!showFavoritesOnly)}
+          aria-pressed={showFavoritesOnly}
           className={`flex items-center gap-1.5 px-4 py-2 text-sm font-semibold
             rounded-[var(--radius-full)] border-2
             shadow-[var(--shadow-xs)]
@@ -118,6 +119,7 @@ export default function GalleryFilters({
             <button
               key={opt.value}
               onClick={() => selectRarity(opt.value)}
+              aria-pressed={isSelected}
               className={`px-4 py-2 text-sm font-semibold
                 rounded-[var(--radius-full)] border-2
                 shadow-[var(--shadow-xs)]

@@ -40,6 +40,7 @@ export default function DiscoverFilters({
       <div className="flex rounded-[var(--radius-md)] border border-[var(--border-light)] overflow-hidden">
         <button
           onClick={() => onSortChange("alpha")}
+          aria-pressed={sort === "alpha"}
           className={`px-4 py-2.5 text-sm font-medium transition-all duration-[var(--timing-fast)]
             ${
               sort === "alpha"
@@ -51,6 +52,7 @@ export default function DiscoverFilters({
         </button>
         <button
           onClick={() => onSortChange("random")}
+          aria-pressed={sort === "random"}
           className={`px-4 py-2.5 text-sm font-medium border-l border-[var(--border-light)]
             transition-all duration-[var(--timing-fast)]
             ${

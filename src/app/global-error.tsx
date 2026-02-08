@@ -20,7 +20,7 @@ export default function GlobalError({
 
   return (
     // global-error must include html and body tags since it replaces the root layout
-    <html>
+    <html lang="en">
       <body>
         <div
           style={{
@@ -33,7 +33,7 @@ export default function GlobalError({
           }}
         >
           <div style={{ textAlign: "center", padding: "2rem" }}>
-            <h2
+            <h1
               style={{
                 fontSize: "1.5rem",
                 fontWeight: 600,
@@ -42,7 +42,7 @@ export default function GlobalError({
               }}
             >
               Something went wrong
-            </h2>
+            </h1>
             <p
               style={{
                 color: "#666",
