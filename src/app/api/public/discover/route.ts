@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { users, species, photos } from "@/db/schema";
-import { eq, and, count, sql } from "drizzle-orm";
+import { eq, and, count, sql, inArray } from "drizzle-orm";
 import { STATE_CODES } from "@/config/usStates";
 
 export const runtime = "nodejs";
@@ -66,33 +66,39 @@ export async function GET(request: NextRequest) {
       .limit(limit)
       .offset(offset);
 
-    // Get species and photo counts for each user
-    const galleries = await Promise.all(
-      listedUsers.map(async (user) => {
-        const [speciesResult] = await db
-          .select({ count: count() })
-          .from(species)
-          .where(eq(species.userId, user.id));
+    // Batch-fetch species and photo counts (avoids N+1 queries)
+    const userIds = listedUsers.map((u) => u.id);
 
-        const [photoResult] = await db
-          .select({ count: count() })
-          .from(photos)
-          .where(eq(photos.userId, user.id));
+    const [speciesCounts, photoCounts] = userIds.length > 0
+      ? await Promise.all([
+          db.select({ userId: species.userId, count: count() })
+            .from(species)
+            .where(inArray(species.userId, userIds))
+            .groupBy(species.userId),
+          db.select({ userId: photos.userId, count: count() })
+            .from(photos)
+            .where(inArray(photos.userId, userIds))
+            .groupBy(photos.userId),
+        ])
+      : [[], []];
 
-        const displayName = user.firstName
-          ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`
-          : user.username || "Bird Feed User";
+    const speciesMap = new Map(speciesCounts.map((r) => [r.userId, r.count]));
+    const photosMap = new Map(photoCounts.map((r) => [r.userId, r.count]));
 
-        return {
-          username: user.username,
-          displayName,
-          city: user.city,
-          state: user.state,
-          speciesCount: speciesResult?.count ?? 0,
-          photoCount: photoResult?.count ?? 0,
-        };
-      })
-    );
+    const galleries = listedUsers.map((user) => {
+      const displayName = user.firstName
+        ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`
+        : user.username || "Bird Feed User";
+
+      return {
+        username: user.username,
+        displayName,
+        city: user.city,
+        state: user.state,
+        speciesCount: speciesMap.get(user.id) ?? 0,
+        photoCount: photosMap.get(user.id) ?? 0,
+      };
+    });
 
     return NextResponse.json({
       galleries,
