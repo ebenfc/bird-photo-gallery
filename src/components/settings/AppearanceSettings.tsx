@@ -59,11 +59,18 @@ const skinOptions = [
     colors: ["#8B6F47", "#6B7F5C", "#F5F1E8", "#3A3A3A"],
     available: true,
   },
+  {
+    value: "retro" as const,
+    label: "Retro",
+    description: "90s web nostalgia",
+    colors: ["#000080", "#FFFF00", "#FF00FF", "#00FF00"],
+    available: true,
+  },
 ];
 
 export default function AppearanceSettings() {
   const { theme, setTheme } = useTheme();
-  const { skin, setSkin, retroUnlocked } = useSkin();
+  const { skin, setSkin } = useSkin();
   const [mounted, setMounted] = useState(false);
 
   // Prevent hydration mismatch — useTheme() returns undefined during SSR
@@ -88,7 +95,7 @@ export default function AppearanceSettings() {
         <div>
           <div className="h-5 w-16 skeleton mb-3" />
           <div className="grid grid-cols-2 gap-3">
-            {[1, 2].map((i) => (
+            {[1, 2, 3, 4].map((i) => (
               <div key={i} className="h-24 skeleton" />
             ))}
           </div>
@@ -189,44 +196,6 @@ export default function AppearanceSettings() {
               </button>
             );
           })}
-
-          {/* Retro easter egg card — only visible when unlocked */}
-          {retroUnlocked && (
-            <button
-              onClick={() => setSkin("retro")}
-              className={`relative flex flex-col items-start gap-2 p-4 col-span-2
-                rounded-[var(--radius-lg)] border-2 transition-all duration-[var(--timing-fast)]
-                ${skin === "retro"
-                  ? "border-[var(--moss-500)] bg-[var(--surface-moss)] shadow-[var(--shadow-moss)]"
-                  : "border-[var(--border)] bg-[var(--card-bg)] hover:border-[var(--mist-300)] hover:shadow-[var(--shadow-sm)] cursor-pointer"
-                }`}
-            >
-              {/* Retro color swatches */}
-              <div className="flex gap-1.5">
-                {["#000080", "#FFFF00", "#FF00FF", "#00FF00"].map((color, i) => (
-                  <div
-                    key={i}
-                    className="w-5 h-5 rounded-full border border-[var(--border)]"
-                    style={{ backgroundColor: color }}
-                  />
-                ))}
-              </div>
-              <div>
-                <span className="text-sm font-semibold block text-[var(--text-primary)]">
-                  Retro
-                  <span className="ml-2 text-[10px] font-normal text-[var(--mist-500)]">circa 1997</span>
-                </span>
-                <span className="text-xs text-[var(--mist-500)] leading-tight">90s web nostalgia</span>
-              </div>
-              {skin === "retro" && (
-                <div className="absolute top-2 right-2">
-                  <svg className="w-4 h-4 text-[var(--moss-500)]" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              )}
-            </button>
-          )}
         </div>
       </div>
     </div>

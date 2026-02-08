@@ -9,7 +9,7 @@ Components are organized by feature area.
 | `activity/` | Haikubox activity page components |
 | `discover/` | Discover page: BookmarkButton, GalleryCard, DiscoverFilters |
 | `gallery/` | Photo gallery and modal components |
-| `landing/` | Public landing page for unauthenticated users |
+| `landing/` | Public landing page for unauthenticated users (includes `ThemeShowcase` live skin picker) |
 | `layout/` | Header, navigation, PublicHeader |
 | `settings/` | User settings forms on /settings page (public gallery, location, appearance/skin picker) |
 | `species/` | Species cards and forms |
