@@ -191,9 +191,8 @@ export default function AppearanceSettings() {
                 rounded-[var(--radius-lg)] border-2 transition-all duration-[var(--timing-fast)]
                 ${skin === "retro"
                   ? "border-[var(--moss-500)] bg-[var(--surface-moss)] shadow-[var(--shadow-moss)]"
-                  : "border-[var(--border-light)] bg-[var(--card-bg)] opacity-60 cursor-not-allowed"
+                  : "border-[var(--border)] bg-[var(--card-bg)] hover:border-[var(--mist-300)] hover:shadow-[var(--shadow-sm)] cursor-pointer"
                 }`}
-              disabled
             >
               {/* Retro color swatches */}
               <div className="flex gap-1.5">
@@ -210,8 +209,15 @@ export default function AppearanceSettings() {
                   Retro
                   <span className="ml-2 text-[10px] font-normal text-[var(--mist-500)]">circa 1997</span>
                 </span>
-                <span className="text-xs text-[var(--mist-500)] leading-tight">Coming soon</span>
+                <span className="text-xs text-[var(--mist-500)] leading-tight">90s web nostalgia</span>
               </div>
+              {skin === "retro" && (
+                <div className="absolute top-2 right-2">
+                  <svg className="w-4 h-4 text-[var(--moss-500)]" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              )}
             </button>
           )}
         </div>

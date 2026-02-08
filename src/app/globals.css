@@ -871,3 +871,267 @@ h1, h2, h3, h4, h5, h6 {
 [data-skin="bold"][data-mode="dark"] .error-glow {
   box-shadow: 0 0 0 3px rgba(248, 81, 73, 0.15), var(--shadow-md);
 }
+
+/* ============================================================
+   RETRO SKIN — GeoCities / mid-90s web aesthetic
+   ============================================================ */
+
+/* === RETRO SKIN — LIGHT MODE === */
+[data-skin="retro"] {
+  /* Base — Windows 95 silver */
+  --background: #f0f0f0;
+  --background-warm: #e8e8e8;
+  --foreground: #000000;
+  --foreground-muted: #404040;
+  --card-bg: #ffffff;
+  --border: #808080;
+  --border-light: #c0c0c0;
+
+  /* Semantic text — navy legibility */
+  --text-primary: #000080;
+  --text-secondary: #000066;
+  --text-label: #003366;
+
+  /* Semantic surfaces */
+  --surface-forest: #e8e8ff;
+  --surface-moss: #e0ffff;
+  --surface-sky: #e0e8ff;
+
+  /* Navy blue palette (replaces forest) */
+  --forest-50: #e8e8ff;
+  --forest-100: #d0d0ff;
+  --forest-200: #a0a0ff;
+  --forest-300: #7070ff;
+  --forest-400: #4040ff;
+  --forest-500: #0000cc;
+  --forest-600: #0000aa;
+  --forest-700: #000099;
+  --forest-800: #000080;
+  --forest-900: #000066;
+  --forest-950: #00004d;
+
+  /* Teal/cyan palette (replaces moss) */
+  --moss-50: #e0ffff;
+  --moss-100: #b0ffff;
+  --moss-200: #80ffff;
+  --moss-300: #40e0d0;
+  --moss-400: #20b2aa;
+  --moss-500: #008080;
+  --moss-600: #006666;
+  --moss-700: #005555;
+  --moss-800: #004444;
+  --moss-900: #003333;
+
+  /* Silver/gray palette (replaces mist) — Windows 95 grays */
+  --mist-50: #f0f0f0;
+  --mist-100: #e0e0e0;
+  --mist-200: #c0c0c0;
+  --mist-300: #a0a0a0;
+  --mist-400: #808080;
+  --mist-500: #606060;
+  --mist-600: #404040;
+  --mist-700: #303030;
+  --mist-800: #202020;
+  --mist-900: #101010;
+
+  /* Warm gray (replaces bark) */
+  --bark-50: #f5f5f0;
+  --bark-100: #e8e8e0;
+  --bark-200: #d0d0c8;
+  --bark-300: #b8b8b0;
+  --bark-400: #989890;
+  --bark-500: #787870;
+  --bark-600: #585850;
+  --bark-700: #404038;
+  --bark-800: #282820;
+  --bark-900: #181810;
+
+  /* Bright blue links (replaces sky) */
+  --sky-50: #e0e8ff;
+  --sky-100: #c0d0ff;
+  --sky-200: #90a8ff;
+  --sky-300: #6080ff;
+  --sky-400: #3060ff;
+  --sky-500: #0000ff;
+  --sky-600: #0000cc;
+  --sky-700: #0000aa;
+  --sky-800: #000088;
+  --sky-900: #000066;
+
+  /* Gold/orange (replaces amber) */
+  --amber-50: #fffff0;
+  --amber-100: #ffffe0;
+  --amber-200: #ffffc0;
+  --amber-300: #ffff80;
+  --amber-400: #ffcc00;
+  --amber-500: #ff9900;
+  --amber-600: #cc7700;
+  --amber-700: #aa5500;
+  --amber-800: #884400;
+  --amber-900: #663300;
+
+  /* Shadows — hard, no blur, bevel-style */
+  --shadow-xs: 1px 1px 0 #808080;
+  --shadow-sm: 2px 2px 0 #808080;
+  --shadow-md: 3px 3px 0 #808080;
+  --shadow-lg: 4px 4px 0 #606060;
+  --shadow-xl: 5px 5px 0 #404040;
+  --shadow-2xl: 6px 6px 0 #404040;
+  --shadow-moss: 3px 3px 0 #008080;
+  --shadow-moss-lg: 4px 4px 0 #006666;
+  --shadow-forest: 3px 3px 0 #000080;
+  --shadow-amber: 3px 3px 0 #cc7700;
+  --shadow-inset-sm: inset 2px 2px 0 #c0c0c0;
+  --shadow-inset-md: inset 3px 3px 0 #a0a0a0;
+
+  /* Border radii — boxy, minimal rounding */
+  --radius-sm: 0px;
+  --radius-md: 2px;
+  --radius-lg: 3px;
+  --radius-xl: 4px;
+  --radius-2xl: 6px;
+  --radius-full: 9999px;
+
+  /* Status feedback — saturated retro style */
+  --success-bg: #e0ffe0;
+  --success-text: #006600;
+  --success-border: #00cc00;
+  --error-bg: #ffe0e0;
+  --error-text: #cc0000;
+  --error-border: #ff0000;
+  --info-bg: #e0e8ff;
+  --info-text: #0000cc;
+  --info-border: #0000ff;
+  --warning-bg: #ffffe0;
+  --warning-text: #886600;
+  --warning-border: #ffcc00;
+}
+
+/* === RETRO SKIN — DARK MODE === */
+[data-skin="retro"][data-mode="dark"] {
+  /* Base — dark navy backgrounds */
+  --background: #0a0a1a;
+  --background-warm: #101028;
+  --foreground: #e0e0e0;
+  --foreground-muted: #a0a0b0;
+  --card-bg: #141430;
+  --border: #303060;
+  --border-light: #202050;
+
+  /* Semantic text — bright for dark backgrounds */
+  --text-primary: #e0e0ff;
+  --text-secondary: #c0c0e0;
+  --text-label: #a0a0cc;
+
+  /* Semantic surfaces */
+  --surface-forest: #1a1a40;
+  --surface-moss: #0a2828;
+  --surface-sky: #0a1a40;
+
+  /* Inverted mist palette */
+  --mist-50: #0a0a1a;
+  --mist-100: #141430;
+  --mist-200: #202050;
+  --mist-300: #303060;
+  --mist-400: #505080;
+  --mist-500: #7070a0;
+  --mist-600: #9090b0;
+  --mist-700: #b0b0cc;
+  --mist-800: #c0c0e0;
+  --mist-900: #e0e0ff;
+
+  /* Inverted bark palette */
+  --bark-50: #101020;
+  --bark-100: #1a1a30;
+  --bark-200: #303050;
+  --bark-300: #484870;
+  --bark-400: #606090;
+  --bark-500: #8080a0;
+  --bark-600: #b0b0c8;
+  --bark-700: #d0d0e0;
+  --bark-800: #e8e8f0;
+  --bark-900: #f5f5ff;
+
+  /* Shadows — darker, hard edges */
+  --shadow-xs: 1px 1px 0 rgba(0, 0, 0, 0.5);
+  --shadow-sm: 2px 2px 0 rgba(0, 0, 0, 0.6);
+  --shadow-md: 3px 3px 0 rgba(0, 0, 0, 0.7);
+  --shadow-lg: 4px 4px 0 rgba(0, 0, 50, 0.8);
+  --shadow-xl: 5px 5px 0 rgba(0, 0, 50, 0.9);
+  --shadow-2xl: 6px 6px 0 rgba(0, 0, 50, 0.9);
+  --shadow-moss: 3px 3px 0 rgba(0, 128, 128, 0.4);
+  --shadow-moss-lg: 4px 4px 0 rgba(0, 128, 128, 0.5);
+  --shadow-forest: 3px 3px 0 rgba(0, 0, 128, 0.4);
+  --shadow-amber: 3px 3px 0 rgba(204, 119, 0, 0.4);
+  --shadow-inset-sm: inset 2px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-inset-md: inset 3px 3px 0 rgba(0, 0, 0, 0.4);
+
+  /* Status feedback — dark mode, neon-bright */
+  --success-bg: #0a2a0a;
+  --success-text: #00ff00;
+  --success-border: #008800;
+  --error-bg: #2a0a0a;
+  --error-text: #ff4444;
+  --error-border: #880000;
+  --info-bg: #0a0a2a;
+  --info-text: #6060ff;
+  --info-border: #0000aa;
+  --warning-bg: #2a2a0a;
+  --warning-text: #ffcc00;
+  --warning-border: #886600;
+}
+
+/* === RETRO SKIN — CLASS OVERRIDES === */
+[data-skin="retro"] .paper-texture {
+  background: linear-gradient(180deg, var(--background) 0%, var(--background-warm) 100%);
+}
+
+[data-skin="retro"] .pnw-texture {
+  /* Subtle dot grid — 90s tiled background feel */
+  background-image:
+    radial-gradient(circle at 50% 50%, rgba(0, 0, 128, 0.06) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+[data-skin="retro"] ::selection {
+  background: #ffff00;
+  color: #000080;
+}
+
+[data-skin="retro"] .success-glow {
+  box-shadow: 0 0 0 3px rgba(0, 204, 0, 0.25), var(--shadow-md);
+}
+
+[data-skin="retro"] .error-glow {
+  box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.25), var(--shadow-md);
+}
+
+/* Retro typography — wider letter-spacing, monospace era */
+[data-skin="retro"] h1, [data-skin="retro"] h2, [data-skin="retro"] h3,
+[data-skin="retro"] h4, [data-skin="retro"] h5, [data-skin="retro"] h6 {
+  letter-spacing: 0.02em;
+}
+
+/* Retro dark mode class overrides */
+[data-skin="retro"][data-mode="dark"] .paper-texture {
+  background: linear-gradient(180deg, var(--background) 0%, var(--background-warm) 100%);
+}
+
+[data-skin="retro"][data-mode="dark"] .pnw-texture {
+  background-image:
+    radial-gradient(circle at 50% 50%, rgba(100, 100, 255, 0.04) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+[data-skin="retro"][data-mode="dark"] ::selection {
+  background: rgba(255, 255, 0, 0.4);
+  color: #e0e0ff;
+}
+
+[data-skin="retro"][data-mode="dark"] .success-glow {
+  box-shadow: 0 0 0 3px rgba(0, 255, 0, 0.2), var(--shadow-md);
+}
+
+[data-skin="retro"][data-mode="dark"] .error-glow {
+  box-shadow: 0 0 0 3px rgba(255, 68, 68, 0.2), var(--shadow-md);
+}
