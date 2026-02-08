@@ -97,6 +97,22 @@ function applyElasticResistance(rawDelta: number, maxStretch: number): number {
   return sign * maxStretch * (1 - Math.exp(-abs / maxStretch));
 }
 
+/** Check if an element or any of its ancestors (up to the container) is interactive */
+function isInteractiveElement(target: EventTarget | null, container: HTMLElement): boolean {
+  let el = target as HTMLElement | null;
+  while (el && el !== container) {
+    const tag = el.tagName;
+    if (tag === "BUTTON" || tag === "A" || tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") {
+      return true;
+    }
+    if (el.getAttribute("role") === "button") {
+      return true;
+    }
+    el = el.parentElement;
+  }
+  return false;
+}
+
 // --- Hook ---
 
 export function useSwipeGesture(config: SwipeGestureConfig): SwipeGestureState {
@@ -233,6 +249,12 @@ export function useSwipeGesture(config: SwipeGestureConfig): SwipeGestureState {
     if (!el || !enabled) return;
 
     const handleTouchStart = (e: TouchEvent) => {
+      // Skip gesture tracking when tapping interactive elements (buttons, links)
+      // so their native click handlers fire normally
+      if (isInteractiveElement(e.target, el)) {
+        return;
+      }
+
       const s = stateRef.current;
 
       // If an animation is running, cancel it and start fresh
