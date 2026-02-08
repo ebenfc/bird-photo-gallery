@@ -83,6 +83,17 @@ export default function PublicSpeciesDetailPage() {
     next: currentPhotoIndex < photos.length - 1,
   };
 
+  const adjacentPhotos = selectedPhoto && currentPhotoIndex >= 0
+    ? {
+        prev: currentPhotoIndex > 0
+          ? { originalUrl: photos[currentPhotoIndex - 1]!.originalUrl, alt: photos[currentPhotoIndex - 1]!.species?.commonName || "Bird photo" }
+          : null,
+        next: currentPhotoIndex < photos.length - 1
+          ? { originalUrl: photos[currentPhotoIndex + 1]!.originalUrl, alt: photos[currentPhotoIndex + 1]!.species?.commonName || "Bird photo" }
+          : null,
+      }
+    : undefined;
+
   return (
     <div className="pb-16 md:pb-0">
       {/* Back link */}
@@ -215,6 +226,7 @@ export default function PublicSpeciesDetailPage() {
           onClose={() => setSelectedPhoto(null)}
           onNavigate={handleNavigate}
           canNavigate={canNavigate}
+          adjacentPhotos={adjacentPhotos}
           readOnly
         />
       )}

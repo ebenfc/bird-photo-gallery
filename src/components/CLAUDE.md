@@ -67,7 +67,9 @@ Mobile species page uses circular FAB instead of button in header.
 Key behaviors:
 - `defaultToFullscreen` prop - Opens directly in fullscreen (used on Species detail page)
 - `readOnly` prop - Hides all edit controls (used for public gallery views)
-- Swipe gestures - Left/right to navigate (50px minimum distance)
+- `adjacentPhotos` prop - Prev/next photo URLs for peek effect during swipe
+- Swipe gestures via `useSwipeGesture` hook: 1:1 finger tracking, velocity-based flicks, elastic edge bounce, swipe-down-to-dismiss
+- Photo track renders 3 images (prev/current/next) for peeking during horizontal swipe
 - Preserves view state - Swipe in fullscreen stays in fullscreen
 - Escape key - Closes modal (different behavior when `defaultToFullscreen`)
 
