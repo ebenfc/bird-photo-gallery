@@ -18,47 +18,25 @@ export const runtime = "nodejs";
 
 /**
  * Check if the request is from a Vercel Cron job using CRON_SECRET.
- * Vercel sends `Authorization: Bearer <CRON_SECRET>` automatically,
- * but Clerk middleware may consume/strip the Authorization header on
- * public routes. We check multiple signals:
- * 1. Authorization: Bearer <secret> (standard Vercel cron)
- * 2. x-cron-secret header (custom fallback)
- * 3. cron_secret query parameter (last resort fallback)
+ * Vercel sends `Authorization: Bearer <CRON_SECRET>` automatically.
+ * The proxy.ts middleware bypasses Clerk for cron requests (identified by
+ * user-agent) so the Authorization header reaches this handler intact.
  */
 function isCronRequest(request: NextRequest): boolean {
   const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret) {
-    console.log("[cron-auth] CRON_SECRET env var is not set");
-    return false;
-  }
+  if (!cronSecret) return false;
 
-  // Check standard Authorization header (Vercel sends this automatically)
+  // Check Authorization header (Vercel auto-injects this for cron jobs)
   const authHeader = request.headers.get("authorization");
   if (authHeader === `Bearer ${cronSecret}`) {
     return true;
   }
 
-  // Fallback: check custom header (in case Clerk consumed Authorization)
+  // Fallback: custom header (for manual cron triggers)
   const customHeader = request.headers.get("x-cron-secret");
   if (customHeader === cronSecret) {
     return true;
   }
-
-  // Fallback: check query parameter
-  const querySecret = new URL(request.url).searchParams.get("cron_secret");
-  if (querySecret === cronSecret) {
-    return true;
-  }
-
-  // Log what we received for debugging (don't log actual secrets)
-  console.log("[cron-auth] Failed auth check:", {
-    hasAuthHeader: !!authHeader,
-    authHeaderPrefix: authHeader?.substring(0, 10),
-    hasCronSecretEnv: !!cronSecret,
-    hasCustomHeader: !!customHeader,
-    hasQueryParam: !!querySecret,
-    allHeaders: Object.fromEntries(request.headers.entries()),
-  });
 
   return false;
 }
