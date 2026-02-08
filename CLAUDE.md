@@ -54,17 +54,18 @@ src/
 
 Two-dimensional theming via HTML attributes on `<html>`:
 - `data-mode` — `light` | `dark` | `system` (managed by `next-themes`)
-- `data-skin` — `default` | `bold` | `retro` (managed by `SkinContext`)
+- `data-skin` — `default` | `bold` | `retro` | `fieldguide` (managed by `SkinContext`)
 
 ### Available Skins
 | Skin | Palette | Status |
 |------|---------|--------|
 | Default | PNW nature (green/teal) | Active |
 | Bold | Purple/electric blue | Active |
+| Field Guide | Cream/sage green/warm brown, Georgia serif headers | Active |
 | Retro | GeoCities navy/teal/yellow | Unlockable via easter egg |
 
 ### How It Works
-All colors use CSS custom properties (`var(--forest-500)`, `var(--moss-300)`, etc.). Skin overrides in `globals.css` use `[data-skin="bold"]` / `[data-skin="retro"]` selectors to remap every variable. Components need zero changes — they inherit the active skin automatically.
+All colors use CSS custom properties (`var(--forest-500)`, `var(--moss-300)`, etc.). Skin overrides in `globals.css` use `[data-skin="bold"]` / `[data-skin="fieldguide"]` / `[data-skin="retro"]` selectors to remap every variable. Components need zero changes — they inherit the active skin automatically.
 
 ### Retro Unlock (Easter Egg)
 - **Desktop:** Konami Code (↑↑↓↓←→←→BA) — detected by `useKonamiCode` hook
@@ -77,7 +78,7 @@ All colors use CSS custom properties (`var(--forest-500)`, `var(--moss-300)`, et
 - Text: `var(--text-primary)`, `var(--text-secondary)` — never hardcoded colors
 - Borders: `var(--border)`, `var(--border-light)`
 - Accents: `var(--moss-500)`, `var(--forest-600)` — these remap per skin
-- Shadows: `var(--shadow-sm)`, `var(--shadow-moss)` — purple-tinted in Bold
+- Shadows: `var(--shadow-sm)`, `var(--shadow-moss)` — tinted per skin (emerald/purple/brown/hard-bevel)
 
 ### Key Theming Files
 - `src/app/globals.css` — CSS variable definitions + skin overrides
