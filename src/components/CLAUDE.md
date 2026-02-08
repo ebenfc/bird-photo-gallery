@@ -92,6 +92,14 @@ Minimal header for public gallery pages:
 Reusable primitives: buttons, inputs, modals, badges, loading states, toast notifications.
 Use these instead of creating one-off styled elements.
 
+### Accessibility Patterns (WCAG 2.1 AA)
+- **Modal** has built-in focus trap (Tab/Shift+Tab cycling), focus restore on close, `role="dialog"`, `aria-modal="true"`. Pass `aria-label` or `aria-labelledby` prop to every Modal usage.
+- **Input & Select** auto-generate stable IDs via `useId()`, wire `htmlFor` labels, and link errors with `aria-describedby` + `aria-invalid` + `role="alert"`.
+- **Button `sm` size** is 44px min-height (WCAG touch target minimum).
+- Custom modals (PhotoModal, SpeciesAssignModal, UploadModal) have their own `role="dialog"` + `aria-modal` — not using the shared Modal component.
+- Toggle/filter buttons use `aria-pressed`; mobile filter toggles use `aria-expanded` + `aria-label` with active count.
+- Decorative SVGs get `aria-hidden="true"`; icon-only buttons get `aria-label`.
+
 ### Toast Notifications (`ui/Toast.tsx`)
 - `ToastProvider` wraps the app in `layout.tsx` (authenticated section only)
 - `useToast()` hook returns `{ showToast(message, type) }`

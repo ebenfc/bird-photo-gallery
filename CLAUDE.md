@@ -86,6 +86,12 @@ All colors use CSS custom properties (`var(--forest-500)`, `var(--moss-300)`, et
 - `src/hooks/useKonamiCode.ts` — Konami Code keyboard sequence detector
 - `src/hooks/useLogoTapUnlock.ts` — Rapid tap gesture detector
 
+## Page Metadata
+
+Most pages are client components (`"use client"`), so they can't export `metadata` directly. Pattern:
+- Create a `layout.tsx` in the route folder that exports `metadata` (e.g., `src/app/activity/layout.tsx`)
+- For dynamic routes, use `generateMetadata` in the layout (e.g., `src/app/u/[username]/layout.tsx`)
+
 ## Key Files
 
 - `src/db/schema.ts` — All database tables
