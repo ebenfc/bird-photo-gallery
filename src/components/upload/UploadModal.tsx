@@ -348,11 +348,12 @@ export default function UploadModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in" role="dialog" aria-modal="true" aria-label="Upload photos">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-gradient-to-b from-[var(--forest-950)]/85 to-[var(--mist-900)]/75 backdrop-blur-md"
         onClick={step === "uploading" ? undefined : handleClose}
+        aria-hidden="true"
       />
 
       {/* Modal */}
@@ -375,6 +376,7 @@ export default function UploadModal({
             {step !== "uploading" && (
               <button
                 onClick={handleClose}
+                aria-label="Close upload dialog"
                 className="p-2.5 text-[var(--mist-400)] hover:text-[var(--mist-600)]
                   hover:bg-[var(--card-bg)]/70 rounded-[var(--radius-lg)]
                   transition-all duration-[var(--timing-fast)]
@@ -403,7 +405,11 @@ export default function UploadModal({
               />
 
               <div
+                role="button"
+                tabIndex={0}
+                aria-label="Choose files or drag and drop"
                 onClick={() => fileInputRef.current?.click()}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInputRef.current?.click(); } }}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}

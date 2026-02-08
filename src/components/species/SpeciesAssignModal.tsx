@@ -309,8 +309,8 @@ export default function SpeciesAssignModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[var(--forest-950)]/80 backdrop-blur-sm" onClick={onClose} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Assign species">
+      <div className="absolute inset-0 bg-[var(--forest-950)]/80 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
 
       <div className="relative bg-[var(--card-bg)] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col border border-[var(--mist-100)]">
         {/* Accent top border */}
@@ -417,6 +417,7 @@ export default function SpeciesAssignModal({
               <div className="mb-4">
                 <Input
                   placeholder="Search species..."
+                  aria-label="Search species"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -507,6 +508,9 @@ export default function SpeciesAssignModal({
 
               {/* Species list */}
               <div className="space-y-2 mb-4">
+                <div className="sr-only" aria-live="polite" role="status">
+                  {searchQuery ? `${filteredSpecies.length} species found` : ""}
+                </div>
                 {filteredSpecies.length === 0 ? (
                   <p className="text-center text-[var(--mist-500)] py-4">
                     {searchQuery

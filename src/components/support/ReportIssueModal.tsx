@@ -108,7 +108,7 @@ export default function ReportIssueModal({
   const charsRemaining = MAX_DESCRIPTION - description.length;
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="md">
+    <Modal isOpen={isOpen} onClose={handleClose} size="md" aria-label="Report an issue">
       <form onSubmit={handleSubmit} className="p-6 pt-8">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">

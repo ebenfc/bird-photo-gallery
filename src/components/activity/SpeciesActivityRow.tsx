@@ -86,6 +86,7 @@ export default function SpeciesActivityRow({
               className="w-5 h-5 text-[var(--moss-600)]"
               viewBox="0 0 24 24"
               fill="currentColor"
+              aria-hidden="true"
             >
               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
             </svg>
@@ -96,6 +97,7 @@ export default function SpeciesActivityRow({
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
+              aria-hidden="true"
             >
               <circle cx="12" cy="12" r="10" />
             </svg>
@@ -132,6 +134,7 @@ export default function SpeciesActivityRow({
               className="w-4 h-4 text-[var(--moss-600)] flex-shrink-0"
               viewBox="0 0 24 24"
               fill="currentColor"
+              aria-hidden="true"
             >
               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
             </svg>
@@ -142,6 +145,7 @@ export default function SpeciesActivityRow({
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
+              aria-hidden="true"
             >
               <circle cx="12" cy="12" r="10" />
             </svg>

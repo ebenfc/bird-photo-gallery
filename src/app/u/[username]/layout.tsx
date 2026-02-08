@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getUserByUsername } from "@/lib/user";
@@ -7,6 +8,17 @@ import BookmarkButton from "@/components/discover/BookmarkButton";
 interface PublicGalleryLayoutProps {
   children: React.ReactNode;
   params: Promise<{ username: string }>;
+}
+
+export async function generateMetadata({ params }: PublicGalleryLayoutProps): Promise<Metadata> {
+  const { username } = await params;
+  const user = await getUserByUsername(username);
+  const displayName = user?.firstName
+    ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`
+    : username;
+  return {
+    title: `${displayName}'s Gallery | Bird Feed`,
+  };
 }
 
 export default async function PublicGalleryLayout({

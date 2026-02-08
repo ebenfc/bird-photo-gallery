@@ -1,4 +1,6 @@
-import { SelectHTMLAttributes, forwardRef } from "react";
+"use client";
+
+import { SelectHTMLAttributes, forwardRef, useId } from "react";
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
@@ -6,17 +8,24 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 }
 
 const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className = "", label, error, children, ...props }, ref) => {
+  ({ className = "", label, error, children, id: externalId, ...props }, ref) => {
+    const generatedId = useId();
+    const selectId = externalId || generatedId;
+    const errorId = `${selectId}-error`;
+
     return (
       <div className={className || "w-full"}>
         {label && (
-          <label className="block text-sm font-semibold text-[var(--text-label)] mb-2">
+          <label htmlFor={selectId} className="block text-sm font-semibold text-[var(--text-label)] mb-2">
             {label}
           </label>
         )}
         <div className="relative inline-flex w-full">
           <select
             ref={ref}
+            id={selectId}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? errorId : undefined}
             className={`
               block w-full px-4 py-3 pr-10
               bg-[var(--card-bg)] text-[var(--foreground)]
@@ -41,6 +50,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
@@ -52,8 +62,8 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
           </div>
         </div>
         {error && (
-          <p className="mt-2 text-sm text-red-500 flex items-center gap-1.5 animate-fade-in">
-            <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <p id={errorId} role="alert" className="mt-2 text-sm text-red-500 flex items-center gap-1.5 animate-fade-in">
+            <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             {error}

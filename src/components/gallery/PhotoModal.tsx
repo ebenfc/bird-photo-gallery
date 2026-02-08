@@ -388,12 +388,23 @@ export default function PhotoModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex animate-fade-in">
+    <div
+      className="fixed inset-0 z-50 flex animate-fade-in"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Photo viewer: ${photo.species?.commonName || "Bird photo"}`}
+    >
       {/* Backdrop with blur */}
       <div
         className="absolute inset-0 bg-[var(--forest-950)]/95 backdrop-blur-sm"
         onClick={onClose}
+        aria-hidden="true"
       />
+
+      {/* Visually hidden keyboard shortcut hint for screen readers */}
+      <div className="sr-only">
+        Use left and right arrow keys to navigate between photos. Press Escape to close. Press F for fullscreen.
+      </div>
 
       {/* Content - different layout for mobile vs desktop */}
       <div className="relative flex flex-col lg:flex-row w-full h-full animate-fade-in-scale">
@@ -416,13 +427,14 @@ export default function PhotoModal({
             {/* Close button */}
             <button
               onClick={(e) => { e.stopPropagation(); onClose(); }}
+              aria-label="Close photo viewer"
               className="p-3 bg-[var(--card-bg)]/10 backdrop-blur-md rounded-full
                 text-white/80 hover:text-white hover:bg-[var(--card-bg)]/20
                 shadow-[var(--shadow-lg)]
                 transition-all duration-[var(--timing-fast)]
                 hover:scale-105 active:scale-95"
             >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -436,6 +448,7 @@ export default function PhotoModal({
                 transition-all duration-[var(--timing-fast)]
                 hover:scale-105 active:scale-95"
               title="Fullscreen (F)"
+              aria-label="Enter fullscreen"
             >
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
@@ -496,7 +509,7 @@ export default function PhotoModal({
           <div className="relative w-full h-full max-w-4xl max-h-[50vh] lg:max-h-[80vh]">
             <Image
               src={photo.originalUrl}
-              alt={photo.species?.commonName || "Bird photo"}
+              alt={`${photo.species?.commonName || "Bird"} photo${photo.originalDateTaken ? `, taken ${formatDateShort(photo.originalDateTaken)}` : ""}${photo.isFavorite ? " (favorited)" : ""}`}
               fill
               className="object-contain cursor-pointer lg:cursor-default"
               sizes="(max-width: 1024px) 100vw, 80vw"
@@ -549,6 +562,8 @@ export default function PhotoModal({
                   <button
                     id="mobile-overflow-btn"
                     onClick={(e) => { e.stopPropagation(); setShowOverflowMenu(!showOverflowMenu); }}
+                    aria-label="More options"
+                    aria-expanded={showOverflowMenu}
                     className="p-2 text-[var(--mist-400)] hover:text-[var(--forest-700)]
                       hover:bg-[var(--mist-50)] rounded-full transition-all"
                   >
@@ -818,6 +833,7 @@ export default function PhotoModal({
                   <textarea
                     value={editNotesValue}
                     onChange={(e) => setEditNotesValue(e.target.value.slice(0, 500))}
+                    aria-label="Photo notes"
                     placeholder="Add notes about this sighting..."
                     className="w-full px-3 py-2.5 text-sm border-2 border-[var(--mist-200)]
                       rounded-[var(--radius-md)] focus:outline-none focus:border-[var(--moss-400)]
