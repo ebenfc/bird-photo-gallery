@@ -2,11 +2,12 @@
 
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
-import { Photo, Species, PhotosResponse } from "@/types";
+import { Photo, Species, PhotosResponse, HaikuboxDetection } from "@/types";
 import PhotoGrid from "@/components/gallery/PhotoGrid";
 import PhotoModal from "@/components/gallery/PhotoModal";
 import Button from "@/components/ui/Button";
 import RarityBadge from "@/components/ui/RarityBadge";
+import HeardBadge from "@/components/ui/HeardBadge";
 import ActivityTimeline from "@/components/activity/ActivityTimeline";
 import { SPECIES_PHOTO_LIMIT } from "@/config/limits";
 
@@ -22,6 +23,7 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
+  const [detection, setDetection] = useState<HaikuboxDetection | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,6 +46,27 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
 
     fetchData();
   }, [speciesId]);
+
+  // Fetch Haikubox detection data for this species
+  useEffect(() => {
+    const fetchDetection = async () => {
+      if (!species?.commonName) return;
+
+      try {
+        const res = await fetch(`/api/haikubox/detections?species=${encodeURIComponent(species.commonName)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.detections && data.detections.length > 0) {
+            setDetection(data.detections[0]);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch detection:", err);
+      }
+    };
+
+    fetchDetection();
+  }, [species?.commonName]);
 
   const handleFavoriteToggle = async (id: number, isFavorite: boolean) => {
     try {
@@ -231,7 +254,16 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
               </p>
             )}
           </div>
-          <RarityBadge rarity={species.rarity} />
+          <div className="flex items-center gap-2">
+            <RarityBadge rarity={species.rarity} />
+            {detection && detection.yearlyCount > 0 && (
+              <HeardBadge
+                count={detection.yearlyCount}
+                lastHeard={detection.lastHeardAt}
+                size="md"
+              />
+            )}
+          </div>
         </div>
 
         {/* External link */}
