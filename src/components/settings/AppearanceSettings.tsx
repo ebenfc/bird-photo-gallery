@@ -49,8 +49,8 @@ const skinOptions = [
     value: "bold" as const,
     label: "Bold",
     description: "Vibrant and colorful",
-    colors: ["#5e74ff", "#c181ff", "#b1ff8f", "#f2f2f2"],
-    available: false,
+    colors: ["#7c5cff", "#5e74ff", "#b1ff8f", "#f2f2f2"],
+    available: true,
   },
 ];
 

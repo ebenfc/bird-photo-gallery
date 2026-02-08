@@ -225,6 +225,199 @@
   --warning-border: #5c4813;
 }
 
+/* === BOLD SKIN — LIGHT MODE === */
+[data-skin="bold"] {
+  /* Base */
+  --background: #f9f9f9;
+  --background-warm: #f2f2f2;
+  --foreground: #1a1a1a;
+  --foreground-muted: #5c5c5c;
+  --card-bg: #ffffff;
+  --border: #e0e0e0;
+  --border-light: #f0f0f0;
+
+  /* Semantic text */
+  --text-primary: #1a0e45;
+  --text-secondary: #2d1d6e;
+  --text-label: #3e2796;
+
+  /* Semantic surfaces */
+  --surface-forest: #f5f0ff;
+  --surface-moss: #eef1ff;
+  --surface-sky: #eef1ff;
+
+  /* Purple palette (replaces forest) */
+  --forest-50: #f5f0ff;
+  --forest-100: #ede5ff;
+  --forest-200: #d9ccff;
+  --forest-300: #b8a3ff;
+  --forest-400: #9b7aff;
+  --forest-500: #7c5cff;
+  --forest-600: #6344e0;
+  --forest-700: #5236c2;
+  --forest-800: #3e2796;
+  --forest-900: #2d1d6e;
+  --forest-950: #1a0e45;
+
+  /* Electric blue palette (replaces moss) */
+  --moss-50: #eef1ff;
+  --moss-100: #dde4ff;
+  --moss-200: #bbc8ff;
+  --moss-300: #8ea4ff;
+  --moss-400: #6d85ff;
+  --moss-500: #5e74ff;
+  --moss-600: #4a5ce6;
+  --moss-700: #3a48c7;
+  --moss-800: #2d38a0;
+  --moss-900: #212a7a;
+
+  /* True gray palette (replaces mist) */
+  --mist-50: #f9f9f9;
+  --mist-100: #f0f0f0;
+  --mist-200: #e0e0e0;
+  --mist-300: #c7c7c7;
+  --mist-400: #a0a0a0;
+  --mist-500: #787878;
+  --mist-600: #5c5c5c;
+  --mist-700: #454545;
+  --mist-800: #303030;
+  --mist-900: #1a1a1a;
+
+  /* Warm gray palette (replaces bark) */
+  --bark-50: #fafafa;
+  --bark-100: #f2f2f2;
+  --bark-200: #e5e5e5;
+  --bark-300: #cccccc;
+  --bark-400: #a3a3a3;
+  --bark-500: #808080;
+  --bark-600: #636363;
+  --bark-700: #4a4a4a;
+  --bark-800: #333333;
+  --bark-900: #1f1f1f;
+
+  /* Orange palette (replaces amber) */
+  --amber-50: #fff7ed;
+  --amber-100: #ffedd5;
+  --amber-200: #fed7aa;
+  --amber-300: #fdba74;
+  --amber-400: #fb923c;
+  --amber-500: #ff771c;
+  --amber-600: #ea580c;
+  --amber-700: #c2410c;
+  --amber-800: #9a3412;
+  --amber-900: #7c2d12;
+
+  /* Shadows — purple undertone, minimal */
+  --shadow-xs: 0 1px 2px rgba(26, 14, 69, 0.04);
+  --shadow-sm: 0 2px 4px rgba(26, 14, 69, 0.06);
+  --shadow-md: 0 4px 8px rgba(26, 14, 69, 0.08);
+  --shadow-lg: 0 8px 16px rgba(26, 14, 69, 0.10);
+  --shadow-xl: 0 12px 24px rgba(26, 14, 69, 0.12);
+  --shadow-2xl: 0 16px 32px rgba(26, 14, 69, 0.14);
+  --shadow-moss: 0 4px 16px rgba(94, 116, 255, 0.15);
+  --shadow-moss-lg: 0 8px 24px rgba(94, 116, 255, 0.18);
+  --shadow-forest: 0 4px 16px rgba(124, 92, 255, 0.12);
+  --shadow-amber: 0 4px 16px rgba(255, 119, 28, 0.15);
+  --shadow-inset-sm: inset 0 1px 2px rgba(26, 14, 69, 0.06);
+  --shadow-inset-md: inset 0 2px 4px rgba(26, 14, 69, 0.08);
+
+  /* Border radii — sharper */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 12px;
+  --radius-full: 9999px;
+
+  /* Status feedback */
+  --success-bg: #f0fdf4;
+  --success-text: #166534;
+  --success-border: #bbf7d0;
+  --error-bg: #fef2f2;
+  --error-text: #991b1b;
+  --error-border: #fecaca;
+  --info-bg: #eef1ff;
+  --info-text: #3a48c7;
+  --info-border: #bbc8ff;
+  --warning-bg: #fff7ed;
+  --warning-text: #c2410c;
+  --warning-border: #fed7aa;
+}
+
+/* === BOLD SKIN — DARK MODE === */
+[data-skin="bold"][data-mode="dark"] {
+  /* Base — deep purple backgrounds */
+  --background: #0e0a1a;
+  --background-warm: #130e22;
+  --foreground: #e8e0f5;
+  --foreground-muted: #9088a8;
+  --card-bg: #1a1230;
+  --border: #2d2548;
+  --border-light: #221a3a;
+
+  /* Semantic text */
+  --text-primary: #e8e0f5;
+  --text-secondary: #c9bfe0;
+  --text-label: #a89ec5;
+
+  /* Semantic surfaces */
+  --surface-forest: #1e1440;
+  --surface-moss: #141535;
+  --surface-sky: #121830;
+
+  /* Inverted mist palette (purple-tinted grays for dark mode) */
+  --mist-50: #0e0a1a;
+  --mist-100: #1a1230;
+  --mist-200: #221a3a;
+  --mist-300: #2d2548;
+  --mist-400: #443a65;
+  --mist-500: #6b5f8a;
+  --mist-600: #9088a8;
+  --mist-700: #a89ec5;
+  --mist-800: #c9bfe0;
+  --mist-900: #e8e0f5;
+
+  /* Inverted bark palette */
+  --bark-50: #1a1230;
+  --bark-100: #221a3a;
+  --bark-200: #3a3055;
+  --bark-300: #504570;
+  --bark-400: #6b5f8a;
+  --bark-500: #9088a8;
+  --bark-600: #c9bfe0;
+  --bark-700: #dcd5ea;
+  --bark-800: #ede8f5;
+  --bark-900: #f8f5ff;
+
+  /* Shadows — darker, purple undertone */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.45);
+  --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.5);
+  --shadow-2xl: 0 16px 32px rgba(0, 0, 0, 0.55);
+  --shadow-moss: 0 4px 16px rgba(94, 116, 255, 0.15);
+  --shadow-moss-lg: 0 8px 24px rgba(94, 116, 255, 0.18);
+  --shadow-forest: 0 4px 16px rgba(124, 92, 255, 0.12);
+  --shadow-amber: 0 4px 16px rgba(255, 119, 28, 0.12);
+  --shadow-inset-sm: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-inset-md: inset 0 2px 4px rgba(0, 0, 0, 0.25);
+
+  /* Status feedback — dark mode variants */
+  --success-bg: #0d2818;
+  --success-text: #3fb950;
+  --success-border: #1b4332;
+  --error-bg: #2d1215;
+  --error-text: #f85149;
+  --error-border: #5c2124;
+  --info-bg: #141535;
+  --info-text: #7d94ff;
+  --info-border: #2d2a6e;
+  --warning-bg: #2d1a06;
+  --warning-text: #ffaa44;
+  --warning-border: #5c3a13;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -620,5 +813,61 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 [data-mode="dark"] .error-glow {
+  box-shadow: 0 0 0 3px rgba(248, 81, 73, 0.15), var(--shadow-md);
+}
+
+/* === BOLD SKIN — CLASS OVERRIDES === */
+[data-skin="bold"] .paper-texture {
+  background: linear-gradient(180deg, var(--background) 0%, var(--background-warm) 100%);
+}
+
+[data-skin="bold"] .pnw-texture {
+  background-image:
+    radial-gradient(ellipse at 20% 10%, rgba(124, 92, 255, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(94, 116, 255, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(120, 120, 120, 0.02) 0%, transparent 70%);
+}
+
+[data-skin="bold"] ::selection {
+  background: rgba(124, 92, 255, 0.25);
+  color: #1a0e45;
+}
+
+[data-skin="bold"] .success-glow {
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15), var(--shadow-md);
+}
+
+[data-skin="bold"] .error-glow {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15), var(--shadow-md);
+}
+
+/* Bold typography — tighter letter-spacing */
+[data-skin="bold"] h1, [data-skin="bold"] h2, [data-skin="bold"] h3,
+[data-skin="bold"] h4, [data-skin="bold"] h5, [data-skin="bold"] h6 {
+  letter-spacing: -0.025em;
+}
+
+/* Bold dark mode class overrides */
+[data-skin="bold"][data-mode="dark"] .paper-texture {
+  background: linear-gradient(180deg, var(--background) 0%, var(--background-warm) 100%);
+}
+
+[data-skin="bold"][data-mode="dark"] .pnw-texture {
+  background-image:
+    radial-gradient(ellipse at 20% 10%, rgba(124, 92, 255, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(94, 116, 255, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(100, 100, 140, 0.03) 0%, transparent 70%);
+}
+
+[data-skin="bold"][data-mode="dark"] ::selection {
+  background: rgba(124, 92, 255, 0.35);
+  color: #e8e0f5;
+}
+
+[data-skin="bold"][data-mode="dark"] .success-glow {
+  box-shadow: 0 0 0 3px rgba(63, 185, 80, 0.15), var(--shadow-md);
+}
+
+[data-skin="bold"][data-mode="dark"] .error-glow {
   box-shadow: 0 0 0 3px rgba(248, 81, 73, 0.15), var(--shadow-md);
 }
