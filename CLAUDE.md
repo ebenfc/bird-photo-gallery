@@ -102,5 +102,5 @@ Most pages are client components (`"use client"`), so they can't export `metadat
 
 - `src/db/schema.ts` — All database tables
 - `src/lib/validation.ts` — Zod schemas for request validation
-- `src/middleware.ts` — Clerk route protection
+- `src/proxy.ts` — Clerk route protection (Next.js 16 middleware)
 - `drizzle.config.ts` — Database configuration

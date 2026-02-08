@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import { hasAcceptedCurrentAgreement } from "@/lib/agreement";
@@ -102,6 +103,7 @@ export default async function RootLayout({
             )}
           </ThemeProvider>
           <Analytics />
+          <SpeedInsights />
         </body>
       </html>
     </ClerkProvider>

@@ -88,7 +88,7 @@ describe('Image Processing', () => {
     it('should process original image with correct settings', async () => {
       await processUploadedImage(mockBuffer);
 
-      expect(sharp).toHaveBeenCalledWith(mockBuffer);
+      expect(sharp).toHaveBeenCalledWith(mockBuffer, { failOn: 'none' });
       expect(mockRotate).toHaveBeenCalled();
       expect(mockJpeg).toHaveBeenCalledWith({ quality: 90 });
       expect(mockToBuffer).toHaveBeenCalled();
@@ -111,11 +111,13 @@ describe('Image Processing', () => {
       expect(uploadToStorage).toHaveBeenCalledTimes(2);
       expect(uploadToStorage).toHaveBeenCalledWith(
         expect.any(Buffer),
-        `originals/${result.filename}`
+        `originals/${result.filename}`,
+        'image/jpeg'
       );
       expect(uploadToStorage).toHaveBeenCalledWith(
         expect.any(Buffer),
-        `thumbnails/${result.thumbnailFilename}`
+        `thumbnails/${result.thumbnailFilename}`,
+        'image/jpeg'
       );
     });
 
@@ -127,12 +129,15 @@ describe('Image Processing', () => {
       await expect(processUploadedImage(mockBuffer)).rejects.toThrow('Upload failed');
     });
 
-    it('should propagate sharp processing errors', async () => {
+    it('should fall back to original buffer when sharp processing fails', async () => {
       mockToBuffer.mockRejectedValueOnce(new Error('Sharp processing failed'));
 
-      await expect(processUploadedImage(mockBuffer)).rejects.toThrow(
-        'Sharp processing failed'
-      );
+      // processUploadedImage has a graceful fallback — when sharp fails, it stores
+      // the original buffer instead of throwing. Magic byte validation happens at
+      // the upload route level (src/app/api/upload/browser/route.ts), not here.
+      const result = await processUploadedImage(mockBuffer);
+      expect(result.filename).toBeTruthy();
+      expect(uploadToStorage).toHaveBeenCalledTimes(2);
     });
 
     it('should generate different filenames for multiple calls', async () => {
@@ -159,16 +164,17 @@ describe('Image Processing', () => {
   });
 
   describe('File Validation (Security)', () => {
-    it('should process buffer without validating magic bytes', async () => {
-      // Note: This is an identified security gap from the review
-      // The function currently doesn't validate magic bytes before processing
+    it('should fall back gracefully for non-image buffers (magic bytes validated at route level)', async () => {
+      // processUploadedImage does NOT validate magic bytes — that responsibility
+      // belongs to the upload route (src/app/api/upload/browser/route.ts), which
+      // calls validateImageMagicBytesFromBuffer() BEFORE calling this function.
+      // When sharp fails on a non-image buffer, this function falls back to
+      // storing the original buffer as-is rather than throwing.
       const maliciousBuffer = Buffer.from('not-an-image');
-
-      // This should ideally fail, but currently doesn't validate
-      // Sharp will fail if it's truly not an image, which provides some protection
       mockToBuffer.mockRejectedValueOnce(new Error('Input buffer contains unsupported image format'));
 
-      await expect(processUploadedImage(maliciousBuffer)).rejects.toThrow();
+      const result = await processUploadedImage(maliciousBuffer);
+      expect(result.filename).toBeTruthy();
     });
   });
 });
