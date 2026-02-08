@@ -11,7 +11,7 @@ Components are organized by feature area.
 | `gallery/` | Photo gallery and modal components |
 | `landing/` | Public landing page for unauthenticated users |
 | `layout/` | Header, navigation, PublicHeader |
-| `settings/` | User settings forms (public gallery) |
+| `settings/` | User settings forms (public gallery, appearance/skin picker) |
 | `species/` | Species cards and forms |
 | `stats/` | Property stats widget |
 | `suggestions/` | AI suggestion components |
