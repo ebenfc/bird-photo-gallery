@@ -36,6 +36,7 @@ src/
   app/              # Pages and API routes (see api/CLAUDE.md)
   components/       # React components (see components/CLAUDE.md)
   db/               # Database schema (see db/CLAUDE.md)
+  hooks/            # Custom React hooks (useKonamiCode, useLogoTapUnlock)
   lib/              # Utilities and business logic (see lib/CLAUDE.md)
   types/            # TypeScript definitions
   config/           # App configuration (limits.ts, usStates.ts)
@@ -60,10 +61,16 @@ Two-dimensional theming via HTML attributes on `<html>`:
 |------|---------|--------|
 | Default | PNW nature (green/teal) | Active |
 | Bold | Purple/electric blue | Active |
-| Retro | Easter egg (90s web) | Unlockable, not yet styled |
+| Retro | GeoCities navy/teal/yellow | Unlockable via easter egg |
 
 ### How It Works
-All colors use CSS custom properties (`var(--forest-500)`, `var(--moss-300)`, etc.). Skin overrides in `globals.css` use `[data-skin="bold"]` selectors to remap every variable. Components need zero changes — they inherit the active skin automatically.
+All colors use CSS custom properties (`var(--forest-500)`, `var(--moss-300)`, etc.). Skin overrides in `globals.css` use `[data-skin="bold"]` / `[data-skin="retro"]` selectors to remap every variable. Components need zero changes — they inherit the active skin automatically.
+
+### Retro Unlock (Easter Egg)
+- **Desktop:** Konami Code (↑↑↓↓←→←→BA) — detected by `useKonamiCode` hook
+- **Mobile:** 7 rapid taps on the bird logo — detected by `useLogoTapUnlock` hook
+- Both triggers live in `Header.tsx` and call `unlockRetro()` from `SkinContext`
+- Once unlocked, the Retro card appears in Settings > Appearance
 
 ### Color Rules for New Components
 - Backgrounds: `var(--card-bg)`, `var(--background)` — never `bg-white`
@@ -76,6 +83,8 @@ All colors use CSS custom properties (`var(--forest-500)`, `var(--moss-300)`, et
 - `src/app/globals.css` — CSS variable definitions + skin overrides
 - `src/contexts/SkinContext.tsx` — Skin state + localStorage persistence
 - `src/components/settings/AppearanceSettings.tsx` — Skin/mode picker UI
+- `src/hooks/useKonamiCode.ts` — Konami Code keyboard sequence detector
+- `src/hooks/useLogoTapUnlock.ts` — Rapid tap gesture detector
 
 ## Key Files
 
