@@ -49,6 +49,34 @@ src/
 - **Previews:** Vercel (auto-deploys on PRs)
 - **Cron:** Haikubox sync daily at 6am UTC (Vercel)
 
+## Theming System
+
+Two-dimensional theming via HTML attributes on `<html>`:
+- `data-mode` — `light` | `dark` | `system` (managed by `next-themes`)
+- `data-skin` — `default` | `bold` | `retro` (managed by `SkinContext`)
+
+### Available Skins
+| Skin | Palette | Status |
+|------|---------|--------|
+| Default | PNW nature (green/teal) | Active |
+| Bold | Purple/electric blue | Active |
+| Retro | Easter egg (90s web) | Unlockable, not yet styled |
+
+### How It Works
+All colors use CSS custom properties (`var(--forest-500)`, `var(--moss-300)`, etc.). Skin overrides in `globals.css` use `[data-skin="bold"]` selectors to remap every variable. Components need zero changes — they inherit the active skin automatically.
+
+### Color Rules for New Components
+- Backgrounds: `var(--card-bg)`, `var(--background)` — never `bg-white`
+- Text: `var(--text-primary)`, `var(--text-secondary)` — never hardcoded colors
+- Borders: `var(--border)`, `var(--border-light)`
+- Accents: `var(--moss-500)`, `var(--forest-600)` — these remap per skin
+- Shadows: `var(--shadow-sm)`, `var(--shadow-moss)` — purple-tinted in Bold
+
+### Key Theming Files
+- `src/app/globals.css` — CSS variable definitions + skin overrides
+- `src/contexts/SkinContext.tsx` — Skin state + localStorage persistence
+- `src/components/settings/AppearanceSettings.tsx` — Skin/mode picker UI
+
 ## Key Files
 
 - `src/db/schema.ts` — All database tables
