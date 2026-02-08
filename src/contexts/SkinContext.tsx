@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 
-export type Skin = "default" | "bold" | "retro";
+export type Skin = "default" | "bold" | "retro" | "fieldguide";
 
 interface SkinContextType {
   skin: Skin;
@@ -31,7 +31,7 @@ export function SkinProvider({ children }: { children: React.ReactNode }) {
     const loadStoredPreferences = () => {
       try {
         const storedSkin = localStorage.getItem(SKIN_STORAGE_KEY) as Skin | null;
-        if (storedSkin && ["default", "bold", "retro"].includes(storedSkin)) {
+        if (storedSkin && ["default", "bold", "retro", "fieldguide"].includes(storedSkin)) {
           setSkinState(storedSkin);
         }
         const unlocked = localStorage.getItem(RETRO_UNLOCK_KEY) === "true";

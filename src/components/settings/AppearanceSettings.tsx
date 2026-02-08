@@ -52,6 +52,13 @@ const skinOptions = [
     colors: ["#7c5cff", "#5e74ff", "#b1ff8f", "#f2f2f2"],
     available: true,
   },
+  {
+    value: "fieldguide" as const,
+    label: "Field Guide",
+    description: "Classic naturalist aesthetic",
+    colors: ["#8B6F47", "#6B7F5C", "#F5F1E8", "#3A3A3A"],
+    available: true,
+  },
 ];
 
 export default function AppearanceSettings() {
