@@ -66,6 +66,20 @@ const skinOptions = [
     colors: ["#000080", "#FFFF00", "#FF00FF", "#00FF00"],
     available: true,
   },
+  {
+    value: "journal" as const,
+    label: "Journal",
+    description: "Warm naturalist's notebook",
+    colors: ["#7D6544", "#5E4B32", "#F6F1E3", "#2C2417"],
+    available: true,
+  },
+  {
+    value: "highcontrast" as const,
+    label: "High Contrast",
+    description: "Maximum readability",
+    colors: ["#003D2E", "#002B66", "#FFFFFF", "#1A1A1A"],
+    available: true,
+  },
 ];
 
 export default function AppearanceSettings() {
@@ -95,7 +109,7 @@ export default function AppearanceSettings() {
         <div>
           <div className="h-5 w-16 skeleton mb-3" />
           <div className="grid grid-cols-2 gap-3">
-            {[1, 2, 3, 4].map((i) => (
+            {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="h-24 skeleton" />
             ))}
           </div>
