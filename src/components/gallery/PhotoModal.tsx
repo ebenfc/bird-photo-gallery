@@ -587,7 +587,7 @@ export default function PhotoModal({
                   className={`p-1.5 rounded-full ${justFavorited ? "animate-heart-beat" : ""}`}
                 >
                   <svg
-                    className={`w-5 h-5 ${photo.isFavorite ? "text-red-500 fill-current" : "text-[var(--mist-300)]"}`}
+                    className={`w-5 h-5 ${photo.isFavorite ? "text-[var(--favorite-color)] fill-current" : "text-[var(--mist-300)]"}`}
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                     strokeWidth={photo.isFavorite ? 0 : 2}
@@ -731,7 +731,7 @@ export default function PhotoModal({
               >
                 <svg
                   className={`w-7 h-7 transition-colors duration-[var(--timing-fast)]
-                    ${photo.isFavorite ? "text-red-500 fill-current" : "text-[var(--mist-300)]"}`}
+                    ${photo.isFavorite ? "text-[var(--favorite-color)] fill-current" : "text-[var(--mist-300)]"}`}
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                   strokeWidth={photo.isFavorite ? 0 : 2}
@@ -933,7 +933,7 @@ export default function PhotoModal({
             <div className="mt-6 pt-4 border-t border-[var(--border)]">
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className="text-sm text-[var(--mist-400)] hover:text-red-500
+                className="text-sm text-[var(--mist-400)] hover:text-[var(--error-text)]
                   transition-colors flex items-center gap-1.5"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1017,8 +1017,8 @@ export default function PhotoModal({
                     setShowOverflowMenu(false);
                     setShowDeleteConfirm(true);
                   }}
-                  className="w-full px-4 py-2.5 text-left text-sm text-red-600
-                    hover:bg-red-50 flex items-center gap-2"
+                  className="w-full px-4 py-2.5 text-left text-sm text-[var(--error-text)]
+                    hover:bg-[var(--error-bg)] flex items-center gap-2"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -1038,8 +1038,8 @@ export default function PhotoModal({
           <div className="relative bg-[var(--card-bg)] rounded-[var(--radius-2xl)] shadow-[var(--shadow-2xl)] p-6 max-w-sm w-full
             animate-fade-in-scale">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="w-12 h-12 rounded-full bg-[var(--error-bg)] flex items-center justify-center">
+                <svg className="w-6 h-6 text-[var(--error-text)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
@@ -1054,7 +1054,7 @@ export default function PhotoModal({
                   <li>Taken on {formatDate(photo.originalDateTaken)}</li>
                 )}
               </ul>
-              <p className="mt-3 font-semibold text-red-600">This action cannot be undone.</p>
+              <p className="mt-3 font-semibold text-[var(--error-text)]">This action cannot be undone.</p>
             </div>
 
             <div className="flex gap-3">
@@ -1082,9 +1082,9 @@ export default function PhotoModal({
                 }}
                 disabled={isDeleting}
                 className="flex-1 px-4 py-3 text-sm font-semibold text-white
-                  bg-gradient-to-b from-red-500 to-red-600
+                  bg-gradient-to-b from-[var(--danger-from)] to-[var(--danger-to)]
                   rounded-[var(--radius-lg)] shadow-[var(--shadow-md)]
-                  hover:from-red-400 hover:to-red-500
+                  hover:from-[var(--danger-hover-from)] hover:to-[var(--danger-hover-to)]
                   disabled:opacity-50 active:scale-[0.98] transition-all"
               >
                 {isDeleting ? "Deleting..." : "Delete Photo"}

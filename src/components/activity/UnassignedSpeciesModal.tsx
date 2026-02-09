@@ -139,9 +139,9 @@ export default function UnassignedSpeciesModal({
       <form onSubmit={handleSubmit} className="p-6 pt-8">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--mist-100)] to-[var(--mist-200)] flex items-center justify-center">
             <svg
-              className="w-5 h-5 text-slate-600"
+              className="w-5 h-5 text-[var(--mist-600)]"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -241,9 +241,9 @@ export default function UnassignedSpeciesModal({
                   className={`flex-1 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${
                     rarity === r
                       ? r === "common"
-                        ? "bg-slate-100 border-slate-300 text-slate-700 shadow-sm"
+                        ? "bg-[var(--mist-100)] border-[var(--mist-300)] text-[var(--mist-700)] shadow-sm"
                         : r === "uncommon"
-                        ? "bg-amber-50 border-amber-300 text-amber-700 shadow-sm"
+                        ? "bg-[var(--amber-50)] border-[var(--amber-300)] text-[var(--amber-700)] shadow-sm"
                         : "bg-[var(--error-bg)] border-[var(--error-border)] text-[var(--error-text)] shadow-sm"
                       : "bg-[var(--card-bg)] border-[var(--mist-200)] text-[var(--mist-500)] hover:border-[var(--mist-300)]"
                   }`}
@@ -259,7 +259,7 @@ export default function UnassignedSpeciesModal({
         {error && (
           <div className="mt-4 p-3 bg-[var(--error-bg)] border border-[var(--error-border)] rounded-xl flex items-center gap-2">
             <svg
-              className="w-5 h-5 text-red-500 flex-shrink-0"
+              className="w-5 h-5 text-[var(--error-text)] flex-shrink-0"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -271,7 +271,7 @@ export default function UnassignedSpeciesModal({
                 d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <p className="text-sm text-red-600">{error}</p>
+            <p className="text-sm text-[var(--error-text)]">{error}</p>
           </div>
         )}
 

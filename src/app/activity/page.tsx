@@ -298,7 +298,7 @@ export default function ActivityPage() {
         <div className="bg-[var(--error-bg)] border border-[var(--error-border)] rounded-[var(--radius-lg)] p-4 mb-8">
           <div className="flex items-start gap-3">
             <svg
-              className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"
+              className="w-5 h-5 text-[var(--error-text)] flex-shrink-0 mt-0.5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -311,10 +311,10 @@ export default function ActivityPage() {
               />
             </svg>
             <div>
-              <h3 className="font-semibold text-red-800 mb-1">
+              <h3 className="font-semibold text-[var(--error-text)] mb-1">
                 Error Loading Activity Data
               </h3>
-              <p className="text-sm text-red-700">{error}</p>
+              <p className="text-sm text-[var(--error-text)]">{error}</p>
             </div>
           </div>
         </div>
