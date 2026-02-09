@@ -33,6 +33,16 @@ export function useKonamiCode(onUnlock: () => void): void {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (hasTriggeredRef.current) return;
 
+      // Don't track keys when user is typing in a form field
+      const target = e.target as HTMLElement;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
       const buffer = bufferRef.current;
       buffer.push(e.code);
 
