@@ -39,19 +39,26 @@ This is required for database access (pg driver) and sharp (image processing).
 
 | Endpoint | Purpose |
 |----------|---------|
-| `/photos` | CRUD for photos |
-| `/species` | CRUD for species |
-| `/upload`, `/upload/browser` | Photo upload (API and browser) |
-| `/haikubox/*` | Haikubox device integration |
+| `/photos` | List photos (GET), update/delete (PATCH/DELETE) |
+| `/photos/[id]` | Single photo GET/PATCH/DELETE |
+| `/photos/unassigned` | List unassigned inbox photos |
+| `/species` | List (GET) / create (POST) species |
+| `/species/[id]` | Species detail GET/PATCH/DELETE |
+| `/species/refresh` | Refresh Haikubox species data |
+| `/upload/browser` | Browser photo upload |
+| `/haikubox/*` | Haikubox device integration (see below) |
 | `/settings` | App settings (Haikubox serial) |
 | `/settings/profile` | User profile (username, public gallery toggle) |
+| `/settings/profile/check-username` | Check username availability |
 | `/public/gallery/[username]/*` | Public gallery read-only APIs |
 | `/public/discover` | Browse directory-listed galleries |
 | `/bookmarks` | GET (list) + POST (create) bookmarks |
 | `/bookmarks/[username]` | DELETE bookmark |
 | `/bookmarks/check/[username]` | Check if gallery is bookmarked |
-| `/activity/*` | Species activity data |
+| `/activity/*` | Species activity data (current, heatmap, species/[name]) |
 | `/suggestions` | AI-powered suggestions |
+| `/birds/lookup` | Bird name validation via Wikipedia |
+| `/agreement` | Accept user agreement (POST) |
 | `/webhook/clerk` | Clerk user sync |
 | `/support/report` | Issue reporting (POST → Slack webhook) |
 | `/health` | Health check (public, no auth) |

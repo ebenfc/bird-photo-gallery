@@ -57,23 +57,13 @@ Two-dimensional theming via HTML attributes on `<html>`:
 - `data-skin` — `default` | `bold` | `retro` | `fieldguide` (managed by `SkinContext`)
 
 ### Available Skins
-| Skin | Palette | Status |
-|------|---------|--------|
-| Default | PNW nature (green/teal) | Active |
-| Bold | Purple/electric blue | Active |
-| Field Guide | Cream/sage green/warm brown, Georgia serif headers | Active |
-| Retro | GeoCities navy/teal/yellow | Active |
+Default (PNW green/teal), Bold (purple/electric blue), Field Guide (cream/sage, Georgia serif), Retro (GeoCities navy/teal/yellow).
 
 ### How It Works
 All colors use CSS custom properties (`var(--forest-500)`, `var(--moss-300)`, etc.). Skin overrides in `globals.css` use `[data-skin="bold"]` / `[data-skin="fieldguide"]` / `[data-skin="retro"]` selectors to remap every variable. Components need zero changes — they inherit the active skin automatically.
 
 ### Easter Egg Infrastructure (Dormant)
-The easter egg unlock system is intact but currently dormant — no reward is wired to it.
-- **Desktop:** Konami Code (↑↑↓↓←→←→BA) — `useKonamiCode` hook
-- **Mobile:** 7 rapid taps on the bird logo — `useLogoTapUnlock` hook
-- Both hooks fire in `Header.tsx` but the callback is a no-op
-- `SkinContext` still exports `unlockRetro()` and `retroUnlocked` for future reuse
-- To re-enable: add reward logic to `handleRetroUnlock` in `Header.tsx`
+Unlock system hooks (`useKonamiCode`, `useLogoTapUnlock`) fire in `Header.tsx` but callback is a no-op. To re-enable: add reward logic to `handleRetroUnlock` in `Header.tsx`.
 
 ### Landing Page Theme Showcase
 Unauthenticated visitors can live-preview all 4 skins on the landing page (`ThemeShowcase` component). Their choice persists to localStorage and carries over into sign-up. Includes a light/dark mode toggle.
@@ -88,9 +78,6 @@ Unauthenticated visitors can live-preview all 4 skins on the landing page (`Them
 ### Key Theming Files
 - `src/app/globals.css` — CSS variable definitions + skin overrides
 - `src/contexts/SkinContext.tsx` — Skin state + localStorage persistence
-- `src/components/settings/AppearanceSettings.tsx` — Skin/mode picker UI
-- `src/hooks/useKonamiCode.ts` — Konami Code keyboard sequence detector
-- `src/hooks/useLogoTapUnlock.ts` — Rapid tap gesture detector
 
 ## Page Metadata
 
