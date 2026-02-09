@@ -18,7 +18,7 @@ Components are organized by feature area.
 | `stats/` | Property stats widget |
 | `suggestions/` | AI suggestion components |
 | `support/` | Issue reporting (ReportIssueButton, ReportIssueModal) |
-| `ui/` | Reusable UI primitives (Modal, Button, Input, Select, Toast, RarityBadge, HeardBadge) |
+| `ui/` | Reusable UI primitives (Modal, Button, Input, Select, Toast, RarityBadge, RarityPicker, HeardBadge) |
 | `upload/` | Photo upload components |
 
 `SentryUserIdentifier.tsx` (root) — Links Clerk user to Sentry context
@@ -70,6 +70,9 @@ Minimal header for public galleries: Feed/Species tabs, no auth UI, CTA link (de
 
 Reusable primitives: buttons, inputs, modals, badges, loading states, toast notifications.
 Use these instead of creating one-off styled elements.
+
+### RarityPicker (`ui/RarityPicker.tsx`)
+Toggle buttons for common/uncommon/rare selection. Props: `value: Rarity`, `onChange: (rarity: Rarity) => void`. Used in SpeciesForm, SpeciesAssignModal, and UnassignedSpeciesModal.
 
 ### Accessibility Patterns (WCAG 2.1 AA)
 - **Modal** has built-in focus trap (Tab/Shift+Tab cycling), focus restore on close, `role="dialog"`, `aria-modal="true"`. Pass `aria-label` or `aria-labelledby` prop to every Modal usage.
