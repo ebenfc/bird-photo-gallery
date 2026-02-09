@@ -20,8 +20,10 @@ export async function GET(request: NextRequest) {
 ```
 
 **Exceptions:**
-- Webhooks (`/api/webhook/clerk`) - No auth required
-- Public gallery APIs (`/api/public/*`) - No auth required (see `public/CLAUDE.md`)
+- Webhooks (`/api/webhook/clerk`) — No auth required
+- Public gallery APIs (`/api/public/*`) — No auth required (see `public/CLAUDE.md`)
+- Health check (`/api/health`) — Public, no auth
+- Haikubox sync (`/api/haikubox/sync`) — Dual auth: Clerk for manual sync, `CRON_SECRET` for Vercel cron (see below)
 
 ## Runtime Configuration
 
@@ -52,12 +54,12 @@ This is required for database access (pg driver) and sharp (image processing).
 | `/suggestions` | AI-powered suggestions |
 | `/webhook/clerk` | Clerk user sync |
 | `/support/report` | Issue reporting (POST → Slack webhook) |
-| `/debug/*` | Development debugging |
+| `/health` | Health check (public, no auth) |
 
 ## Haikubox Integration
 
 - `/haikubox/test` - Validate serial number against Haikubox API
-- `/haikubox/sync` - Sync detections from Haikubox
+- `/haikubox/sync` - Sync detections (manual POST or Vercel cron GET)
 - `/haikubox/stats` - Get detection statistics
 - `/haikubox/detections` - List detections
 - `/haikubox/detections/link` - Link detections to species
@@ -73,8 +75,10 @@ Server-side helpers in `src/lib/photoLimits.ts`: `checkSpeciesLimit()`, `checkUn
 - Photo swaps use `db.transaction()` for atomic delete-old + insert/update-new
 - `replacePhotoId` parameter triggers swap; clears `coverPhotoId` if swapped photo was cover
 
-## Debug Endpoints
+## Haikubox Cron Auth
 
-Available in all environments:
-- `GET /api/debug/auth` - Check auth status and user database sync
-- `POST /api/debug/setup` - Manually create current user in database
+Vercel cron (`vercel.json`) hits `GET /api/haikubox/sync` daily at 6am UTC. Auth flow:
+1. `proxy.ts` detects `vercel-cron` user-agent → bypasses Clerk entirely (`NextResponse.next()`)
+2. Route handler checks `Authorization: Bearer <CRON_SECRET>` via `isCronRequest()`
+3. On success: syncs all users with `haikubox_serial` in `appSettings`
+4. On failure: returns 401 (never falls through to `requireAuth()` — Clerk wasn't loaded)

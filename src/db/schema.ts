@@ -114,7 +114,9 @@ export const haikuboxSyncLog = pgTable("haikubox_sync_log", {
   syncedAt: timestamp("synced_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+}, (table) => ({
+  userIdIdx: index("sync_log_user_id_idx").on(table.userId),
+}));
 
 // Haikubox Relations
 export const haikuboxDetectionsRelations = relations(haikuboxDetections, ({ one }) => ({
@@ -178,6 +180,7 @@ export const appSettings = pgTable("app_settings", {
     .$onUpdate(() => new Date()),
 }, (table) => ({
   userKeyUnique: unique().on(table.userId, table.key),
+  keyIdx: index("app_settings_key_idx").on(table.key),
 }));
 
 // App Settings Type exports
