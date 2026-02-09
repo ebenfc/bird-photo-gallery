@@ -10,6 +10,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/webhook/clerk', // Clerk webhook endpoint
   '/api/haikubox/sync', // Haikubox cron (auth handled in route via CRON_SECRET)
   '/api/health',    // Health check for monitoring tools
+  '/about',         // About page (accessible pre-signup)
   '/u/(.*)',        // Public user galleries
   '/api/public/(.*)', // Public API endpoints
   '/monitoring',    // Sentry tunnel route

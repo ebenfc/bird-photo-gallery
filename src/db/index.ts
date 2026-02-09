@@ -13,6 +13,9 @@ function getDb(): NodePgDatabase<typeof schema> {
     }
     const pool = new Pool({
       connectionString,
+      max: 20,                      // Maximum connections in the pool (default was 10)
+      idleTimeoutMillis: 30_000,    // Close idle connections after 30 seconds
+      connectionTimeoutMillis: 5_000, // Fail fast if connection can't be established
       ssl:
         process.env.NODE_ENV === "production"
           ? { rejectUnauthorized: false }
