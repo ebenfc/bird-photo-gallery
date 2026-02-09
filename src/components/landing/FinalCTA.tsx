@@ -8,10 +8,10 @@ export default function FinalCTA() {
           className="text-3xl sm:text-4xl font-bold tracking-tight"
           style={{ color: "white" }}
         >
-          Start your bird feed today
+          Start your Bird Feed today
         </h2>
         <p className="mt-4 text-lg text-[var(--forest-200)] max-w-xl mx-auto">
-          Create your free account to build your personal collection, share your gallery, and discover what birders near you are seeing.
+          Create a free account to build your personal gallery.
         </p>
 
         <div className="mt-10">

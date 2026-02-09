@@ -82,7 +82,7 @@ Unauthenticated visitors can live-preview all 4 skins on the landing page (`Them
 ## Page Metadata
 
 Most pages are client components (`"use client"`), so they can't export `metadata` directly. Pattern:
-- Create a `layout.tsx` in the route folder that exports `metadata` (e.g., `src/app/activity/layout.tsx`)
+- Create a `layout.tsx` in the route folder that exports `metadata` (e.g., `src/app/haikubox/layout.tsx`)
 - For dynamic routes, use `generateMetadata` in the layout (e.g., `src/app/u/[username]/layout.tsx`)
 
 ## Key Files

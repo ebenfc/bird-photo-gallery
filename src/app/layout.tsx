@@ -24,8 +24,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Bird Feed - Catalogue Your Bird Photography",
-  description: "A simple, focused tool for birders to catalogue their favorite bird photos and organize them by species.",
+  title: "Bird Feed - Catalog Your Bird Photos",
+  description: "A simple site for birders to feature their favorite photos.",
 };
 
 export default async function RootLayout({

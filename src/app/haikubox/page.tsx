@@ -170,7 +170,7 @@ export default function ActivityPage() {
         {/* Desktop header */}
         <div className="hidden sm:block mb-8">
           <h1 className="text-3xl font-bold text-[var(--text-primary)] tracking-tight mb-2">
-            Activity
+            Haikubox
           </h1>
           <p className="text-[var(--mist-600)]">
             Bird species automatically detected by your Haikubox device on the property.
@@ -180,7 +180,7 @@ export default function ActivityPage() {
         {/* Mobile header */}
         <div className="sm:hidden mb-4">
           <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">
-            Activity
+            Haikubox
           </h1>
         </div>
 
@@ -245,7 +245,7 @@ export default function ActivityPage() {
       <div className="sm:hidden mb-4">
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">
-            Activity
+            Haikubox
           </h1>
           <button
             onClick={() => setShowMobileFilters(!showMobileFilters)}

@@ -9,7 +9,7 @@ export default function SignInPage() {
             Welcome to Bird Feed
           </h1>
           <p className="text-[var(--mist-600)]">
-            Sign in to access your bird photo collection
+            Sign in to access your bird gallery
           </p>
         </div>
         <SignIn

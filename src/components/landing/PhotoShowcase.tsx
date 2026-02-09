@@ -13,10 +13,10 @@ export default function PhotoShowcase() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] tracking-tight">
-            Build your personal collection
+            Build your personal gallery.
           </h2>
           <p className="mt-4 text-lg text-[var(--mist-600)] max-w-2xl mx-auto">
-            Every birder has their favorite shots. Create a beautiful gallery organized by the species you love — then share it with a unique link.
+            Every birder has their favorite shots. Curate your collection, organize by species, and share with friends.
           </p>
         </div>
 

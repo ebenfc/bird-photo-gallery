@@ -91,7 +91,7 @@ export default function AgreementText() {
           service.
         </li>
         <li>
-          Accounts that violate these terms may be suspended or deleted.
+          Accounts that violate these terms can be suspended or deleted.
         </li>
       </ul>
 

@@ -99,10 +99,10 @@ export default function SettingsPage() {
       if (res.ok && data.success) {
         setSaveStatus(`✓ Synced! Found ${data.processed} species.`);
       } else {
-        setSaveStatus("Sync failed — your data will sync automatically within 24 hours.");
+        setSaveStatus("Sync failed. Your data will sync automatically within 24 hours.");
       }
     } catch {
-      setSaveStatus("Sync failed — your data will sync automatically within 24 hours.");
+      setSaveStatus("Sync failed. Your data will sync automatically within 24 hours.");
     } finally {
       setSyncing(false);
       setShowSyncOption(false);
@@ -247,7 +247,7 @@ export default function SettingsPage() {
                       </button>
                       <span className="text-[var(--mist-400)]">or</span>
                       <Link
-                        href="/activity"
+                        href="/haikubox"
                         className="text-[var(--moss-700)] underline hover:text-[var(--moss-800)] font-semibold"
                       >
                         Go to Activity page
