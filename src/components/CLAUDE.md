@@ -7,17 +7,21 @@ Components are organized by feature area.
 | Folder | Purpose |
 |--------|---------|
 | `activity/` | Haikubox activity page components |
+| `agreement/` | User agreement acceptance (AgreementText, AgreementForm) |
 | `discover/` | Discover page: BookmarkButton, GalleryCard, DiscoverFilters |
 | `gallery/` | Photo gallery and modal components |
-| `landing/` | Public landing page for unauthenticated users (includes `ThemeShowcase` live skin picker) |
+| `landing/` | Public landing page (includes `ThemeShowcase` live skin picker) |
 | `layout/` | Header, navigation, PublicHeader |
-| `settings/` | User settings forms on /settings page (public gallery, location, appearance/skin picker) |
+| `providers/` | Theme provider (next-themes wrapper) |
+| `settings/` | Settings forms (public gallery, location, appearance/skin picker) |
 | `species/` | Species cards and forms |
 | `stats/` | Property stats widget |
 | `suggestions/` | AI suggestion components |
 | `support/` | Issue reporting (ReportIssueButton, ReportIssueModal) |
-| `ui/` | Reusable UI primitives |
+| `ui/` | Reusable UI primitives (Modal, Button, Input, Select, Toast, RarityBadge, HeardBadge) |
 | `upload/` | Photo upload components |
+
+`SentryUserIdentifier.tsx` (root) — Links Clerk user to Sentry context
 
 ## Activity Components (`activity/`)
 
@@ -31,55 +35,28 @@ Components are organized by feature area.
 | `ActiveNowWidget` | Real-time activity display |
 | `ActivityTimeline` | Timeline view of detections |
 
-## Mobile-Responsive Patterns
+## Key Component Patterns
 
 ### Collapsible Filters
-Mobile views use collapsible filter panels (Feed, Species, Activity, and Public Feed pages):
-- Filters hidden by default on mobile
-- "Filter" button with badge showing active filter count
-- Smooth slide-down animation on expand
-- Desktop filters always visible (no toggle)
+Mobile views use collapsible filter panels (Feed, Species, Activity, Public Feed). Desktop filters always visible.
 
 ### SpeciesCard (`species/SpeciesCard.tsx`)
-Shared card component used by both authenticated and public species directories:
-- `linkPrefix` prop controls the link target (default: `"/species"`, public view uses `"/u/{username}/species"`)
-- `onEdit` prop conditionally shows the edit button (authenticated only)
-- `HeardBadge` only shows when Haikubox data is present (excluded from public API)
-- Photo count pill shows `"X of 8"` progress or `"Curated"` checkmark badge at limit
+Shared card for auth and public views. `linkPrefix` prop for URL target, `onEdit` for auth-only edit button. `HeardBadge` only shows with Haikubox data. Photo count shows `"X of 8"` or `"Curated"` badge.
 
 ### SwapPicker (`species/SwapPicker.tsx`)
-Reusable photo swap picker used in UploadModal and SpeciesAssignModal:
-- 4-column grid of thumbnails; selected photo gets red-tinted overlay with swap icon
-- Shows favorite heart indicator and warning when favorited photo selected
-- Props: `photos`, `selectedPhotoId`, `onSelect`, `loading`
+4-column thumbnail grid for photo swaps (used in UploadModal and SpeciesAssignModal). Shows favorite indicator + warning.
 
 ### SpeciesForm (`species/SpeciesForm.tsx`)
-Reusable modal for creating/editing species. Used on **both** the Species page and inside the Upload modal.
-- Has Wikipedia "Look up" button that auto-populates scientific name + description
-- Debounced auto-lookup (800ms) when typing a new species name
-- `onSubmit` receives `{commonName, scientificName?, description?, rarity?}` — the **parent** handles the API call
-- After `onSubmit` resolves, SpeciesForm calls `onClose()` automatically
-
-### Floating Action Button (FAB)
-Mobile species page uses circular FAB instead of button in header.
+Create/edit modal with Wikipedia auto-lookup (debounced 800ms). Parent handles the API call via `onSubmit`.
 
 ### Photo Modal (`gallery/PhotoModal.tsx`)
-Key behaviors:
-- `defaultToFullscreen` prop - Opens directly in fullscreen (used on Species detail page)
-- `readOnly` prop - Hides all edit controls (used for public gallery views)
-- `adjacentPhotos` prop - Prev/next photo URLs for peek effect during swipe
-- Swipe gestures via `useSwipeGesture` hook: 1:1 finger tracking, velocity-based flicks, elastic edge bounce, swipe-down-to-dismiss
-- Photo track renders 3 images (prev/current/next) for peeking during horizontal swipe
-- Preserves view state - Swipe in fullscreen stays in fullscreen
-- Escape key - Closes modal (different behavior when `defaultToFullscreen`)
+- `defaultToFullscreen` — opens directly in fullscreen (Species detail page)
+- `readOnly` — hides edit controls (public gallery)
+- `adjacentPhotos` — prev/next URLs for peek effect during swipe
+- Swipe gestures via `useSwipeGesture`: 1:1 tracking, velocity flicks, elastic bounce, swipe-down dismiss
 
 ### Public Header (`layout/PublicHeader.tsx`)
-Minimal header for public gallery pages:
-- Shows "[Name]'s Bird Feed" title with Feed/Species tabs
-- No logo icon (intentionally removed pending brand finalization)
-- No auth UI or edit buttons
-- Includes "Create your own Bird Feed" CTA link (desktop only)
-- Accepts `children` prop for rendering BookmarkButton
+Minimal header for public galleries: Feed/Species tabs, no auth UI, CTA link (desktop only), `children` prop for BookmarkButton.
 
 ## Discover Components (`discover/`)
 
