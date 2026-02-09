@@ -1205,14 +1205,14 @@ h1, h2, h3, h4, h5, h6 {
 
 /* === FIELD GUIDE SKIN — LIGHT MODE === */
 [data-skin="fieldguide"] {
-  /* Base — cream parchment paper */
-  --background: #F5F1E8;
-  --background-warm: #EDE8DA;
+  /* Base — cool parchment paper (less yellow than Journal) */
+  --background: #F2F0EC;
+  --background-warm: #EAE8E2;
   --foreground: #3A3A3A;
   --foreground-muted: #6B6258;
-  --card-bg: #FDFBF6;
-  --border: #D9D0C1;
-  --border-light: #E8E2D6;
+  --card-bg: #FAFAF8;
+  --border: #CCC8BE;
+  --border-light: #DDD8CE;
 
   /* Semantic text — warm browns */
   --text-primary: #3A3A3A;
@@ -1345,12 +1345,12 @@ h1, h2, h3, h4, h5, h6 {
 
 /* === FIELD GUIDE SKIN — DARK MODE === */
 [data-skin="fieldguide"][data-mode="dark"] {
-  /* Base — deep leather brown */
-  --background: #2C2416;
-  --background-warm: #32291C;
+  /* Base — cool deep brown (less warm than Journal) */
+  --background: #282420;
+  --background-warm: #302C26;
   --foreground: #E8E0D5;
   --foreground-muted: #A8998A;
-  --card-bg: #382F22;
+  --card-bg: #343230;
   --border: #4E4234;
   --border-light: #40362A;
 
@@ -1451,11 +1451,17 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 0 0 3px rgba(139, 58, 42, 0.18), var(--shadow-md);
 }
 
-/* Field Guide typography — serif headers, dignified spacing */
-[data-skin="fieldguide"] h1, [data-skin="fieldguide"] h2, [data-skin="fieldguide"] h3,
-[data-skin="fieldguide"] h4, [data-skin="fieldguide"] h5, [data-skin="fieldguide"] h6 {
+/* Field Guide typography — serif headers, structured reference-book feel */
+[data-skin="fieldguide"] h1, [data-skin="fieldguide"] h2 {
   font-family: Georgia, 'Times New Roman', serif;
   letter-spacing: 0.01em;
+}
+[data-skin="fieldguide"] h3, [data-skin="fieldguide"] h4,
+[data-skin="fieldguide"] h5, [data-skin="fieldguide"] h6 {
+  font-family: Georgia, 'Times New Roman', serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.85em;
 }
 
 /* Field Guide dark mode class overrides */
@@ -1487,12 +1493,12 @@ h1, h2, h3, h4, h5, h6 {
 /* === JOURNAL SKIN — LIGHT MODE              === */
 /* ============================================= */
 [data-skin="journal"] {
-  /* Base — warm linen/parchment paper */
-  --background: #F6F1E3;
-  --background-warm: #EEE8D5;
+  /* Base — warm golden linen (warmer than Field Guide) */
+  --background: #F8F2E0;
+  --background-warm: #F0E8D5;
   --foreground: #2C2417;
   --foreground-muted: #5E4B32;
-  --card-bg: #FFFDF7;
+  --card-bg: #FFFEF5;
   --border: #D4CCBB;
   --border-light: #E2DACB;
 
@@ -1782,9 +1788,14 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 0 0 3px rgba(136, 56, 40, 0.18), var(--shadow-md);
 }
 
-/* Journal typography — serif headers, naturalist notebook feel */
-[data-skin="journal"] h1, [data-skin="journal"] h2, [data-skin="journal"] h3,
-[data-skin="journal"] h4, [data-skin="journal"] h5, [data-skin="journal"] h6 {
+/* Journal typography — serif headers, handwritten notebook feel */
+[data-skin="journal"] h1, [data-skin="journal"] h2 {
+  font-family: Georgia, 'Times New Roman', serif;
+  letter-spacing: 0.01em;
+  font-style: italic;
+}
+[data-skin="journal"] h3, [data-skin="journal"] h4,
+[data-skin="journal"] h5, [data-skin="journal"] h6 {
   font-family: Georgia, 'Times New Roman', serif;
   letter-spacing: 0.01em;
 }
