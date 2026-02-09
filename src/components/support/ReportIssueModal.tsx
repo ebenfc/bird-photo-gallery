@@ -80,7 +80,7 @@ export default function ReportIssueModal({
       });
 
       if (res.ok) {
-        showToast("Report submitted — thank you!", "success");
+        showToast("Feedback submitted, thank you!", "success");
         onClose();
       } else if (res.status === 429) {
         setError(
@@ -108,7 +108,7 @@ export default function ReportIssueModal({
   const charsRemaining = MAX_DESCRIPTION - description.length;
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="md" aria-label="Report an issue">
+    <Modal isOpen={isOpen} onClose={handleClose} size="md" aria-label="Give feedback">
       <form onSubmit={handleSubmit} className="p-6 pt-8">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
@@ -129,7 +129,7 @@ export default function ReportIssueModal({
           </div>
           <div>
             <h2 className="text-xl font-semibold text-[var(--text-primary)]">
-              Report an Issue
+              Give Feedback
             </h2>
             <p className="text-sm text-[var(--mist-500)]">
               Let us know what&apos;s going on
@@ -231,7 +231,7 @@ export default function ReportIssueModal({
             Cancel
           </Button>
           <Button type="submit" disabled={loading}>
-            {loading ? "Submitting..." : "Submit Report"}
+            {loading ? "Submitting..." : "Submit Feedback"}
           </Button>
         </div>
       </form>

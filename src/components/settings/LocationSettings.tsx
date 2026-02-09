@@ -82,7 +82,7 @@ export default function LocationSettings() {
     <div className="space-y-5">
       <p className="text-sm text-[var(--mist-600)]">
         Your location helps other birders find your gallery in the Discover directory.
-        Only your city and state are shown — never your exact address.
+        Only your city and state are shown. Never your exact address.
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

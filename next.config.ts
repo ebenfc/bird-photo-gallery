@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
         destination: '/settings',
         permanent: true,
       },
+      {
+        source: '/activity',
+        destination: '/haikubox',
+        permanent: true,
+      },
     ];
   },
   images: {

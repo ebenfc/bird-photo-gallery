@@ -87,7 +87,7 @@ export default function ThemeShowcase() {
             Make it yours
           </h2>
           <p className="mt-4 text-lg text-[var(--mist-600)] max-w-2xl mx-auto">
-            Choose a theme that fits your style. Try them now — your pick carries over when you sign up.
+            Choose a theme that fits your style. Try them now. Your pick carries over when you sign up.
           </p>
         </div>
 

@@ -2,7 +2,7 @@ const sharingFeatures = [
   {
     title: "Share Your Gallery",
     description:
-      "Get a unique link to your bird feed. Anyone with the link can browse your photos, species, and notes — no account needed.",
+      "Get a unique link to your bird feed. Anyone with the link can browse your photos, species, and notes. No account needed.",
     icon: (
       <svg
         className="w-6 h-6"
@@ -22,7 +22,7 @@ const sharingFeatures = [
   {
     title: "Discover Other Birders",
     description:
-      "Browse galleries from birders across the country. Filter by state to find birders in your area. Save your favorites for quick access.",
+      "Browse galleries from other Bird Feed users and save your favorites.",
     icon: (
       <svg
         className="w-6 h-6"
@@ -42,7 +42,7 @@ const sharingFeatures = [
   {
     title: "You're in Control",
     description:
-      "Choose to share via link only, or opt into the public directory. Change your mind anytime — revoke access instantly.",
+      "Choose to share via link only, or opt into the public directory. Change your mind anytime. Revoke access instantly.",
     icon: (
       <svg
         className="w-6 h-6"
@@ -67,12 +67,10 @@ export default function SharingSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12 sm:mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] tracking-tight">
-            Share what you love
+            Share and explore.
           </h2>
           <p className="mt-4 text-lg text-[var(--mist-600)] max-w-2xl mx-auto">
-            Your gallery is yours. Share it with a link, explore other
-            birders&apos; collections, or keep it completely private. No
-            followers, no likes — just birds.
+            Your gallery is yours. You can share it with a custom link, make it public for other Bird Feed users to discover, or keep it completely private. Bird Feed is intended to be a gallery tool, not a social media platform. No popularity metrics, no algorithms, no pressure. Just birds.
           </p>
         </div>
 
@@ -109,13 +107,6 @@ export default function SharingSection() {
           ))}
         </div>
 
-        {/* Philosophy line */}
-        <div className="mt-12 sm:mt-16 text-center">
-          <p className="text-sm text-[var(--mist-500)]">
-            Bird Feed is intentionally non-social. No popularity metrics, no
-            algorithms, no pressure. Just birders sharing what they see.
-          </p>
-        </div>
       </div>
     </section>
   );

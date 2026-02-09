@@ -307,7 +307,7 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
         <div className="flex items-center gap-3">
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">
             {photos.length >= SPECIES_PHOTO_LIMIT
-              ? "Your Gallery — Curated"
+              ? "Your Gallery, Curated"
               : `Your Gallery (${photos.length} of ${SPECIES_PHOTO_LIMIT})`}
           </h2>
           {photos.length >= SPECIES_PHOTO_LIMIT && (

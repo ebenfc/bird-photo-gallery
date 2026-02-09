@@ -9,7 +9,7 @@ export default function SignUpPage() {
             Create Your Account
           </h1>
           <p className="text-[var(--mist-600)]">
-            Start organizing your bird photography collection
+            Start curating your bird photos
           </p>
         </div>
         <SignUp

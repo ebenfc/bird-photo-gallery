@@ -21,8 +21,8 @@ export default function ReportIssueButton() {
     <>
       <button
         onClick={handleOpen}
-        aria-label="Report an issue"
-        title="Report an issue"
+        aria-label="Give feedback"
+        title="Give feedback"
         className="hidden sm:fixed sm:bottom-6 sm:right-6 z-40
           w-11 h-11 rounded-full
           bg-[var(--forest-700)] text-white

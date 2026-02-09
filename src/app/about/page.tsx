@@ -5,7 +5,7 @@ export default function AboutPage() {
     {
       title: "Upload Photos",
       description:
-        "Snap a photo of a backyard visitor and upload it to your feed. Bird Feed supports common image formats and makes it easy to build your collection over time.",
+        "Snap a photo and upload it to your feed.",
       icon: (
         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -13,9 +13,9 @@ export default function AboutPage() {
       ),
     },
     {
-      title: "Catalog by Species",
+      title: "Catalog and Curate",
       description:
-        "Tag your photos with species names to build your own personal field guide. Filter and browse by species to see all your sightings in one place.",
+        "Tag your photos by species. Curate your best stuff. Up to 8 photos can be added for each species.",
       icon: (
         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -25,7 +25,7 @@ export default function AboutPage() {
     {
       title: "Track Activity",
       description:
-        "Connect a Haikubox device to automatically detect and identify birds visiting your yard. See which species are showing up, even when you're not watching.",
+        "If you have a Haikubox, you can connect it to automatically import bird activity data and track which bird visitors you've photographed.",
       icon: (
         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
@@ -35,7 +35,7 @@ export default function AboutPage() {
     {
       title: "Share Your Gallery",
       description:
-        "Enable your public gallery and share a link with fellow birders, friends, and family. Let others enjoy the birds that visit your corner of the world.",
+        "If you want, you can create a custom link to share your Bird Feed with others (they don't need to have a Bird Feed account). You can also opt-in to enable your feed to be publicly discoverable by other Bird Feed users. Or you can keep your gallery completely private or disable any previous sharing settings at any time.",
       icon: (
         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -68,21 +68,15 @@ export default function AboutPage() {
             Who We Are
           </h2>
           <p className="text-sm sm:text-base text-[var(--mist-600)]">
-            Backyard birders, not professional developers or ornithologists
+            Bird and photo enthusiasts in the Pacific Northwest.
           </p>
         </div>
         <div className="p-5 sm:p-6 space-y-4">
           <p className="text-[var(--mist-700)] leading-relaxed">
-            We&apos;re hobbyists who love watching birds from our backyards. Whether it&apos;s
-            filling feeders, setting up birdbaths, or just sitting quietly with a cup of coffee
-            and waiting to see who shows up &mdash; there&apos;s something deeply satisfying about
-            getting to know the birds that share your little patch of the world.
+            We love the wildlife in our backyard and around the Pacific Northwest. We bought our first pair of binoculars in 2022 and started taking photos around our neighborhood in 2025. We are by no means experts (in birding, photography, nor web development), but are nerdy tinker-ers who wanted a place to save and share our bird photos with friends and neighbors. Thus, Bird Feed was born. After we got it running, we thought others might like to use it too and so we set it up to support individual accounts.
           </p>
           <p className="text-[var(--mist-700)] leading-relaxed">
-            Bird Feed was born out of that love. We wanted a simple, no-fuss way to catalog the
-            birds visiting our yards and share those moments with friends and family. No PhD required,
-            no complicated field research tools &mdash; just a straightforward place to keep track of
-            your feathered visitors and enjoy the hobby.
+            Bird Feed is meant to supplement and not duplicate the amazing birding resources and apps that already exist for identification, life lists, and species information. We link to many of them in our &quot;Resources&quot; section. Our wish is for Bird Feed to be a simple, approachable, good-looking place to feature and curate bird photos, whether taken in your neighborhood or the Galapagos, with a cell phone or a professional telephoto kit. This is a hobby project (we are not experts), so we also welcome feedback and suggestions through the &quot;Give Feedback&quot; feature. We hope you like it!
           </p>
         </div>
       </section>
@@ -99,7 +93,7 @@ export default function AboutPage() {
             How to Use Bird Feed
           </h2>
           <p className="text-sm sm:text-base text-[var(--mist-600)]">
-            Getting started is simple &mdash; here&apos;s what you can do
+            Getting started is simple
           </p>
         </div>
         <div className="p-5 sm:p-6">
@@ -141,7 +135,7 @@ export default function AboutPage() {
             Birding Resources
           </h2>
           <p className="text-sm sm:text-base text-[var(--mist-600)]">
-            Tools and guides for bird identification and species information
+            Tools and guides for bird identification, and species information.
           </p>
         </div>
         <div className="p-5 sm:p-6 space-y-6">
@@ -150,9 +144,9 @@ export default function AboutPage() {
             <h3 className="font-semibold text-[var(--text-primary)] mb-3">Bird Identification</h3>
             <div className="space-y-3">
               {[
-                { name: "Merlin Bird ID", url: "https://merlin.allaboutbirds.org/", description: "Free app by Cornell Lab with photo ID, sound ID, and bird identification by answering simple questions" },
+                { name: "Merlin Bird ID", url: "https://merlin.allaboutbirds.org/", description: "Free app by Cornell Lab for easy bird identification" },
                 { name: "eBird", url: "https://ebird.org/", description: "Global database of bird observations with species information and range maps" },
-                { name: "iNaturalist", url: "https://www.inaturalist.org/", description: "Community-powered identification for all wildlife, including birds" },
+                { name: "iNaturalist", url: "https://www.inaturalist.org/", description: "Community-powered identification for wildlife, including birds" },
               ].map((link) => (
                 <a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer" className="block group">
                   <div className="flex items-start gap-3 p-4 rounded-[var(--radius-md)]
@@ -209,26 +203,38 @@ export default function AboutPage() {
             <h3 className="font-semibold text-[var(--text-primary)] mb-3">Haikubox</h3>
             <div className="space-y-3">
               {[
-                { name: "Get a Haikubox", url: "https://haikubox.com/", description: "Purchase a Haikubox to automatically detect and identify birds visiting your yard 24/7" },
-                { name: "Haikubox API Documentation", url: "https://api.haikubox.com/docs", description: "Technical documentation for the Haikubox API" },
-              ].map((link) => (
-                <a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer" className="block group">
-                  <div className="flex items-start gap-3 p-4 rounded-[var(--radius-md)]
-                    bg-[var(--bg-secondary)] hover:bg-[var(--surface-forest)]
-                    border border-[var(--border-light)] hover:border-[var(--moss-300)]
-                    transition-all duration-[var(--timing-fast)] hover:shadow-[var(--shadow-sm)]">
-                    <div className="flex-shrink-0 mt-0.5">
-                      <svg className="w-5 h-5 text-[var(--moss-600)] group-hover:text-[var(--moss-700)] transition-colors duration-[var(--timing-fast)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                    </div>
+                { name: "Not Affiliated", description: "We are not formally associated with Haikubox other than the fact that we have one." },
+                { name: "What is Haikubox?", url: "https://haikubox.com/", description: "Haikubox is a product that records birdcalls 24/7 to detect birds that are visiting your area." },
+                { name: "Bird Feed Integration", description: "Bird Feed includes an optional feature to link a Haikubox to automatically import data about your bird visitors and track which ones you've photographed." },
+              ].map((item) => {
+                const content = (
+                  <div className={`flex items-start gap-3 p-4 rounded-[var(--radius-md)]
+                    bg-[var(--bg-secondary)] ${item.url ? "hover:bg-[var(--surface-forest)]" : ""}
+                    border border-[var(--border-light)] ${item.url ? "hover:border-[var(--moss-300)]" : ""}
+                    transition-all duration-[var(--timing-fast)] ${item.url ? "hover:shadow-[var(--shadow-sm)]" : ""}`}>
+                    {item.url && (
+                      <div className="flex-shrink-0 mt-0.5">
+                        <svg className="w-5 h-5 text-[var(--moss-600)] group-hover:text-[var(--moss-700)] transition-colors duration-[var(--timing-fast)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-[var(--text-primary)] mb-1 group-hover:text-[var(--moss-700)] transition-colors duration-[var(--timing-fast)]">{link.name}</h4>
-                      <p className="text-sm text-[var(--mist-600)] leading-relaxed">{link.description}</p>
+                      <h4 className={`font-semibold text-[var(--text-primary)] mb-1 ${item.url ? "group-hover:text-[var(--moss-700)]" : ""} transition-colors duration-[var(--timing-fast)]`}>{item.name}</h4>
+                      <p className="text-sm text-[var(--mist-600)] leading-relaxed">{item.description}</p>
                     </div>
                   </div>
-                </a>
-              ))}
+                );
+                return item.url ? (
+                  <a key={item.name} href={item.url} target="_blank" rel="noopener noreferrer" className="block group">
+                    {content}
+                  </a>
+                ) : (
+                  <div key={item.name}>
+                    {content}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -239,7 +245,7 @@ export default function AboutPage() {
         border border-[var(--moss-200)] mb-8">
         <p className="text-sm text-[var(--mist-600)] text-center">
           <span className="font-semibold text-[var(--text-primary)]">Note:</span> Bird Feed
-          is designed for organizing and cataloguing your bird photos, not for detailed species
+          is designed for organizing and cataloging your bird photos, not for detailed species
           identification or research. These external resources complement Bird Feed by providing
           expert identification tools and comprehensive species information.
         </p>
@@ -249,10 +255,7 @@ export default function AboutPage() {
       <div className="p-4 bg-[var(--surface-moss)] rounded-[var(--radius-md)]
         border border-[var(--moss-200)]">
         <p className="text-sm text-[var(--mist-600)] text-center leading-relaxed">
-          Bird Feed was built in the <span className="font-semibold text-[var(--text-primary)]">Pacific Northwest</span> by
-          backyard bird enthusiasts and was proudly vibe-coded
-          with <span className="font-semibold text-[var(--text-primary)]">Claude</span>, Anthropic&apos;s AI assistant.
-          We&apos;re not professionals &mdash; just folks who love birds and thought it&apos;d be fun to build something.
+          Bird Feed was built in the <span className="font-semibold text-[var(--text-primary)]">Pacific Northwest</span> by backyard bird enthusiasts and was vibe-coded with <span className="font-semibold text-[var(--text-primary)]">Claude</span>, Anthropic&apos;s AI assistant. We&apos;re not professionals, just people who like birds and thought it&apos;d be fun to build something.
         </p>
       </div>
     </div>
