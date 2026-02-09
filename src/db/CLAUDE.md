@@ -36,6 +36,8 @@ Tables with performance indexes:
 - `species`: `user_id`
 - `haikuboxDetections`: `user_id`, unique on `(user_id, species_common_name, data_year)`
 - `haikuboxActivityLog`: unique on `(species_common_name, detected_at)`, `(species_common_name, hour_of_day)`, `detected_at`
+- `haikuboxSyncLog`: `user_id`
+- `appSettings`: `key`, unique on `(user_id, key)`
 - `bookmarks`: `user_id`, unique on `(user_id, bookmarked_user_id)`
 
 ## Key Relationships

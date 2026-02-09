@@ -98,6 +98,12 @@ Most pages are client components (`"use client"`), so they can't export `metadat
 - Create a `layout.tsx` in the route folder that exports `metadata` (e.g., `src/app/activity/layout.tsx`)
 - For dynamic routes, use `generateMetadata` in the layout (e.g., `src/app/u/[username]/layout.tsx`)
 
+## Public Pages
+
+Public routes (no auth required) are listed in `src/proxy.ts`. The root layout renders unauthenticated pages as bare `{children}` with no header or container.
+
+**If a public page needs proper styling**, create a `layout.tsx` that checks `auth()` and wraps unauthenticated visitors in a lightweight header + container. See `src/app/about/layout.tsx` and `src/app/u/[username]/layout.tsx` for examples.
+
 ## Key Files
 
 - `src/db/schema.ts` — All database tables
