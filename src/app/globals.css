@@ -1402,3 +1402,616 @@ h1, h2, h3, h4, h5, h6 {
 [data-skin="fieldguide"][data-mode="dark"] .error-glow {
   box-shadow: 0 0 0 3px rgba(212, 119, 106, 0.18), var(--shadow-md);
 }
+
+/* ============================================= */
+/* === JOURNAL SKIN — LIGHT MODE              === */
+/* ============================================= */
+[data-skin="journal"] {
+  /* Base — warm linen/parchment paper */
+  --background: #F6F1E3;
+  --background-warm: #EEE8D5;
+  --foreground: #2C2417;
+  --foreground-muted: #5E4B32;
+  --card-bg: #FFFDF7;
+  --border: #D4CCBB;
+  --border-light: #E2DACB;
+
+  /* Semantic text — ink and sepia tones */
+  --text-primary: #2C2417;
+  --text-secondary: #5E4B32;
+  --text-label: #7D6544;
+
+  /* Semantic surfaces */
+  --surface-forest: #EDF2EA;
+  --surface-moss: #F5EDE4;
+  --surface-sky: #ECEEF4;
+
+  /* Botanical green palette (replaces forest) — pressed leaves, not emerald */
+  --forest-50: #F0F4ED;
+  --forest-100: #E0E8DA;
+  --forest-200: #C2D1B6;
+  --forest-300: #A3BA91;
+  --forest-400: #849F6E;
+  --forest-500: #668350;
+  --forest-600: #526B40;
+  --forest-700: #415534;
+  --forest-800: #334228;
+  --forest-900: #2A3A22;
+  --forest-950: #1C2818;
+
+  /* Warm sienna/terracotta palette (replaces moss) — interactive accent */
+  --moss-50: #FBF3ED;
+  --moss-100: #F4E2D4;
+  --moss-200: #E8C5A9;
+  --moss-300: #D9A57C;
+  --moss-400: #C88554;
+  --moss-500: #A86838;
+  --moss-600: #88522C;
+  --moss-700: #6B3F22;
+  --moss-800: #512F1A;
+  --moss-900: #3D1E0C;
+
+  /* Warm paper grays (replaces mist) — never cool/blue */
+  --mist-50: #F5F2ED;
+  --mist-100: #ECE7DE;
+  --mist-200: #DDD6CA;
+  --mist-300: #C8BFB0;
+  --mist-400: #AEA392;
+  --mist-500: #948774;
+  --mist-600: #756858;
+  --mist-700: #5A4F40;
+  --mist-800: #40382D;
+  --mist-900: #2C2417;
+
+  /* Deep warm browns — espresso/walnut (replaces bark) */
+  --bark-50: #F4EFE8;
+  --bark-100: #E6DDD2;
+  --bark-200: #D0C2B2;
+  --bark-300: #B8A48E;
+  --bark-400: #9A8268;
+  --bark-500: #7A6550;
+  --bark-600: #5E4E3C;
+  --bark-700: #473A2C;
+  --bark-800: #332A20;
+  --bark-900: #221B14;
+
+  /* Muted slate blue — faded ink (replaces sky) */
+  --sky-50: #F0EFF4;
+  --sky-100: #DDDCE8;
+  --sky-200: #BCBAD0;
+  --sky-300: #9896B5;
+  --sky-400: #76749A;
+  --sky-500: #5A587E;
+  --sky-600: #484668;
+  --sky-700: #383654;
+  --sky-800: #2A2840;
+  --sky-900: #1E2030;
+
+  /* Golden ochre — dried wildflowers (replaces amber) */
+  --amber-50: #FDF8ED;
+  --amber-100: #F8EDCF;
+  --amber-200: #F0D99F;
+  --amber-300: #E5C06E;
+  --amber-400: #D6A644;
+  --amber-500: #C08E2A;
+  --amber-600: #9C7322;
+  --amber-700: #7A5A1B;
+  --amber-800: #5A4214;
+  --amber-900: #3E2E0E;
+
+  /* Shadows — warm brown undertone, soft diffuse like shadows on textured paper */
+  --shadow-xs: 0 1px 2px rgba(44, 36, 23, 0.06);
+  --shadow-sm: 0 2px 4px rgba(44, 36, 23, 0.08), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 12px rgba(44, 36, 23, 0.10), 0 2px 4px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0 8px 24px rgba(44, 36, 23, 0.12), 0 4px 8px rgba(0, 0, 0, 0.03);
+  --shadow-xl: 0 16px 40px rgba(44, 36, 23, 0.14), 0 8px 16px rgba(0, 0, 0, 0.03);
+  --shadow-2xl: 0 24px 56px rgba(44, 36, 23, 0.16), 0 12px 24px rgba(0, 0, 0, 0.04);
+  --shadow-moss: 0 4px 16px rgba(168, 104, 56, 0.20);
+  --shadow-moss-lg: 0 8px 24px rgba(168, 104, 56, 0.24);
+  --shadow-forest: 0 4px 16px rgba(102, 131, 80, 0.18);
+  --shadow-amber: 0 4px 16px rgba(192, 142, 42, 0.20);
+  --shadow-inset-sm: inset 0 1px 2px rgba(44, 36, 23, 0.08);
+  --shadow-inset-md: inset 0 2px 4px rgba(44, 36, 23, 0.10);
+
+  /* Border radii — generous, soft, slightly organic */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* Status feedback — warm naturalistic tones */
+  --success-bg: #EEF4EB;
+  --success-text: #3A5630;
+  --success-border: #B4D1A8;
+  --error-bg: #F8EFEC;
+  --error-text: #883828;
+  --error-border: #DEB4A8;
+  --info-bg: #ECEEF4;
+  --info-text: #484668;
+  --info-border: #BCBAD0;
+  --warning-bg: #F8F2E6;
+  --warning-text: #7A5A1B;
+  --warning-border: #F0D99F;
+}
+
+/* === JOURNAL SKIN — DARK MODE === */
+[data-skin="journal"][data-mode="dark"] {
+  /* Base — deep warm brown, leather journal cover by lamplight */
+  --background: #1E1A14;
+  --background-warm: #24201A;
+  --foreground: #E8E0D0;
+  --foreground-muted: #A89880;
+  --card-bg: #2A2418;
+  --border: #3E362A;
+  --border-light: #352E24;
+
+  /* Semantic text — warm parchment tones */
+  --text-primary: #E8E0D0;
+  --text-secondary: #C4B89E;
+  --text-label: #A89880;
+
+  /* Semantic surfaces */
+  --surface-forest: #242E1E;
+  --surface-moss: #302620;
+  --surface-sky: #222430;
+
+  /* Inverted botanical green */
+  --forest-50: #1C2818;
+  --forest-100: #243220;
+  --forest-200: #2E4028;
+  --forest-300: #3A5032;
+  --forest-400: #4A6440;
+  --forest-500: #5E7C50;
+  --forest-600: #7A9A6A;
+  --forest-700: #96B486;
+  --forest-800: #B4CCA6;
+  --forest-900: #D0E2C6;
+  --forest-950: #E8F0E2;
+
+  /* Inverted sienna/terracotta */
+  --moss-50: #2E2018;
+  --moss-100: #3E2C1E;
+  --moss-200: #523A26;
+  --moss-300: #6A4C30;
+  --moss-400: #886440;
+  --moss-500: #A88058;
+  --moss-600: #C49C74;
+  --moss-700: #D8B894;
+  --moss-800: #E8D0B4;
+  --moss-900: #F4E8D8;
+
+  /* Inverted warm paper grays */
+  --mist-50: #1E1A14;
+  --mist-100: #2A2418;
+  --mist-200: #352E24;
+  --mist-300: #3E362A;
+  --mist-400: #5A4F40;
+  --mist-500: #756858;
+  --mist-600: #948774;
+  --mist-700: #AEA392;
+  --mist-800: #C8BFB0;
+  --mist-900: #E8E0D0;
+
+  /* Inverted espresso/walnut */
+  --bark-50: #1E1A14;
+  --bark-100: #2A2218;
+  --bark-200: #3A3024;
+  --bark-300: #4E4030;
+  --bark-400: #665440;
+  --bark-500: #886E56;
+  --bark-600: #A88E72;
+  --bark-700: #C4AA90;
+  --bark-800: #DCC6B0;
+  --bark-900: #F0E6DA;
+
+  /* Inverted faded ink blue */
+  --sky-50: #1A1C28;
+  --sky-100: #222434;
+  --sky-200: #2E3048;
+  --sky-300: #3E405C;
+  --sky-400: #545676;
+  --sky-500: #6E708E;
+  --sky-600: #8E90A8;
+  --sky-700: #AEAEC0;
+  --sky-800: #CECDD8;
+  --sky-900: #E8E8EE;
+
+  /* Inverted golden ochre */
+  --amber-50: #2A2210;
+  --amber-100: #382E16;
+  --amber-200: #4C3E1E;
+  --amber-300: #645228;
+  --amber-400: #826A34;
+  --amber-500: #A08644;
+  --amber-600: #C0A45C;
+  --amber-700: #D8C07C;
+  --amber-800: #E8D8A4;
+  --amber-900: #F4ECD0;
+
+  /* Shadows — darker, warm undertone */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-xl: 0 16px 40px rgba(0, 0, 0, 0.5);
+  --shadow-2xl: 0 24px 56px rgba(0, 0, 0, 0.55);
+  --shadow-moss: 0 4px 16px rgba(168, 128, 88, 0.15);
+  --shadow-moss-lg: 0 8px 24px rgba(168, 128, 88, 0.18);
+  --shadow-forest: 0 4px 16px rgba(94, 124, 80, 0.12);
+  --shadow-amber: 0 4px 16px rgba(160, 134, 68, 0.12);
+  --shadow-inset-sm: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+  --shadow-inset-md: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  /* Status feedback — dark mode warm naturalistic */
+  --success-bg: #1C2A18;
+  --success-text: #7AB06C;
+  --success-border: #3A5630;
+  --error-bg: #2C1A18;
+  --error-text: #D07466;
+  --error-border: #883828;
+  --info-bg: #1A1C30;
+  --info-text: #7E80A8;
+  --info-border: #484668;
+  --warning-bg: #2C2410;
+  --warning-text: #D0A440;
+  --warning-border: #7A5A1B;
+}
+
+/* === JOURNAL SKIN — CLASS OVERRIDES === */
+[data-skin="journal"] .paper-texture {
+  background: linear-gradient(180deg, var(--background) 0%, var(--background-warm) 100%);
+}
+
+[data-skin="journal"] .pnw-texture {
+  background-image:
+    radial-gradient(ellipse at 20% 10%, rgba(102, 131, 80, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(168, 104, 56, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(44, 36, 23, 0.02) 0%, transparent 70%);
+}
+
+[data-skin="journal"] ::selection {
+  background: rgba(168, 104, 56, 0.25);
+  color: #2C2417;
+}
+
+[data-skin="journal"] .success-glow {
+  box-shadow: 0 0 0 3px rgba(102, 131, 80, 0.18), var(--shadow-md);
+}
+
+[data-skin="journal"] .error-glow {
+  box-shadow: 0 0 0 3px rgba(136, 56, 40, 0.18), var(--shadow-md);
+}
+
+/* Journal typography — serif headers, naturalist notebook feel */
+[data-skin="journal"] h1, [data-skin="journal"] h2, [data-skin="journal"] h3,
+[data-skin="journal"] h4, [data-skin="journal"] h5, [data-skin="journal"] h6 {
+  font-family: Georgia, 'Times New Roman', serif;
+  letter-spacing: 0.01em;
+}
+
+/* Journal dark mode class overrides */
+[data-skin="journal"][data-mode="dark"] .paper-texture {
+  background: linear-gradient(180deg, var(--background) 0%, var(--background-warm) 100%);
+}
+
+[data-skin="journal"][data-mode="dark"] .pnw-texture {
+  background-image:
+    radial-gradient(ellipse at 20% 10%, rgba(94, 124, 80, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(168, 128, 88, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(44, 36, 23, 0.03) 0%, transparent 70%);
+}
+
+[data-skin="journal"][data-mode="dark"] ::selection {
+  background: rgba(168, 128, 88, 0.35);
+  color: #E8E0D0;
+}
+
+[data-skin="journal"][data-mode="dark"] .success-glow {
+  box-shadow: 0 0 0 3px rgba(122, 176, 108, 0.18), var(--shadow-md);
+}
+
+[data-skin="journal"][data-mode="dark"] .error-glow {
+  box-shadow: 0 0 0 3px rgba(208, 116, 102, 0.18), var(--shadow-md);
+}
+
+/* ============================================= */
+/* === HIGH CONTRAST SKIN — LIGHT MODE        === */
+/* ============================================= */
+[data-skin="highcontrast"] {
+  /* Base — pure white, maximum contrast */
+  --background: #FFFFFF;
+  --background-warm: #F8F8F8;
+  --foreground: #1A1A1A;
+  --foreground-muted: #3D3D3D;
+  --card-bg: #FFFFFF;
+  --border: #4A4A4A;
+  --border-light: #6A6A6A;
+
+  /* Semantic text — high contrast on white */
+  --text-primary: #1A1A1A;
+  --text-secondary: #3D3D3D;
+  --text-label: #555555;
+
+  /* Semantic surfaces */
+  --surface-forest: #E0F0EA;
+  --surface-moss: #E0ECFF;
+  --surface-sky: #E0F4FF;
+
+  /* Deep teal/green palette (replaces forest) — traffic-sign visibility */
+  --forest-50: #E6F7F2;
+  --forest-100: #C0EAE0;
+  --forest-200: #8DD8C4;
+  --forest-300: #58C4A6;
+  --forest-400: #2AA882;
+  --forest-500: #0D8A65;
+  --forest-600: #0A7054;
+  --forest-700: #085842;
+  --forest-800: #064232;
+  --forest-900: #003D2E;
+  --forest-950: #002820;
+
+  /* Strong blue palette (replaces moss) — interactive accent, colorblind-safe */
+  --moss-50: #E6F0FF;
+  --moss-100: #C0D8FF;
+  --moss-200: #8AB8FF;
+  --moss-300: #5496FF;
+  --moss-400: #2A78FF;
+  --moss-500: #0A5CE0;
+  --moss-600: #084AB8;
+  --moss-700: #063A90;
+  --moss-800: #042C6E;
+  --moss-900: #002B66;
+
+  /* True neutral grays (replaces mist) — no warmth, no coolness */
+  --mist-50: #F5F5F5;
+  --mist-100: #E8E8E8;
+  --mist-200: #D0D0D0;
+  --mist-300: #B0B0B0;
+  --mist-400: #8A8A8A;
+  --mist-500: #6A6A6A;
+  --mist-600: #4A4A4A;
+  --mist-700: #3D3D3D;
+  --mist-800: #2A2A2A;
+  --mist-900: #1A1A1A;
+
+  /* Dark neutral warm grays (replaces bark) */
+  --bark-50: #F4F3F2;
+  --bark-100: #E6E4E2;
+  --bark-200: #D0CDCA;
+  --bark-300: #B6B2AE;
+  --bark-400: #96918C;
+  --bark-500: #78736E;
+  --bark-600: #5C5854;
+  --bark-700: #46423E;
+  --bark-800: #32302D;
+  --bark-900: #201E1C;
+
+  /* Bright informational blue — cyan-leaning, distinct from moss (replaces sky) */
+  --sky-50: #E0F4FF;
+  --sky-100: #B8E4FF;
+  --sky-200: #80D0FF;
+  --sky-300: #48BAFF;
+  --sky-400: #1AA0F0;
+  --sky-500: #0882CC;
+  --sky-600: #0668A6;
+  --sky-700: #045080;
+  --sky-800: #033C60;
+  --sky-900: #022A44;
+
+  /* Strong warm amber/orange for warnings — high saturation (replaces amber) */
+  --amber-50: #FFF3E0;
+  --amber-100: #FFE0B2;
+  --amber-200: #FFCA78;
+  --amber-300: #FFB040;
+  --amber-400: #F59618;
+  --amber-500: #D87E08;
+  --amber-600: #B06606;
+  --amber-700: #8A5004;
+  --amber-800: #7A3500;
+  --amber-900: #5C2800;
+
+  /* Shadows — minimal, strong when used. Prefer borders for separation */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.12);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.16);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.20);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.22);
+  --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.24);
+  --shadow-2xl: 0 16px 32px rgba(0, 0, 0, 0.26);
+  --shadow-moss: 0 4px 12px rgba(10, 92, 224, 0.22);
+  --shadow-moss-lg: 0 8px 20px rgba(10, 92, 224, 0.26);
+  --shadow-forest: 0 4px 12px rgba(13, 138, 101, 0.20);
+  --shadow-amber: 0 4px 12px rgba(216, 126, 8, 0.22);
+  --shadow-inset-sm: inset 0 1px 2px rgba(0, 0, 0, 0.12);
+  --shadow-inset-md: inset 0 2px 4px rgba(0, 0, 0, 0.16);
+
+  /* Border radii — modest, sharp enough to define boundaries */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 12px;
+  --radius-full: 9999px;
+
+  /* Status feedback — strong, clear colors */
+  --success-bg: #E6F7F2;
+  --success-text: #085842;
+  --success-border: #0D8A65;
+  --error-bg: #FFF0F0;
+  --error-text: #8B1A1A;
+  --error-border: #CC3333;
+  --info-bg: #E0F4FF;
+  --info-text: #045080;
+  --info-border: #0882CC;
+  --warning-bg: #FFF3E0;
+  --warning-text: #7A3500;
+  --warning-border: #D87E08;
+}
+
+/* === HIGH CONTRAST SKIN — DARK MODE === */
+[data-skin="highcontrast"][data-mode="dark"] {
+  /* Base — true near-black, maximum dark contrast */
+  --background: #0A0A0A;
+  --background-warm: #121212;
+  --foreground: #F0F0F0;
+  --foreground-muted: #D0D0D0;
+  --card-bg: #1A1A1A;
+  --border: #888888;
+  --border-light: #666666;
+
+  /* Semantic text — bright but not eye-searing */
+  --text-primary: #F0F0F0;
+  --text-secondary: #D0D0D0;
+  --text-label: #B0B0B0;
+
+  /* Semantic surfaces */
+  --surface-forest: #0E2820;
+  --surface-moss: #0E1C36;
+  --surface-sky: #0E2430;
+
+  /* Inverted teal/green — brighter for dark mode visibility */
+  --forest-50: #002820;
+  --forest-100: #003D2E;
+  --forest-200: #06523E;
+  --forest-300: #0A7054;
+  --forest-400: #0D8A65;
+  --forest-500: #14A87E;
+  --forest-600: #30C89C;
+  --forest-700: #5CDEB6;
+  --forest-800: #90EAD0;
+  --forest-900: #C0F4E6;
+  --forest-950: #E6FBF5;
+
+  /* Inverted strong blue — brighter for visibility */
+  --moss-50: #002040;
+  --moss-100: #002B66;
+  --moss-200: #04388A;
+  --moss-300: #084AB8;
+  --moss-400: #0A5CE0;
+  --moss-500: #2A78FF;
+  --moss-600: #5496FF;
+  --moss-700: #8AB8FF;
+  --moss-800: #B8D4FF;
+  --moss-900: #E0ECFF;
+
+  /* Inverted true neutral grays */
+  --mist-50: #0A0A0A;
+  --mist-100: #1A1A1A;
+  --mist-200: #2A2A2A;
+  --mist-300: #3D3D3D;
+  --mist-400: #555555;
+  --mist-500: #6A6A6A;
+  --mist-600: #8A8A8A;
+  --mist-700: #B0B0B0;
+  --mist-800: #D0D0D0;
+  --mist-900: #F0F0F0;
+
+  /* Inverted dark neutral warm grays */
+  --bark-50: #141312;
+  --bark-100: #201E1C;
+  --bark-200: #32302D;
+  --bark-300: #46423E;
+  --bark-400: #5C5854;
+  --bark-500: #78736E;
+  --bark-600: #96918C;
+  --bark-700: #B6B2AE;
+  --bark-800: #D0CDCA;
+  --bark-900: #E6E4E2;
+
+  /* Inverted bright informational blue */
+  --sky-50: #022030;
+  --sky-100: #022A44;
+  --sky-200: #033C60;
+  --sky-300: #045080;
+  --sky-400: #0668A6;
+  --sky-500: #1AA0F0;
+  --sky-600: #48BAFF;
+  --sky-700: #80D0FF;
+  --sky-800: #B8E4FF;
+  --sky-900: #E0F4FF;
+
+  /* Inverted strong warm amber — high saturation for dark mode */
+  --amber-50: #3A1E00;
+  --amber-100: #5C2800;
+  --amber-200: #7A3500;
+  --amber-300: #A05000;
+  --amber-400: #C86A04;
+  --amber-500: #F59618;
+  --amber-600: #FFB040;
+  --amber-700: #FFCA78;
+  --amber-800: #FFE0B2;
+  --amber-900: #FFF3E0;
+
+  /* Shadows — strong, clear */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.6);
+  --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.65);
+  --shadow-2xl: 0 16px 32px rgba(0, 0, 0, 0.7);
+  --shadow-moss: 0 4px 12px rgba(42, 120, 255, 0.18);
+  --shadow-moss-lg: 0 8px 20px rgba(42, 120, 255, 0.22);
+  --shadow-forest: 0 4px 12px rgba(20, 168, 126, 0.16);
+  --shadow-amber: 0 4px 12px rgba(245, 150, 24, 0.16);
+  --shadow-inset-sm: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-inset-md: inset 0 2px 4px rgba(0, 0, 0, 0.25);
+
+  /* Status feedback — dark mode high contrast */
+  --success-bg: #0A2018;
+  --success-text: #30C89C;
+  --success-border: #14A87E;
+  --error-bg: #2A0A0A;
+  --error-text: #FF6666;
+  --error-border: #CC3333;
+  --info-bg: #0A1A2E;
+  --info-text: #48BAFF;
+  --info-border: #1AA0F0;
+  --warning-bg: #2A1A00;
+  --warning-text: #FFB040;
+  --warning-border: #F59618;
+}
+
+/* === HIGH CONTRAST SKIN — CLASS OVERRIDES === */
+[data-skin="highcontrast"] .paper-texture {
+  background: var(--background);
+}
+
+[data-skin="highcontrast"] .pnw-texture {
+  background-image: none;
+}
+
+[data-skin="highcontrast"] ::selection {
+  background: rgba(10, 92, 224, 0.30);
+  color: #1A1A1A;
+}
+
+[data-skin="highcontrast"] .success-glow {
+  box-shadow: 0 0 0 3px rgba(13, 138, 101, 0.25), var(--shadow-md);
+}
+
+[data-skin="highcontrast"] .error-glow {
+  box-shadow: 0 0 0 3px rgba(204, 51, 51, 0.25), var(--shadow-md);
+}
+
+/* High Contrast dark mode class overrides */
+[data-skin="highcontrast"][data-mode="dark"] .paper-texture {
+  background: var(--background);
+}
+
+[data-skin="highcontrast"][data-mode="dark"] .pnw-texture {
+  background-image: none;
+}
+
+[data-skin="highcontrast"][data-mode="dark"] ::selection {
+  background: rgba(42, 120, 255, 0.40);
+  color: #F0F0F0;
+}
+
+[data-skin="highcontrast"][data-mode="dark"] .success-glow {
+  box-shadow: 0 0 0 3px rgba(48, 200, 156, 0.25), var(--shadow-md);
+}
+
+[data-skin="highcontrast"][data-mode="dark"] .error-glow {
+  box-shadow: 0 0 0 3px rgba(255, 102, 102, 0.25), var(--shadow-md);
+}

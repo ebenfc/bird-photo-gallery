@@ -35,6 +35,18 @@ const themes: Array<{
     description: "90s web nostalgia",
     colors: ["#000080", "#FFFF00", "#FF00FF", "#00FF00"],
   },
+  {
+    value: "journal",
+    label: "Journal",
+    description: "Warm & handwritten",
+    colors: ["#7D6544", "#5E4B32", "#F6F1E3", "#2C2417"],
+  },
+  {
+    value: "highcontrast",
+    label: "High Contrast",
+    description: "Bold & accessible",
+    colors: ["#003D2E", "#002B66", "#FFFFFF", "#1A1A1A"],
+  },
 ];
 
 export default function ThemeShowcase() {
@@ -55,8 +67,8 @@ export default function ThemeShowcase() {
             <div className="h-10 w-48 skeleton mx-auto mb-4" />
             <div className="h-6 w-80 skeleton mx-auto" />
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-2xl mx-auto">
-            {[1, 2, 3, 4].map((i) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 max-w-3xl mx-auto">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="h-24 skeleton" />
             ))}
           </div>
@@ -80,7 +92,7 @@ export default function ThemeShowcase() {
         </div>
 
         {/* Theme cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-3xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 max-w-3xl mx-auto">
           {themes.map((t) => {
             const isActive = skin === t.value;
             return (
