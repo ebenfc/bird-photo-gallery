@@ -6,6 +6,7 @@ import { Photo, Species, Rarity, HaikuboxDetection, PhotosResponse } from "@/typ
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import RarityBadge from "@/components/ui/RarityBadge";
+import RarityPicker from "@/components/ui/RarityPicker";
 import HeardBadge from "@/components/ui/HeardBadge";
 import SwapPicker from "@/components/species/SwapPicker";
 import { SPECIES_PHOTO_LIMIT } from "@/config/limits";
@@ -674,26 +675,7 @@ export default function SpeciesAssignModal({
                 <label className="block text-sm font-medium text-[var(--forest-700)] mb-2">
                   Rarity
                 </label>
-                <div className="flex gap-2">
-                  {(["common", "uncommon", "rare"] as const).map((rarity) => (
-                    <button
-                      key={rarity}
-                      type="button"
-                      onClick={() => setNewRarity(rarity)}
-                      className={`flex-1 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
-                        newRarity === rarity
-                          ? rarity === "common"
-                            ? "bg-[var(--mist-100)] border-[var(--mist-300)] text-[var(--mist-700)]"
-                            : rarity === "uncommon"
-                            ? "bg-[var(--amber-50)] border-[var(--amber-300)] text-[var(--amber-700)]"
-                            : "bg-[var(--error-bg)] border-[var(--error-border)] text-[var(--error-text)]"
-                          : "bg-[var(--card-bg)] border-[var(--mist-200)] text-[var(--mist-500)] hover:border-[var(--mist-300)]"
-                      }`}
-                    >
-                      {rarity.charAt(0).toUpperCase() + rarity.slice(1)}
-                    </button>
-                  ))}
-                </div>
+                <RarityPicker value={newRarity} onChange={setNewRarity} />
               </div>
               <div className="flex gap-3">
                 <Button
