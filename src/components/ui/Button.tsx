@@ -43,13 +43,13 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         active:bg-[var(--moss-100)]
       `,
       danger: `
-        bg-gradient-to-b from-red-500 to-red-600
+        bg-gradient-to-b from-[var(--danger-from)] to-[var(--danger-to)]
         text-white font-semibold
         shadow-[var(--shadow-md)]
-        hover:from-red-400 hover:to-red-500
-        hover:shadow-[0_4px_16px_rgba(239,68,68,0.25)] hover:-translate-y-0.5
-        focus-visible:ring-red-400
-        active:from-red-600 active:to-red-700
+        hover:from-[var(--danger-hover-from)] hover:to-[var(--danger-hover-to)]
+        hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5
+        focus-visible:ring-[var(--danger-ring)]
+        active:from-[var(--danger-to)] active:to-[var(--danger-to)]
       `,
     };
 

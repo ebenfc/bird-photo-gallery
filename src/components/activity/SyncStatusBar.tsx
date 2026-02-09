@@ -146,8 +146,8 @@ export default function SyncStatusBar({ onSyncComplete }: SyncStatusBarProps) {
           <span
             className={`text-xs font-medium ${
               syncResult.success
-                ? "text-green-700"
-                : "text-red-700"
+                ? "text-[var(--success-text)]"
+                : "text-[var(--error-text)]"
             }`}
           >
             {syncResult.message}

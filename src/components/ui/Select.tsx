@@ -37,7 +37,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
               focus:shadow-[var(--shadow-moss)]
               hover:border-[var(--mist-300)] hover:shadow-[var(--shadow-md)]
               text-base font-medium
-              ${error ? "border-red-400 focus:border-red-400 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.15)]" : ""}
+              ${error ? "border-[var(--error-border)] focus:border-[var(--error-border)] focus:shadow-[var(--error-ring-shadow)]" : ""}
             `}
             {...props}
           >
@@ -62,7 +62,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
           </div>
         </div>
         {error && (
-          <p id={errorId} role="alert" className="mt-2 text-sm text-red-500 flex items-center gap-1.5 animate-fade-in">
+          <p id={errorId} role="alert" className="mt-2 text-sm text-[var(--error-text)] flex items-center gap-1.5 animate-fade-in">
             <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>

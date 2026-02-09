@@ -35,7 +35,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 focus:shadow-[var(--shadow-moss),var(--shadow-inset-sm)]
                 hover:border-[var(--mist-300)]
                 text-base
-                ${error ? "border-red-400 focus:border-red-400 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.15),var(--shadow-inset-sm)]" : ""}
+                ${error ? "border-[var(--error-border)] focus:border-[var(--error-border)] focus:shadow-[var(--error-ring-shadow),var(--shadow-inset-sm)]" : ""}
                 ${className}
               `}
               placeholder={label}
@@ -57,7 +57,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                   ? "top-2 text-xs font-medium text-[var(--moss-600)]"
                   : "top-1/2 -translate-y-1/2 text-base text-[var(--mist-400)]"
                 }
-                ${error ? "text-red-500" : ""}
+                ${error ? "text-[var(--error-text)]" : ""}
                 peer-focus:top-2 peer-focus:text-xs peer-focus:font-medium
                 peer-focus:text-[var(--moss-600)]
                 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2
@@ -68,7 +68,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             </label>
           </div>
           {error && (
-            <p id={errorId} role="alert" className="mt-2 text-sm text-red-500 flex items-center gap-1.5 animate-fade-in">
+            <p id={errorId} role="alert" className="mt-2 text-sm text-[var(--error-text)] flex items-center gap-1.5 animate-fade-in">
               <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -101,13 +101,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             focus:shadow-[var(--shadow-moss),var(--shadow-inset-sm)]
             hover:border-[var(--mist-300)]
             text-base
-            ${error ? "border-red-400 focus:border-red-400 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.15),var(--shadow-inset-sm)]" : ""}
+            ${error ? "border-[var(--error-border)] focus:border-[var(--error-border)] focus:shadow-[var(--error-ring-shadow),var(--shadow-inset-sm)]" : ""}
             ${className}
           `}
           {...props}
         />
         {error && (
-          <p id={errorId} role="alert" className="mt-2 text-sm text-red-500 flex items-center gap-1.5 animate-fade-in">
+          <p id={errorId} role="alert" className="mt-2 text-sm text-[var(--error-text)] flex items-center gap-1.5 animate-fade-in">
             <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>

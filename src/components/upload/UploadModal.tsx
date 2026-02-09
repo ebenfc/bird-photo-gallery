@@ -452,7 +452,7 @@ export default function UploadModal({
               {error && (
                 <div className="mt-4 p-3.5 bg-[var(--error-bg)] border border-[var(--error-border)] rounded-[var(--radius-lg)]
                   animate-fade-in">
-                  <p className="text-sm text-red-600 font-medium">{error}</p>
+                  <p className="text-sm text-[var(--error-text)] font-medium">{error}</p>
                 </div>
               )}
             </div>
@@ -706,7 +706,7 @@ export default function UploadModal({
               {error && (
                 <div className="p-3.5 bg-[var(--error-bg)] border border-[var(--error-border)] rounded-[var(--radius-lg)]
                   animate-fade-in">
-                  <p className="text-sm text-red-600 font-medium">{error}</p>
+                  <p className="text-sm text-[var(--error-text)] font-medium">{error}</p>
                 </div>
               )}
             </div>
@@ -742,7 +742,7 @@ export default function UploadModal({
                         <span className="text-xs text-[var(--mist-500)] flex items-center gap-1">
                           {progress}%
                           {isComplete && (
-                            <svg className="w-3 h-3 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-3 h-3 text-[var(--success-text)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
                           )}
@@ -752,7 +752,7 @@ export default function UploadModal({
                         <div
                           className={`h-2 rounded-full transition-all duration-300 ${
                             isComplete
-                              ? "bg-green-500"
+                              ? "bg-[var(--success-text)]"
                               : "bg-gradient-to-r from-[var(--forest-500)] to-[var(--moss-500)]"
                           }`}
                           style={{ width: `${progress}%` }}

@@ -201,9 +201,9 @@ export default function PublicGallerySettings() {
               transition-all duration-[var(--timing-fast)]
               ${
                 usernameStatus?.error
-                  ? "border-red-300 focus:ring-red-500"
+                  ? "border-[var(--error-border)] focus:ring-[var(--error-text)]"
                   : usernameStatus?.available
-                  ? "border-green-300 focus:ring-green-500"
+                  ? "border-[var(--success-border)] focus:ring-[var(--success-text)]"
                   : "border-[var(--border-light)] focus:ring-[var(--moss-500)]"
               }`}
           />
@@ -231,22 +231,22 @@ export default function PublicGallerySettings() {
               </svg>
             )}
             {!checkingUsername && usernameStatus?.available && (
-              <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 text-[var(--success-text)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             )}
             {!checkingUsername && usernameStatus?.error && (
-              <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 text-[var(--error-text)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             )}
           </div>
         </div>
         {usernameStatus?.error && (
-          <p className="text-xs text-red-600 mt-1.5">{usernameStatus.error}</p>
+          <p className="text-xs text-[var(--error-text)] mt-1.5">{usernameStatus.error}</p>
         )}
         {usernameStatus?.available && (
-          <p className="text-xs text-green-600 mt-1.5">Username is available!</p>
+          <p className="text-xs text-[var(--success-text)] mt-1.5">Username is available!</p>
         )}
         <p className="text-xs text-[var(--mist-500)] mt-1.5">
           3-30 characters. Letters, numbers, and hyphens only.
@@ -345,7 +345,7 @@ export default function PublicGallerySettings() {
                 transition-all duration-[var(--timing-fast)]
                 ${
                   copied
-                    ? "bg-green-100 text-green-700 border border-green-200"
+                    ? "bg-[var(--success-bg)] text-[var(--success-text)] border border-[var(--success-border)]"
                     : "bg-[var(--card-bg)] text-[var(--forest-700)] border border-[var(--border-light)] hover:bg-[var(--mist-50)] hover:border-[var(--moss-300)]"
                 }`}
             >
@@ -392,8 +392,8 @@ export default function PublicGallerySettings() {
           <p
             className={`text-sm font-medium ${
               saveMessage.type === "success"
-                ? "text-green-600"
-                : "text-red-600"
+                ? "text-[var(--success-text)]"
+                : "text-[var(--error-text)]"
             }`}
           >
             {saveMessage.text}

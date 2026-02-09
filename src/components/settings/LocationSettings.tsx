@@ -144,7 +144,7 @@ export default function LocationSettings() {
         {saveMessage && (
           <p
             className={`text-sm font-medium ${
-              saveMessage.type === "success" ? "text-green-600" : "text-red-600"
+              saveMessage.type === "success" ? "text-[var(--success-text)]" : "text-[var(--error-text)]"
             }`}
           >
             {saveMessage.text}

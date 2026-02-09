@@ -313,9 +313,9 @@ export default function SpeciesForm({
                   className={`flex-1 px-3 py-2 rounded-xl border text-sm font-medium transition-all ${
                     rarity === r
                       ? r === "common"
-                        ? "bg-slate-100 border-slate-300 text-slate-700"
+                        ? "bg-[var(--mist-100)] border-[var(--mist-300)] text-[var(--mist-700)]"
                         : r === "uncommon"
-                        ? "bg-amber-50 border-amber-300 text-amber-700"
+                        ? "bg-[var(--amber-50)] border-[var(--amber-300)] text-[var(--amber-700)]"
                         : "bg-[var(--error-bg)] border-[var(--error-border)] text-[var(--error-text)]"
                       : "bg-[var(--card-bg)] border-[var(--mist-200)] text-[var(--mist-500)] hover:border-[var(--mist-300)]"
                   }`}
@@ -329,10 +329,10 @@ export default function SpeciesForm({
 
         {error && commonName.trim() && (
           <div className="mt-4 p-3 bg-[var(--error-bg)] border border-[var(--error-border)] rounded-xl flex items-center gap-2">
-            <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-5 h-5 text-[var(--error-text)] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p className="text-sm text-red-600">{error}</p>
+            <p className="text-sm text-[var(--error-text)]">{error}</p>
           </div>
         )}
 
@@ -340,14 +340,14 @@ export default function SpeciesForm({
         {showDeleteConfirm && onDelete && (
           <div className="mt-6 p-4 bg-[var(--error-bg)] border border-[var(--error-border)] rounded-xl">
             <div className="flex items-center gap-2 mb-2">
-              <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 text-[var(--error-text)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
-              <p className="text-sm text-red-800 font-medium">
+              <p className="text-sm text-[var(--error-text)] font-medium">
                 Delete this species?
               </p>
             </div>
-            <p className="text-sm text-red-600 mb-4 ml-7">
+            <p className="text-sm text-[var(--error-text)] mb-4 ml-7">
               {photoCount > 0
                 ? `This will also delete ${photoCount} photo${photoCount !== 1 ? "s" : ""} associated with this species.`
                 : "This action cannot be undone."}
@@ -366,7 +366,7 @@ export default function SpeciesForm({
                 type="button"
                 onClick={handleDelete}
                 disabled={deleting}
-                className="px-4 py-1.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-xl disabled:opacity-50 transition-colors shadow-sm"
+                className="px-4 py-1.5 text-sm font-medium text-white bg-[var(--danger-to)] hover:bg-[var(--danger-from)] rounded-xl disabled:opacity-50 transition-colors shadow-sm"
               >
                 {deleting ? "Deleting..." : "Yes, Delete"}
               </button>
@@ -380,7 +380,7 @@ export default function SpeciesForm({
             <button
               type="button"
               onClick={() => setShowDeleteConfirm(true)}
-              className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl transition-colors flex items-center gap-1.5"
+              className="px-4 py-2 text-sm font-medium text-[var(--error-text)] hover:text-[var(--error-text)] hover:bg-[var(--error-bg)] rounded-xl transition-colors flex items-center gap-1.5"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

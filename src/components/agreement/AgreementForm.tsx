@@ -75,7 +75,7 @@ export default function AgreementForm() {
         {error && (
           <div
             className="mb-4 p-3 rounded-[var(--radius-md)] bg-[var(--error-bg)] text-[var(--error-text)]
-              border border-red-200 text-sm font-medium"
+              border border-[var(--error-border)] text-sm font-medium"
           >
             {error}
           </div>

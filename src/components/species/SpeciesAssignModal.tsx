@@ -683,9 +683,9 @@ export default function SpeciesAssignModal({
                       className={`flex-1 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
                         newRarity === rarity
                           ? rarity === "common"
-                            ? "bg-slate-100 border-slate-300 text-slate-700"
+                            ? "bg-[var(--mist-100)] border-[var(--mist-300)] text-[var(--mist-700)]"
                             : rarity === "uncommon"
-                            ? "bg-amber-50 border-amber-300 text-amber-700"
+                            ? "bg-[var(--amber-50)] border-[var(--amber-300)] text-[var(--amber-700)]"
                             : "bg-[var(--error-bg)] border-[var(--error-border)] text-[var(--error-text)]"
                           : "bg-[var(--card-bg)] border-[var(--mist-200)] text-[var(--mist-500)] hover:border-[var(--mist-300)]"
                       }`}

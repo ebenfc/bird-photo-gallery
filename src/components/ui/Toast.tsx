@@ -62,7 +62,7 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: number)
 
   const bgColor = {
     success: "bg-[var(--forest-700)] text-white",
-    error: "bg-red-600 text-white",
+    error: "bg-[var(--danger-to)] text-white",
     info: "bg-[var(--forest-900)] text-white",
   }[toast.type];
 

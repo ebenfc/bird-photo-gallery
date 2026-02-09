@@ -35,17 +35,17 @@ const rarityConfig: Record<
   rare: {
     label: "Rare",
     icon: "M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z",
-    bgColor: "bg-gradient-to-br from-red-50 to-rose-100",
-    textColor: "text-red-700",
-    borderColor: "border-red-300",
-    glow: "shadow-[0_2px_8px_rgba(239,68,68,0.15)]",
+    bgColor: "bg-[var(--error-bg)]",
+    textColor: "text-[var(--error-text)]",
+    borderColor: "border-[var(--error-border)]",
+    glow: "shadow-[var(--error-ring-shadow)]",
   },
   unassigned: {
     label: "Unassigned",
     icon: "M12 4v16m8-8H4", // Plus sign to indicate action needed
-    bgColor: "bg-gradient-to-br from-slate-50 to-slate-100",
-    textColor: "text-slate-600",
-    borderColor: "border-slate-300 border-dashed",
+    bgColor: "bg-[var(--mist-100)]",
+    textColor: "text-[var(--mist-600)]",
+    borderColor: "border-[var(--mist-300)] border-dashed",
   },
 };
 
@@ -79,8 +79,8 @@ export default function RarityBadge({
         transition-all duration-[var(--timing-fast)]
         ${config.bgColor} ${config.textColor} ${config.borderColor}
         ${sizeClasses[size]}
-        ${isRare ? "shadow-[0_2px_8px_rgba(239,68,68,0.2)] hover:shadow-[0_4px_12px_rgba(239,68,68,0.25)]" : ""}
-        ${displayRarity === "uncommon" ? "shadow-[0_2px_6px_rgba(245,158,11,0.15)]" : ""}
+        ${isRare ? "shadow-[var(--error-ring-shadow)] hover:shadow-[var(--error-ring-shadow)]" : ""}
+        ${displayRarity === "uncommon" ? "shadow-[var(--shadow-amber)]" : ""}
       `}
     >
       {(showIcon || isUnassigned) && (
