@@ -150,7 +150,20 @@ export default function PhotoModal({
         } else {
           onClose();
         }
-      } else if (e.key === "ArrowLeft" && onNavigate && canNavigate.prev) {
+        return;
+      }
+
+      // Don't intercept keys when user is typing in a form field
+      const target = e.target as HTMLElement;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      if (e.key === "ArrowLeft" && onNavigate && canNavigate.prev) {
         // Preserve current view state during keyboard navigation
         isNavigatingRef.current = true;
         wasFullscreenRef.current = isFullscreen;
