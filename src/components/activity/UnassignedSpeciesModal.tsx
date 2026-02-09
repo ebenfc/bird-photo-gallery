@@ -5,6 +5,7 @@ import { Rarity } from "@/types";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
+import RarityPicker from "@/components/ui/RarityPicker";
 
 interface BirdLookupResult {
   commonName: string;
@@ -232,26 +233,7 @@ export default function UnassignedSpeciesModal({
             <p className="text-xs text-[var(--mist-500)] mb-2">
               How often do you see this species on your property?
             </p>
-            <div className="flex gap-2">
-              {(["common", "uncommon", "rare"] as const).map((r) => (
-                <button
-                  key={r}
-                  type="button"
-                  onClick={() => setRarity(r)}
-                  className={`flex-1 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${
-                    rarity === r
-                      ? r === "common"
-                        ? "bg-[var(--mist-100)] border-[var(--mist-300)] text-[var(--mist-700)] shadow-sm"
-                        : r === "uncommon"
-                        ? "bg-[var(--amber-50)] border-[var(--amber-300)] text-[var(--amber-700)] shadow-sm"
-                        : "bg-[var(--error-bg)] border-[var(--error-border)] text-[var(--error-text)] shadow-sm"
-                      : "bg-[var(--card-bg)] border-[var(--mist-200)] text-[var(--mist-500)] hover:border-[var(--mist-300)]"
-                  }`}
-                >
-                  {r.charAt(0).toUpperCase() + r.slice(1)}
-                </button>
-              ))}
-            </div>
+            <RarityPicker value={rarity} onChange={setRarity} />
           </div>
         </div>
 
