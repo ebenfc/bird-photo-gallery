@@ -74,9 +74,9 @@ export default function PhotoThisNextWidget() {
 
   // Determine score color based on priority level
   const getScoreColor = (score: number): string => {
-    if (score >= 80) return "from-[var(--red-500)] to-[var(--orange-500)]";
-    if (score >= 60) return "from-[var(--orange-500)] to-[var(--amber-500)]";
-    if (score >= 40) return "from-[var(--amber-500)] to-[var(--yellow-500)]";
+    if (score >= 80) return "from-[var(--danger-from)] to-[var(--amber-500)]";
+    if (score >= 60) return "from-[var(--amber-600)] to-[var(--amber-500)]";
+    if (score >= 40) return "from-[var(--amber-500)] to-[var(--amber-400)]";
     return "from-[var(--moss-500)] to-[var(--forest-500)]";
   };
 

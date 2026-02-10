@@ -102,7 +102,7 @@ export default function AboutPage() {
               <div
                 key={idx}
                 className="flex items-start gap-3 p-4 rounded-[var(--radius-md)]
-                  bg-[var(--bg-secondary)] border border-[var(--border-light)]"
+                  bg-[var(--mist-50)] border border-[var(--border-light)]"
               >
                 <div className="flex-shrink-0 w-10 h-10 rounded-[var(--radius-md)]
                   bg-gradient-to-br from-[var(--moss-100)] to-[var(--forest-100)]
@@ -150,7 +150,7 @@ export default function AboutPage() {
               ].map((link) => (
                 <a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer" className="block group">
                   <div className="flex items-start gap-3 p-4 rounded-[var(--radius-md)]
-                    bg-[var(--bg-secondary)] hover:bg-[var(--surface-forest)]
+                    bg-[var(--mist-50)] hover:bg-[var(--surface-forest)]
                     border border-[var(--border-light)] hover:border-[var(--moss-300)]
                     transition-all duration-[var(--timing-fast)] hover:shadow-[var(--shadow-sm)]">
                     <div className="flex-shrink-0 mt-0.5">
@@ -180,7 +180,7 @@ export default function AboutPage() {
               ].map((link) => (
                 <a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer" className="block group">
                   <div className="flex items-start gap-3 p-4 rounded-[var(--radius-md)]
-                    bg-[var(--bg-secondary)] hover:bg-[var(--surface-forest)]
+                    bg-[var(--mist-50)] hover:bg-[var(--surface-forest)]
                     border border-[var(--border-light)] hover:border-[var(--moss-300)]
                     transition-all duration-[var(--timing-fast)] hover:shadow-[var(--shadow-sm)]">
                     <div className="flex-shrink-0 mt-0.5">
@@ -209,7 +209,7 @@ export default function AboutPage() {
               ].map((item) => {
                 const content = (
                   <div className={`flex items-start gap-3 p-4 rounded-[var(--radius-md)]
-                    bg-[var(--bg-secondary)] ${item.url ? "hover:bg-[var(--surface-forest)]" : ""}
+                    bg-[var(--mist-50)] ${item.url ? "hover:bg-[var(--surface-forest)]" : ""}
                     border border-[var(--border-light)] ${item.url ? "hover:border-[var(--moss-300)]" : ""}
                     transition-all duration-[var(--timing-fast)] ${item.url ? "hover:shadow-[var(--shadow-sm)]" : ""}`}>
                     {item.url && (

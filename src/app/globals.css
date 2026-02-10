@@ -237,6 +237,55 @@
   --warning-text: #e3b341;
   --warning-border: #5c4813;
 
+  /* Inverted forest palette (emerald) */
+  --forest-50: #022c22;
+  --forest-100: #064e3b;
+  --forest-200: #065f46;
+  --forest-300: #047857;
+  --forest-400: #059669;
+  --forest-500: #10b981;
+  --forest-600: #34d399;
+  --forest-700: #6ee7b7;
+  --forest-800: #a7f3d0;
+  --forest-900: #d1fae5;
+  --forest-950: #ecfdf5;
+
+  /* Inverted moss palette (teal) */
+  --moss-50: #134e4a;
+  --moss-100: #115e59;
+  --moss-200: #0f766e;
+  --moss-300: #0d9488;
+  --moss-400: #14b8a6;
+  --moss-500: #2dd4bf;
+  --moss-600: #5eead4;
+  --moss-700: #99f6e4;
+  --moss-800: #ccfbf1;
+  --moss-900: #f0fdfa;
+
+  /* Inverted sky palette (blue) */
+  --sky-50: #0c4a6e;
+  --sky-100: #075985;
+  --sky-200: #0369a1;
+  --sky-300: #0284c7;
+  --sky-400: #0ea5e9;
+  --sky-500: #38bdf8;
+  --sky-600: #7dd3fc;
+  --sky-700: #bae6fd;
+  --sky-800: #e0f2fe;
+  --sky-900: #f0f9ff;
+
+  /* Inverted amber palette (gold) */
+  --amber-50: #78350f;
+  --amber-100: #92400e;
+  --amber-200: #b45309;
+  --amber-300: #d97706;
+  --amber-400: #f59e0b;
+  --amber-500: #fbbf24;
+  --amber-600: #fcd34d;
+  --amber-700: #fde68a;
+  --amber-800: #fef3c7;
+  --amber-900: #fffbeb;
+
   /* Danger / favorite */
   --danger-from: #f87171;
   --danger-to: #ef4444;
@@ -451,6 +500,55 @@
   --warning-bg: #2d1a06;
   --warning-text: #ffaa44;
   --warning-border: #5c3a13;
+
+  /* Inverted forest palette (purple) */
+  --forest-50: #1a0e45;
+  --forest-100: #2d1d6e;
+  --forest-200: #3e2796;
+  --forest-300: #5236c2;
+  --forest-400: #6344e0;
+  --forest-500: #7c5cff;
+  --forest-600: #9b7aff;
+  --forest-700: #b8a3ff;
+  --forest-800: #d9ccff;
+  --forest-900: #ede5ff;
+  --forest-950: #f5f0ff;
+
+  /* Inverted moss palette (electric blue) */
+  --moss-50: #212a7a;
+  --moss-100: #2d38a0;
+  --moss-200: #3a48c7;
+  --moss-300: #4a5ce6;
+  --moss-400: #5e74ff;
+  --moss-500: #6d85ff;
+  --moss-600: #8ea4ff;
+  --moss-700: #bbc8ff;
+  --moss-800: #dde4ff;
+  --moss-900: #eef1ff;
+
+  /* Inverted sky palette (same as moss in Bold) */
+  --sky-50: #0c4a6e;
+  --sky-100: #075985;
+  --sky-200: #0369a1;
+  --sky-300: #0284c7;
+  --sky-400: #0ea5e9;
+  --sky-500: #38bdf8;
+  --sky-600: #7dd3fc;
+  --sky-700: #bae6fd;
+  --sky-800: #e0f2fe;
+  --sky-900: #f0f9ff;
+
+  /* Inverted amber palette (orange) */
+  --amber-50: #7c2d12;
+  --amber-100: #9a3412;
+  --amber-200: #c2410c;
+  --amber-300: #ea580c;
+  --amber-400: #ff771c;
+  --amber-500: #fb923c;
+  --amber-600: #fdba74;
+  --amber-700: #fed7aa;
+  --amber-800: #ffedd5;
+  --amber-900: #fff7ed;
 
   /* Danger / favorite */
   --danger-from: #ef5a68;
@@ -1144,6 +1242,55 @@ h1, h2, h3, h4, h5, h6 {
   --warning-bg: #2a2a0a;
   --warning-text: #ffcc00;
   --warning-border: #886600;
+
+  /* Inverted forest palette (navy blue) */
+  --forest-50: #00004d;
+  --forest-100: #000066;
+  --forest-200: #000080;
+  --forest-300: #000099;
+  --forest-400: #0000aa;
+  --forest-500: #0000cc;
+  --forest-600: #4040ff;
+  --forest-700: #7070ff;
+  --forest-800: #a0a0ff;
+  --forest-900: #d0d0ff;
+  --forest-950: #e8e8ff;
+
+  /* Inverted moss palette (teal/cyan) */
+  --moss-50: #003333;
+  --moss-100: #004444;
+  --moss-200: #005555;
+  --moss-300: #006666;
+  --moss-400: #008080;
+  --moss-500: #20b2aa;
+  --moss-600: #40e0d0;
+  --moss-700: #80ffff;
+  --moss-800: #b0ffff;
+  --moss-900: #e0ffff;
+
+  /* Inverted sky palette (bright blue) */
+  --sky-50: #000066;
+  --sky-100: #000088;
+  --sky-200: #0000aa;
+  --sky-300: #0000cc;
+  --sky-400: #0000ff;
+  --sky-500: #3060ff;
+  --sky-600: #6080ff;
+  --sky-700: #90a8ff;
+  --sky-800: #c0d0ff;
+  --sky-900: #e0e8ff;
+
+  /* Inverted amber palette (gold/orange) */
+  --amber-50: #663300;
+  --amber-100: #884400;
+  --amber-200: #aa5500;
+  --amber-300: #cc7700;
+  --amber-400: #ff9900;
+  --amber-500: #ffcc00;
+  --amber-600: #ffff80;
+  --amber-700: #ffffc0;
+  --amber-800: #ffffe0;
+  --amber-900: #fffff0;
 
   /* Danger / favorite */
   --danger-from: #ff4444;

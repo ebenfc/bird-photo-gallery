@@ -58,7 +58,7 @@ export default function ActiveNowWidget() {
   return (
     <div className="bg-[var(--card-bg)] rounded-2xl shadow-sm border border-[var(--mist-100)] overflow-hidden">
       {/* Header */}
-      <div className="px-6 py-4 bg-gradient-to-r from-[var(--amber-50)] to-[var(--orange-50)] border-b border-[var(--mist-100)]">
+      <div className="px-6 py-4 bg-gradient-to-r from-[var(--amber-50)] to-[var(--amber-100)] border-b border-[var(--mist-100)]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <svg
@@ -116,7 +116,7 @@ export default function ActiveNowWidget() {
                   <div className="w-24 flex-shrink-0">
                     <div className="h-2 bg-[var(--mist-200)] rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-[var(--amber-400)] to-[var(--orange-400)] rounded-full transition-all"
+                        className="h-full bg-gradient-to-r from-[var(--amber-400)] to-[var(--amber-500)] rounded-full transition-all"
                         style={{ width: `${activityPercent}%` }}
                       />
                     </div>
