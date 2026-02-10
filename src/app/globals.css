@@ -118,6 +118,10 @@
   --error-ring-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
   --favorite-color: #ef4444;
 
+  /* Header — always dark regardless of light/dark mode */
+  --header-from: #022c22;
+  --header-to: #065f46;
+
   /* === ELEVATION / SHADOW SYSTEM === */
   /* Modern, subtle shadows with emerald undertones */
   --shadow-xs: 0 1px 2px rgba(6, 95, 70, 0.04);
@@ -369,6 +373,10 @@
   --danger-ring: #ef5a68;
   --error-ring-shadow: 0 0 0 3px rgba(230, 57, 70, 0.15);
   --favorite-color: #e63946;
+
+  /* Header — always dark regardless of light/dark mode */
+  --header-from: #1a0e45;
+  --header-to: #3e2796;
 }
 
 /* === BOLD SKIN — DARK MODE === */
@@ -1058,6 +1066,10 @@ h1, h2, h3, h4, h5, h6 {
   --danger-ring: #ff0000;
   --error-ring-shadow: 0 0 0 3px rgba(255, 0, 0, 0.2);
   --favorite-color: #ff0000;
+
+  /* Header — always dark regardless of light/dark mode */
+  --header-from: #00004d;
+  --header-to: #000080;
 }
 
 /* === RETRO SKIN — DARK MODE === */
@@ -1343,6 +1355,10 @@ h1, h2, h3, h4, h5, h6 {
   --danger-ring: #D45040;
   --error-ring-shadow: 0 0 0 3px rgba(196, 64, 48, 0.15);
   --favorite-color: #D4604A;
+
+  /* Header — always dark regardless of light/dark mode */
+  --header-from: #0B1E26;
+  --header-to: #173E4E;
 }
 
 /* === COASTAL SKIN — DARK MODE === */
@@ -1475,6 +1491,10 @@ h1, h2, h3, h4, h5, h6 {
   --danger-ring: #E08070;
   --error-ring-shadow: 0 0 0 3px rgba(224, 128, 112, 0.2);
   --favorite-color: #E08070;
+
+  /* Header — always dark regardless of light/dark mode */
+  --header-from: #0B1E26;
+  --header-to: #173E4E;
 }
 
 /* === COASTAL SKIN — CLASS OVERRIDES === */
@@ -1667,6 +1687,10 @@ h1, h2, h3, h4, h5, h6 {
   --danger-ring: #C05848;
   --error-ring-shadow: 0 0 0 3px rgba(176, 72, 56, 0.15);
   --favorite-color: #B85040;
+
+  /* Header — always dark regardless of light/dark mode */
+  --header-from: #1C2818;
+  --header-to: #334228;
 }
 
 /* === JOURNAL SKIN — DARK MODE === */
@@ -1799,6 +1823,10 @@ h1, h2, h3, h4, h5, h6 {
   --danger-ring: #D07466;
   --error-ring-shadow: 0 0 0 3px rgba(208, 116, 102, 0.2);
   --favorite-color: #D07466;
+
+  /* Header — always dark regardless of light/dark mode */
+  --header-from: #1C2818;
+  --header-to: #334228;
 }
 
 /* === JOURNAL SKIN — CLASS OVERRIDES === */
@@ -2009,6 +2037,10 @@ h1, h2, h3, h4, h5, h6 {
   --danger-ring: #C85848;
   --error-ring-shadow: 0 0 0 3px rgba(184, 72, 56, 0.15);
   --favorite-color: #C85040;
+
+  /* Header — always dark regardless of light/dark mode */
+  --header-from: #1A2216;
+  --header-to: #34442A;
 }
 
 /* === MEADOW SKIN — DARK MODE === */
@@ -2141,6 +2173,10 @@ h1, h2, h3, h4, h5, h6 {
   --danger-ring: #D47466;
   --error-ring-shadow: 0 0 0 3px rgba(212, 116, 102, 0.2);
   --favorite-color: #D47466;
+
+  /* Header — always dark regardless of light/dark mode */
+  --header-from: #1A2216;
+  --header-to: #34442A;
 }
 
 /* === MEADOW SKIN — CLASS OVERRIDES === */
@@ -2333,6 +2369,10 @@ h1, h2, h3, h4, h5, h6 {
   --danger-ring: #CC0000;
   --error-ring-shadow: 0 0 0 3px rgba(204, 0, 0, 0.25);
   --favorite-color: #CC0000;
+
+  /* Header — always dark regardless of light/dark mode */
+  --header-from: #002820;
+  --header-to: #064232;
 }
 
 /* === HIGH CONTRAST SKIN — DARK MODE === */
@@ -2465,6 +2505,10 @@ h1, h2, h3, h4, h5, h6 {
   --danger-ring: #FF4444;
   --error-ring-shadow: 0 0 0 3px rgba(255, 68, 68, 0.3);
   --favorite-color: #FF6666;
+
+  /* Header — always dark regardless of light/dark mode */
+  --header-from: #002820;
+  --header-to: #064232;
 }
 
 /* === HIGH CONTRAST SKIN — CLASS OVERRIDES === */

@@ -84,7 +84,7 @@ export default function Header() {
   ];
 
   return (
-    <header className="bg-gradient-to-r from-[var(--forest-950)] to-[var(--forest-800)]
+    <header className="bg-gradient-to-r from-[var(--header-from)] to-[var(--header-to)]
       sticky top-0 z-50 shadow-[var(--shadow-lg)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14 sm:h-16">
@@ -127,7 +127,7 @@ export default function Header() {
                     transition-all duration-[var(--timing-fast)]
                     ${isActive
                       ? "bg-white/20 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
-                      : "text-[var(--moss-200)] hover:text-white hover:bg-white/10"
+                      : "text-white/60 hover:text-white hover:bg-white/10"
                     }`}
                 >
                   {item.label}
@@ -151,7 +151,7 @@ export default function Header() {
               <Link
                 href="/sign-in"
                 className="hidden sm:flex px-4 py-2 rounded-[var(--radius-lg)] text-sm font-semibold
-                  text-[var(--moss-200)] hover:text-white hover:bg-white/10
+                  text-white/60 hover:text-white hover:bg-white/10
                   transition-all duration-[var(--timing-fast)]"
               >
                 Sign in
@@ -201,7 +201,7 @@ export default function Header() {
                     active:scale-[0.98]
                     ${isActive
                       ? "bg-white/20 text-white"
-                      : "text-[var(--moss-200)] hover:text-white hover:bg-white/10"
+                      : "text-white/60 hover:text-white hover:bg-white/10"
                     }`}
                 >
                   {item.icon}
@@ -215,7 +215,7 @@ export default function Header() {
                 href="/sign-in"
                 className="flex items-center gap-3 px-4 py-3.5
                   rounded-[var(--radius-lg)] text-base font-semibold
-                  text-[var(--moss-200)] hover:text-white hover:bg-white/10
+                  text-white/60 hover:text-white hover:bg-white/10
                   transition-all duration-[var(--timing-fast)]
                   active:scale-[0.98]"
               >
@@ -234,7 +234,7 @@ export default function Header() {
                 }}
                 className="flex items-center gap-3 px-4 py-3.5 w-full
                   rounded-[var(--radius-lg)] text-base font-semibold
-                  text-[var(--moss-200)] hover:text-white hover:bg-white/10
+                  text-white/60 hover:text-white hover:bg-white/10
                   transition-all duration-[var(--timing-fast)]
                   active:scale-[0.98]"
               >
@@ -250,7 +250,7 @@ export default function Header() {
                 <button
                   className="flex items-center gap-3 px-4 py-3.5 w-full
                     rounded-[var(--radius-lg)] text-base font-semibold
-                    text-[var(--moss-200)] hover:text-white hover:bg-white/10
+                    text-white/60 hover:text-white hover:bg-white/10
                     transition-all duration-[var(--timing-fast)]
                     active:scale-[0.98]"
                 >
