@@ -68,7 +68,7 @@ export default function PhotoCard({
       {/* Species name overlay - elegant reveal */}
       {showSpecies && photo.species && (
         <div className="absolute bottom-0 left-0 right-0
-          bg-gradient-to-t from-[var(--forest-950)]/90 via-[var(--forest-950)]/60 to-transparent
+          bg-gradient-to-t from-[var(--header-from)]/90 via-[var(--header-from)]/60 to-transparent
           p-3.5 pt-12
           opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0
           transition-all duration-[var(--timing-normal)]">

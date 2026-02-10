@@ -311,7 +311,7 @@ export default function SpeciesAssignModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Assign species">
-      <div className="absolute inset-0 bg-[var(--forest-950)]/80 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
+      <div className="absolute inset-0 bg-[var(--header-from)]/80 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
 
       <div className="relative bg-[var(--card-bg)] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col border border-[var(--mist-100)]">
         {/* Accent top border */}
