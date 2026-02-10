@@ -411,7 +411,7 @@ export default function PhotoModal({
     >
       {/* Backdrop with blur */}
       <div
-        className="absolute inset-0 bg-[var(--forest-950)]/95 backdrop-blur-sm"
+        className="absolute inset-0 bg-[var(--header-from)]/95 backdrop-blur-sm"
         onClick={onClose}
         aria-hidden="true"
       />

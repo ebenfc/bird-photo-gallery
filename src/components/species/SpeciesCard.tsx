@@ -58,7 +58,7 @@ export default function SpeciesCard({ species, onEdit, index = 0, linkPrefix = "
             </div>
           )}
           {/* Gradient overlay on hover */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[var(--forest-950)]/30 to-transparent
+          <div className="absolute inset-0 bg-gradient-to-t from-[var(--header-from)]/30 to-transparent
             opacity-0 group-hover:opacity-100 transition-opacity duration-[var(--timing-normal)]" />
 
           {/* Frame effect */}

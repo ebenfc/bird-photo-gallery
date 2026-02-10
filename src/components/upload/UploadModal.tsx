@@ -351,7 +351,7 @@ export default function UploadModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in" role="dialog" aria-modal="true" aria-label="Upload photos">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-gradient-to-b from-[var(--forest-950)]/85 to-[var(--mist-900)]/75 backdrop-blur-md"
+        className="absolute inset-0 bg-gradient-to-b from-[var(--header-from)]/85 to-[var(--header-to)]/75 backdrop-blur-md"
         onClick={step === "uploading" ? undefined : handleClose}
         aria-hidden="true"
       />

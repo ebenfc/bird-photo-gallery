@@ -111,7 +111,7 @@ export default function Modal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop with elegant blur */}
       <div
-        className="absolute inset-0 bg-gradient-to-b from-[var(--forest-950)]/85 to-[var(--mist-900)]/75 backdrop-blur-md animate-fade-in"
+        className="absolute inset-0 bg-gradient-to-b from-[var(--header-from)]/85 to-[var(--header-to)]/75 backdrop-blur-md animate-fade-in"
         onClick={onClose}
         aria-hidden="true"
       />
