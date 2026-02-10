@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function FinalCTA() {
   return (
-    <section className="py-16 sm:py-24 bg-gradient-to-br from-[var(--forest-900)] to-[var(--forest-950)]">
+    <section className="py-16 sm:py-24 bg-gradient-to-br from-[var(--header-from)] to-[var(--header-to)]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2
           className="text-3xl sm:text-4xl font-bold tracking-tight"
@@ -10,7 +10,7 @@ export default function FinalCTA() {
         >
           Start your Bird Feed today
         </h2>
-        <p className="mt-4 text-lg text-[var(--forest-200)] max-w-xl mx-auto">
+        <p className="mt-4 text-lg text-white/80 max-w-xl mx-auto">
           Create a free account to build your personal gallery.
         </p>
 
@@ -30,16 +30,16 @@ export default function FinalCTA() {
           </Link>
         </div>
 
-        <p className="mt-8 text-sm text-[var(--forest-300)]">
+        <p className="mt-8 text-sm text-white/60">
           Have a Haikubox? Connect it to automatically track which birds visit your property.
         </p>
 
         {/* Footer */}
-        <div className="mt-16 pt-8 border-t border-[var(--forest-800)]">
-          <p className="text-sm text-[var(--forest-200)]">
+        <div className="mt-16 pt-8 border-t border-white/20">
+          <p className="text-sm text-white/80">
             Made with care in the Pacific Northwest
           </p>
-          <p className="mt-2 text-xs text-[var(--forest-300)]">
+          <p className="mt-2 text-xs text-white/60">
             &copy; {new Date().getFullYear()} Bird Feed
           </p>
         </div>
