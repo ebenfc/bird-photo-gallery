@@ -3,6 +3,15 @@
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import { useSkin } from "@/contexts/SkinContext";
+import type { Skin } from "@/contexts/SkinContext";
+
+interface SkinOption {
+  value: Skin;
+  label: string;
+  description: string;
+  colors: string[];
+  available: boolean;
+}
 
 const modeOptions = [
   {
@@ -37,44 +46,44 @@ const modeOptions = [
   },
 ];
 
-const skinOptions = [
+const skinOptions: SkinOption[] = [
   {
-    value: "default" as const,
+    value: "default",
     label: "Default",
     description: "Nature-inspired PNW design",
     colors: ["#10b981", "#14b8a6", "#064e3b", "#fafafa"],
     available: true,
   },
   {
-    value: "bold" as const,
+    value: "bold",
     label: "Bold",
     description: "Vibrant and colorful",
     colors: ["#7c5cff", "#5e74ff", "#b1ff8f", "#f2f2f2"],
     available: true,
   },
   {
-    value: "fieldguide" as const,
-    label: "Field Guide",
-    description: "Classic naturalist aesthetic",
-    colors: ["#8B6F47", "#6B7F5C", "#F5F1E8", "#3A3A3A"],
-    available: true,
-  },
-  {
-    value: "retro" as const,
-    label: "Retro",
-    description: "90s web nostalgia",
-    colors: ["#000080", "#FFFF00", "#FF00FF", "#00FF00"],
-    available: true,
-  },
-  {
-    value: "journal" as const,
+    value: "journal",
     label: "Journal",
     description: "Warm naturalist's notebook",
     colors: ["#7D6544", "#5E4B32", "#F6F1E3", "#2C2417"],
     available: true,
   },
   {
-    value: "highcontrast" as const,
+    value: "coastal",
+    label: "Coastal",
+    description: "Sky, sea & shore",
+    colors: ["#2E7D9B", "#A87D48", "#F5F8FA", "#1E2D3D"],
+    available: true,
+  },
+  {
+    value: "meadow",
+    label: "Meadow",
+    description: "Soft & restful",
+    colors: ["#6B8A54", "#A67866", "#F6F5F0", "#2E3028"],
+    available: true,
+  },
+  {
+    value: "highcontrast",
     label: "High Contrast",
     description: "Maximum readability",
     colors: ["#003D2E", "#002B66", "#FFFFFF", "#1A1A1A"],
@@ -82,10 +91,22 @@ const skinOptions = [
   },
 ];
 
+const retroOption: SkinOption = {
+  value: "retro",
+  label: "Retro",
+  description: "90s web nostalgia",
+  colors: ["#000080", "#FFFF00", "#FF00FF", "#00FF00"],
+  available: true,
+};
+
 export default function AppearanceSettings() {
   const { theme, setTheme } = useTheme();
-  const { skin, setSkin } = useSkin();
+  const { skin, setSkin, retroUnlocked } = useSkin();
   const [mounted, setMounted] = useState(false);
+
+  const visibleSkins = retroUnlocked
+    ? [...skinOptions, retroOption]
+    : skinOptions;
 
   // Prevent hydration mismatch — useTheme() returns undefined during SSR
   useEffect(() => {
@@ -163,7 +184,7 @@ export default function AppearanceSettings() {
       <div>
         <h3 className="text-sm font-semibold text-[var(--text-label)] mb-3">Style</h3>
         <div className="grid grid-cols-2 gap-3">
-          {skinOptions.map((option) => {
+          {visibleSkins.map((option) => {
             const isActive = skin === option.value;
             const isDisabled = !option.available;
             return (

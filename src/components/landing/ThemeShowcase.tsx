@@ -24,22 +24,22 @@ const themes: Array<{
     colors: ["#7c5cff", "#5e74ff", "#b1ff8f", "#f2f2f2"],
   },
   {
-    value: "fieldguide",
-    label: "Field Guide",
-    description: "Classic naturalist",
-    colors: ["#8B6F47", "#6B7F5C", "#F5F1E8", "#3A3A3A"],
-  },
-  {
-    value: "retro",
-    label: "Retro",
-    description: "90s web nostalgia",
-    colors: ["#000080", "#FFFF00", "#FF00FF", "#00FF00"],
-  },
-  {
     value: "journal",
     label: "Journal",
     description: "Warm & handwritten",
     colors: ["#7D6544", "#5E4B32", "#F6F1E3", "#2C2417"],
+  },
+  {
+    value: "coastal",
+    label: "Coastal",
+    description: "Sky, sea & shore",
+    colors: ["#2E7D9B", "#A87D48", "#F5F8FA", "#1E2D3D"],
+  },
+  {
+    value: "meadow",
+    label: "Meadow",
+    description: "Soft & restful",
+    colors: ["#6B8A54", "#A67866", "#F6F5F0", "#2E3028"],
   },
   {
     value: "highcontrast",
