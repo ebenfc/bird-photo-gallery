@@ -8,6 +8,7 @@ Components are organized by feature area.
 |--------|---------|
 | `activity/` | Haikubox activity page components |
 | `agreement/` | User agreement acceptance (AgreementText, AgreementForm) |
+| `onboarding/` | Post-agreement onboarding gates (DisplayNameGate) |
 | `discover/` | Discover page: BookmarkButton, GalleryCard, DiscoverFilters |
 | `gallery/` | Photo gallery and modal components |
 | `landing/` | Public landing page (includes `ThemeShowcase` live skin picker) |
