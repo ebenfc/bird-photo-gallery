@@ -286,7 +286,7 @@ export default function PropertyBirdsModal({
                     {opportunitiesByPriority.high.map((bird, i) => (
                       <div
                         key={bird.commonName}
-                        className="bg-gradient-to-r from-[var(--amber-50)] to-[var(--orange-50)] rounded-[var(--radius-lg)] p-4 ring-1 ring-[var(--amber-200)]"
+                        className="bg-gradient-to-r from-[var(--amber-50)] to-[var(--amber-100)] rounded-[var(--radius-lg)] p-4 ring-1 ring-[var(--amber-200)]"
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1">

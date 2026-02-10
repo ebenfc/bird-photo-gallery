@@ -83,6 +83,11 @@ Toggle buttons for common/uncommon/rare selection. Props: `value: Rarity`, `onCh
 - Toggle/filter buttons use `aria-pressed`; mobile filter toggles use `aria-expanded` + `aria-label` with active count.
 - Decorative SVGs get `aria-hidden="true"`; icon-only buttons get `aria-label`.
 
+### Dark Mode: Always-Dark Elements
+For elements that must stay dark in both light and dark mode (header, CTA, photo overlays, modal backdrops), use `--header-from`/`--header-to` instead of `--forest-950`/`--forest-900`. These vars are defined in all theme blocks and never invert. For text on always-dark backgrounds, use `text-white/80`, `text-white/60`, `border-white/20`.
+
+All 7 themes now fully invert `--forest-*`, `--moss-*`, `--sky-*`, `--amber-*` palettes in dark mode. No `--orange-*`, `--red-*`, or `--yellow-*` vars exist — use `--amber-*` for warm accents, `--danger-from/to` for red.
+
 ### Toast Notifications (`ui/Toast.tsx`)
 - `ToastProvider` wraps the app in `layout.tsx` (authenticated section only)
 - `useToast()` hook returns `{ showToast(message, type) }`

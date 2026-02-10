@@ -94,7 +94,7 @@ export default function ActivityTimeline({ speciesName, compact = false }: Activ
   return (
     <div className="bg-[var(--card-bg)] rounded-2xl shadow-sm border border-[var(--mist-100)] overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 bg-gradient-to-r from-[var(--amber-50)] to-[var(--orange-50)] border-b border-[var(--mist-100)]">
+      <div className="px-4 py-3 bg-gradient-to-r from-[var(--amber-50)] to-[var(--amber-100)] border-b border-[var(--mist-100)]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <svg
