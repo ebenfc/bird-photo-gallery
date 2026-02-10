@@ -5,7 +5,7 @@ export default function HeroSection() {
   return (
     <section className="relative overflow-hidden">
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[var(--surface-moss)] via-[var(--forest-50)] to-[var(--mist-50)]" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[var(--surface-moss)] via-[var(--background)] to-[var(--mist-50)]" />
 
       {/* Subtle texture overlay */}
       <div className="absolute inset-0 pnw-texture opacity-50" />
@@ -79,8 +79,8 @@ export default function HeroSection() {
               </div>
             </div>
             {/* Decorative elements */}
-            <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-gradient-to-br from-[var(--moss-200)] to-[var(--forest-200)] rounded-full blur-2xl opacity-60" />
-            <div className="absolute -top-4 -left-4 w-32 h-32 bg-gradient-to-br from-[var(--forest-200)] to-[var(--moss-200)] rounded-full blur-3xl opacity-40" />
+            <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-gradient-to-br from-[var(--surface-moss)] to-[var(--surface-forest)] rounded-full blur-2xl opacity-60" />
+            <div className="absolute -top-4 -left-4 w-32 h-32 bg-gradient-to-br from-[var(--surface-forest)] to-[var(--surface-moss)] rounded-full blur-3xl opacity-40" />
           </div>
         </div>
       </div>
