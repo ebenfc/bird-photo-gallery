@@ -60,7 +60,7 @@ Use `src/lib/user.ts` functions for user operations:
 - `getUserByUsername(username)` - Lookup by public username
 - `isUsernameAvailable(username, excludeUserId?)` - Check availability
 - `validateUsername(username)` - Validate format
-- `getDisplayName(user)` - Compute display name with fallback chain: displayName > firstName/lastName > username
+- `getDisplayName(user)` - Compute display name: displayName > username > "Bird Feed User" (firstName/lastName intentionally excluded for privacy)
 
 ## Rarity Type
 
