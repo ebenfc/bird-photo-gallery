@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getUserByUsername } from "@/lib/user";
+import { getUserByUsername, getDisplayName } from "@/lib/user";
 import PublicHeader from "@/components/layout/PublicHeader";
 import BookmarkButton from "@/components/discover/BookmarkButton";
 
@@ -13,9 +13,7 @@ interface PublicGalleryLayoutProps {
 export async function generateMetadata({ params }: PublicGalleryLayoutProps): Promise<Metadata> {
   const { username } = await params;
   const user = await getUserByUsername(username);
-  const displayName = user?.firstName
-    ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`
-    : username;
+  const displayName = user ? getDisplayName(user) : username;
   return {
     title: `${displayName}'s Gallery | Bird Feed`,
   };
@@ -34,9 +32,7 @@ export default async function PublicGalleryLayout({
     notFound();
   }
 
-  const displayName = user.firstName
-    ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`
-    : user.username || "Bird Feed User";
+  const displayName = getDisplayName(user);
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)]">

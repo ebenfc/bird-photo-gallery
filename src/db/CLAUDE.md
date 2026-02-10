@@ -50,6 +50,7 @@ Tables with performance indexes:
 
 The `users` table includes public gallery sharing fields:
 - `username` (text, unique, nullable) - Public URL identifier (e.g., `/u/eben`)
+- `displayName` (text, nullable) - User-set public display name; overrides Clerk firstName/lastName
 - `isPublicGalleryEnabled` (boolean, default false) - Controls public gallery visibility
 - `isDirectoryListed` (boolean, default false) - Opt-in to Discover directory
 - `city` (text, nullable) - Free-text city name
@@ -59,6 +60,7 @@ Use `src/lib/user.ts` functions for user operations:
 - `getUserByUsername(username)` - Lookup by public username
 - `isUsernameAvailable(username, excludeUserId?)` - Check availability
 - `validateUsername(username)` - Validate format
+- `getDisplayName(user)` - Compute display name with fallback chain: displayName > firstName/lastName > username
 
 ## Rarity Type
 

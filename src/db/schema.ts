@@ -10,6 +10,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   firstName: text("first_name"),
   lastName: text("last_name"),
+  displayName: text("display_name"), // User-set name; overrides firstName/lastName for public display
   imageUrl: text("image_url"),
   // Public gallery sharing fields
   username: text("username").unique(), // URL-safe username for public profile (e.g., /u/eben)

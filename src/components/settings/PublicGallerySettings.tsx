@@ -7,12 +7,14 @@ interface ProfileSettings {
   isPublicGalleryEnabled: boolean;
   isDirectoryListed: boolean;
   displayName: string | null;
+  rawDisplayName: string | null;
 }
 
 export default function PublicGallerySettings() {
   const [settings, setSettings] = useState<ProfileSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState("");
+  const [displayNameInput, setDisplayNameInput] = useState("");
   const [isPublicEnabled, setIsPublicEnabled] = useState(false);
   const [isDirectoryListed, setIsDirectoryListed] = useState(false);
   const [checkingUsername, setCheckingUsername] = useState(false);
@@ -36,6 +38,7 @@ export default function PublicGallerySettings() {
           const data = await res.json();
           setSettings(data);
           setUsername(data.username || "");
+          setDisplayNameInput(data.rawDisplayName || "");
           setIsPublicEnabled(data.isPublicGalleryEnabled);
           setIsDirectoryListed(data.isDirectoryListed);
         }
@@ -109,6 +112,7 @@ export default function PublicGallerySettings() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username: username || null,
+          displayName: displayNameInput || null,
           isPublicGalleryEnabled: isPublicEnabled,
           isDirectoryListed,
         }),
@@ -124,6 +128,7 @@ export default function PublicGallerySettings() {
                 username: data.username,
                 isPublicGalleryEnabled: data.isPublicGalleryEnabled,
                 isDirectoryListed: data.isDirectoryListed,
+                rawDisplayName: data.displayName || null,
               }
             : null
         );
@@ -160,6 +165,7 @@ export default function PublicGallerySettings() {
 
   const hasChanges =
     username !== (settings?.username || "") ||
+    displayNameInput !== (settings?.rawDisplayName || "") ||
     isPublicEnabled !== settings?.isPublicGalleryEnabled ||
     isDirectoryListed !== settings?.isDirectoryListed;
 
@@ -180,6 +186,28 @@ export default function PublicGallerySettings() {
 
   return (
     <div className="space-y-5">
+      {/* Display Name */}
+      <div>
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+          Display Name
+        </label>
+        <input
+          type="text"
+          value={displayNameInput}
+          onChange={(e) => setDisplayNameInput(e.target.value)}
+          placeholder={settings?.displayName || "Your name"}
+          maxLength={50}
+          className="w-full px-4 py-2.5 border border-[var(--border-light)] rounded-[var(--radius-md)]
+            text-[var(--text-primary)] bg-[var(--card-bg)]
+            focus:outline-none focus:ring-2 focus:ring-[var(--moss-500)] focus:border-transparent
+            transition-all duration-[var(--timing-fast)]"
+        />
+        <p className="text-xs text-[var(--mist-500)] mt-1.5">
+          This name appears on your public profile and in the Discover directory.
+          Leave blank to use your account name.
+        </p>
+      </div>
+
       {/* Username Input */}
       <div>
         <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
