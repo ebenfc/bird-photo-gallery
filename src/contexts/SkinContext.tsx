@@ -2,7 +2,14 @@
 
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 
-export type Skin = "default" | "bold" | "retro" | "fieldguide" | "journal" | "highcontrast";
+export type Skin = "default" | "bold" | "retro" | "coastal" | "journal" | "meadow" | "highcontrast";
+
+const VALID_SKINS: Skin[] = ["default", "bold", "retro", "coastal", "journal", "meadow", "highcontrast"];
+
+// Migration map: old skin names → new equivalents
+const SKIN_MIGRATIONS: Record<string, Skin> = {
+  fieldguide: "journal",
+};
 
 interface SkinContextType {
   skin: Skin;
@@ -30,9 +37,17 @@ export function SkinProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const loadStoredPreferences = () => {
       try {
-        const storedSkin = localStorage.getItem(SKIN_STORAGE_KEY) as Skin | null;
-        if (storedSkin && ["default", "bold", "retro", "fieldguide", "journal", "highcontrast"].includes(storedSkin)) {
-          setSkinState(storedSkin);
+        let storedSkin = localStorage.getItem(SKIN_STORAGE_KEY);
+        // Migrate deprecated skin names
+        if (storedSkin && storedSkin in SKIN_MIGRATIONS) {
+          const migrated = SKIN_MIGRATIONS[storedSkin];
+          if (migrated) {
+            storedSkin = migrated;
+            localStorage.setItem(SKIN_STORAGE_KEY, storedSkin);
+          }
+        }
+        if (storedSkin && VALID_SKINS.includes(storedSkin as Skin)) {
+          setSkinState(storedSkin as Skin);
         }
         const unlocked = localStorage.getItem(RETRO_UNLOCK_KEY) === "true";
         setRetroUnlocked(unlocked);
