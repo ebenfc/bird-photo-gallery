@@ -7,7 +7,9 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import { hasAcceptedCurrentAgreement } from "@/lib/agreement";
+import { getUserByClerkId } from "@/lib/user";
 import AgreementForm from "@/components/agreement/AgreementForm";
+import DisplayNameGate from "@/components/onboarding/DisplayNameGate";
 import { ToastProvider } from "@/components/ui/Toast";
 import ReportIssueButton from "@/components/support/ReportIssueButton";
 import SentryUserIdentifier from "@/components/SentryUserIdentifier";
@@ -44,11 +46,16 @@ export default async function RootLayout({
   }
   const isAuthenticated = !!userId;
 
-  // Check if the authenticated user has accepted the current agreement
+  // Check if the authenticated user has completed onboarding
   let hasAcceptedAgreement = false;
+  let hasDisplayName = false;
   if (isAuthenticated) {
     try {
       hasAcceptedAgreement = await hasAcceptedCurrentAgreement(userId!);
+      if (hasAcceptedAgreement) {
+        const user = await getUserByClerkId(userId!);
+        hasDisplayName = !!user?.displayName;
+      }
     } catch {
       // If check fails (e.g., user not in DB yet), treat as not accepted.
       // They'll see the agreement page and can accept once their account
@@ -74,8 +81,22 @@ export default async function RootLayout({
           <ThemeProvider>
             <SentryUserIdentifier />
             {isAuthenticated ? (
-              hasAcceptedAgreement ? (
-                // User is authenticated and has accepted the agreement — show full app
+              !hasAcceptedAgreement ? (
+                // User is authenticated but hasn't accepted — show agreement gate
+                <div className="pnw-texture min-h-screen flex items-center justify-center py-12 px-4">
+                  <div className="w-full max-w-2xl">
+                    <AgreementForm />
+                  </div>
+                </div>
+              ) : !hasDisplayName ? (
+                // User accepted agreement but needs a display name
+                <div className="pnw-texture min-h-screen flex items-center justify-center py-12 px-4">
+                  <div className="w-full max-w-lg">
+                    <DisplayNameGate />
+                  </div>
+                </div>
+              ) : (
+                // Onboarding complete — show full app
                 <ToastProvider>
                   <a
                     href="#main-content"
@@ -89,13 +110,6 @@ export default async function RootLayout({
                   </main>
                   <ReportIssueButton />
                 </ToastProvider>
-              ) : (
-                // User is authenticated but hasn't accepted — show agreement gate
-                <div className="pnw-texture min-h-screen flex items-center justify-center py-12 px-4">
-                  <div className="w-full max-w-2xl">
-                    <AgreementForm />
-                  </div>
-                </div>
               )
             ) : (
               // Not authenticated — landing page, sign-in, sign-up get full-width layout

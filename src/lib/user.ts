@@ -152,15 +152,13 @@ export function validateUsername(username: string): { valid: true } | { valid: f
 
 /**
  * Computes the public display name for a user.
- * Priority: displayName (user-set) > firstName + lastName (Clerk) > username > fallback
+ * Priority: displayName (user-set) > username > fallback.
+ * firstName/lastName from Clerk are intentionally excluded to keep the app pseudonymous.
  */
 export function getDisplayName(user: {
   displayName?: string | null;
-  firstName?: string | null;
-  lastName?: string | null;
   username?: string | null;
 }): string {
   if (user.displayName) return user.displayName;
-  if (user.firstName) return `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`;
   return user.username || "Bird Feed User";
 }
