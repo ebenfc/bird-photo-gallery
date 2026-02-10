@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
 import { db } from "@/db";
 import { bookmarks, users, species, photos } from "@/db/schema";
-import { eq, and, count } from "drizzle-orm";
-import { getUserByUsername } from "@/lib/user";
+import { eq, and, count, sql } from "drizzle-orm";
+import { getUserByUsername, getDisplayName } from "@/lib/user";
 
 export const runtime = "nodejs";
 
@@ -28,6 +28,7 @@ export async function GET(_request: NextRequest) {
         username: users.username,
         firstName: users.firstName,
         lastName: users.lastName,
+        displayName: users.displayName,
         city: users.city,
         state: users.state,
         isPublicGalleryEnabled: users.isPublicGalleryEnabled,
@@ -35,7 +36,7 @@ export async function GET(_request: NextRequest) {
       .from(bookmarks)
       .innerJoin(users, eq(bookmarks.bookmarkedUserId, users.id))
       .where(eq(bookmarks.userId, userId))
-      .orderBy(users.firstName, users.username);
+      .orderBy(sql`COALESCE(${users.displayName}, ${users.firstName}, ${users.username})`, users.username);
 
     // Filter to only public galleries (in case someone disabled after being bookmarked)
     const publicBookmarks = userBookmarks.filter((b) => b.isPublicGalleryEnabled);
@@ -53,9 +54,7 @@ export async function GET(_request: NextRequest) {
           .from(photos)
           .where(eq(photos.userId, bookmark.userId));
 
-        const displayName = bookmark.firstName
-          ? `${bookmark.firstName}${bookmark.lastName ? ` ${bookmark.lastName}` : ""}`
-          : bookmark.username || "Bird Feed User";
+        const displayName = getDisplayName(bookmark);
 
         return {
           username: bookmark.username,

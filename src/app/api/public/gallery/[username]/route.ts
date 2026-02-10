@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { photos, species } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
-import { getUserByUsername } from "@/lib/user";
+import { getUserByUsername, getDisplayName } from "@/lib/user";
 import { checkAndGetRateLimitResponse, RATE_LIMITS, addRateLimitHeaders } from "@/lib/rateLimit";
 import { logError } from "@/lib/logger";
 
@@ -52,10 +52,7 @@ export async function GET(
       .where(eq(species.userId, user.id));
     const speciesCount = Number(speciesCountResult[0]?.count ?? 0);
 
-    // Build display name
-    const displayName = user.firstName
-      ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`
-      : user.username || "Bird Feed User";
+    const displayName = getDisplayName(user);
 
     const response = NextResponse.json({
       username: user.username,

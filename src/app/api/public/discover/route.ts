@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { users, species, photos } from "@/db/schema";
 import { eq, and, count, sql, inArray } from "drizzle-orm";
+import { getDisplayName } from "@/lib/user";
 import { STATE_CODES } from "@/config/usStates";
 
 export const runtime = "nodejs";
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
     // Get the directory-listed users
     const orderExpr = sort === "random"
       ? [sql`random()`]
-      : [users.firstName, users.username];
+      : [sql`COALESCE(${users.displayName}, ${users.firstName}, ${users.username})`, users.username];
 
     const listedUsers = await db
       .select({
@@ -57,6 +58,7 @@ export async function GET(request: NextRequest) {
         username: users.username,
         firstName: users.firstName,
         lastName: users.lastName,
+        displayName: users.displayName,
         city: users.city,
         state: users.state,
       })
@@ -86,13 +88,9 @@ export async function GET(request: NextRequest) {
     const photosMap = new Map(photoCounts.map((r) => [r.userId, r.count]));
 
     const galleries = listedUsers.map((user) => {
-      const displayName = user.firstName
-        ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`
-        : user.username || "Bird Feed User";
-
       return {
         username: user.username,
-        displayName,
+        displayName: getDisplayName(user),
         city: user.city,
         state: user.state,
         speciesCount: speciesMap.get(user.id) ?? 0,

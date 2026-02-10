@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
-import { getUserByClerkId, validateUsername, isUsernameAvailable } from "@/lib/user";
+import { getUserByClerkId, validateUsername, isUsernameAvailable, getDisplayName } from "@/lib/user";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -37,9 +37,8 @@ export async function GET(_request: NextRequest) {
       isDirectoryListed: user.isDirectoryListed,
       city: user.city || null,
       state: user.state || null,
-      displayName: user.firstName
-        ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`
-        : null,
+      displayName: getDisplayName(user),
+      rawDisplayName: user.displayName || null,
     });
   } catch (error) {
     console.error("Failed to fetch profile settings:", error);
@@ -64,7 +63,7 @@ export async function PATCH(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { username, isPublicGalleryEnabled, city, state, isDirectoryListed } = body;
+    const { username, isPublicGalleryEnabled, city, state, isDirectoryListed, displayName } = body;
 
     // Build update object
     const updates: Partial<{
@@ -73,6 +72,7 @@ export async function PATCH(request: NextRequest) {
       isDirectoryListed: boolean;
       city: string | null;
       state: string | null;
+      displayName: string | null;
     }> = {};
 
     // Handle username update
@@ -158,6 +158,22 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
+    // Handle displayName update
+    if (displayName !== undefined) {
+      if (displayName === null || displayName === "") {
+        updates.displayName = null;
+      } else {
+        const trimmed = String(displayName).trim();
+        if (trimmed.length > 50) {
+          return NextResponse.json(
+            { error: "Display name must be 50 characters or less" },
+            { status: 400 }
+          );
+        }
+        updates.displayName = trimmed;
+      }
+    }
+
     // Handle directory listing toggle
     if (typeof isDirectoryListed === "boolean") {
       if (isDirectoryListed) {
@@ -208,6 +224,7 @@ export async function PATCH(request: NextRequest) {
       isDirectoryListed: result[0].isDirectoryListed,
       city: result[0].city,
       state: result[0].state,
+      displayName: result[0].displayName,
     });
   } catch (error) {
     console.error("Failed to update profile settings:", error);

@@ -7,7 +7,7 @@ Server-side utility modules. Most are server-only — do not import from client 
 | File | Purpose |
 |------|---------|
 | `authHelpers.ts` | `requireAuth()`, `isErrorResponse()`, `getCurrentUserId()` — used in every authenticated API route |
-| `user.ts` | User DB operations: `getOrCreateUser`, `getUserByUsername`, `isUsernameAvailable`, `validateUsername` |
+| `user.ts` | User DB operations: `getOrCreateUser`, `getUserByUsername`, `isUsernameAvailable`, `validateUsername`, `getDisplayName` |
 | `validation.ts` | Zod schemas for all request validation. Use `validateRequest()` or `validateSearchParams()` helpers |
 | `photoLimits.ts` | `checkSpeciesLimit()`, `checkUnassignedLimit()` — enforces 8-per-species and 24-unassigned caps |
 | `haikubox.ts` | Haikubox API client. Reads serial from DB via `settings.ts`, falls back to env var |
