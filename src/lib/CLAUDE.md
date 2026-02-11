@@ -7,7 +7,7 @@ Server-side utility modules. Most are server-only — do not import from client 
 | File | Purpose |
 |------|---------|
 | `authHelpers.ts` | `requireAuth()`, `isErrorResponse()`, `getCurrentUserId()` — used in every authenticated API route |
-| `user.ts` | User DB operations: `getOrCreateUser`, `getUserByUsername`, `isUsernameAvailable`, `validateUsername`, `getDisplayName` |
+| `user.ts` | User DB operations: `getOrCreateUser`, `getUserByUsername`, `getCachedUserByUsername`, `isUsernameAvailable`, `validateUsername`, `getDisplayName` |
 | `nameGenerator.ts` | Bird-themed display name generator: `generateBirdName()` → e.g., "CuriousWren42". Client-safe |
 | `validation.ts` | Zod schemas for all request validation. Use `validateRequest()` or `validateSearchParams()` helpers |
 | `photoLimits.ts` | `checkSpeciesLimit()`, `checkUnassignedLimit()` — enforces 8-per-species and 24-unassigned caps |
@@ -22,7 +22,7 @@ Server-side utility modules. Most are server-only — do not import from client 
 | `suggestions.ts` | Photography suggestions scored by detection frequency, photo deficit, recency, and rarity |
 | `agreement.ts` | User agreement tracking: `hasAcceptedCurrentAgreement()`, `acceptAgreement()` |
 | `slack.ts` | Slack webhook for issue reports (Block Kit formatting). Server-only |
-| `cache.ts` | In-memory TTL cache (singleton). Use `getOrFetch()` for cache-aside pattern |
+| `cache.ts` | In-memory TTL cache (singleton). Use `getOrFetch()` for cache-aside or `getOrFetchDeduped()` for thundering-herd-safe pattern |
 | `rateLimit.ts` | In-memory rate limiter with preset tiers: `read` (100/min), `write` (20/min), `upload` (10/min), `sync` (5/min) |
 | `logger.ts` | Structured logging with Sentry integration. Use `logError()` (auto-reports to Sentry in production) |
 
@@ -37,6 +37,8 @@ Server-side utility modules. Most are server-only — do not import from client 
 **Haikubox name matching:** Use `normalizeCommonName()` from `haikubox.ts` when comparing bird names (handles Unicode apostrophes, case, whitespace).
 
 **Cache invalidation:** After any mutation (create/update/delete), call the appropriate `invalidate*Cache()` from `cache.ts`. Forgetting this causes stale data.
+
+**Public user lookups:** Always use `getCachedUserByUsername()` instead of `getUserByUsername()` in public-facing routes. It uses `getOrFetchDeduped()` with 60s TTL to prevent DB pool exhaustion from concurrent crawler traffic. In server components, additionally wrap with `React.cache()` for per-request deduplication.
 
 ## Tests
 

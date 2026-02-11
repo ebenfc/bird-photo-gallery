@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { photos, species } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
-import { getUserByUsername, getDisplayName } from "@/lib/user";
+import { getCachedUserByUsername, getDisplayName } from "@/lib/user";
 import { checkAndGetRateLimitResponse, RATE_LIMITS, addRateLimitHeaders } from "@/lib/rateLimit";
 import { logError } from "@/lib/logger";
 
@@ -28,7 +28,7 @@ export async function GET(
     const { username } = await params;
 
     // Look up user by username
-    const user = await getUserByUsername(username);
+    const user = await getCachedUserByUsername(username);
 
     // Return 404 if user not found or gallery not public
     if (!user || !user.isPublicGalleryEnabled) {
