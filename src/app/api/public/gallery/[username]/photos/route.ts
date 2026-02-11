@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { photos, species, Rarity } from "@/db/schema";
 import { eq, desc, asc, and, sql, inArray } from "drizzle-orm";
 import { getThumbnailUrl, getOriginalUrl } from "@/lib/storage";
-import { getUserByUsername } from "@/lib/user";
+import { getCachedUserByUsername } from "@/lib/user";
 import { checkAndGetRateLimitResponse, RATE_LIMITS, addRateLimitHeaders } from "@/lib/rateLimit";
 import { logError } from "@/lib/logger";
 
@@ -31,7 +31,7 @@ export async function GET(
     const { username } = await params;
 
     // Look up user by username
-    const user = await getUserByUsername(username);
+    const user = await getCachedUserByUsername(username);
 
     // Return 404 if user not found or gallery not public
     if (!user || !user.isPublicGalleryEnabled) {

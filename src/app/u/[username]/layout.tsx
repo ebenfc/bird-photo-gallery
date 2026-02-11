@@ -1,9 +1,14 @@
+import { cache } from "react";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getUserByUsername, getDisplayName } from "@/lib/user";
+import { getCachedUserByUsername, getDisplayName } from "@/lib/user";
 import PublicHeader from "@/components/layout/PublicHeader";
 import BookmarkButton from "@/components/discover/BookmarkButton";
+
+// Request-level deduplication: generateMetadata and component body
+// share the same cached result within a single server render
+const getUser = cache((username: string) => getCachedUserByUsername(username));
 
 interface PublicGalleryLayoutProps {
   children: React.ReactNode;
@@ -12,7 +17,7 @@ interface PublicGalleryLayoutProps {
 
 export async function generateMetadata({ params }: PublicGalleryLayoutProps): Promise<Metadata> {
   const { username } = await params;
-  const user = await getUserByUsername(username);
+  const user = await getUser(username);
   const displayName = user ? getDisplayName(user) : username;
   return {
     title: `${displayName}'s Gallery | Bird Feed`,
@@ -26,7 +31,7 @@ export default async function PublicGalleryLayout({
   const { username } = await params;
 
   // Server-side check if gallery exists and is public
-  const user = await getUserByUsername(username);
+  const user = await getUser(username);
 
   if (!user || !user.isPublicGalleryEnabled) {
     notFound();

@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { STATE_CODES } from "@/config/usStates";
+import { invalidateUserCache } from "@/lib/cache";
 
 // Ensure this route runs on Node.js runtime (not Edge)
 export const runtime = "nodejs";
@@ -216,6 +217,12 @@ export async function PATCH(request: NextRequest) {
         { status: 404 }
       );
     }
+
+    // Invalidate cached user lookup so public pages reflect changes
+    if (result[0].username) {
+      invalidateUserCache(result[0].username);
+    }
+    // If username was changed, the old cached entry expires naturally (60s TTL)
 
     return NextResponse.json({
       success: true,

@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { getOrFetchDeduped, cacheKeys } from "@/lib/cache";
 
 /**
  * Gets or creates a user in our database from Clerk user data
@@ -84,6 +85,21 @@ export async function getUserByUsername(username: string) {
     .limit(1);
 
   return result[0] || null;
+}
+
+/**
+ * Cached version of getUserByUsername.
+ * Uses in-memory cache with 60s TTL + in-flight deduplication
+ * to prevent connection pool exhaustion from concurrent requests
+ * (e.g., social media crawlers generating link previews).
+ */
+export async function getCachedUserByUsername(username: string) {
+  const normalized = username.toLowerCase();
+  return getOrFetchDeduped(
+    cacheKeys.userByUsername(normalized),
+    () => getUserByUsername(normalized),
+    60
+  );
 }
 
 /**

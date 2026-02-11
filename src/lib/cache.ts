@@ -107,6 +107,7 @@ export const cacheKeys = {
   photoById: (id: number) => `photo:${id}`,
   haikuboxStats: () => 'haikubox:stats',
   haikuboxDetections: (params: string) => `haikubox:detections:${params}`,
+  userByUsername: (username: string) => `user:username:${username}`,
 };
 
 /**
@@ -160,4 +161,49 @@ export function invalidatePhotosCache(photoId?: number): void {
 export function invalidateHaikuboxCache(): void {
   cache.delete(cacheKeys.haikuboxStats());
   cache.deletePattern('^haikubox:');
+}
+
+// Map of in-flight fetch promises for deduplication (thundering herd protection)
+const inFlight = new Map<string, Promise<unknown>>();
+
+/**
+ * Like getOrFetch, but deduplicates concurrent in-flight fetches for the same key.
+ * When multiple requests arrive simultaneously for a cold cache key,
+ * only the first triggers the actual fetch — the rest share its Promise.
+ */
+export async function getOrFetchDeduped<T>(
+  key: string,
+  fetchFn: () => Promise<T>,
+  ttlSeconds: number = 300
+): Promise<T> {
+  const cached = cache.get<T>(key);
+  if (cached !== null) {
+    return cached;
+  }
+
+  const existing = inFlight.get(key);
+  if (existing) {
+    return existing as Promise<T>;
+  }
+
+  const promise = fetchFn()
+    .then((data) => {
+      cache.set(key, data, ttlSeconds);
+      inFlight.delete(key);
+      return data;
+    })
+    .catch((error) => {
+      inFlight.delete(key);
+      throw error;
+    });
+
+  inFlight.set(key, promise);
+  return promise;
+}
+
+/**
+ * Invalidate cached user lookup by username
+ */
+export function invalidateUserCache(username: string): void {
+  cache.delete(cacheKeys.userByUsername(username.toLowerCase()));
 }
