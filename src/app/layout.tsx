@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
+import { headers } from "next/headers";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
@@ -35,6 +36,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Check if this is a public page (e.g., /u/[username], /about)
+  // Set by middleware in proxy.ts via x-pathname header
+  const headersList = await headers();
+  const pathname = headersList.get('x-pathname') || '';
+  const isPublicPage = pathname.startsWith('/u/') || pathname === '/about';
+
   let userId: string | null = null;
   try {
     const authResult = await auth();
@@ -47,9 +54,10 @@ export default async function RootLayout({
   const isAuthenticated = !!userId;
 
   // Check if the authenticated user has completed onboarding
+  // Skip for public pages — visitors should never be gated
   let hasAcceptedAgreement = false;
   let hasDisplayName = false;
-  if (isAuthenticated) {
+  if (isAuthenticated && !isPublicPage) {
     try {
       hasAcceptedAgreement = await hasAcceptedCurrentAgreement(userId!);
       if (hasAcceptedAgreement) {
@@ -80,7 +88,7 @@ export default async function RootLayout({
         >
           <ThemeProvider>
             <SentryUserIdentifier />
-            {isAuthenticated ? (
+            {isAuthenticated && !isPublicPage ? (
               !hasAcceptedAgreement ? (
                 // User is authenticated but hasn't accepted — show agreement gate
                 <div className="pnw-texture min-h-screen flex items-center justify-center py-12 px-4">
