@@ -24,6 +24,12 @@ const clerkHandler = clerkMiddleware(async (auth, req) => {
       return redirectToSignIn();
     }
   }
+
+  // Pass pathname to server components so the root layout can
+  // skip onboarding gates on public pages (e.g., /u/[username])
+  const headers = new Headers(req.headers);
+  headers.set('x-pathname', req.nextUrl.pathname);
+  return NextResponse.next({ request: { headers } });
 });
 
 export default async function middleware(request: NextRequest, event: NextFetchEvent) {
