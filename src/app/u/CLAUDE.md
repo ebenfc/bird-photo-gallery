@@ -18,6 +18,9 @@ Uses `PublicHeader` component with minimal navigation (Feed | Species tabs only)
 No Clerk auth UI, no edit/upload buttons.
 `BookmarkButton` rendered as child of `PublicHeader` for authenticated visitors.
 
+### Onboarding Gate Bypass
+Authenticated users visiting `/u/` pages skip onboarding gates (agreement form, display name gate). This is handled by `AuthenticatedLayout` (client component) using `usePathname()` — NOT middleware. Never use middleware to pass pathname to server components; it interferes with Clerk.
+
 ### Security
 - Routes are public (added to Clerk middleware's `isPublicRoute` matcher in `src/proxy.ts`)
 - API endpoints verify `isPublicGalleryEnabled === true` before returning data

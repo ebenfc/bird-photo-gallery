@@ -12,7 +12,7 @@ Components are organized by feature area.
 | `discover/` | Discover page: BookmarkButton, GalleryCard, DiscoverFilters |
 | `gallery/` | Photo gallery and modal components |
 | `landing/` | Public landing page (includes `ThemeShowcase` live skin picker) |
-| `layout/` | Header, navigation, PublicHeader |
+| `layout/` | Header, navigation, PublicHeader, AuthenticatedLayout |
 | `providers/` | Theme provider (next-themes wrapper) |
 | `settings/` | Settings forms (public gallery, location, appearance/skin picker) |
 | `species/` | Species cards and forms |
@@ -55,6 +55,9 @@ Create/edit modal with Wikipedia auto-lookup (debounced 800ms). Parent handles t
 - `readOnly` — hides edit controls (public gallery)
 - `adjacentPhotos` — prev/next URLs for peek effect during swipe
 - Swipe gestures via `useSwipeGesture`: 1:1 tracking, velocity flicks, elastic bounce, swipe-down dismiss
+
+### Authenticated Layout (`layout/AuthenticatedLayout.tsx`)
+Client component wrapping all authenticated content. Uses `usePathname()` to detect public pages (`/u/`, `/about`) and skip onboarding gates. On public pages: fully onboarded users see app chrome (Header, nav), others see just the page content. On app pages: enforces agreement → display name → full app flow.
 
 ### Public Header (`layout/PublicHeader.tsx`)
 Minimal header for public galleries: Feed/Species tabs, no auth UI, CTA link (desktop only), `children` prop for BookmarkButton.
