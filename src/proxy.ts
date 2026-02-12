@@ -39,11 +39,6 @@ export default async function middleware(request: NextRequest, event: NextFetchE
     return NextResponse.next();
   }
 
-  // Set pathname on request headers before Clerk processes it.
-  // This flows through to server components via headers(), allowing
-  // the root layout to skip onboarding gates on public pages.
-  request.headers.set('x-pathname', request.nextUrl.pathname);
-
   return clerkHandler(request, event);
 }
 

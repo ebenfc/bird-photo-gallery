@@ -2,17 +2,13 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
-import { headers } from "next/headers";
+import { connection } from "next/server";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
-import Header from "@/components/layout/Header";
 import { hasAcceptedCurrentAgreement } from "@/lib/agreement";
 import { getUserByClerkId } from "@/lib/user";
-import AgreementForm from "@/components/agreement/AgreementForm";
-import DisplayNameGate from "@/components/onboarding/DisplayNameGate";
-import { ToastProvider } from "@/components/ui/Toast";
-import ReportIssueButton from "@/components/support/ReportIssueButton";
+import AuthenticatedLayout from "@/components/layout/AuthenticatedLayout";
 import SentryUserIdentifier from "@/components/SentryUserIdentifier";
 import ThemeProvider from "@/components/providers/ThemeProvider";
 
@@ -36,11 +32,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Check if this is a public page (e.g., /u/[username], /about)
-  // Set by middleware in proxy.ts via x-pathname header
-  const headersList = await headers();
-  const pathname = headersList.get('x-pathname') || '';
-  const isPublicPage = pathname.startsWith('/u/') || pathname === '/about';
+  // Force dynamic rendering — this layout reads auth state and must not be
+  // statically pre-rendered at build time (ClerkProvider needs env vars).
+  await connection();
 
   let userId: string | null = null;
   try {
@@ -54,10 +48,9 @@ export default async function RootLayout({
   const isAuthenticated = !!userId;
 
   // Check if the authenticated user has completed onboarding
-  // Skip for public pages — visitors should never be gated
   let hasAcceptedAgreement = false;
   let hasDisplayName = false;
-  if (isAuthenticated && !isPublicPage) {
+  if (isAuthenticated) {
     try {
       hasAcceptedAgreement = await hasAcceptedCurrentAgreement(userId!);
       if (hasAcceptedAgreement) {
@@ -88,39 +81,14 @@ export default async function RootLayout({
         >
           <ThemeProvider>
             <SentryUserIdentifier />
-            {isAuthenticated && !isPublicPage ? (
-              !hasAcceptedAgreement ? (
-                // User is authenticated but hasn't accepted — show agreement gate
-                <div className="pnw-texture min-h-screen flex items-center justify-center py-12 px-4">
-                  <div className="w-full max-w-2xl">
-                    <AgreementForm />
-                  </div>
-                </div>
-              ) : !hasDisplayName ? (
-                // User accepted agreement but needs a display name
-                <div className="pnw-texture min-h-screen flex items-center justify-center py-12 px-4">
-                  <div className="w-full max-w-lg">
-                    <DisplayNameGate />
-                  </div>
-                </div>
-              ) : (
-                // Onboarding complete — show full app
-                <ToastProvider>
-                  <a
-                    href="#main-content"
-                    className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-[var(--card-bg)] focus:text-black focus:rounded"
-                  >
-                    Skip to content
-                  </a>
-                  <Header />
-                  <main id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-                    {children}
-                  </main>
-                  <ReportIssueButton />
-                </ToastProvider>
-              )
+            {isAuthenticated ? (
+              <AuthenticatedLayout
+                hasAcceptedAgreement={hasAcceptedAgreement}
+                hasDisplayName={hasDisplayName}
+              >
+                {children}
+              </AuthenticatedLayout>
             ) : (
-              // Not authenticated — landing page, sign-in, sign-up get full-width layout
               <>{children}</>
             )}
           </ThemeProvider>
