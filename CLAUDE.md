@@ -79,6 +79,15 @@ Unauthenticated visitors can live-preview all 4 skins on the landing page (`Them
 - `src/app/globals.css` — CSS variable definitions + skin overrides
 - `src/contexts/SkinContext.tsx` — Skin state + localStorage persistence
 
+## Public Pages
+
+Public pages (`/u/[username]`, `/about`) are accessible without authentication. Two layers handle this:
+
+1. **Clerk middleware** (`src/proxy.ts`) — marks these routes as public via `isPublicRoute` matcher, so Clerk doesn't require auth
+2. **`AuthenticatedLayout`** (`src/components/layout/AuthenticatedLayout.tsx`) — client component using `usePathname()` to skip onboarding gates (agreement form, display name) when authenticated users visit public pages
+
+**Important:** Never use middleware to pass pathname data to server components (e.g., `request.headers.set()`). It interferes with Clerk. Use `usePathname()` in a client component instead.
+
 ## Page Metadata
 
 Most pages are client components (`"use client"`), so they can't export `metadata` directly. Pattern:
