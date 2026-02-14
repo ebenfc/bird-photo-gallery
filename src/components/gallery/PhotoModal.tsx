@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Photo } from "@/types";
 import { useSwipeGesture, SPRING_BACK_DURATION, COMPLETION_DURATION } from "@/hooks/useSwipeGesture";
 import { usePinchZoom, ZOOM_ANIMATION_DURATION } from "@/hooks/usePinchZoom";
+import AllAboutBirdsLink from "@/components/species/AllAboutBirdsLink";
 
 interface PhotoModalProps {
   photo: Photo | null;
@@ -671,9 +672,15 @@ export default function PhotoModal({
           <div className="p-4 overflow-auto max-h-[calc(50vh-5rem)]">
             {/* Species description - mobile */}
             {photo.species?.description && (
-              <p className="text-sm text-[var(--mist-600)] mb-4 leading-relaxed">
+              <p className="text-sm text-[var(--mist-600)] mb-2 leading-relaxed">
                 {photo.species.description}
               </p>
+            )}
+
+            {photo.species && (
+              <div className="mb-4">
+                <AllAboutBirdsLink commonName={photo.species.commonName} compact />
+              </div>
             )}
 
             {/* Notes section — always visible, above dates */}
@@ -781,9 +788,15 @@ export default function PhotoModal({
           </div>
 
           {photo.species?.description && (
-            <p className="text-[var(--mist-600)] text-sm mb-5 leading-relaxed">
+            <p className="text-[var(--mist-600)] text-sm mb-3 leading-relaxed">
               {photo.species.description}
             </p>
+          )}
+
+          {photo.species && (
+            <div className="mb-5">
+              <AllAboutBirdsLink commonName={photo.species.commonName} compact />
+            </div>
           )}
 
           {/* Set as cover photo button - hidden in readOnly mode */}

@@ -9,6 +9,7 @@ import Button from "@/components/ui/Button";
 import RarityBadge from "@/components/ui/RarityBadge";
 import HeardBadge from "@/components/ui/HeardBadge";
 import ActivityTimeline from "@/components/activity/ActivityTimeline";
+import AllAboutBirdsLink from "@/components/species/AllAboutBirdsLink";
 import { SPECIES_PHOTO_LIMIT } from "@/config/limits";
 
 interface SpeciesPageProps {
@@ -280,21 +281,7 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
           </div>
         </div>
 
-        {/* External link */}
-        <div className="mt-4 pt-4 border-t border-[var(--border-light)]">
-          <a
-            href={`https://www.allaboutbirds.org/guide/${species.commonName.replace(/\s+/g, "_")}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm text-[var(--forest-600)]
-              hover:text-[var(--moss-600)] transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-            Learn more at All About Birds
-          </a>
-        </div>
+        <AllAboutBirdsLink commonName={species.commonName} />
       </div>
 
       {/* Activity Timeline */}
