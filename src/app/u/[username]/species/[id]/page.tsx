@@ -113,11 +113,16 @@ export default function PublicSpeciesDetailPage() {
       {species && (
         <div className="bg-[var(--card-bg)] rounded-[var(--radius-lg)] border border-[var(--border-light)]
           p-5 sm:p-6 mb-6">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] mb-1">
-                {species.commonName}
-              </h1>
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)]">
+                  {species.commonName}
+                </h1>
+                <div className="sm:hidden">
+                  <RarityBadge rarity={species.rarity} />
+                </div>
+              </div>
               {species.scientificName && (
                 <p className="text-[var(--mist-500)] italic mb-3">
                   {species.scientificName}
@@ -129,7 +134,9 @@ export default function PublicSpeciesDetailPage() {
                 </p>
               )}
             </div>
-            <RarityBadge rarity={species.rarity} />
+            <div className="hidden sm:flex items-center gap-2">
+              <RarityBadge rarity={species.rarity} />
+            </div>
           </div>
 
           <AllAboutBirdsLink commonName={species.commonName} />
