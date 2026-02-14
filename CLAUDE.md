@@ -49,6 +49,7 @@ src/
 - **Storage:** Supabase
 - **Previews:** Vercel (auto-deploys on PRs)
 - **Cron:** Haikubox sync daily at 6am UTC (Vercel)
+- **MCP Servers** (all in `~/.claude.json`): Railway (deploy/logs/variables), GitHub (issues/PRs), Sentry (error tracking, org: `birdfeed-a6`), Vercel (deployments/previews, team: `team_xv5NW24dJANhDhJb6zpDE8Tj`), Supabase (DB/storage management)
 
 ## Theming System
 
@@ -93,6 +94,26 @@ Public pages (`/u/[username]`, `/about`) are accessible without authentication. 
 Most pages are client components (`"use client"`), so they can't export `metadata` directly. Pattern:
 - Create a `layout.tsx` in the route folder that exports `metadata` (e.g., `src/app/haikubox/layout.tsx`)
 - For dynamic routes, use `generateMetadata` in the layout (e.g., `src/app/u/[username]/layout.tsx`)
+
+## Custom Skills (`.claude/skills/`)
+
+Slash commands for common workflows. Invoke with `/skill-name`.
+
+| Skill | Purpose |
+|-------|---------|
+| `/new-api-route` | Scaffold authenticated API route with auth + validation boilerplate |
+| `/migrate` | Safe two-database migration (local Supabase + production Railway) |
+| `/new-component` | Generate theme-aware, accessible React component |
+| `/theme-var` | Find or create CSS variables across all 7 themes |
+| `/pr-ready` | Run tests/lint/type-check, update docs, create PR |
+| `/add-public-endpoint` | Scaffold public API route with visibility checks |
+| `/update-docs` | Scan changes and update CLAUDE.md files (auto-invocable) |
+| `/seed-species` | Generate realistic test fixtures matching DB schema |
+| `/design-review` | Evaluate UI for hierarchy, spacing, consistency, theme compliance |
+| `/mobile-ux` | Review touch targets, gestures, responsive layout, mobile patterns |
+| `/a11y-check` | Audit ARIA, keyboard nav, contrast, screen reader compatibility |
+
+Personal skills (in `~/.claude/skills/`, not committed): `/explain`, `/debug-sentry`, `/check-deploy`
 
 ## Key Files
 
