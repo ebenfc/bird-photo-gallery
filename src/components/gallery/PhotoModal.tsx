@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Photo } from "@/types";
 import { useSwipeGesture, SPRING_BACK_DURATION, COMPLETION_DURATION } from "@/hooks/useSwipeGesture";
+import { usePinchZoom, ZOOM_ANIMATION_DURATION } from "@/hooks/usePinchZoom";
 
 interface PhotoModalProps {
   photo: Photo | null;
@@ -220,6 +221,16 @@ export default function PhotoModal({
   // Swipe gesture hook
   const swipeContainerRef = useRef<HTMLDivElement>(null);
 
+  // Pinch-to-zoom hook (fullscreen only)
+  const zoomState = usePinchZoom({
+    containerRef: swipeContainerRef,
+    enabled: isFullscreen && !!photo,
+    onZoomChange: () => {
+      // No-op needed here — zoomState.isZoomed drives swipe disable below
+    },
+    viewId: photo?.id, // Reset zoom when photo changes
+  });
+
   const swipeState = useSwipeGesture({
     containerRef: swipeContainerRef,
     onNavigate: (direction) => {
@@ -239,7 +250,7 @@ export default function PhotoModal({
       }
     },
     canNavigate,
-    enabled: !!photo && !isEditingDate && !isEditingNotes && !showDeleteConfirm,
+    enabled: !!photo && !isEditingDate && !isEditingNotes && !showDeleteConfirm && !zoomState.isZoomed,
     viewId: isFullscreen ? "fullscreen" : "detail",
   });
 
@@ -322,16 +333,29 @@ export default function PhotoModal({
                   />
                 )}
               </div>
-              {/* Current photo */}
-              <div className="flex-shrink-0 relative" style={{ width: "100vw" }}>
-                <Image
-                  src={photo.originalUrl}
-                  alt={photo.species?.commonName || "Bird photo"}
-                  fill
-                  className="object-contain"
-                  sizes="100vw"
-                  priority
-                />
+              {/* Current photo — with pinch-zoom transform */}
+              <div className="flex-shrink-0 relative" style={{ width: "100vw", overflow: "hidden" }}>
+                <div
+                  style={{
+                    position: "relative",
+                    width: "100%",
+                    height: "100%",
+                    transform: `translate3d(${zoomState.translateX}px, ${zoomState.translateY}px, 0) scale(${zoomState.scale})`,
+                    willChange: zoomState.isZoomed ? "transform" : undefined,
+                    transition: zoomState.isAnimating
+                      ? `transform ${ZOOM_ANIMATION_DURATION}ms cubic-bezier(0.175, 0.885, 0.32, 1.275)`
+                      : "none",
+                  }}
+                >
+                  <Image
+                    src={photo.originalUrl}
+                    alt={photo.species?.commonName || "Bird photo"}
+                    fill
+                    className="object-contain"
+                    sizes="100vw"
+                    priority
+                  />
+                </div>
               </div>
               {/* Next photo (off-screen right) */}
               <div className="flex-shrink-0 relative" style={{ width: "100vw" }}>

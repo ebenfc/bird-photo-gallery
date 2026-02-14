@@ -249,6 +249,11 @@ export function useSwipeGesture(config: SwipeGestureConfig): SwipeGestureState {
     if (!el || !enabled) return;
 
     const handleTouchStart = (e: TouchEvent) => {
+      // Multi-touch — let pinch zoom handle it
+      if (e.touches.length > 1) {
+        return;
+      }
+
       // Skip gesture tracking when tapping interactive elements (buttons, links)
       // so their native click handlers fire normally
       if (isInteractiveElement(e.target, el)) {

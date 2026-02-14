@@ -55,6 +55,7 @@ Create/edit modal with Wikipedia auto-lookup (debounced 800ms). Parent handles t
 - `readOnly` — hides edit controls (public gallery)
 - `adjacentPhotos` — prev/next URLs for peek effect during swipe
 - Swipe gestures via `useSwipeGesture`: 1:1 tracking, velocity flicks, elastic bounce, swipe-down dismiss
+- **Pinch-to-zoom** (fullscreen only) via `usePinchZoom`: pinch 1x–4x, pan while zoomed, double-tap to toggle 2.5x. Disables swipe when zoomed (`enabled: !zoomState.isZoomed`). `useSwipeGesture` has multi-touch guard to avoid conflicts.
 
 ### Authenticated Layout (`layout/AuthenticatedLayout.tsx`)
 Client component wrapping all authenticated content. Uses `usePathname()` to detect public pages (`/u/`, `/about`) and skip onboarding gates. On public pages: fully onboarded users see app chrome (Header, nav), others see just the page content. On app pages: enforces agreement → display name → full app flow.
