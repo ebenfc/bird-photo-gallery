@@ -36,7 +36,7 @@ src/
   app/              # Pages and API routes (see api/CLAUDE.md)
   components/       # React components (see components/CLAUDE.md)
   db/               # Database schema (see db/CLAUDE.md)
-  hooks/            # Custom React hooks (useKonamiCode, useLogoTapUnlock)
+  hooks/            # Custom React hooks (useKonamiCode, useLogoTapUnlock, usePinchZoom, useSwipeGesture)
   lib/              # Utilities and business logic (see lib/CLAUDE.md)
   types/            # TypeScript definitions
   config/           # App configuration (limits.ts, usStates.ts)
@@ -55,30 +55,9 @@ src/
 
 Two-dimensional theming via HTML attributes on `<html>`:
 - `data-mode` — `light` | `dark` | `system` (managed by `next-themes`)
-- `data-skin` — `default` | `bold` | `retro` | `fieldguide` (managed by `SkinContext`)
+- `data-skin` — `default` | `bold` | `retro` | `coastal` | `journal` | `meadow` | `highcontrast` (managed by `SkinContext`)
 
-### Available Skins
-Default (PNW green/teal), Bold (purple/electric blue), Field Guide (cream/sage, Georgia serif), Retro (GeoCities navy/teal/yellow).
-
-### How It Works
-All colors use CSS custom properties (`var(--forest-500)`, `var(--moss-300)`, etc.). Skin overrides in `globals.css` use `[data-skin="bold"]` / `[data-skin="fieldguide"]` / `[data-skin="retro"]` selectors to remap every variable. Components need zero changes — they inherit the active skin automatically.
-
-### Easter Egg Infrastructure (Dormant)
-Unlock system hooks (`useKonamiCode`, `useLogoTapUnlock`) fire in `Header.tsx` but callback is a no-op. To re-enable: add reward logic to `handleRetroUnlock` in `Header.tsx`.
-
-### Landing Page Theme Showcase
-Unauthenticated visitors can live-preview all 4 skins on the landing page (`ThemeShowcase` component). Their choice persists to localStorage and carries over into sign-up. Includes a light/dark mode toggle.
-
-### Color Rules for New Components
-- Backgrounds: `var(--card-bg)`, `var(--background)` — never `bg-white`
-- Text: `var(--text-primary)`, `var(--text-secondary)` — never hardcoded colors
-- Borders: `var(--border)`, `var(--border-light)`
-- Accents: `var(--moss-500)`, `var(--forest-600)` — these remap per skin
-- Shadows: `var(--shadow-sm)`, `var(--shadow-moss)` — tinted per skin (emerald/purple/brown/hard-bevel)
-
-### Key Theming Files
-- `src/app/globals.css` — CSS variable definitions + skin overrides
-- `src/contexts/SkinContext.tsx` — Skin state + localStorage persistence
+6 standard skins + Retro (hidden easter egg). All colors use CSS custom properties; skin overrides in `globals.css` remap every variable. See `src/contexts/CLAUDE.md` for full theming details.
 
 ## Public Pages
 
@@ -117,7 +96,4 @@ Personal skills (in `~/.claude/skills/`, not committed): `/explain`, `/debug-sen
 
 ## Key Files
 
-- `src/db/schema.ts` — All database tables
-- `src/lib/validation.ts` — Zod schemas for request validation
-- `src/proxy.ts` — Clerk route protection (Next.js 16 middleware)
-- `drizzle.config.ts` — Database configuration
+`src/db/schema.ts` (tables) | `src/lib/validation.ts` (Zod schemas) | `src/proxy.ts` (Clerk middleware) | `drizzle.config.ts` (DB config)

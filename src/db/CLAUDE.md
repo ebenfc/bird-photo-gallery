@@ -18,6 +18,7 @@ All tables defined in `schema.ts`.
 | `haikuboxSyncLog` | Sync operation history |
 | `bookmarks` | Saved galleries (private, per-user) |
 | `appSettings` | User settings (key-value pairs) |
+| `userAgreements` | Tracks user acceptance of agreement versions |
 
 ## Data Isolation
 
@@ -37,6 +38,7 @@ Tables with performance indexes:
 - `haikuboxDetections`: `user_id`, unique on `(user_id, species_common_name, data_year)`
 - `haikuboxActivityLog`: unique on `(species_common_name, detected_at)`, `(species_common_name, hour_of_day)`, `detected_at`
 - `bookmarks`: `user_id`, unique on `(user_id, bookmarked_user_id)`
+- `userAgreements`: `user_id`, unique on `(user_id, agreement_version)`
 
 ## Key Relationships
 
