@@ -35,6 +35,7 @@ Components are organized by feature area.
 | `UnassignedSpeciesModal` | Modal for creating a species entry from an unmatched detection |
 | `ActiveNowWidget` | Real-time activity display |
 | `ActivityTimeline` | Timeline view of detections |
+| `HaikuboxSetupCard` | Guided setup flow for connecting a Haikubox device |
 
 ## Key Component Patterns
 
