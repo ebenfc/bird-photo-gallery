@@ -40,6 +40,9 @@ export const species = pgTable("species", {
   description: text("description"),
   rarity: text("rarity").notNull().default("common"), // 'common', 'uncommon', 'rare'
   coverPhotoId: integer("cover_photo_id"),
+  userNotes: text("user_notes"), // Personal notes about this species (separate from Wikipedia description)
+  ebirdChecklistUrl: text("ebird_checklist_url"), // Optional eBird checklist link
+  inatObservationUrl: text("inat_observation_url"), // Optional iNaturalist observation link
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

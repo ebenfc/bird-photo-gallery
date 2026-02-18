@@ -22,6 +22,8 @@ interface SpeciesFormProps {
     scientificName?: string;
     description?: string;
     rarity?: Rarity;
+    ebirdChecklistUrl?: string | null;
+    inatObservationUrl?: string | null;
   }) => Promise<void>;
   onDelete?: () => Promise<void>;
   initialData?: {
@@ -29,6 +31,8 @@ interface SpeciesFormProps {
     scientificName?: string;
     description?: string;
     rarity?: Rarity;
+    ebirdChecklistUrl?: string | null;
+    inatObservationUrl?: string | null;
   };
   title?: string;
   photoCount?: number;
@@ -47,6 +51,8 @@ export default function SpeciesForm({
   const [scientificName, setScientificName] = useState("");
   const [description, setDescription] = useState("");
   const [rarity, setRarity] = useState<Rarity>("common");
+  const [ebirdChecklistUrl, setEbirdChecklistUrl] = useState("");
+  const [inatObservationUrl, setInatObservationUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -93,6 +99,8 @@ export default function SpeciesForm({
       setScientificName(initialData?.scientificName || "");
       setDescription(initialData?.description || "");
       setRarity(initialData?.rarity || "common");
+      setEbirdChecklistUrl(initialData?.ebirdChecklistUrl || "");
+      setInatObservationUrl(initialData?.inatObservationUrl || "");
       setError("");
       setLookupResult(null);
 
@@ -173,6 +181,8 @@ export default function SpeciesForm({
         scientificName: scientificName.trim() || undefined,
         description: description.trim() || undefined,
         rarity,
+        ebirdChecklistUrl: ebirdChecklistUrl.trim() || null,
+        inatObservationUrl: inatObservationUrl.trim() || null,
       });
       onClose();
     } catch (err) {
@@ -188,6 +198,8 @@ export default function SpeciesForm({
     setScientificName("");
     setDescription("");
     setRarity("common");
+    setEbirdChecklistUrl("");
+    setInatObservationUrl("");
     setError("");
     setShowDeleteConfirm(false);
     onClose();
@@ -307,6 +319,39 @@ export default function SpeciesForm({
             </label>
             <RarityPicker value={rarity} onChange={setRarity} />
           </div>
+
+          {/* Ecosystem links - shown when editing */}
+          {initialData && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-[var(--mist-700)] mb-1.5">
+                  eBird Checklist Link
+                </label>
+                <Input
+                  placeholder="https://ebird.org/checklist/..."
+                  value={ebirdChecklistUrl}
+                  onChange={(e) => setEbirdChecklistUrl(e.target.value)}
+                />
+                <p className="mt-1 text-xs text-[var(--mist-400)]">
+                  Optional link to an eBird checklist for this species
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[var(--mist-700)] mb-1.5">
+                  iNaturalist Link
+                </label>
+                <Input
+                  placeholder="https://www.inaturalist.org/observations/..."
+                  value={inatObservationUrl}
+                  onChange={(e) => setInatObservationUrl(e.target.value)}
+                />
+                <p className="mt-1 text-xs text-[var(--mist-400)]">
+                  Optional link to an iNaturalist observation
+                </p>
+              </div>
+            </>
+          )}
         </div>
 
         {error && commonName.trim() && (

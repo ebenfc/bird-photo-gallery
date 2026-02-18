@@ -59,7 +59,10 @@ export async function GET(
         rarity: species.rarity,
         createdAt: species.createdAt,
         coverPhotoId: species.coverPhotoId,
+        ebirdChecklistUrl: species.ebirdChecklistUrl,
+        inatObservationUrl: species.inatObservationUrl,
         photoCount: sql<number>`count(${photos.id})`.as("photo_count"),
+        firstPhotoDate: sql<string | null>`min(${photos.originalDateTaken})`.as("first_photo_date"),
       })
       .from(species)
       .leftJoin(photos, and(

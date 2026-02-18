@@ -106,7 +106,14 @@ export default function SpeciesCard({ species, onEdit, index = 0, linkPrefix = "
           )}
         </div>
 
-        <div className="mt-3 flex items-center gap-2 flex-wrap">
+        {/* First photographed date */}
+        {species.firstPhotoDate && (
+          <p className="mt-2 text-xs text-[var(--mist-400)]">
+            First photographed {new Date(species.firstPhotoDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+          </p>
+        )}
+
+        <div className="mt-2 flex items-center gap-2 flex-wrap">
           <RarityBadge rarity={species.rarity} size="sm" />
 
           {/* Haikubox heard badge */}

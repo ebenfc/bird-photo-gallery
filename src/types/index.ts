@@ -28,6 +28,13 @@ export interface Species {
     id: number;
     thumbnailUrl: string;
   } | null;
+  // Personal notes (separate from Wikipedia description)
+  userNotes?: string | null;
+  // Ecosystem links
+  ebirdChecklistUrl?: string | null;
+  inatObservationUrl?: string | null;
+  // First photographed date (earliest originalDateTaken across all photos)
+  firstPhotoDate?: string | null;
   // Haikubox detection data (populated when available)
   haikuboxYearlyCount?: number | null;
   haikuboxLastHeard?: string | null;

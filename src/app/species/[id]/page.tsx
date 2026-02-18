@@ -11,6 +11,7 @@ import HeardBadge from "@/components/ui/HeardBadge";
 import ActivityTimeline from "@/components/activity/ActivityTimeline";
 import AllAboutBirdsLink from "@/components/species/AllAboutBirdsLink";
 import { SPECIES_PHOTO_LIMIT } from "@/config/limits";
+import { useToast } from "@/components/ui/Toast";
 
 interface SpeciesPageProps {
   params: Promise<{ id: string }>;
@@ -20,11 +21,15 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
   const { id } = use(params);
   const speciesId = parseInt(id);
 
+  const { showToast } = useToast();
   const [species, setSpecies] = useState<Species | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [detection, setDetection] = useState<HaikuboxDetection | null>(null);
+  const [editingNotes, setEditingNotes] = useState(false);
+  const [notesValue, setNotesValue] = useState("");
+  const [savingNotes, setSavingNotes] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -142,6 +147,30 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
       setSelectedPhoto(null);
     } catch (err) {
       console.error("Failed to delete photo:", err);
+    }
+  };
+
+  const handleSaveNotes = async () => {
+    if (!species) return;
+    setSavingNotes(true);
+    try {
+      const res = await fetch(`/api/species/${species.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userNotes: notesValue.trim() || null }),
+      });
+      if (res.ok) {
+        setSpecies((prev) => prev ? { ...prev, userNotes: notesValue.trim() || null } : null);
+        setEditingNotes(false);
+        showToast("Notes saved", "success");
+      } else {
+        showToast("Failed to save notes", "error");
+      }
+    } catch (err) {
+      console.error("Failed to save notes:", err);
+      showToast("Failed to save notes", "error");
+    } finally {
+      setSavingNotes(false);
     }
   };
 
@@ -293,7 +322,107 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
           </div>
         </div>
 
-        <AllAboutBirdsLink commonName={species.commonName} />
+        {/* Ecosystem links and metadata */}
+        <div className="flex flex-wrap items-center gap-3 mt-3">
+          <AllAboutBirdsLink commonName={species.commonName} />
+
+          {species.ebirdChecklistUrl && (
+            <a
+              href={species.ebirdChecklistUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-sm text-[var(--moss-600)] hover:text-[var(--moss-700)] font-medium transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              View on eBird
+            </a>
+          )}
+
+          {species.inatObservationUrl && (
+            <a
+              href={species.inatObservationUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-sm text-[var(--moss-600)] hover:text-[var(--moss-700)] font-medium transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              View on iNaturalist
+            </a>
+          )}
+        </div>
+
+        {/* First photographed date */}
+        {species.firstPhotoDate && (
+          <p className="text-sm text-[var(--mist-500)] mt-3">
+            First photographed {new Date(species.firstPhotoDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+          </p>
+        )}
+
+        {/* Personal notes section */}
+        <div className="mt-4 pt-4 border-t border-[var(--border-light)]">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-[var(--mist-700)]">Personal Notes</h3>
+            {!editingNotes && (
+              <button
+                type="button"
+                onClick={() => {
+                  setNotesValue(species.userNotes || "");
+                  setEditingNotes(true);
+                }}
+                className="text-xs text-[var(--moss-600)] hover:text-[var(--moss-700)] font-medium transition-colors"
+              >
+                {species.userNotes ? "Edit" : "Add notes"}
+              </button>
+            )}
+          </div>
+          {editingNotes ? (
+            <div>
+              <textarea
+                value={notesValue}
+                onChange={(e) => setNotesValue(e.target.value)}
+                placeholder="Add personal notes about this species — memories, observations, favorite spots..."
+                rows={3}
+                maxLength={2000}
+                className="block w-full px-4 py-2.5 border border-[var(--mist-200)] rounded-xl shadow-sm
+                  bg-[var(--card-bg)] text-[var(--foreground)] placeholder-[var(--mist-400)]
+                  focus:outline-none focus:ring-2 focus:ring-[var(--moss-400)] focus:border-[var(--moss-400)]
+                  hover:border-[var(--mist-300)] transition-colors text-sm resize-none"
+              />
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-xs text-[var(--mist-400)]">{notesValue.length}/2000</span>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingNotes(false)}
+                    className="px-3 py-1.5 text-xs font-medium text-[var(--mist-600)] hover:text-[var(--text-primary)] transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveNotes}
+                    disabled={savingNotes}
+                    className="px-3 py-1.5 text-xs font-medium text-white bg-[var(--moss-600)] hover:bg-[var(--moss-700)] rounded-lg disabled:opacity-50 transition-colors"
+                  >
+                    {savingNotes ? "Saving..." : "Save"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : species.userNotes ? (
+            <p className="text-sm text-[var(--mist-600)] leading-relaxed whitespace-pre-wrap">
+              {species.userNotes}
+            </p>
+          ) : (
+            <p className="text-sm text-[var(--mist-400)] italic">
+              No personal notes yet
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Activity Timeline */}
