@@ -30,7 +30,7 @@ Server-side utility modules. Most are server-only — do not import from client 
 
 **Auth in API routes:** Always use `requireAuth()` + `isErrorResponse()` from `authHelpers.ts`. See `api/CLAUDE.md` for the full pattern.
 
-**Validation:** Define Zod schemas in `validation.ts`, use `validateRequest(schema, data)` in routes. Export `type FooInput = z.infer<typeof FooSchema>` for TypeScript types.
+**Validation:** Define Zod schemas in `validation.ts`, use `validateRequest(schema, data)` in routes. Export `type FooInput = z.infer<typeof FooSchema>` for TypeScript types. For optional URL fields that users can clear, use `z.preprocess((val) => (val === '' ? null : val), ...)` to convert empty strings to null before `.url()` validation.
 
 **Storage paths:** Originals at `originals/{uuid}.jpg`, thumbnails at `thumbnails/{uuid}_thumb.jpg`. Use `storage.ts` helpers for URLs, `supabase.ts` for upload/delete.
 

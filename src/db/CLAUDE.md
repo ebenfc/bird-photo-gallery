@@ -11,7 +11,7 @@ All tables defined in `schema.ts`.
 | Table | Purpose |
 |-------|---------|
 | `users` | User accounts (synced from Clerk) + public gallery settings |
-| `species` | Bird species with rarity classification |
+| `species` | Bird species with rarity, personal notes, ecosystem links (eBird/iNaturalist) |
 | `photos` | Uploaded photos linked to species |
 | `haikuboxDetections` | Aggregated yearly detection counts |
 | `haikuboxActivityLog` | Individual detection timestamps |
@@ -86,15 +86,21 @@ const latestPhotos = await db
 
 **Avoid raw SQL for array parameters** — `db.execute(sql`...`)` with `ANY(${array})` fails silently due to array serialization issues. Always use Drizzle's `inArray()` instead.
 
-## Commands
+## Species Table — Notable Columns
 
-```bash
-npm run db:push     # Push schema changes to database
-npx drizzle-kit studio  # Open Drizzle Studio
-```
-
-For production, use the PUBLIC database URL (see project CLAUDE.md).
+- `userNotes` (text, nullable) — Personal notes, private (excluded from public API)
+- `ebirdChecklistUrl` (text, nullable) — Optional eBird link, visible publicly
+- `inatObservationUrl` (text, nullable) — Optional iNaturalist link, visible publicly
+- `coverPhotoId` (integer, nullable) — User-selected cover photo
+- `firstPhotoDate` — Not a column; computed as `min(photos.originalDateTaken)` via SQL aggregation in species queries
 
 ## Migrations
 
-Located in `migrations/` folder. Drizzle handles migrations automatically with `db:push`.
+**Preferred method:** Supabase MCP `execute_sql` for local, `railway connect Postgres` (piped SQL) for production. `drizzle-kit push` hangs indefinitely — avoid it.
+
+```bash
+# Local (Supabase) — use MCP execute_sql tool
+# Production (Railway) — pipe SQL through railway CLI:
+echo "ALTER TABLE species ADD COLUMN IF NOT EXISTS col_name text;" | \
+  PATH="/opt/homebrew/opt/libpq/bin:$PATH" railway connect Postgres
+```

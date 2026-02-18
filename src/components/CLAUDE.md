@@ -43,13 +43,13 @@ Components are organized by feature area.
 Mobile views use collapsible filter panels (Feed, Species, Activity, Public Feed). Desktop filters always visible.
 
 ### SpeciesCard (`species/SpeciesCard.tsx`)
-Shared card for auth and public views. `linkPrefix` prop for URL target, `onEdit` for auth-only edit button. `HeardBadge` only shows with Haikubox data. Photo count shows `"X of 8"` or `"Curated"` badge.
+Shared card for auth and public views. `linkPrefix` prop for URL target, `onEdit` for auth-only edit button. `HeardBadge` only shows with Haikubox data. Photo count shows `"X of 8"` or `"Curated"` badge. Shows "First photographed" date when `species.firstPhotoDate` is set.
 
 ### SwapPicker (`species/SwapPicker.tsx`)
 4-column thumbnail grid for photo swaps (used in UploadModal and SpeciesAssignModal). Shows favorite indicator + warning.
 
 ### SpeciesForm (`species/SpeciesForm.tsx`)
-Create/edit modal with Wikipedia auto-lookup (debounced 800ms). Parent handles the API call via `onSubmit`.
+Create/edit modal with Wikipedia auto-lookup (debounced 800ms). Parent handles the API call via `onSubmit`. eBird and iNaturalist URL fields only appear in edit mode (`initialData` is set), not during creation.
 
 ### Photo Modal (`gallery/PhotoModal.tsx`)
 - `defaultToFullscreen` — opens directly in fullscreen (Species detail page)
