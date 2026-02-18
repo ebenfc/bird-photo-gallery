@@ -66,6 +66,8 @@ export default function SpeciesDirectory() {
     scientificName?: string;
     description?: string;
     rarity?: Rarity;
+    ebirdChecklistUrl?: string | null;
+    inatObservationUrl?: string | null;
   }) => {
     if (!editingSpecies) return;
 
@@ -401,6 +403,8 @@ export default function SpeciesDirectory() {
                 scientificName: editingSpecies.scientificName || undefined,
                 description: editingSpecies.description || undefined,
                 rarity: editingSpecies.rarity,
+                ebirdChecklistUrl: editingSpecies.ebirdChecklistUrl,
+                inatObservationUrl: editingSpecies.inatObservationUrl,
               }
             : undefined
         }

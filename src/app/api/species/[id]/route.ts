@@ -38,7 +38,11 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
         description: species.description,
         rarity: species.rarity,
         createdAt: species.createdAt,
+        userNotes: species.userNotes,
+        ebirdChecklistUrl: species.ebirdChecklistUrl,
+        inatObservationUrl: species.inatObservationUrl,
         photoCount: sql<number>`count(${photos.id})`.as("photo_count"),
+        firstPhotoDate: sql<string | null>`min(${photos.originalDateTaken})`.as("first_photo_date"),
       })
       .from(species)
       .leftJoin(photos, and(
@@ -84,7 +88,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     const body = await request.json();
-    const { commonName, scientificName, description, rarity, coverPhotoId } = body;
+    const { commonName, scientificName, description, rarity, coverPhotoId, userNotes, ebirdChecklistUrl, inatObservationUrl } = body;
 
     // Build update object with proper typing for Drizzle
     const updateData: Partial<{
@@ -93,6 +97,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       description: string | null;
       rarity: string;
       coverPhotoId: number | null;
+      userNotes: string | null;
+      ebirdChecklistUrl: string | null;
+      inatObservationUrl: string | null;
     }> = {};
 
     if (commonName !== undefined) {
@@ -118,6 +125,29 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         );
       }
       updateData.rarity = rarity;
+    }
+    if (userNotes !== undefined) {
+      updateData.userNotes = userNotes?.trim() || null;
+    }
+    if (ebirdChecklistUrl !== undefined) {
+      if (ebirdChecklistUrl && typeof ebirdChecklistUrl === "string" && !ebirdChecklistUrl.startsWith("https://ebird.org/")) {
+        return NextResponse.json(
+          { error: "Must be an eBird URL (https://ebird.org/...)" },
+          { status: 400 }
+        );
+      }
+      updateData.ebirdChecklistUrl = ebirdChecklistUrl?.trim() || null;
+    }
+    if (inatObservationUrl !== undefined) {
+      if (inatObservationUrl && typeof inatObservationUrl === "string" &&
+          !inatObservationUrl.startsWith("https://www.inaturalist.org/") &&
+          !inatObservationUrl.startsWith("https://inaturalist.org/")) {
+        return NextResponse.json(
+          { error: "Must be an iNaturalist URL" },
+          { status: 400 }
+        );
+      }
+      updateData.inatObservationUrl = inatObservationUrl?.trim() || null;
     }
     if (coverPhotoId !== undefined) {
       // Validate that the photo exists and belongs to this species and user

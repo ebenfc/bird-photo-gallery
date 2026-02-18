@@ -20,6 +20,29 @@ export const SpeciesSchema = z.object({
     .optional()
     .nullable(),
   rarity: RarityEnum.optional().default('common'),
+  userNotes: z.string()
+    .max(2000, 'Notes too long')
+    .transform(s => s.trim())
+    .optional()
+    .nullable(),
+  ebirdChecklistUrl: z.preprocess(
+    (val) => (val === '' ? null : val),
+    z.string()
+      .url('Must be a valid URL')
+      .max(500, 'URL too long')
+      .refine(s => s.startsWith('https://ebird.org/'), 'Must be an eBird URL (https://ebird.org/...)')
+      .nullable()
+      .optional(),
+  ),
+  inatObservationUrl: z.preprocess(
+    (val) => (val === '' ? null : val),
+    z.string()
+      .url('Must be a valid URL')
+      .max(500, 'URL too long')
+      .refine(s => s.startsWith('https://www.inaturalist.org/') || s.startsWith('https://inaturalist.org/'), 'Must be an iNaturalist URL')
+      .nullable()
+      .optional(),
+  ),
 });
 
 // Species update validation (all fields optional)
@@ -41,6 +64,29 @@ export const SpeciesUpdateSchema = z.object({
     .nullable(),
   rarity: RarityEnum.optional(),
   coverPhotoId: z.number().int().positive().optional().nullable(),
+  userNotes: z.string()
+    .max(2000, 'Notes too long')
+    .transform(s => s.trim())
+    .optional()
+    .nullable(),
+  ebirdChecklistUrl: z.preprocess(
+    (val) => (val === '' ? null : val),
+    z.string()
+      .url('Must be a valid URL')
+      .max(500, 'URL too long')
+      .refine(s => s.startsWith('https://ebird.org/'), 'Must be an eBird URL (https://ebird.org/...)')
+      .nullable()
+      .optional(),
+  ),
+  inatObservationUrl: z.preprocess(
+    (val) => (val === '' ? null : val),
+    z.string()
+      .url('Must be a valid URL')
+      .max(500, 'URL too long')
+      .refine(s => s.startsWith('https://www.inaturalist.org/') || s.startsWith('https://inaturalist.org/'), 'Must be an iNaturalist URL')
+      .nullable()
+      .optional(),
+  ),
 });
 
 // Photo update validation
