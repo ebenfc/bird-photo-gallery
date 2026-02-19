@@ -48,6 +48,9 @@ Shared card for auth and public views. `linkPrefix` prop for URL target, `onEdit
 ### BulkActionBar (`gallery/BulkActionBar.tsx`)
 Fixed bottom bar for bulk photo operations. Appears when select mode is active and photos are selected. Shows count + "Assign Species" + "Cancel". Uses `role="toolbar"`, `aria-live="polite"` for count updates.
 
+### Upload Modal (`upload/UploadModal.tsx`)
+Per-file error recovery with retry. State consolidated into `fileUploadState: FileUploadState[]` array — tracks status (`pending | uploading | success | error`), progress, error messages, and frozen assignment data per file. Uses `Promise.allSettled` (not `Promise.all`) so one failure doesn't abort the batch. `executeUploads(state, indices?)` is reused for initial upload and retries. Step flow: select → preview → uploading → results (mixed) or success (all pass). `UploadError` class carries API error codes (`SPECIES_AT_LIMIT`, `UNASSIGNED_AT_LIMIT`) and `retryAfter` for 429s.
+
 ### SwapPicker (`species/SwapPicker.tsx`)
 4-column thumbnail grid for photo swaps (used in UploadModal and SpeciesAssignModal). Shows favorite indicator + warning.
 

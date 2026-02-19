@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { Species, Rarity, Photo, PhotosResponse } from "@/types";
 import Button from "@/components/ui/Button";
@@ -17,7 +17,36 @@ interface UploadModalProps {
   onSpeciesCreated: () => void;
 }
 
-type UploadStep = "select" | "preview" | "uploading" | "success";
+// --- Upload Error Recovery Types ---
+
+class UploadError extends Error {
+  code: string | null;
+  retryAfter: number | null;
+
+  constructor(message: string, code?: string | null, retryAfter?: number | null) {
+    super(message);
+    this.code = code ?? null;
+    this.retryAfter = retryAfter ?? null;
+  }
+}
+
+type FileUploadStatus = "pending" | "uploading" | "success" | "error";
+
+interface FileUploadState {
+  file: File;
+  previewUrl: string;
+  status: FileUploadStatus;
+  progress: number;
+  error: string | null;
+  errorCode: string | null;
+  photoId: number | null;
+  retryAfter: number | null;
+  speciesId: string;
+  notes: string;
+  replacePhotoId: number | null;
+}
+
+type UploadStep = "select" | "preview" | "uploading" | "results" | "success";
 
 export default function UploadModal({
   isOpen,
@@ -28,13 +57,10 @@ export default function UploadModal({
 }: UploadModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState<UploadStep>("select");
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [fileUploadState, setFileUploadState] = useState<FileUploadState[]>([]);
+  const [fileSelectionError, setFileSelectionError] = useState<string | null>(null);
   const [selectedSpeciesId, setSelectedSpeciesId] = useState<string>("");
   const [notes, setNotes] = useState("");
-  const [uploadProgress, setUploadProgress] = useState<{ [key: number]: number }>({});
-  const [error, setError] = useState<string | null>(null);
-  const [uploadedPhotoIds, setUploadedPhotoIds] = useState<number[]>([]);
 
   // Batch upload mode state
   const [sameSpeciesForAll, setSameSpeciesForAll] = useState(true);
@@ -50,15 +76,25 @@ export default function UploadModal({
   // New species form state
   const [showNewSpeciesForm, setShowNewSpeciesForm] = useState(false);
 
+  // Ref to avoid stale closures in async callbacks
+  const fileUploadStateRef = useRef<FileUploadState[]>([]);
+  fileUploadStateRef.current = fileUploadState;
+
+  // Derived values from per-file state
+  const selectedFiles = useMemo(() => fileUploadState.map(f => f.file), [fileUploadState]);
+  const previewUrls = useMemo(() => fileUploadState.map(f => f.previewUrl), [fileUploadState]);
+  const uploadedPhotoIds = useMemo(
+    () => fileUploadState.filter(f => f.status === "success" && f.photoId !== null).map(f => f.photoId!),
+    [fileUploadState]
+  );
+  const failedFiles = useMemo(() => fileUploadState.filter(f => f.status === "error"), [fileUploadState]);
+
   const resetModal = useCallback(() => {
     setStep("select");
-    setSelectedFiles([]);
-    setPreviewUrls([]);
+    setFileUploadState([]);
+    setFileSelectionError(null);
     setSelectedSpeciesId("");
     setNotes("");
-    setUploadProgress({});
-    setError(null);
-    setUploadedPhotoIds([]);
     setSameSpeciesForAll(true);
     setCurrentPhotoIndex(0);
     setIndividualPhotoData([]);
@@ -108,7 +144,7 @@ export default function UploadModal({
     }
 
     if (validFiles.length === 0) {
-      setError(errors.join(". "));
+      setFileSelectionError(errors.join(". "));
       return;
     }
 
@@ -117,17 +153,31 @@ export default function UploadModal({
       console.warn("Some files were skipped:", errors);
     }
 
-    setError(null);
-    setSelectedFiles(validFiles);
+    setFileSelectionError(null);
 
     // Generate previews for all files
+    let previews: string[];
     try {
-      const previews = await Promise.all(validFiles.map(generatePreview));
-      setPreviewUrls(previews);
+      previews = await Promise.all(validFiles.map(generatePreview));
     } catch {
-      setError("Failed to generate previews");
+      setFileSelectionError("Failed to generate previews");
       return;
     }
+
+    // Initialize per-file upload state
+    setFileUploadState(validFiles.map((file, i) => ({
+      file,
+      previewUrl: previews[i] ?? "",
+      status: "pending" as const,
+      progress: 0,
+      error: null,
+      errorCode: null,
+      photoId: null,
+      retryAfter: null,
+      speciesId: "",
+      notes: "",
+      replacePhotoId: null,
+    })));
 
     // Initialize individual photo data
     setIndividualPhotoData(validFiles.map(() => ({ speciesId: "", notes: "" })));
@@ -242,6 +292,8 @@ export default function UploadModal({
     };
   }, [activeSpeciesId, isSpeciesAtLimit]);
 
+  // --- Upload Logic ---
+
   const uploadSingleFile = (
     file: File,
     speciesId: string,
@@ -267,27 +319,35 @@ export default function UploadModal({
       xhr.upload.addEventListener("progress", (e) => {
         if (e.lengthComputable) {
           const percentComplete = Math.round((e.loaded / e.total) * 100);
-          setUploadProgress((prev) => ({ ...prev, [index]: percentComplete }));
+          setFileUploadState(prev => prev.map((f, i) =>
+            i === index && f.status === "uploading" ? { ...f, progress: percentComplete } : f
+          ));
         }
       });
 
       xhr.addEventListener("load", () => {
         if (xhr.status === 200) {
           const result = JSON.parse(xhr.responseText);
-          setUploadProgress((prev) => ({ ...prev, [index]: 100 }));
+          setFileUploadState(prev => prev.map((f, i) =>
+            i === index ? { ...f, progress: 100 } : f
+          ));
           resolve(result.photoId);
         } else {
           try {
             const errorData = JSON.parse(xhr.responseText);
-            reject(new Error(errorData.error || `Upload failed for ${file.name}`));
+            reject(new UploadError(
+              errorData.error || `Upload failed for ${file.name}`,
+              errorData.code || null,
+              errorData.retryAfter || null
+            ));
           } catch {
-            reject(new Error(`Upload failed for ${file.name}`));
+            reject(new UploadError(`Upload failed for ${file.name}`));
           }
         }
       });
 
       xhr.addEventListener("error", () => {
-        reject(new Error(`Network error uploading ${file.name}`));
+        reject(new UploadError(`Network error uploading ${file.name}`));
       });
 
       xhr.open("POST", "/api/upload/browser");
@@ -295,53 +355,155 @@ export default function UploadModal({
     });
   };
 
+  const executeUploads = async (currentState: FileUploadState[], indicesToUpload?: number[]) => {
+    const indices = indicesToUpload ??
+      currentState.map((f, i) => (f.status === "pending" || f.status === "error") ? i : -1).filter(i => i !== -1);
+
+    if (indices.length === 0) return;
+
+    // Mark targeted files as "uploading"
+    setFileUploadState(prev => prev.map((f, i) =>
+      indices.includes(i)
+        ? { ...f, status: "uploading" as const, progress: 0, error: null, errorCode: null, retryAfter: null }
+        : f
+    ));
+
+    // Fire all uploads concurrently — each promise always resolves (never rejects)
+    const uploadPromises = indices.map(index => {
+      const fs = currentState[index]!;
+      return uploadSingleFile(fs.file, fs.speciesId, fs.notes, index, fs.replacePhotoId)
+        .then(
+          (photoId) => ({ index, photoId, success: true as const }),
+          (err: UploadError) => ({ index, error: err, success: false as const })
+        );
+    });
+
+    const results = await Promise.allSettled(uploadPromises);
+
+    // Process results and update per-file state
+    setFileUploadState(prev => {
+      const updated: FileUploadState[] = [...prev];
+      for (const result of results) {
+        if (result.status === "fulfilled") {
+          const val = result.value;
+          const existing = updated[val.index];
+          if (!existing) continue;
+          if (val.success) {
+            updated[val.index] = {
+              ...existing,
+              status: "success",
+              progress: 100,
+              photoId: val.photoId,
+              error: null,
+              errorCode: null,
+            };
+          } else {
+            const err = val.error;
+            updated[val.index] = {
+              ...existing,
+              status: "error",
+              error: err.message || "Upload failed",
+              errorCode: err.code || null,
+              retryAfter: err.retryAfter || null,
+            };
+          }
+        }
+      }
+      return updated;
+    });
+  };
+
   const handleUpload = async () => {
-    if (selectedFiles.length === 0) return;
+    if (fileUploadState.length === 0) return;
 
     setStep("uploading");
-    setUploadProgress({});
-    setError(null);
 
-    // Initialize progress for all files
-    const initialProgress: { [key: number]: number } = {};
-    selectedFiles.forEach((_, index) => {
-      initialProgress[index] = 0;
+    // Freeze assignment data from the preview form into each file's state
+    const frozenState = fileUploadState.map((fs, index) => {
+      let speciesId = selectedSpeciesId;
+      let fileNotes = notes;
+      const fileReplaceId: number | null = sameSpeciesForAll ? replacePhotoId : null;
+
+      if (!sameSpeciesForAll && individualPhotoData[index]) {
+        speciesId = individualPhotoData[index].speciesId;
+        fileNotes = individualPhotoData[index].notes;
+      }
+
+      return {
+        ...fs,
+        status: "pending" as const,
+        progress: 0,
+        error: null,
+        errorCode: null,
+        photoId: null,
+        retryAfter: null,
+        speciesId,
+        notes: fileNotes,
+        replacePhotoId: fileReplaceId,
+      };
     });
-    setUploadProgress(initialProgress);
+
+    setFileUploadState(frozenState);
 
     try {
-      const uploadPromises = selectedFiles.map((file, index) => {
-        let fileSpeciesId = selectedSpeciesId;
-        let fileNotes = notes;
-
-        // Use individual data if not using same species for all
-        if (!sameSpeciesForAll && individualPhotoData[index]) {
-          fileSpeciesId = individualPhotoData[index].speciesId;
-          fileNotes = individualPhotoData[index].notes;
-        }
-
-        // Pass replacePhotoId for single upload or same-for-all mode
-        const fileReplaceId = sameSpeciesForAll ? replacePhotoId : null;
-        return uploadSingleFile(file, fileSpeciesId, fileNotes, index, fileReplaceId);
-      });
-
-      const photoIds = await Promise.all(uploadPromises);
-      setUploadedPhotoIds(photoIds);
-      setStep("success");
+      await executeUploads(frozenState);
     } catch (err) {
-      console.error("Upload error:", err);
-      setError(err instanceof Error ? err.message : "Some uploads failed. Please try again.");
-      setStep("preview");
+      console.error("Unexpected upload error:", err);
+      setFileUploadState(prev => prev.map(f =>
+        f.status === "uploading" || f.status === "pending"
+          ? { ...f, status: "error" as const, error: "An unexpected error occurred. Please try again." }
+          : f
+      ));
+    }
+  };
+
+  // Transition from "uploading" to "results" or "success" when all files resolve
+  useEffect(() => {
+    if (step !== "uploading") return;
+    if (fileUploadState.length === 0) return;
+
+    const allResolved = fileUploadState.every(f => f.status === "success" || f.status === "error");
+    if (!allResolved) return;
+
+    const allSucceeded = fileUploadState.every(f => f.status === "success");
+    setStep(allSucceeded ? "success" : "results");
+    onUploadComplete();
+  }, [fileUploadState, step, onUploadComplete]);
+
+  // --- Retry Handlers ---
+
+  const handleRetrySingle = async (index: number) => {
+    setStep("uploading");
+    try {
+      await executeUploads(fileUploadStateRef.current, [index]);
+    } catch (err) {
+      console.error("Retry error:", err);
+    }
+  };
+
+  const handleRetryAllFailed = async () => {
+    const failedIndices = fileUploadStateRef.current
+      .map((f, i) => f.status === "error" ? i : -1)
+      .filter(i => i !== -1);
+
+    if (failedIndices.length === 0) return;
+    setStep("uploading");
+    try {
+      await executeUploads(fileUploadStateRef.current, failedIndices);
+    } catch (err) {
+      console.error("Retry error:", err);
     }
   };
 
   const handleUploadAnother = () => {
     resetModal();
-    onUploadComplete();
   };
 
   const handleViewPhoto = () => {
-    onUploadComplete();
+    handleClose();
+  };
+
+  const handleDone = () => {
     handleClose();
   };
 
@@ -371,6 +533,7 @@ export default function UploadModal({
               {step === "select" && "Upload Photos"}
               {step === "preview" && (selectedFiles.length > 1 ? `Upload ${selectedFiles.length} Photos` : "Photo Details")}
               {step === "uploading" && "Uploading..."}
+              {step === "results" && "Upload Results"}
               {step === "success" && "Upload Complete"}
             </h2>
             {step !== "uploading" && (
@@ -449,10 +612,10 @@ export default function UploadModal({
                 </div>
               </div>
 
-              {error && (
+              {fileSelectionError && (
                 <div className="mt-4 p-3.5 bg-[var(--error-bg)] border border-[var(--error-border)] rounded-[var(--radius-lg)]
                   animate-fade-in">
-                  <p className="text-sm text-[var(--error-text)] font-medium">{error}</p>
+                  <p className="text-sm text-[var(--error-text)] font-medium">{fileSelectionError}</p>
                 </div>
               )}
             </div>
@@ -702,13 +865,6 @@ export default function UploadModal({
                     transition-all duration-[var(--timing-fast)] resize-none"
                 />
               </div>
-
-              {error && (
-                <div className="p-3.5 bg-[var(--error-bg)] border border-[var(--error-border)] rounded-[var(--radius-lg)]
-                  animate-fade-in">
-                  <p className="text-sm text-[var(--error-text)] font-medium">{error}</p>
-                </div>
-              )}
             </div>
           )}
 
@@ -730,21 +886,33 @@ export default function UploadModal({
 
               {/* Progress bars for each file */}
               <div className="space-y-3">
-                {selectedFiles.map((file, index) => {
-                  const progress = uploadProgress[index] || 0;
-                  const isComplete = progress === 100;
+                {fileUploadState.map((fileState, index) => {
+                  const progress = fileState.progress;
+                  const isComplete = fileState.status === "success";
+                  const isFailed = fileState.status === "error";
                   return (
                     <div key={index} className="text-left">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs text-[var(--mist-600)] truncate max-w-[70%]">
-                          {selectedFiles.length > 1 ? `Photo ${index + 1}` : file.name}
+                          {fileUploadState.length > 1 ? `Photo ${index + 1}` : fileState.file.name}
                         </span>
                         <span className="text-xs text-[var(--mist-500)] flex items-center gap-1">
-                          {progress}%
-                          {isComplete && (
-                            <svg className="w-3 h-3 text-[var(--success-text)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
+                          {isFailed ? (
+                            <>
+                              Failed
+                              <svg className="w-3 h-3 text-[var(--error-text)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </>
+                          ) : (
+                            <>
+                              {progress}%
+                              {isComplete && (
+                                <svg className="w-3 h-3 text-[var(--success-text)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
+                            </>
                           )}
                         </span>
                       </div>
@@ -753,9 +921,11 @@ export default function UploadModal({
                           className={`h-2 rounded-full transition-all duration-300 ${
                             isComplete
                               ? "bg-[var(--success-text)]"
-                              : "bg-gradient-to-r from-[var(--forest-500)] to-[var(--moss-500)]"
+                              : isFailed
+                                ? "bg-[var(--error-text)]"
+                                : "bg-gradient-to-r from-[var(--forest-500)] to-[var(--moss-500)]"
                           }`}
-                          style={{ width: `${progress}%` }}
+                          style={{ width: `${isComplete ? 100 : isFailed ? 100 : progress}%` }}
                         />
                       </div>
                     </div>
@@ -764,11 +934,90 @@ export default function UploadModal({
               </div>
 
               {/* Overall progress for batch */}
-              {selectedFiles.length > 1 && (
+              {fileUploadState.length > 1 && (
                 <p className="text-sm text-[var(--mist-500)] mt-4">
-                  {Object.values(uploadProgress).filter(p => p === 100).length} of {selectedFiles.length} complete
+                  {fileUploadState.filter(f => f.status === "success").length} of {fileUploadState.length} complete
                 </p>
               )}
+            </div>
+          )}
+
+          {/* Step: Results (mixed success/failure) */}
+          {step === "results" && (
+            <div className="space-y-4 animate-fade-in">
+              {/* Summary banner */}
+              <div className={`p-4 rounded-[var(--radius-lg)] border ${
+                uploadedPhotoIds.length > 0
+                  ? "bg-[var(--warning-bg)] border-[var(--warning-border)]"
+                  : "bg-[var(--error-bg)] border-[var(--error-border)]"
+              }`}>
+                <p className={`text-sm font-medium ${
+                  uploadedPhotoIds.length > 0
+                    ? "text-[var(--warning-text)]"
+                    : "text-[var(--error-text)]"
+                }`}>
+                  {uploadedPhotoIds.length > 0
+                    ? `${uploadedPhotoIds.length} of ${fileUploadState.length} photo${fileUploadState.length !== 1 ? "s" : ""} uploaded. ${failedFiles.length} failed.`
+                    : `All ${fileUploadState.length} upload${fileUploadState.length !== 1 ? "s" : ""} failed.`}
+                </p>
+              </div>
+
+              {/* Per-file results list */}
+              <div className="space-y-2 max-h-[40vh] overflow-y-auto">
+                {fileUploadState.map((fileState, index) => (
+                  <div
+                    key={index}
+                    className={`flex items-center gap-3 p-3 rounded-[var(--radius-lg)] border ${
+                      fileState.status === "success"
+                        ? "border-[var(--success-border)] bg-[var(--success-bg)]"
+                        : "border-[var(--error-border)] bg-[var(--error-bg)]"
+                    }`}
+                  >
+                    {/* Thumbnail */}
+                    <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                      <Image
+                        src={fileState.previewUrl}
+                        alt={`Photo ${index + 1}`}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+
+                    {/* Status + info */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-[var(--text-primary)] truncate">
+                        Photo {index + 1}
+                      </p>
+                      {fileState.status === "success" && (
+                        <p className="text-xs text-[var(--success-text)] flex items-center gap-1">
+                          <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          Uploaded
+                        </p>
+                      )}
+                      {fileState.status === "error" && (
+                        <p className="text-xs text-[var(--error-text)]">
+                          {fileState.retryAfter
+                            ? `Rate limited — try again in ${fileState.retryAfter}s`
+                            : fileState.error}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Retry button for failed files */}
+                    {fileState.status === "error" && (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => handleRetrySingle(index)}
+                      >
+                        Retry
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
@@ -828,6 +1077,23 @@ export default function UploadModal({
                     ? "Upload Photo"
                     : `Upload ${selectedFiles.length} Photos`}
               </Button>
+            </div>
+          </div>
+        )}
+
+        {step === "results" && (
+          <div className="p-5 border-t border-[var(--border)] bg-[var(--mist-50)]">
+            <div className="flex gap-3">
+              <Button variant="secondary" onClick={handleDone} className="flex-1">
+                Done
+              </Button>
+              {failedFiles.length > 0 && (
+                <Button onClick={handleRetryAllFailed} className="flex-1">
+                  {failedFiles.length === 1
+                    ? "Retry Failed Upload"
+                    : `Retry ${failedFiles.length} Failed`}
+                </Button>
+              )}
             </div>
           </div>
         )}
