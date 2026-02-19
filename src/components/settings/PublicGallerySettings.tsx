@@ -6,6 +6,7 @@ interface ProfileSettings {
   username: string | null;
   isPublicGalleryEnabled: boolean;
   isDirectoryListed: boolean;
+  showGearPublicly: boolean;
   displayName: string | null;
   rawDisplayName: string | null;
 }
@@ -17,6 +18,7 @@ export default function PublicGallerySettings() {
   const [displayNameInput, setDisplayNameInput] = useState("");
   const [isPublicEnabled, setIsPublicEnabled] = useState(false);
   const [isDirectoryListed, setIsDirectoryListed] = useState(false);
+  const [showGearPublicly, setShowGearPublicly] = useState(false);
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState<{
     available: boolean;
@@ -41,6 +43,7 @@ export default function PublicGallerySettings() {
           setDisplayNameInput(data.rawDisplayName || "");
           setIsPublicEnabled(data.isPublicGalleryEnabled);
           setIsDirectoryListed(data.isDirectoryListed);
+          setShowGearPublicly(data.showGearPublicly);
         }
       } catch (error) {
         console.error("Failed to load profile settings:", error);
@@ -115,6 +118,7 @@ export default function PublicGallerySettings() {
           displayName: displayNameInput || null,
           isPublicGalleryEnabled: isPublicEnabled,
           isDirectoryListed,
+          showGearPublicly,
         }),
       });
 
@@ -128,6 +132,7 @@ export default function PublicGallerySettings() {
                 username: data.username,
                 isPublicGalleryEnabled: data.isPublicGalleryEnabled,
                 isDirectoryListed: data.isDirectoryListed,
+                showGearPublicly: data.showGearPublicly,
                 rawDisplayName: data.displayName || null,
               }
             : null
@@ -167,7 +172,8 @@ export default function PublicGallerySettings() {
     username !== (settings?.username || "") ||
     displayNameInput !== (settings?.rawDisplayName || "") ||
     isPublicEnabled !== settings?.isPublicGalleryEnabled ||
-    isDirectoryListed !== settings?.isDirectoryListed;
+    isDirectoryListed !== settings?.isDirectoryListed ||
+    showGearPublicly !== settings?.showGearPublicly;
 
   const canSave =
     hasChanges &&
@@ -351,6 +357,40 @@ export default function PublicGallerySettings() {
               className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm
                 transition duration-200 ease-in-out
                 ${isDirectoryListed ? "translate-x-6" : "translate-x-1"}`}
+            />
+          </button>
+        </div>
+      )}
+
+      {/* Show Camera Gear Publicly Toggle (only shown when public gallery is enabled) */}
+      {isPublicEnabled && (
+        <div className="flex items-center justify-between py-3 px-4 bg-[var(--mist-50)] rounded-[var(--radius-md)]">
+          <div>
+            <label className="text-sm font-medium text-[var(--text-primary)]">
+              Show camera gear on public gallery
+            </label>
+            <p className="text-xs text-[var(--mist-500)] mt-0.5">
+              Display camera, lens, and settings on photos in your public feed
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={showGearPublicly}
+            onClick={() => setShowGearPublicly(!showGearPublicly)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full
+              transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2
+              focus:ring-[var(--moss-500)] focus:ring-offset-2 cursor-pointer
+              ${
+                showGearPublicly
+                  ? "bg-[var(--moss-500)]"
+                  : "bg-[var(--mist-300)]"
+              }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm
+                transition duration-200 ease-in-out
+                ${showGearPublicly ? "translate-x-6" : "translate-x-1"}`}
             />
           </button>
         </div>

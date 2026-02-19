@@ -2,10 +2,21 @@ import exifr from "exifr";
 import { randomUUID } from "crypto";
 import { uploadToStorage } from "./supabase";
 
+export interface ExifMetadata {
+  cameraMake: string | null;
+  cameraModel: string | null;
+  lensModel: string | null;
+  iso: number | null;
+  aperture: string | null;       // "f/5.6"
+  shutterSpeed: string | null;   // "1/500"
+  focalLength: string | null;    // "200mm"
+}
+
 export interface ProcessedImage {
   filename: string;
   thumbnailFilename: string;
   originalDateTaken: Date | null;
+  exif: ExifMetadata;
 }
 
 // Sharp import state tracking
@@ -47,13 +58,35 @@ export async function processUploadedImage(
 
   // Extract EXIF before any processing
   let originalDateTaken: Date | null = null;
+  const exif: ExifMetadata = {
+    cameraMake: null,
+    cameraModel: null,
+    lensModel: null,
+    iso: null,
+    aperture: null,
+    shutterSpeed: null,
+    focalLength: null,
+  };
   try {
     const exifData = await exifr.parse(buffer);
-    if (exifData?.DateTimeOriginal) {
-      originalDateTaken = new Date(exifData.DateTimeOriginal);
+    if (exifData) {
+      if (exifData.DateTimeOriginal) {
+        originalDateTaken = new Date(exifData.DateTimeOriginal);
+      }
+      // Camera info
+      if (exifData.Make) exif.cameraMake = String(exifData.Make).trim();
+      if (exifData.Model) exif.cameraModel = String(exifData.Model).trim();
+      if (exifData.LensModel) exif.lensModel = String(exifData.LensModel).trim();
+      // Shooting settings
+      if (exifData.ISO != null) exif.iso = Number(exifData.ISO);
+      if (exifData.FNumber != null) exif.aperture = `f/${exifData.FNumber}`;
+      if (exifData.ExposureTime != null) {
+        exif.shutterSpeed = formatShutterSpeed(exifData.ExposureTime);
+      }
+      if (exifData.FocalLength != null) exif.focalLength = `${Math.round(exifData.FocalLength)}mm`;
     }
   } catch {
-    // EXIF extraction failed, continue without date
+    // EXIF extraction failed, continue without metadata
   }
 
   // Try to use sharp for processing
@@ -124,7 +157,19 @@ export async function processUploadedImage(
     throw new Error(`Storage upload failed for thumbnail: ${errorMsg}`);
   }
 
-  return { filename, thumbnailFilename, originalDateTaken };
+  return { filename, thumbnailFilename, originalDateTaken, exif };
+}
+
+/**
+ * Format ExposureTime (in seconds) as a human-readable shutter speed.
+ * e.g. 0.002 → "1/500", 0.5 → "1/2", 2.0 → "2s"
+ */
+function formatShutterSpeed(exposureTime: number): string {
+  if (exposureTime >= 1) {
+    return `${exposureTime}s`;
+  }
+  const denominator = Math.round(1 / exposureTime);
+  return `1/${denominator}`;
 }
 
 function detectImageFormat(buffer: Buffer): { ext: string; contentType: string } {

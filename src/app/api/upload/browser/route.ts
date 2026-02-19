@@ -196,6 +196,13 @@ export async function POST(request: NextRequest) {
               thumbnailFilename: processed.thumbnailFilename,
               originalDateTaken: processed.originalDateTaken,
               notes: notes?.trim() || null,
+              cameraMake: processed.exif.cameraMake,
+              cameraModel: processed.exif.cameraModel,
+              lensModel: processed.exif.lensModel,
+              iso: processed.exif.iso,
+              aperture: processed.exif.aperture,
+              shutterSpeed: processed.exif.shutterSpeed,
+              focalLength: processed.exif.focalLength,
             })
             .returning();
 
@@ -222,6 +229,13 @@ export async function POST(request: NextRequest) {
             thumbnailFilename: processed.thumbnailFilename,
             originalDateTaken: processed.originalDateTaken,
             notes: notes?.trim() || null,
+            cameraMake: processed.exif.cameraMake,
+            cameraModel: processed.exif.cameraModel,
+            lensModel: processed.exif.lensModel,
+            iso: processed.exif.iso,
+            aperture: processed.exif.aperture,
+            shutterSpeed: processed.exif.shutterSpeed,
+            focalLength: processed.exif.focalLength,
           })
           .returning();
 

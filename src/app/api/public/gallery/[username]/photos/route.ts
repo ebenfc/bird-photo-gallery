@@ -101,7 +101,9 @@ export async function GET(
     const countResult = await countWithJoin.where(whereClause);
     const total = Number(countResult[0]?.count ?? 0);
 
-    // Get photos with species info
+    const includeGear = user.showGearPublicly;
+
+    // Get photos with species info (always select EXIF for conditional inclusion)
     const result = await db
       .select({
         id: photos.id,
@@ -112,6 +114,13 @@ export async function GET(
         dateTakenSource: photos.dateTakenSource,
         isFavorite: photos.isFavorite,
         notes: photos.notes,
+        cameraMake: photos.cameraMake,
+        cameraModel: photos.cameraModel,
+        lensModel: photos.lensModel,
+        iso: photos.iso,
+        aperture: photos.aperture,
+        shutterSpeed: photos.shutterSpeed,
+        focalLength: photos.focalLength,
         speciesId: photos.speciesId,
         speciesCommonName: species.commonName,
         speciesScientificName: species.scientificName,
@@ -125,7 +134,7 @@ export async function GET(
       .limit(limit)
       .offset(offset);
 
-    // Add URLs to each photo (exclude notes for privacy in public view)
+    // Add URLs to each photo; conditionally include gear data based on user preference
     const photosWithUrls = result.map((photo) => ({
       id: photo.id,
       filename: photo.filename,
@@ -136,8 +145,17 @@ export async function GET(
       originalDateTaken: photo.originalDateTaken,
       dateTakenSource: photo.dateTakenSource,
       isFavorite: photo.isFavorite,
-      // Note: Including notes in public view - they're part of the gallery content
       notes: photo.notes,
+      // EXIF gear data — only included when user has opted in
+      ...(includeGear ? {
+        cameraMake: photo.cameraMake,
+        cameraModel: photo.cameraModel,
+        lensModel: photo.lensModel,
+        iso: photo.iso,
+        aperture: photo.aperture,
+        shutterSpeed: photo.shutterSpeed,
+        focalLength: photo.focalLength,
+      } : {}),
       species: photo.speciesId
         ? {
             id: photo.speciesId,
