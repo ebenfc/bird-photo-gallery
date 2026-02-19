@@ -19,6 +19,7 @@ Components are organized by feature area.
 | `stats/` | Property stats widget |
 | `suggestions/` | AI suggestion components |
 | `support/` | Issue reporting (ReportIssueButton, ReportIssueModal) |
+| `timeline/` | Unified timeline: TimelineEventCard (3 card variants), TimelineDayHeader |
 | `ui/` | Reusable UI primitives (Modal, Button, Input, Select, Toast, RarityBadge, RarityPicker, HeardBadge) |
 | `upload/` | Photo upload components |
 
