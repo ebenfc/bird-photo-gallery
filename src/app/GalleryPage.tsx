@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect, useCallback, useMemo } from "react";
+import { Suspense, useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Photo, Species, PhotosResponse, SpeciesResponse, Rarity } from "@/types";
 import PhotoGrid from "@/components/gallery/PhotoGrid";
@@ -49,20 +49,60 @@ function GalleryContent() {
       ["common", "uncommon", "rare"].includes(r)
     ) as Rarity[];
   }, [rarityParam]);
+  const searchQuery = searchParams.get("search") || "";
+  const dateFrom = searchParams.get("dateFrom") || "";
+  const dateTo = searchParams.get("dateTo") || "";
 
-  // Update URL with filter state — also clears selection
+  // Local search input state for debouncing (input shows immediately, URL updates after 300ms)
+  const [searchInput, setSearchInput] = useState(searchQuery);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Update URL with filter state — merges overrides with current values, clears selection
   const updateFilters = useCallback(
-    (newSpecies: number | null, newFavorites: boolean, newRarities: Rarity[]) => {
+    (overrides: {
+      species?: number | null;
+      favorites?: boolean;
+      rarities?: Rarity[];
+      search?: string;
+      dateFrom?: string;
+      dateTo?: string;
+    }) => {
       setSelectedPhotoIds(new Set());
+      const newSpecies = overrides.species !== undefined ? overrides.species : selectedSpecies;
+      const newFavorites = overrides.favorites !== undefined ? overrides.favorites : showFavoritesOnly;
+      const newRarities = overrides.rarities !== undefined ? overrides.rarities : selectedRarities;
+      const newSearch = overrides.search !== undefined ? overrides.search : searchQuery;
+      const newDateFrom = overrides.dateFrom !== undefined ? overrides.dateFrom : dateFrom;
+      const newDateTo = overrides.dateTo !== undefined ? overrides.dateTo : dateTo;
+
       const params = new URLSearchParams();
       if (newSpecies) params.set("species", newSpecies.toString());
       if (newFavorites) params.set("favorites", "true");
       if (newRarities.length > 0) params.set("rarity", newRarities.join(","));
+      if (newSearch) params.set("search", newSearch);
+      if (newDateFrom) params.set("dateFrom", newDateFrom);
+      if (newDateTo) params.set("dateTo", newDateTo);
       const queryString = params.toString();
       router.push(queryString ? `/?${queryString}` : "/");
     },
-    [router]
+    [router, selectedSpecies, showFavoritesOnly, selectedRarities, searchQuery, dateFrom, dateTo]
   );
+
+  // Debounce search input → URL param update
+  useEffect(() => {
+    if (searchInput === searchQuery) return;
+    debounceRef.current = setTimeout(() => {
+      updateFilters({ search: searchInput });
+    }, 300);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [searchInput]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Sync local search input when URL param changes externally (back/forward navigation)
+  useEffect(() => {
+    setSearchInput(searchQuery);
+  }, [searchQuery]);
 
   const fetchPhotos = useCallback(async () => {
     setLoading(true);
@@ -70,6 +110,9 @@ function GalleryContent() {
     if (selectedSpecies) params.set("speciesId", selectedSpecies.toString());
     if (showFavoritesOnly) params.set("favorites", "true");
     if (selectedRarities.length > 0) params.set("rarity", selectedRarities.join(","));
+    if (searchQuery) params.set("search", searchQuery);
+    if (dateFrom) params.set("dateFrom", dateFrom);
+    if (dateTo) params.set("dateTo", dateTo);
     params.set("sort", sortOption);
 
     try {
@@ -83,7 +126,7 @@ function GalleryContent() {
     } finally {
       setLoading(false);
     }
-  }, [selectedSpecies, showFavoritesOnly, selectedRarities, sortOption, showToast]);
+  }, [selectedSpecies, showFavoritesOnly, selectedRarities, searchQuery, dateFrom, dateTo, sortOption, showToast]);
 
   // Handle sort change
   const handleSortChange = (newSort: string) => {
@@ -431,7 +474,8 @@ function GalleryContent() {
   };
 
   // Count active filters for the badge
-  const activeFilterCount = (selectedSpecies ? 1 : 0) + (showFavoritesOnly ? 1 : 0) + selectedRarities.length;
+  const activeFilterCount = (selectedSpecies ? 1 : 0) + (showFavoritesOnly ? 1 : 0) + selectedRarities.length
+    + (searchQuery ? 1 : 0) + (dateFrom || dateTo ? 1 : 0);
 
   // Photos for bulk modal (memoized to avoid recalculating on every render)
   const bulkPhotos = useMemo(() => {
@@ -577,7 +621,7 @@ function GalleryContent() {
       {/* Mobile filters - collapsible (hidden during select mode) */}
       {!isSelectMode && (
         <div className={`sm:hidden overflow-hidden transition-all duration-300 ease-out
-          ${showMobileFilters ? "max-h-96 opacity-100 mb-4" : "max-h-0 opacity-0"}`}>
+          ${showMobileFilters ? "max-h-[32rem] opacity-100 mb-4" : "max-h-0 opacity-0"}`}>
           <div className="bg-[var(--card-bg)]/80 backdrop-blur-sm rounded-[var(--radius-xl)] p-4 shadow-[var(--shadow-sm)] border border-[var(--border)]">
             <GalleryFilters
               species={species}
@@ -585,10 +629,20 @@ function GalleryContent() {
               showFavoritesOnly={showFavoritesOnly}
               selectedRarities={selectedRarities}
               sortOption={sortOption}
-              onSpeciesChange={(id) => updateFilters(id, showFavoritesOnly, selectedRarities)}
-              onFavoritesChange={(value) => updateFilters(selectedSpecies, value, selectedRarities)}
-              onRarityChange={(rarities) => updateFilters(selectedSpecies, showFavoritesOnly, rarities)}
+              searchQuery={searchInput}
+              dateFrom={dateFrom}
+              dateTo={dateTo}
+              onSpeciesChange={(id) => updateFilters({ species: id })}
+              onFavoritesChange={(value) => updateFilters({ favorites: value })}
+              onRarityChange={(rarities) => updateFilters({ rarities })}
               onSortChange={handleSortChange}
+              onSearchChange={setSearchInput}
+              onDateFromChange={(d) => updateFilters({ dateFrom: d })}
+              onDateToChange={(d) => updateFilters({ dateTo: d })}
+              onClearAll={() => {
+                setSearchInput("");
+                updateFilters({ species: null, favorites: false, rarities: [], search: "", dateFrom: "", dateTo: "" });
+              }}
             />
           </div>
         </div>
@@ -602,10 +656,20 @@ function GalleryContent() {
           showFavoritesOnly={showFavoritesOnly}
           selectedRarities={selectedRarities}
           sortOption={sortOption}
-          onSpeciesChange={(id) => updateFilters(id, showFavoritesOnly, selectedRarities)}
-          onFavoritesChange={(value) => updateFilters(selectedSpecies, value, selectedRarities)}
-          onRarityChange={(rarities) => updateFilters(selectedSpecies, showFavoritesOnly, rarities)}
+          searchQuery={searchInput}
+          dateFrom={dateFrom}
+          dateTo={dateTo}
+          onSpeciesChange={(id) => updateFilters({ species: id })}
+          onFavoritesChange={(value) => updateFilters({ favorites: value })}
+          onRarityChange={(rarities) => updateFilters({ rarities })}
           onSortChange={handleSortChange}
+          onSearchChange={setSearchInput}
+          onDateFromChange={(d) => updateFilters({ dateFrom: d })}
+          onDateToChange={(d) => updateFilters({ dateTo: d })}
+          onClearAll={() => {
+            setSearchInput("");
+            updateFilters({ species: null, favorites: false, rarities: [], search: "", dateFrom: "", dateTo: "" });
+          }}
         />
       </div>
 

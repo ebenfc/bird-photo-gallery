@@ -13,6 +13,14 @@ interface GalleryFiltersProps {
   onFavoritesChange: (value: boolean) => void;
   onRarityChange: (rarities: Rarity[]) => void;
   onSortChange: (sort: string) => void;
+  // Advanced search filters (owner-only — not shown on public galleries)
+  searchQuery?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  onSearchChange?: (query: string) => void;
+  onDateFromChange?: (date: string) => void;
+  onDateToChange?: (date: string) => void;
+  onClearAll?: () => void;
 }
 
 const sortOptions = [
@@ -35,12 +43,21 @@ export default function GalleryFilters({
   showFavoritesOnly,
   selectedRarities,
   sortOption,
+  searchQuery,
+  dateFrom,
+  dateTo,
   onSpeciesChange,
   onFavoritesChange,
   onRarityChange,
   onSortChange,
+  onSearchChange,
+  onDateFromChange,
+  onDateToChange,
+  onClearAll,
 }: GalleryFiltersProps) {
-  const hasFilters = selectedSpecies !== null || showFavoritesOnly || selectedRarities.length > 0;
+  const showAdvancedSearch = onSearchChange !== undefined;
+  const hasFilters = selectedSpecies !== null || showFavoritesOnly || selectedRarities.length > 0
+    || (searchQuery && searchQuery.length > 0) || (dateFrom && dateFrom.length > 0) || (dateTo && dateTo.length > 0);
 
   // Single-select: clicking a rarity toggles it (deselects if already selected, or selects it exclusively)
   const selectRarity = (rarity: Rarity) => {
@@ -51,8 +68,62 @@ export default function GalleryFilters({
     }
   };
 
+  const dateInputClass = `
+    block w-full px-3 py-3
+    bg-[var(--card-bg)] text-[var(--foreground)]
+    border-2 border-[var(--mist-200)] rounded-[var(--radius-lg)]
+    shadow-[var(--shadow-sm)]
+    transition-all duration-[var(--timing-fast)]
+    focus:outline-none focus:border-[var(--moss-400)]
+    focus:shadow-[var(--shadow-moss)]
+    hover:border-[var(--mist-300)] hover:shadow-[var(--shadow-md)]
+    text-base font-medium
+  `;
+
   return (
     <div className="space-y-4 sm:mb-6 animate-fade-in">
+      {/* Search bar (owner-only) */}
+      {showAdvancedSearch && (
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+            <svg className="w-5 h-5 text-[var(--mist-400)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input
+            type="text"
+            value={searchQuery || ""}
+            onChange={(e) => onSearchChange!(e.target.value)}
+            placeholder="Search by species name..."
+            aria-label="Search photos by species name"
+            className={`
+              block w-full pl-11 pr-10 py-3
+              bg-[var(--card-bg)] text-[var(--foreground)] placeholder-[var(--mist-400)]
+              border-2 border-[var(--mist-200)] rounded-[var(--radius-lg)]
+              shadow-[var(--shadow-sm)]
+              transition-all duration-[var(--timing-fast)]
+              focus:outline-none focus:border-[var(--moss-400)]
+              focus:shadow-[var(--shadow-moss)]
+              hover:border-[var(--mist-300)] hover:shadow-[var(--shadow-md)]
+              text-base font-medium
+            `}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => onSearchChange!("")}
+              className="absolute inset-y-0 right-0 flex items-center pr-3
+                text-[var(--mist-400)] hover:text-[var(--forest-700)]
+                transition-colors duration-[var(--timing-fast)]"
+              aria-label="Clear search"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Row 1: Dropdowns */}
       <div className="flex flex-col sm:flex-row gap-3">
         <Select
@@ -81,6 +152,35 @@ export default function GalleryFilters({
             </option>
           ))}
         </Select>
+
+        {/* Date range inputs (owner-only) */}
+        {showAdvancedSearch && (
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="relative flex-1 sm:w-40 sm:flex-none">
+              <label htmlFor="dateFrom" className="sr-only">From date</label>
+              <input
+                id="dateFrom"
+                type="date"
+                value={dateFrom || ""}
+                onChange={(e) => onDateFromChange!(e.target.value)}
+                max={dateTo || undefined}
+                className={dateInputClass}
+              />
+            </div>
+            <span className="text-[var(--mist-400)] text-sm font-medium shrink-0">to</span>
+            <div className="relative flex-1 sm:w-40 sm:flex-none">
+              <label htmlFor="dateTo" className="sr-only">To date</label>
+              <input
+                id="dateTo"
+                type="date"
+                value={dateTo || ""}
+                onChange={(e) => onDateToChange!(e.target.value)}
+                min={dateFrom || undefined}
+                className={dateInputClass}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Row 2: Filter pills */}
@@ -139,9 +239,13 @@ export default function GalleryFilters({
         {hasFilters && (
           <button
             onClick={() => {
-              onSpeciesChange(null);
-              onFavoritesChange(false);
-              onRarityChange([]);
+              if (onClearAll) {
+                onClearAll();
+              } else {
+                onSpeciesChange(null);
+                onFavoritesChange(false);
+                onRarityChange([]);
+              }
             }}
             className="px-4 py-2 text-sm font-semibold text-[var(--mist-500)]
               hover:text-[var(--forest-700)] hover:bg-[var(--mist-50)]
