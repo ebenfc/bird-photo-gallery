@@ -422,7 +422,7 @@ export default function UploadModal({
     const frozenState = fileUploadState.map((fs, index) => {
       let speciesId = selectedSpeciesId;
       let fileNotes = notes;
-      let fileReplaceId: number | null = sameSpeciesForAll ? replacePhotoId : null;
+      const fileReplaceId: number | null = sameSpeciesForAll ? replacePhotoId : null;
 
       if (!sameSpeciesForAll && individualPhotoData[index]) {
         speciesId = individualPhotoData[index].speciesId;
