@@ -57,6 +57,9 @@ This is required for database access (pg driver) and sharp (image processing).
 | `/bookmarks/[username]` | DELETE bookmark |
 | `/bookmarks/check/[username]` | Check if gallery is bookmarked |
 | `/activity/*` | Species activity data (current, heatmap, species/[name]) |
+| `/ebird/import` | eBird life list CSV import (POST) and clear (DELETE) |
+| `/ebird/wishlist` | eBird species not yet photographed (GET) |
+| `/ebird/status` | eBird import status check (GET) |
 | `/suggestions` | AI-powered suggestions |
 | `/birds/lookup` | Bird name validation via Wikipedia |
 | `/agreement` | Accept user agreement (POST) |

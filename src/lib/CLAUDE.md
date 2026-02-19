@@ -12,6 +12,8 @@ Server-side utility modules. Most are server-only — do not import from client 
 | `validation.ts` | Zod schemas for all request validation. Use `validateRequest()` or `validateSearchParams()` helpers |
 | `photoLimits.ts` | `checkSpeciesLimit()`, `checkUnassignedLimit()` — enforces 8-per-species and 24-unassigned caps |
 | `haikubox.ts` | Haikubox API client. Reads serial from DB via `settings.ts`, falls back to env var |
+| `ebird.ts` | eBird Taxonomy API client. `lookupSpeciesCode()`, `batchLookupSpeciesCodes()`. Caches full taxonomy (24h) via `getOrFetchDeduped()`. Requires `EBIRD_API_KEY` env var |
+| `ebirdCsvParser.ts` | Parses eBird "My eBird Data" CSV export (tab-delimited). Returns unique species with earliest observation dates. Max 5000 species |
 | `activity.ts` | Activity log storage and queries: hourly patterns, peak hours, "active now" predictions |
 | `settings.ts` | Key-value settings backed by `app_settings` table. `getHaikuboxSerial()` is the main consumer |
 | `image.ts` | Sharp image processing: JPEG conversion, thumbnail generation, full EXIF extraction (camera, lens, ISO, aperture, shutter speed, focal length) with display formatting |
