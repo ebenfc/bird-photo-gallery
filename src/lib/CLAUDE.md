@@ -14,7 +14,7 @@ Server-side utility modules. Most are server-only — do not import from client 
 | `haikubox.ts` | Haikubox API client. Reads serial from DB via `settings.ts`, falls back to env var |
 | `activity.ts` | Activity log storage and queries: hourly patterns, peak hours, "active now" predictions |
 | `settings.ts` | Key-value settings backed by `app_settings` table. `getHaikuboxSerial()` is the main consumer |
-| `image.ts` | Sharp image processing: EXIF extraction, JPEG conversion, thumbnail generation |
+| `image.ts` | Sharp image processing: JPEG conversion, thumbnail generation, full EXIF extraction (camera, lens, ISO, aperture, shutter speed, focal length) with display formatting |
 | `fileValidation.ts` | Client + server file validation: MIME types, size limits, magic byte checks |
 | `storage.ts` | Supabase URL helpers: `getOriginalUrl()`, `getThumbnailUrl()`, `deletePhotoFiles()` |
 | `supabase.ts` | Low-level Supabase storage client (upload, delete, public URL via native fetch) |

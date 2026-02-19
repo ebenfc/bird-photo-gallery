@@ -44,6 +44,7 @@ export default function PhotoModal({
   readOnly = false,
   adjacentPhotos,
 }: PhotoModalProps) {
+  const [isCameraInfoExpanded, setIsCameraInfoExpanded] = useState(false);
   const [isEditingDate, setIsEditingDate] = useState(false);
   const [editDateValue, setEditDateValue] = useState("");
   const [isSavingDate, setIsSavingDate] = useState(false);
@@ -256,6 +257,9 @@ export default function PhotoModal({
   });
 
   if (!photo) return null;
+
+  const hasExifData = !!(photo.cameraMake || photo.cameraModel || photo.lensModel ||
+    photo.iso || photo.aperture || photo.shutterSpeed || photo.focalLength);
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-US", {
@@ -691,6 +695,52 @@ export default function PhotoModal({
               </p>
             </div>
 
+            {/* Camera Info — mobile (collapsible) */}
+            {hasExifData && (
+              <div className="mb-4">
+                <button
+                  onClick={() => setIsCameraInfoExpanded(!isCameraInfoExpanded)}
+                  className="flex items-center gap-2 text-xs text-[var(--mist-500)] hover:text-[var(--forest-600)] transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span className="font-medium uppercase tracking-wider">Camera Info</span>
+                  <svg
+                    className={`w-3 h-3 transition-transform ${isCameraInfoExpanded ? "rotate-180" : ""}`}
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {isCameraInfoExpanded && (
+                  <div className="mt-2 p-3 bg-[var(--mist-50)] rounded-[var(--radius-md)] text-xs text-[var(--text-label)] space-y-1">
+                    {(photo.cameraMake || photo.cameraModel) && (
+                      <div className="flex justify-between">
+                        <span className="text-[var(--mist-500)]">Camera</span>
+                        <span className="font-medium text-right">{[photo.cameraMake, photo.cameraModel].filter(Boolean).join(" ")}</span>
+                      </div>
+                    )}
+                    {photo.lensModel && (
+                      <div className="flex justify-between">
+                        <span className="text-[var(--mist-500)]">Lens</span>
+                        <span className="font-medium text-right">{photo.lensModel}</span>
+                      </div>
+                    )}
+                    {(photo.aperture || photo.shutterSpeed || photo.iso || photo.focalLength) && (
+                      <div className="flex items-center gap-2 flex-wrap pt-1 border-t border-[var(--border)]">
+                        {photo.focalLength && <span>{photo.focalLength}</span>}
+                        {photo.aperture && <span>{photo.aperture}</span>}
+                        {photo.shutterSpeed && <span>{photo.shutterSpeed}</span>}
+                        {photo.iso && <span>ISO {photo.iso}</span>}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Compact date info */}
             <div className="text-xs text-[var(--mist-500)] flex items-center gap-2 flex-wrap">
               <span>Uploaded {formatDateShort(photo.uploadDate)}</span>
@@ -898,6 +948,56 @@ export default function PhotoModal({
                 </p>
               )}
             </div>
+
+            {/* Camera Info — desktop (collapsible) */}
+            {hasExifData && (
+              <div className="p-3.5 bg-[var(--mist-50)] rounded-[var(--radius-lg)] shadow-[var(--shadow-xs)]">
+                <button
+                  onClick={() => setIsCameraInfoExpanded(!isCameraInfoExpanded)}
+                  className="w-full flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-full bg-[var(--mist-100)] flex items-center justify-center">
+                      <svg className="w-3.5 h-3.5 text-[var(--mist-500)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </div>
+                    <span className="text-[var(--mist-600)] text-xs font-semibold uppercase tracking-wider">Camera Info</span>
+                  </div>
+                  <svg
+                    className={`w-4 h-4 text-[var(--mist-400)] transition-transform duration-200 ${isCameraInfoExpanded ? "rotate-180" : ""}`}
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {isCameraInfoExpanded && (
+                  <div className="mt-3 space-y-2 text-sm">
+                    {(photo.cameraMake || photo.cameraModel) && (
+                      <div className="flex justify-between gap-2">
+                        <span className="text-[var(--mist-500)] text-xs">Camera</span>
+                        <span className="text-[var(--text-label)] text-xs font-medium text-right">{[photo.cameraMake, photo.cameraModel].filter(Boolean).join(" ")}</span>
+                      </div>
+                    )}
+                    {photo.lensModel && (
+                      <div className="flex justify-between gap-2">
+                        <span className="text-[var(--mist-500)] text-xs">Lens</span>
+                        <span className="text-[var(--text-label)] text-xs font-medium text-right">{photo.lensModel}</span>
+                      </div>
+                    )}
+                    {(photo.aperture || photo.shutterSpeed || photo.iso || photo.focalLength) && (
+                      <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-[var(--border)] text-xs text-[var(--text-label)]">
+                        {photo.focalLength && <span className="px-1.5 py-0.5 bg-[var(--mist-100)] rounded">{photo.focalLength}</span>}
+                        {photo.aperture && <span className="px-1.5 py-0.5 bg-[var(--mist-100)] rounded">{photo.aperture}</span>}
+                        {photo.shutterSpeed && <span className="px-1.5 py-0.5 bg-[var(--mist-100)] rounded">{photo.shutterSpeed}</span>}
+                        {photo.iso && <span className="px-1.5 py-0.5 bg-[var(--mist-100)] rounded">ISO {photo.iso}</span>}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Compact date info */}
             <div className="px-1 py-2">

@@ -58,8 +58,13 @@ No auth required. Never sorts by popularity.
 - `gallery/[username]/species/route.ts` - Species list
 - `gallery/[username]/species/[id]/route.ts` - Species detail
 
+## Conditional Public Fields
+
+**EXIF gear data** in the photos endpoint is controlled by `user.showGearPublicly`. The query always selects EXIF columns but only includes them in the response when the user has opted in. This pattern (query all, filter in response) avoids conditional SQL and allows future privacy toggles without DB changes.
+
 ## Key Differences from Authenticated Endpoints
 1. No `requireAuth()` call - these are public
 2. User lookup via `getUserByUsername()` instead of auth context
 3. No Haikubox detection data returned
-4. Read-only (no POST/PATCH/DELETE methods)
+4. EXIF gear data only included when `user.showGearPublicly` is true
+5. Read-only (no POST/PATCH/DELETE methods)

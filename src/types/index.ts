@@ -51,6 +51,14 @@ export interface Photo {
   dateTakenSource: "exif" | "manual";
   isFavorite: boolean;
   notes: string | null;
+  // EXIF camera metadata (nullable — older photos won't have these)
+  cameraMake?: string | null;
+  cameraModel?: string | null;
+  lensModel?: string | null;
+  iso?: number | null;
+  aperture?: string | null;
+  shutterSpeed?: string | null;
+  focalLength?: string | null;
   species: {
     id: number;
     commonName: string;

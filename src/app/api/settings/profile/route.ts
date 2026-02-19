@@ -36,6 +36,7 @@ export async function GET(_request: NextRequest) {
       username: user.username || null,
       isPublicGalleryEnabled: user.isPublicGalleryEnabled,
       isDirectoryListed: user.isDirectoryListed,
+      showGearPublicly: user.showGearPublicly,
       city: user.city || null,
       state: user.state || null,
       displayName: getDisplayName(user),
@@ -64,13 +65,14 @@ export async function PATCH(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { username, isPublicGalleryEnabled, city, state, isDirectoryListed, displayName } = body;
+    const { username, isPublicGalleryEnabled, city, state, isDirectoryListed, displayName, showGearPublicly } = body;
 
     // Build update object
     const updates: Partial<{
       username: string | null;
       isPublicGalleryEnabled: boolean;
       isDirectoryListed: boolean;
+      showGearPublicly: boolean;
       city: string | null;
       state: string | null;
       displayName: string | null;
@@ -193,6 +195,11 @@ export async function PATCH(request: NextRequest) {
       updates.isDirectoryListed = isDirectoryListed;
     }
 
+    // Handle show gear publicly toggle
+    if (typeof showGearPublicly === "boolean") {
+      updates.showGearPublicly = showGearPublicly;
+    }
+
     // If no updates provided
     if (Object.keys(updates).length === 0) {
       return NextResponse.json(
@@ -229,6 +236,7 @@ export async function PATCH(request: NextRequest) {
       username: result[0].username,
       isPublicGalleryEnabled: result[0].isPublicGalleryEnabled,
       isDirectoryListed: result[0].isDirectoryListed,
+      showGearPublicly: result[0].showGearPublicly,
       city: result[0].city,
       state: result[0].state,
       displayName: result[0].displayName,

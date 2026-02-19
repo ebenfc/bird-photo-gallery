@@ -19,6 +19,7 @@ export const users = pgTable("users", {
   city: text("city"), // Free-text city name, e.g. "Portland"
   state: text("state"), // 2-letter US state code, e.g. "OR"
   isDirectoryListed: boolean("is_directory_listed").notNull().default(false), // Opt-in to browse directory
+  showGearPublicly: boolean("show_gear_publicly").notNull().default(false), // Show camera gear on public gallery
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -68,8 +69,14 @@ export const photos = pgTable("photos", {
   dateTakenSource: text("date_taken_source").notNull().default("exif"), // 'exif' or 'manual'
   isFavorite: boolean("is_favorite").notNull().default(false),
   notes: text("notes"),
-  // Note: deletedAt column for soft deletes requires migration - uncomment after running db:push
-  // deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  // EXIF metadata fields (nullable — existing photos won't have these)
+  cameraMake: text("camera_make"),
+  cameraModel: text("camera_model"),
+  lensModel: text("lens_model"),
+  iso: integer("iso"),
+  aperture: text("aperture"),       // Display format: "f/5.6"
+  shutterSpeed: text("shutter_speed"), // Display format: "1/500"
+  focalLength: text("focal_length"),   // Display format: "200mm"
 }, (table) => ({
   userIdIdx: index("photos_user_id_idx").on(table.userId),
   speciesIdIdx: index("photos_species_id_idx").on(table.speciesId),
