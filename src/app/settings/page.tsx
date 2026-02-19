@@ -5,6 +5,7 @@ import Link from "next/link";
 import PublicGallerySettings from "@/components/settings/PublicGallerySettings";
 import LocationSettings from "@/components/settings/LocationSettings";
 import AppearanceSettings from "@/components/settings/AppearanceSettings";
+import EbirdSettings from "@/components/settings/EbirdSettings";
 
 export default function SettingsPage() {
   // Haikubox connection form state
@@ -257,6 +258,26 @@ export default function SettingsPage() {
                 </div>
               )}
             </div>
+          </div>
+        </section>
+
+        {/* eBird Section */}
+        <section className="bg-[var(--card-bg)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)]
+          border border-[var(--border-light)] overflow-hidden mb-8">
+          <div className="bg-gradient-to-r from-[var(--surface-moss)] to-[var(--surface-forest)]
+            border-b border-[var(--border-light)] px-5 sm:px-6 py-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-1 flex items-center gap-2">
+              <svg className="w-6 h-6 text-[var(--moss-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              eBird
+            </h2>
+            <p className="text-sm sm:text-base text-[var(--mist-600)]">
+              Import your eBird life list to build a wish list
+            </p>
+          </div>
+          <div className="p-5 sm:p-6">
+            <EbirdSettings />
           </div>
         </section>
 

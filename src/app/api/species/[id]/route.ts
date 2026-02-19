@@ -41,6 +41,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
         userNotes: species.userNotes,
         ebirdChecklistUrl: species.ebirdChecklistUrl,
         inatObservationUrl: species.inatObservationUrl,
+        ebirdSpeciesCode: species.ebirdSpeciesCode,
         photoCount: sql<number>`count(${photos.id})`.as("photo_count"),
         firstPhotoDate: sql<string | null>`min(${photos.originalDateTaken})`.as("first_photo_date"),
       })
@@ -88,7 +89,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     const body = await request.json();
-    const { commonName, scientificName, description, rarity, coverPhotoId, userNotes, ebirdChecklistUrl, inatObservationUrl } = body;
+    const { commonName, scientificName, description, rarity, coverPhotoId, userNotes, ebirdChecklistUrl, inatObservationUrl, ebirdSpeciesCode } = body;
 
     // Build update object with proper typing for Drizzle
     const updateData: Partial<{
@@ -100,6 +101,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       userNotes: string | null;
       ebirdChecklistUrl: string | null;
       inatObservationUrl: string | null;
+      ebirdSpeciesCode: string | null;
     }> = {};
 
     if (commonName !== undefined) {
@@ -148,6 +150,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         );
       }
       updateData.inatObservationUrl = inatObservationUrl?.trim() || null;
+    }
+    if (ebirdSpeciesCode !== undefined) {
+      updateData.ebirdSpeciesCode = ebirdSpeciesCode?.trim() || null;
     }
     if (coverPhotoId !== undefined) {
       // Validate that the photo exists and belongs to this species and user

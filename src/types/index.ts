@@ -33,6 +33,7 @@ export interface Species {
   // Ecosystem links
   ebirdChecklistUrl?: string | null;
   inatObservationUrl?: string | null;
+  ebirdSpeciesCode?: string | null;
   // First photographed date (earliest originalDateTaken across all photos)
   firstPhotoDate?: string | null;
   // Haikubox detection data (populated when available)
@@ -195,4 +196,33 @@ export interface SuggestionsResponse {
   suggestions: Suggestion[];
   topSuggestion: Suggestion | null;
   generatedAt: string;
+}
+
+// eBird Life List types
+export interface EbirdLifeListEntry {
+  id: number;
+  speciesCode: string;
+  commonName: string;
+  scientificName: string | null;
+  firstObservedDate: string | null;
+  importedAt: string;
+}
+
+export interface EbirdWishlistResponse {
+  wishlist: EbirdLifeListEntry[];
+  total: number;
+}
+
+export interface EbirdImportResult {
+  success: boolean;
+  imported: number;
+  matched: number;
+  unmatched: number;
+  errors?: string[];
+}
+
+export interface EbirdImportStatus {
+  hasImport: boolean;
+  totalSpecies: number;
+  lastImportedAt: string | null;
 }
