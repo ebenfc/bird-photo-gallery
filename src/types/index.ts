@@ -226,3 +226,47 @@ export interface EbirdImportStatus {
   totalSpecies: number;
   lastImportedAt: string | null;
 }
+
+// Unified Timeline types (discriminated union on `type`)
+export interface PhotoTimelineEvent {
+  type: "photo";
+  id: number;
+  eventDate: string;
+  thumbnailUrl: string;
+  speciesId: number | null;
+  speciesName: string | null;
+  isFavorite: boolean;
+  usedUploadDate: boolean;
+}
+
+export interface EbirdTimelineEvent {
+  type: "ebird_lifer";
+  id: number;
+  eventDate: string;
+  speciesCode: string;
+  commonName: string;
+  scientificName: string | null;
+}
+
+export interface HaikuboxTimelineEvent {
+  type: "haikubox";
+  speciesCommonName: string;
+  speciesId: number | null;
+  eventDate: string;
+  detectionCount: number;
+}
+
+export type TimelineEvent =
+  | PhotoTimelineEvent
+  | EbirdTimelineEvent
+  | HaikuboxTimelineEvent;
+
+export interface TimelineResponse {
+  events: TimelineEvent[];
+  nextCursor: string | null;
+  counts: {
+    photos: number;
+    ebird: number;
+    haikubox: number;
+  };
+}
