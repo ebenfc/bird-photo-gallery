@@ -55,6 +55,7 @@ The `users` table includes public gallery sharing fields:
 - `displayName` (text, nullable) - User-set public display name; overrides Clerk firstName/lastName
 - `isPublicGalleryEnabled` (boolean, default false) - Controls public gallery visibility
 - `isDirectoryListed` (boolean, default false) - Opt-in to Discover directory
+- `showGearPublicly` (boolean, default false) - Show camera gear metadata on public gallery
 - `city` (text, nullable) - Free-text city name
 - `state` (text, nullable) - 2-letter US state code
 
@@ -85,6 +86,11 @@ const latestPhotos = await db
 ```
 
 **Avoid raw SQL for array parameters** — `db.execute(sql`...`)` with `ANY(${array})` fails silently due to array serialization issues. Always use Drizzle's `inArray()` instead.
+
+## Photos Table — EXIF Metadata Columns
+
+7 nullable columns populated during upload by `processUploadedImage()`:
+`cameraMake`, `cameraModel`, `lensModel` (text), `iso` (integer), `aperture`, `shutterSpeed`, `focalLength` (text — display-formatted: "f/5.6", "1/500", "200mm"). Existing photos without EXIF data have nulls — UI handles gracefully.
 
 ## Species Table — Notable Columns
 
