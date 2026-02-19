@@ -8,6 +8,9 @@ interface PhotoCardProps {
   onClick: () => void;
   showSpecies?: boolean;
   index?: number;
+  isSelectMode?: boolean;
+  isSelected?: boolean;
+  onSelectToggle?: () => void;
 }
 
 export default function PhotoCard({
@@ -15,28 +18,55 @@ export default function PhotoCard({
   onClick,
   showSpecies = true,
   index = 0,
+  isSelectMode = false,
+  isSelected = false,
+  onSelectToggle,
 }: PhotoCardProps) {
   // Stagger animation delay based on index
   const animationDelay = Math.min(index * 50, 400);
+
+  const handleClick = () => {
+    if (isSelectMode && onSelectToggle) {
+      onSelectToggle();
+    } else {
+      onClick();
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleClick();
+    }
+  };
+
+  const speciesName = photo.species?.commonName || "bird";
+  const ariaLabel = isSelectMode
+    ? `${isSelected ? "Deselect" : "Select"} ${speciesName} photo${isSelected ? " (selected)" : ""}`
+    : `View ${speciesName} photo${photo.isFavorite ? " (favorited)" : ""}`;
 
   return (
     <div
       role="button"
       tabIndex={0}
-      className="group relative aspect-square rounded-[var(--radius-xl)] overflow-hidden cursor-pointer
+      className={`group relative aspect-square rounded-[var(--radius-xl)] overflow-hidden cursor-pointer
         bg-gradient-to-br from-[var(--surface-moss)] to-[var(--mist-50)]
         shadow-[var(--shadow-sm)]
-        ring-1 ring-[var(--border)]
         transition-all duration-[var(--timing-normal)]
-        hover:shadow-[var(--shadow-xl)] hover:ring-2 hover:ring-[var(--moss-300)]
+        hover:shadow-[var(--shadow-xl)]
         hover:-translate-y-1
         active:scale-[0.98] active:shadow-[var(--shadow-md)]
         focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--moss-500)]
-        animate-fade-in-up"
+        animate-fade-in-up
+        ${isSelected
+          ? "ring-3 ring-[var(--moss-500)] shadow-[var(--shadow-moss-lg)]"
+          : "ring-1 ring-[var(--border)] hover:ring-2 hover:ring-[var(--moss-300)]"
+        }`}
       style={{ animationDelay: `${animationDelay}ms` }}
-      onClick={onClick}
-      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } }}
-      aria-label={`View ${photo.species?.commonName || "bird"} photo${photo.isFavorite ? " (favorited)" : ""}`}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      aria-label={ariaLabel}
+      aria-pressed={isSelectMode ? isSelected : undefined}
     >
       <Image
         src={photo.thumbnailUrl}
@@ -49,6 +79,24 @@ export default function PhotoCard({
 
       {/* Subtle frame effect */}
       <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-[var(--radius-xl)]" />
+
+      {/* Selection checkbox overlay */}
+      {isSelectMode && (
+        <div
+          className={`absolute top-2.5 left-2.5 w-7 h-7 rounded-full flex items-center justify-center
+            transition-all duration-[var(--timing-fast)] z-10
+            ${isSelected
+              ? "bg-[var(--moss-500)] border-2 border-white shadow-[var(--shadow-md)]"
+              : "border-2 border-white/80 bg-black/20 backdrop-blur-sm"
+            }`}
+        >
+          {isSelected && (
+            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+            </svg>
+          )}
+        </div>
+      )}
 
       {/* Favorite badge with animation */}
       {photo.isFavorite && (
@@ -84,7 +132,7 @@ export default function PhotoCard({
       )}
 
       {/* Unassigned indicator with modern style */}
-      {!photo.species && (
+      {!photo.species && !isSelectMode && (
         <div className="absolute top-2.5 left-2.5
           bg-gradient-to-r from-[var(--mist-400)] to-[var(--mist-500)]
           text-white text-xs font-bold px-3 py-1.5
