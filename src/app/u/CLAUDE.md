@@ -17,6 +17,8 @@ All pages fetch from `/api/public/gallery/[username]/*` endpoints (not the authe
 Uses `PublicHeader` component with minimal navigation (Feed | Species tabs only).
 No Clerk auth UI, no edit/upload buttons.
 `BookmarkButton` rendered as child of `PublicHeader` for authenticated visitors.
+`GalleryStatsStrip` renders between header and main content — shows species count, photo count, member since date.
+Gallery counts use `React.cache()` via `getGalleryCounts()` for dedup between `generateMetadata` and layout body.
 
 ### Onboarding Gate Bypass
 Authenticated users visiting `/u/` pages skip onboarding gates (agreement form, display name gate). This is handled by `AuthenticatedLayout` (client component) using `usePathname()` — NOT middleware. Never use middleware to pass pathname to server components; it interferes with Clerk.
@@ -43,8 +45,14 @@ Authenticated users visiting `/u/` pages skip onboarding gates (agreement form, 
 - Activity page entirely (not accessible)
 - Settings page entirely (not accessible)
 
+### OG Image & Social Metadata
+`opengraph-image.tsx` generates a 1200x630 PNG card using `next/og` `ImageResponse`. Dark forest-green branding with display name + stats. Colors are hardcoded (Satori doesn't support CSS vars). Next.js auto-injects `<meta property="og:image">` — do NOT set `openGraph.images` manually in `generateMetadata`.
+
+`generateMetadata` includes `openGraph` (type: profile) and `twitter` (summary_large_image) metadata.
+
 ## Files
-- `layout.tsx` - Server component that validates username and public gallery status
+- `layout.tsx` - Server component: validates username, fetches counts, renders stats strip, generates metadata
+- `opengraph-image.tsx` - OG image card via `next/og` ImageResponse (1200x630, hardcoded colors)
 - `page.tsx` - Public feed with photos grid, filters, and read-only modal
 - `species/page.tsx` - Public species directory
 - `species/[id]/page.tsx` - Public species detail with photos
