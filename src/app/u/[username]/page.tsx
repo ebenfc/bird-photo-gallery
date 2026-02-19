@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
+import Image from "next/image";
 import { Photo, PhotosResponse, Species } from "@/types";
 import PhotoGrid from "@/components/gallery/PhotoGrid";
 import PhotoModal from "@/components/gallery/PhotoModal";
@@ -26,14 +27,18 @@ export default function PublicFeedPage() {
   const [sortOption, setSortOption] = useState<SortOption>("recent_upload");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
+  // Recently Added state
+  const [recentPhotos, setRecentPhotos] = useState<Photo[]>([]);
+
   // Count active filters for the badge
   const activeFilterCount = (selectedSpecies ? 1 : 0) + (showFavoritesOnly ? 1 : 0) + selectedRarities.length;
+  const hasActiveFilters = activeFilterCount > 0 || sortOption !== "recent_upload";
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Fetch species for filter dropdown
+  // Fetch species for filter dropdown + recently added photos
   useEffect(() => {
     const fetchSpecies = async () => {
       try {
@@ -46,7 +51,21 @@ export default function PublicFeedPage() {
         console.error("Failed to fetch species:", error);
       }
     };
+    const fetchRecentPhotos = async () => {
+      try {
+        const res = await fetch(
+          `/api/public/gallery/${username}/photos?sort=recent_upload&limit=6`
+        );
+        if (res.ok) {
+          const data: PhotosResponse = await res.json();
+          setRecentPhotos(data.photos);
+        }
+      } catch (error) {
+        console.error("Failed to fetch recent photos:", error);
+      }
+    };
     fetchSpecies();
+    fetchRecentPhotos();
   }, [username]);
 
   // Fetch photos
@@ -115,6 +134,50 @@ export default function PublicFeedPage() {
 
   return (
     <div className="pb-16 md:pb-0">
+      {/* Recently Added — only shown on unfiltered default view */}
+      {!hasActiveFilters && recentPhotos.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-sm font-semibold text-[var(--mist-500)] uppercase tracking-wider mb-3">
+            Recently Added
+          </h2>
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide"
+            style={{ WebkitOverflowScrolling: "touch" }}>
+            {recentPhotos.map((photo) => (
+              <button
+                key={photo.id}
+                onClick={() => setSelectedPhoto(photo)}
+                className="flex-shrink-0 relative w-[120px] h-[120px] sm:w-[140px] sm:h-[140px]
+                  rounded-[var(--radius-lg)] overflow-hidden
+                  ring-1 ring-[var(--border)]
+                  shadow-[var(--shadow-sm)]
+                  transition-all duration-[var(--timing-fast)]
+                  hover:shadow-[var(--shadow-lg)] hover:ring-2 hover:ring-[var(--moss-300)]
+                  hover:-translate-y-0.5
+                  active:scale-[0.97]
+                  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--moss-500)]"
+              >
+                <Image
+                  src={photo.thumbnailUrl}
+                  alt={photo.species?.commonName || "Bird photo"}
+                  fill
+                  className="object-cover"
+                  sizes="140px"
+                />
+                {photo.species && (
+                  <div className="absolute bottom-0 left-0 right-0
+                    bg-gradient-to-t from-black/70 to-transparent
+                    p-2 pt-6">
+                    <p className="text-white text-xs font-medium truncate drop-shadow-sm">
+                      {photo.species.commonName}
+                    </p>
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Mobile filter toggle button */}
       <div className="sm:hidden mb-4">
         <button

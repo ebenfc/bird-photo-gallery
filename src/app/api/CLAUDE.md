@@ -41,6 +41,7 @@ This is required for database access (pg driver) and sharp (image processing).
 |----------|---------|
 | `/photos` | List photos (GET), update/delete (PATCH/DELETE) |
 | `/photos/[id]` | Single photo GET/PATCH/DELETE |
+| `/photos/[id]/download` | Download original photo (GET, owner-only) |
 | `/photos/unassigned` | List unassigned inbox photos |
 | `/species` | List (GET) / create (POST) species |
 | `/species/[id]` | Species detail GET/PATCH/DELETE |
