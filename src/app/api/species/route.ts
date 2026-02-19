@@ -8,6 +8,7 @@ import { logError } from "@/lib/logger";
 import { SpeciesSchema, validateRequest } from "@/lib/validation";
 import { invalidateSpeciesCache } from "@/lib/cache";
 import { requireAuth, isErrorResponse } from "@/lib/authHelpers";
+import { lookupSpeciesCode } from "@/lib/ebird";
 
 // Ensure this route runs on Node.js runtime (not Edge)
 export const runtime = "nodejs";
@@ -61,6 +62,7 @@ export async function GET(request: NextRequest) {
         userNotes: species.userNotes,
         ebirdChecklistUrl: species.ebirdChecklistUrl,
         inatObservationUrl: species.inatObservationUrl,
+        ebirdSpeciesCode: species.ebirdSpeciesCode,
         photoCount: sql<number>`count(${photos.id})`.as("photo_count"),
         firstPhotoDate: sql<string | null>`min(${photos.originalDateTaken})`.as("first_photo_date"),
       })
@@ -212,6 +214,20 @@ export async function POST(request: NextRequest) {
     if (!newSpecies) {
       throw new Error("Failed to insert species record");
     }
+
+    // Auto-enrich eBird species code (non-blocking — don't fail the request)
+    lookupSpeciesCode(commonName).then(async (code) => {
+      if (code && newSpecies.id) {
+        try {
+          await db
+            .update(species)
+            .set({ ebirdSpeciesCode: code })
+            .where(and(eq(species.id, newSpecies.id), eq(species.userId, userId)));
+        } catch {
+          // Silent — enrichment is best-effort
+        }
+      }
+    }).catch(() => {});
 
     // Invalidate species cache
     invalidateSpeciesCache();

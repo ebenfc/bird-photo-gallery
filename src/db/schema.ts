@@ -1,4 +1,4 @@
-import { pgTable, text, integer, boolean, serial, timestamp, unique, index } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, boolean, serial, timestamp, date, unique, index } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 // Rarity type for species
@@ -44,6 +44,7 @@ export const species = pgTable("species", {
   userNotes: text("user_notes"), // Personal notes about this species (separate from Wikipedia description)
   ebirdChecklistUrl: text("ebird_checklist_url"), // Optional eBird checklist link
   inatObservationUrl: text("inat_observation_url"), // Optional iNaturalist observation link
+  ebirdSpeciesCode: text("ebird_species_code"), // eBird 6-letter species code (e.g., "norcar") for cross-referencing
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -263,3 +264,23 @@ export const bookmarksRelations = relations(bookmarks, ({ one }) => ({
 // Bookmark Type exports
 export type Bookmark = typeof bookmarks.$inferSelect;
 export type NewBookmark = typeof bookmarks.$inferInsert;
+
+// eBird Life List Table - Stores imported species from user's eBird life list CSV
+export const ebirdLifeList = pgTable("ebird_life_list", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  speciesCode: text("species_code").notNull(), // eBird 6-letter species code
+  commonName: text("common_name").notNull(),
+  scientificName: text("scientific_name"),
+  firstObservedDate: date("first_observed_date"),
+  importedAt: timestamp("imported_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+}, (table) => ({
+  userSpeciesUnique: unique().on(table.userId, table.speciesCode),
+  userIdx: index("idx_ebird_life_list_user").on(table.userId),
+}));
+
+// eBird Life List Type exports
+export type EbirdLifeListRow = typeof ebirdLifeList.$inferSelect;
+export type NewEbirdLifeListRow = typeof ebirdLifeList.$inferInsert;

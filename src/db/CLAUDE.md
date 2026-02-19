@@ -19,6 +19,7 @@ All tables defined in `schema.ts`.
 | `bookmarks` | Saved galleries (private, per-user) |
 | `appSettings` | User settings (key-value pairs) |
 | `userAgreements` | Tracks user acceptance of agreement versions |
+| `ebirdLifeList` | Imported eBird life list species for wish list feature |
 
 ## Data Isolation
 
@@ -39,6 +40,7 @@ Tables with performance indexes:
 - `haikuboxActivityLog`: unique on `(species_common_name, detected_at)`, `(species_common_name, hour_of_day)`, `detected_at`
 - `bookmarks`: `user_id`, unique on `(user_id, bookmarked_user_id)`
 - `userAgreements`: `user_id`, unique on `(user_id, agreement_version)`
+- `ebirdLifeList`: `user_id`, unique on `(user_id, species_code)`
 
 ## Key Relationships
 
@@ -98,6 +100,7 @@ const latestPhotos = await db
 - `ebirdChecklistUrl` (text, nullable) — Optional eBird link, visible publicly
 - `inatObservationUrl` (text, nullable) — Optional iNaturalist link, visible publicly
 - `coverPhotoId` (integer, nullable) — User-selected cover photo
+- `ebirdSpeciesCode` (text, nullable) — eBird 6-letter species code (e.g., "norcar"), auto-enriched on species creation via taxonomy API
 - `firstPhotoDate` — Not a column; computed as `min(photos.originalDateTaken)` via SQL aggregation in species queries
 
 ## Migrations

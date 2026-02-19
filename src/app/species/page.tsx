@@ -1,12 +1,15 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Species, SpeciesResponse, Rarity } from "@/types";
+import { Species, SpeciesResponse, Rarity, EbirdLifeListEntry, EbirdWishlistResponse, EbirdImportStatus } from "@/types";
 import SpeciesCard from "@/components/species/SpeciesCard";
 import SpeciesForm from "@/components/species/SpeciesForm";
+import WishListCard from "@/components/species/WishListCard";
 import Button from "@/components/ui/Button";
 
 type SpeciesSortOption = "alpha" | "photo_count" | "recent_added" | "recent_taken";
+type WishlistSortOption = "alpha" | "recent_observed";
+type ActiveTab = "species" | "wishlist";
 
 export default function SpeciesDirectory() {
   const [species, setSpecies] = useState<Species[]>([]);
@@ -17,6 +20,13 @@ export default function SpeciesDirectory() {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [sortOption, setSortOption] = useState<SpeciesSortOption>("alpha");
   const [error, setError] = useState<string | null>(null);
+
+  // eBird wish list state
+  const [activeTab, setActiveTab] = useState<ActiveTab>("species");
+  const [ebirdStatus, setEbirdStatus] = useState<EbirdImportStatus | null>(null);
+  const [wishlist, setWishlist] = useState<EbirdLifeListEntry[]>([]);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+  const [wishlistSort, setWishlistSort] = useState<WishlistSortOption>("alpha");
 
   const fetchSpecies = useCallback(async () => {
     try {
@@ -40,6 +50,44 @@ export default function SpeciesDirectory() {
   useEffect(() => {
     fetchSpecies();
   }, [fetchSpecies]);
+
+  // Check eBird import status on mount
+  useEffect(() => {
+    const checkEbirdStatus = async () => {
+      try {
+        const res = await fetch("/api/ebird/status");
+        if (res.ok) {
+          const data: EbirdImportStatus = await res.json();
+          setEbirdStatus(data);
+        }
+      } catch {
+        // Silent — eBird status is optional
+      }
+    };
+    checkEbirdStatus();
+  }, []);
+
+  // Fetch wishlist when tab switches to wishlist
+  const fetchWishlist = useCallback(async () => {
+    setWishlistLoading(true);
+    try {
+      const res = await fetch(`/api/ebird/wishlist?sort=${wishlistSort}`);
+      if (res.ok) {
+        const data: EbirdWishlistResponse = await res.json();
+        setWishlist(data.wishlist || []);
+      }
+    } catch {
+      console.error("Failed to fetch wishlist");
+    } finally {
+      setWishlistLoading(false);
+    }
+  }, [wishlistSort]);
+
+  useEffect(() => {
+    if (activeTab === "wishlist" && ebirdStatus?.hasImport) {
+      fetchWishlist();
+    }
+  }, [activeTab, fetchWishlist, ebirdStatus?.hasImport]);
 
   const handleCreateSpecies = async (data: {
     commonName: string;
@@ -237,25 +285,146 @@ export default function SpeciesDirectory() {
         </p>
       </div>
 
-      {/* Mobile filters - collapsible */}
-      <div className={`sm:hidden overflow-hidden transition-all duration-300 ease-out
-        ${showMobileFilters ? "max-h-96 opacity-100 mb-4" : "max-h-0 opacity-0"}`}>
-        <div className="bg-[var(--card-bg)]/80 backdrop-blur-sm rounded-[var(--radius-xl)] p-4 shadow-[var(--shadow-sm)] border border-[var(--border)]">
-          {/* Sort dropdown inside mobile filters */}
-          <div className="mb-3">
+      {/* Tab toggle — only shown if eBird import exists */}
+      {ebirdStatus?.hasImport && (
+        <div className="flex gap-1 p-1 mb-4 bg-[var(--mist-100)] rounded-[var(--radius-lg)] w-fit">
+          <button
+            onClick={() => setActiveTab("species")}
+            className={`px-4 py-2 text-sm font-semibold rounded-[var(--radius-md)]
+              transition-all duration-[var(--timing-fast)]
+              ${activeTab === "species"
+                ? "bg-[var(--card-bg)] text-[var(--text-primary)] shadow-[var(--shadow-sm)]"
+                : "text-[var(--mist-600)] hover:text-[var(--text-primary)]"
+              }`}
+          >
+            My Species ({species.length})
+          </button>
+          <button
+            onClick={() => setActiveTab("wishlist")}
+            className={`px-4 py-2 text-sm font-semibold rounded-[var(--radius-md)]
+              transition-all duration-[var(--timing-fast)]
+              ${activeTab === "wishlist"
+                ? "bg-[var(--card-bg)] text-[var(--text-primary)] shadow-[var(--shadow-sm)]"
+                : "text-[var(--mist-600)] hover:text-[var(--text-primary)]"
+              }`}
+          >
+            Wish List {wishlist.length > 0 ? `(${wishlist.length})` : ""}
+          </button>
+        </div>
+      )}
+
+      {/* Wish list view */}
+      {activeTab === "wishlist" && ebirdStatus?.hasImport ? (
+        <>
+          {/* Wishlist sort */}
+          <div className="flex items-center gap-3 mb-4">
             <select
-              value={sortOption}
-              onChange={(e) => setSortOption(e.target.value as SpeciesSortOption)}
-              className="w-full px-3 py-2 bg-[var(--card-bg)] border border-[var(--border-light)] rounded-[var(--radius-md)]
+              value={wishlistSort}
+              onChange={(e) => setWishlistSort(e.target.value as WishlistSortOption)}
+              className="px-3 py-2 bg-[var(--card-bg)] border border-[var(--border-light)] rounded-[var(--radius-md)]
                 text-sm text-[var(--forest-700)] focus:outline-none focus:ring-2 focus:ring-[var(--moss-500)]"
             >
               <option value="alpha">A-Z</option>
-              <option value="photo_count">Most Photos</option>
-              <option value="recent_added">Recently Added</option>
-              <option value="recent_taken">Recently Photographed</option>
+              <option value="recent_observed">Recently Observed</option>
             </select>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+
+          {wishlistLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-[var(--card-bg)] rounded-[var(--radius-xl)] overflow-hidden shadow-[var(--shadow-sm)] ring-1 ring-[var(--border)]"
+                >
+                  <div className="aspect-[4/3] bg-gradient-to-br from-[var(--surface-moss)] to-[var(--mist-50)] animate-pulse" />
+                  <div className="p-4 space-y-3">
+                    <div className="h-5 w-3/4 bg-[var(--mist-200)] rounded animate-pulse" />
+                    <div className="h-4 w-1/2 bg-[var(--mist-100)] rounded animate-pulse" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : wishlist.length === 0 ? (
+            <div className="text-center py-20 px-4">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-[var(--moss-100)] to-[var(--forest-100)] flex items-center justify-center">
+                <svg className="w-10 h-10 text-[var(--forest-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-[var(--text-label)] mb-2">
+                All caught up!
+              </h3>
+              <p className="text-[var(--mist-500)] mb-6 max-w-sm mx-auto">
+                Every species from your eBird life list is already in your BirdFeed collection.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {wishlist.map((entry) => (
+                <WishListCard key={entry.id} entry={entry} />
+              ))}
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          {/* Mobile filters - collapsible */}
+          <div className={`sm:hidden overflow-hidden transition-all duration-300 ease-out
+            ${showMobileFilters ? "max-h-96 opacity-100 mb-4" : "max-h-0 opacity-0"}`}>
+            <div className="bg-[var(--card-bg)]/80 backdrop-blur-sm rounded-[var(--radius-xl)] p-4 shadow-[var(--shadow-sm)] border border-[var(--border)]">
+              {/* Sort dropdown inside mobile filters */}
+              <div className="mb-3">
+                <select
+                  value={sortOption}
+                  onChange={(e) => setSortOption(e.target.value as SpeciesSortOption)}
+                  className="w-full px-3 py-2 bg-[var(--card-bg)] border border-[var(--border-light)] rounded-[var(--radius-md)]
+                    text-sm text-[var(--forest-700)] focus:outline-none focus:ring-2 focus:ring-[var(--moss-500)]"
+                >
+                  <option value="alpha">A-Z</option>
+                  <option value="photo_count">Most Photos</option>
+                  <option value="recent_added">Recently Added</option>
+                  <option value="recent_taken">Recently Photographed</option>
+                </select>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                {rarityOptions.map((opt) => {
+                  const isSelected = selectedRarities.includes(opt.value);
+                  return (
+                    <button
+                      key={opt.value}
+                      onClick={() => toggleRarity(opt.value)}
+                      className={`px-4 py-2 text-sm font-semibold
+                        rounded-[var(--radius-full)] border-2
+                        shadow-[var(--shadow-xs)]
+                        transition-all duration-[var(--timing-fast)]
+                        active:scale-95
+                        ${isSelected
+                          ? "bg-gradient-to-b from-[var(--moss-500)] to-[var(--moss-600)] text-white border-[var(--moss-600)] shadow-[var(--shadow-moss)]"
+                          : "bg-[var(--card-bg)] text-[var(--mist-500)] border-[var(--mist-200)] hover:border-[var(--moss-300)] hover:text-[var(--forest-700)] hover:shadow-[var(--shadow-sm)]"
+                        }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+                {selectedRarities.length > 0 && (
+                  <button
+                    onClick={() => setSelectedRarities([])}
+                    className="px-4 py-2 text-sm font-semibold text-[var(--mist-500)]
+                      hover:text-[var(--forest-700)] hover:bg-[var(--mist-50)]
+                      rounded-[var(--radius-full)]
+                      transition-all duration-[var(--timing-fast)]
+                      active:scale-95"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Rarity Filters - always visible */}
+          <div className="hidden sm:flex flex-wrap items-center gap-2 mb-6">
             {rarityOptions.map((opt) => {
               const isSelected = selectedRarities.includes(opt.value);
               return (
@@ -289,98 +458,62 @@ export default function SpeciesDirectory() {
               </button>
             )}
           </div>
-        </div>
-      </div>
 
-      {/* Desktop Rarity Filters - always visible */}
-      <div className="hidden sm:flex flex-wrap items-center gap-2 mb-6">
-        {rarityOptions.map((opt) => {
-          const isSelected = selectedRarities.includes(opt.value);
-          return (
-            <button
-              key={opt.value}
-              onClick={() => toggleRarity(opt.value)}
-              className={`px-4 py-2 text-sm font-semibold
-                rounded-[var(--radius-full)] border-2
-                shadow-[var(--shadow-xs)]
-                transition-all duration-[var(--timing-fast)]
-                active:scale-95
-                ${isSelected
-                  ? "bg-gradient-to-b from-[var(--moss-500)] to-[var(--moss-600)] text-white border-[var(--moss-600)] shadow-[var(--shadow-moss)]"
-                  : "bg-[var(--card-bg)] text-[var(--mist-500)] border-[var(--mist-200)] hover:border-[var(--moss-300)] hover:text-[var(--forest-700)] hover:shadow-[var(--shadow-sm)]"
-                }`}
-            >
-              {opt.label}
-            </button>
-          );
-        })}
-        {selectedRarities.length > 0 && (
-          <button
-            onClick={() => setSelectedRarities([])}
-            className="px-4 py-2 text-sm font-semibold text-[var(--mist-500)]
-              hover:text-[var(--forest-700)] hover:bg-[var(--mist-50)]
-              rounded-[var(--radius-full)]
-              transition-all duration-[var(--timing-fast)]
-              active:scale-95"
-          >
-            Clear
-          </button>
-        )}
-      </div>
-
-      {error ? (
-        <div className="text-center py-20 px-4">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-[var(--error-bg)] flex items-center justify-center">
-            <svg className="w-10 h-10 text-[var(--error-text)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-[var(--text-label)] mb-2">
-            Something went wrong
-          </h3>
-          <p className="text-[var(--mist-500)] mb-6 max-w-sm mx-auto">{error}</p>
-          <Button onClick={() => fetchSpecies()}>Try Again</Button>
-        </div>
-      ) : species.length === 0 ? (
-        <div className="text-center py-20 px-4">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-[var(--moss-100)] to-[var(--forest-100)] flex items-center justify-center">
-            <svg className="w-10 h-10 text-[var(--forest-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-[var(--text-label)] mb-2">
-            No species yet
-          </h3>
-          <p className="text-[var(--mist-500)] mb-6 max-w-sm mx-auto">
-            Start building your bird collection by adding your first species
-          </p>
-          <Button onClick={() => setShowForm(true)}>Add Species</Button>
-        </div>
-      ) : filteredSpecies.length === 0 ? (
-        <div className="text-center py-20 px-4">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-[var(--moss-100)] to-[var(--forest-100)] flex items-center justify-center">
-            <svg className="w-10 h-10 text-[var(--forest-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-[var(--text-label)] mb-2">
-            No species found
-          </h3>
-          <p className="text-[var(--mist-500)] mb-6 max-w-sm mx-auto">
-            No species match the selected rarity filter
-          </p>
-          <Button variant="secondary" onClick={() => setSelectedRarities([])}>Clear Filter</Button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredSpecies.map((s) => (
-            <SpeciesCard
-              key={s.id}
-              species={s}
-              onEdit={() => setEditingSpecies(s)}
-            />
-          ))}
-        </div>
+          {error ? (
+            <div className="text-center py-20 px-4">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-[var(--error-bg)] flex items-center justify-center">
+                <svg className="w-10 h-10 text-[var(--error-text)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-[var(--text-label)] mb-2">
+                Something went wrong
+              </h3>
+              <p className="text-[var(--mist-500)] mb-6 max-w-sm mx-auto">{error}</p>
+              <Button onClick={() => fetchSpecies()}>Try Again</Button>
+            </div>
+          ) : species.length === 0 ? (
+            <div className="text-center py-20 px-4">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-[var(--moss-100)] to-[var(--forest-100)] flex items-center justify-center">
+                <svg className="w-10 h-10 text-[var(--forest-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-[var(--text-label)] mb-2">
+                No species yet
+              </h3>
+              <p className="text-[var(--mist-500)] mb-6 max-w-sm mx-auto">
+                Start building your bird collection by adding your first species
+              </p>
+              <Button onClick={() => setShowForm(true)}>Add Species</Button>
+            </div>
+          ) : filteredSpecies.length === 0 ? (
+            <div className="text-center py-20 px-4">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-[var(--moss-100)] to-[var(--forest-100)] flex items-center justify-center">
+                <svg className="w-10 h-10 text-[var(--forest-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-[var(--text-label)] mb-2">
+                No species found
+              </h3>
+              <p className="text-[var(--mist-500)] mb-6 max-w-sm mx-auto">
+                No species match the selected rarity filter
+              </p>
+              <Button variant="secondary" onClick={() => setSelectedRarities([])}>Clear Filter</Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredSpecies.map((s) => (
+                <SpeciesCard
+                  key={s.id}
+                  species={s}
+                  onEdit={() => setEditingSpecies(s)}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       {/* Create new species form */}

@@ -14,8 +14,8 @@ Components are organized by feature area.
 | `landing/` | Public landing page (includes `ThemeShowcase` live skin picker) |
 | `layout/` | Header, navigation, PublicHeader, AuthenticatedLayout |
 | `providers/` | Theme provider (next-themes wrapper) |
-| `settings/` | Settings forms (public gallery, location, appearance/skin picker) |
-| `species/` | Species cards and forms |
+| `settings/` | Settings forms (public gallery, location, appearance/skin picker, eBird import) |
+| `species/` | Species cards, forms, and WishListCard (eBird wish list) |
 | `stats/` | Property stats widget |
 | `suggestions/` | AI suggestion components |
 | `support/` | Issue reporting (ReportIssueButton, ReportIssueModal) |
