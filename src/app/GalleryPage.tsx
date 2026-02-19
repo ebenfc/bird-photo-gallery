@@ -8,6 +8,7 @@ import PhotoModal from "@/components/gallery/PhotoModal";
 import GalleryFilters from "@/components/gallery/GalleryFilters";
 import SpeciesAssignModal from "@/components/species/SpeciesAssignModal";
 import UploadModal from "@/components/upload/UploadModal";
+import BulkActionBar from "@/components/gallery/BulkActionBar";
 import Button from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
 
@@ -30,6 +31,12 @@ function GalleryContent() {
   });
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
+  // Bulk selection state
+  const [isSelectMode, setIsSelectMode] = useState(false);
+  const [selectedPhotoIds, setSelectedPhotoIds] = useState<Set<number>>(new Set());
+  const [showBulkAssignModal, setShowBulkAssignModal] = useState(false);
+  const [bulkAssigning, setBulkAssigning] = useState(false);
+
   // Get filter state from URL (memoized to prevent infinite loops)
   const selectedSpecies = searchParams.get("species")
     ? parseInt(searchParams.get("species")!)
@@ -43,9 +50,10 @@ function GalleryContent() {
     ) as Rarity[];
   }, [rarityParam]);
 
-  // Update URL with filter state
+  // Update URL with filter state — also clears selection
   const updateFilters = useCallback(
     (newSpecies: number | null, newFavorites: boolean, newRarities: Rarity[]) => {
+      setSelectedPhotoIds(new Set());
       const params = new URLSearchParams();
       if (newSpecies) params.set("species", newSpecies.toString());
       if (newFavorites) params.set("favorites", "true");
@@ -106,6 +114,111 @@ function GalleryContent() {
   useEffect(() => {
     fetchPhotos();
   }, [fetchPhotos]);
+
+  // Toggle select mode
+  const toggleSelectMode = () => {
+    if (isSelectMode) {
+      // Exiting select mode
+      setIsSelectMode(false);
+      setSelectedPhotoIds(new Set());
+    } else {
+      // Entering select mode
+      setIsSelectMode(true);
+      setSelectedPhotoIds(new Set());
+      setSelectedPhoto(null); // Close photo modal
+      setShowMobileFilters(false);
+    }
+  };
+
+  // Toggle individual photo selection
+  const handleSelectToggle = (photoId: number) => {
+    setSelectedPhotoIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(photoId)) {
+        next.delete(photoId);
+      } else {
+        next.add(photoId);
+      }
+      return next;
+    });
+  };
+
+  // Bulk assign species to all selected photos
+  const handleBulkAssignSpecies = async (speciesId: number) => {
+    setBulkAssigning(true);
+    const photoIds = Array.from(selectedPhotoIds);
+    let successCount = 0;
+    let limitHit = false;
+
+    for (const photoId of photoIds) {
+      try {
+        const res = await fetch(`/api/photos/${photoId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ speciesId }),
+        });
+        if (res.ok) {
+          successCount++;
+        } else if (res.status === 409) {
+          limitHit = true;
+          break;
+        }
+      } catch {
+        break;
+      }
+      // Small delay between requests to avoid overwhelming the server
+      if (photoIds.indexOf(photoId) < photoIds.length - 1) {
+        await new Promise((r) => setTimeout(r, 50));
+      }
+    }
+
+    // Refresh data
+    await Promise.all([fetchPhotos(), fetchSpecies()]);
+
+    // Report results
+    const speciesName = species.find((s) => s.id === speciesId)?.commonName || "species";
+    if (limitHit && successCount < photoIds.length) {
+      showToast(
+        `Assigned ${successCount} of ${photoIds.length} photos. ${speciesName} gallery is now full.`,
+        "info"
+      );
+    } else if (successCount === photoIds.length) {
+      showToast(
+        `Assigned ${successCount} photo${successCount !== 1 ? "s" : ""} to ${speciesName}`,
+        "success"
+      );
+    } else {
+      showToast(
+        `Assigned ${successCount} of ${photoIds.length} photos. Some failed.`,
+        "error"
+      );
+    }
+
+    // Clean up
+    setShowBulkAssignModal(false);
+    setIsSelectMode(false);
+    setSelectedPhotoIds(new Set());
+    setBulkAssigning(false);
+  };
+
+  // Bulk create species and assign
+  const handleBulkCreateAndAssign = async (
+    speciesData: { commonName: string; scientificName?: string; rarity?: Rarity }
+  ) => {
+    try {
+      const createRes = await fetch("/api/species", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(speciesData),
+      });
+      const { species: newSpecies } = await createRes.json();
+      await handleBulkAssignSpecies(newSpecies.id);
+    } catch (err) {
+      console.error("Failed to create species for bulk assign:", err);
+      showToast("Failed to create species. Please try again.", "error");
+      setBulkAssigning(false);
+    }
+  };
 
   // Handle favorite toggle
   const handleFavoriteToggle = async (id: number, isFavorite: boolean) => {
@@ -320,6 +433,16 @@ function GalleryContent() {
   // Count active filters for the badge
   const activeFilterCount = (selectedSpecies ? 1 : 0) + (showFavoritesOnly ? 1 : 0) + selectedRarities.length;
 
+  // Photos for bulk modal (memoized to avoid recalculating on every render)
+  const bulkPhotos = useMemo(() => {
+    return photos.filter((p) => selectedPhotoIds.has(p.id));
+  }, [photos, selectedPhotoIds]);
+
+  // Select mode button styling (shared between desktop and mobile)
+  const selectButtonClass = isSelectMode
+    ? "bg-[var(--forest-600)] text-white ring-[var(--forest-600)] shadow-[var(--shadow-sm)]"
+    : "text-[var(--forest-700)] bg-gradient-to-br from-[var(--surface-moss)] to-[var(--surface-forest)] ring-[var(--border)] shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:ring-[var(--moss-300)]";
+
   return (
     <div className="pnw-texture min-h-screen pb-24 sm:pb-0">
       {/* Desktop header */}
@@ -329,31 +452,48 @@ function GalleryContent() {
             Feed
           </h1>
           <p className="text-[var(--mist-600)] mt-1">
-            Browse, upload, and organize your bird photography collection.
+            {isSelectMode
+              ? `${selectedPhotoIds.size} photo${selectedPhotoIds.size !== 1 ? "s" : ""} selected`
+              : "Browse, upload, and organize your bird photography collection."}
           </p>
         </div>
         <div className="flex items-center gap-3">
+          {!isSelectMode && (
+            <>
+              <button
+                onClick={() => router.push('/species')}
+                className="text-sm font-semibold text-[var(--forest-700)] px-4 py-1.5
+                  bg-gradient-to-br from-[var(--surface-moss)] to-[var(--surface-forest)]
+                  rounded-full shadow-[var(--shadow-xs)] ring-1 ring-[var(--border)]
+                  hover:shadow-[var(--shadow-sm)] hover:ring-[var(--moss-300)]
+                  transition-all duration-[var(--timing-fast)] active:scale-95 cursor-pointer"
+              >
+                {species.filter(s => s.photoCount && s.photoCount > 0).length} species
+              </button>
+              <span className="text-sm font-semibold text-[var(--forest-700)] px-4 py-1.5
+                bg-gradient-to-br from-[var(--surface-moss)] to-[var(--surface-forest)]
+                rounded-full shadow-[var(--shadow-xs)] ring-1 ring-[var(--border)]">
+                {photos.length} photo{photos.length !== 1 ? "s" : ""}
+              </span>
+            </>
+          )}
           <button
-            onClick={() => router.push('/species')}
-            className="text-sm font-semibold text-[var(--forest-700)] px-4 py-1.5
-              bg-gradient-to-br from-[var(--surface-moss)] to-[var(--surface-forest)]
-              rounded-full shadow-[var(--shadow-xs)] ring-1 ring-[var(--border)]
-              hover:shadow-[var(--shadow-sm)] hover:ring-[var(--moss-300)]
-              transition-all duration-[var(--timing-fast)] active:scale-95 cursor-pointer"
+            onClick={toggleSelectMode}
+            aria-pressed={isSelectMode}
+            className={`text-sm font-semibold px-4 py-1.5 rounded-full ring-1
+              transition-all duration-[var(--timing-fast)] active:scale-95 cursor-pointer
+              ${selectButtonClass}`}
           >
-            {species.filter(s => s.photoCount && s.photoCount > 0).length} species
+            {isSelectMode ? "Cancel" : "Select"}
           </button>
-          <span className="text-sm font-semibold text-[var(--forest-700)] px-4 py-1.5
-            bg-gradient-to-br from-[var(--surface-moss)] to-[var(--surface-forest)]
-            rounded-full shadow-[var(--shadow-xs)] ring-1 ring-[var(--border)]">
-            {photos.length} photo{photos.length !== 1 ? "s" : ""}
-          </span>
-          <Button onClick={() => setShowUploadModal(true)}>
-            <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Upload
-          </Button>
+          {!isSelectMode && (
+            <Button onClick={() => setShowUploadModal(true)}>
+              <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Upload
+            </Button>
+          )}
         </div>
       </div>
 
@@ -363,66 +503,96 @@ function GalleryContent() {
           <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">
             Feed
           </h1>
-          <button
-            onClick={() => setShowMobileFilters(!showMobileFilters)}
-            aria-label={`Toggle filters${activeFilterCount > 0 ? `, ${activeFilterCount} active` : ""}`}
-            aria-expanded={showMobileFilters}
-            className={`flex items-center gap-1.5 px-3 py-2 text-sm font-semibold
-              rounded-[var(--radius-lg)] border
-              transition-all duration-[var(--timing-fast)] active:scale-95
-              ${showMobileFilters || activeFilterCount > 0
-                ? "bg-gradient-to-b from-[var(--forest-500)] to-[var(--forest-600)] text-white border-[var(--forest-600)]"
-                : "bg-[var(--card-bg)] text-[var(--forest-700)] border-[var(--mist-200)] hover:border-[var(--moss-300)]"
-              }`}
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-            </svg>
-            Filter
-            {activeFilterCount > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full bg-[var(--card-bg)]/20">
-                {activeFilterCount}
-              </span>
-            )}
-            <svg
-              className={`w-4 h-4 transition-transform duration-200 ${showMobileFilters ? "rotate-180" : ""}`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+          <div className="flex items-center gap-2">
+            {/* Select toggle for mobile */}
+            <button
+              onClick={toggleSelectMode}
+              aria-pressed={isSelectMode}
+              className={`flex items-center gap-1.5 px-3 py-2 text-sm font-semibold
+                rounded-[var(--radius-lg)] border
+                transition-all duration-[var(--timing-fast)] active:scale-95
+                ${isSelectMode
+                  ? "bg-gradient-to-b from-[var(--forest-500)] to-[var(--forest-600)] text-white border-[var(--forest-600)]"
+                  : "bg-[var(--card-bg)] text-[var(--forest-700)] border-[var(--mist-200)] hover:border-[var(--moss-300)]"
+                }`}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              {isSelectMode ? "Cancel" : "Select"}
+            </button>
+            {/* Filter toggle (hidden during select mode) */}
+            {!isSelectMode && (
+              <button
+                onClick={() => setShowMobileFilters(!showMobileFilters)}
+                aria-label={`Toggle filters${activeFilterCount > 0 ? `, ${activeFilterCount} active` : ""}`}
+                aria-expanded={showMobileFilters}
+                className={`flex items-center gap-1.5 px-3 py-2 text-sm font-semibold
+                  rounded-[var(--radius-lg)] border
+                  transition-all duration-[var(--timing-fast)] active:scale-95
+                  ${showMobileFilters || activeFilterCount > 0
+                    ? "bg-gradient-to-b from-[var(--forest-500)] to-[var(--forest-600)] text-white border-[var(--forest-600)]"
+                    : "bg-[var(--card-bg)] text-[var(--forest-700)] border-[var(--mist-200)] hover:border-[var(--moss-300)]"
+                  }`}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                Filter
+                {activeFilterCount > 0 && (
+                  <span className="ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full bg-[var(--card-bg)]/20">
+                    {activeFilterCount}
+                  </span>
+                )}
+                <svg
+                  className={`w-4 h-4 transition-transform duration-200 ${showMobileFilters ? "rotate-180" : ""}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-2 text-xs text-[var(--mist-500)]">
-          <button
-            onClick={() => router.push('/species')}
-            className="hover:text-[var(--forest-600)] transition-colors"
-          >
-            {species.filter(s => s.photoCount && s.photoCount > 0).length} species
-          </button>
-          <span>•</span>
-          <span>{photos.length} photo{photos.length !== 1 ? "s" : ""}</span>
+          {isSelectMode ? (
+            <span>{selectedPhotoIds.size} photo{selectedPhotoIds.size !== 1 ? "s" : ""} selected</span>
+          ) : (
+            <>
+              <button
+                onClick={() => router.push('/species')}
+                className="hover:text-[var(--forest-600)] transition-colors"
+              >
+                {species.filter(s => s.photoCount && s.photoCount > 0).length} species
+              </button>
+              <span>•</span>
+              <span>{photos.length} photo{photos.length !== 1 ? "s" : ""}</span>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Mobile filters - collapsible */}
-      <div className={`sm:hidden overflow-hidden transition-all duration-300 ease-out
-        ${showMobileFilters ? "max-h-96 opacity-100 mb-4" : "max-h-0 opacity-0"}`}>
-        <div className="bg-[var(--card-bg)]/80 backdrop-blur-sm rounded-[var(--radius-xl)] p-4 shadow-[var(--shadow-sm)] border border-[var(--border)]">
-          <GalleryFilters
-            species={species}
-            selectedSpecies={selectedSpecies}
-            showFavoritesOnly={showFavoritesOnly}
-            selectedRarities={selectedRarities}
-            sortOption={sortOption}
-            onSpeciesChange={(id) => updateFilters(id, showFavoritesOnly, selectedRarities)}
-            onFavoritesChange={(value) => updateFilters(selectedSpecies, value, selectedRarities)}
-            onRarityChange={(rarities) => updateFilters(selectedSpecies, showFavoritesOnly, rarities)}
-            onSortChange={handleSortChange}
-          />
+      {/* Mobile filters - collapsible (hidden during select mode) */}
+      {!isSelectMode && (
+        <div className={`sm:hidden overflow-hidden transition-all duration-300 ease-out
+          ${showMobileFilters ? "max-h-96 opacity-100 mb-4" : "max-h-0 opacity-0"}`}>
+          <div className="bg-[var(--card-bg)]/80 backdrop-blur-sm rounded-[var(--radius-xl)] p-4 shadow-[var(--shadow-sm)] border border-[var(--border)]">
+            <GalleryFilters
+              species={species}
+              selectedSpecies={selectedSpecies}
+              showFavoritesOnly={showFavoritesOnly}
+              selectedRarities={selectedRarities}
+              sortOption={sortOption}
+              onSpeciesChange={(id) => updateFilters(id, showFavoritesOnly, selectedRarities)}
+              onFavoritesChange={(value) => updateFilters(selectedSpecies, value, selectedRarities)}
+              onRarityChange={(rarities) => updateFilters(selectedSpecies, showFavoritesOnly, rarities)}
+              onSortChange={handleSortChange}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Desktop filters - always visible */}
       <div className="hidden sm:block">
@@ -443,6 +613,9 @@ function GalleryContent() {
         photos={photos}
         onPhotoClick={setSelectedPhoto}
         loading={loading}
+        isSelectMode={isSelectMode}
+        selectedPhotoIds={selectedPhotoIds}
+        onSelectToggle={handleSelectToggle}
       />
 
       <PhotoModal
@@ -460,6 +633,7 @@ function GalleryContent() {
         onDownload={handleDownload}
       />
 
+      {/* Single photo assign modal */}
       <SpeciesAssignModal
         photo={photoToAssign}
         species={species}
@@ -467,6 +641,23 @@ function GalleryContent() {
         onClose={() => setPhotoToAssign(null)}
         onAssign={handleAssignSpecies}
         onCreateAndAssign={handleCreateAndAssign}
+      />
+
+      {/* Bulk assign modal */}
+      <SpeciesAssignModal
+        photo={null}
+        species={species}
+        isOpen={showBulkAssignModal}
+        onClose={() => {
+          if (!bulkAssigning) {
+            setShowBulkAssignModal(false);
+          }
+        }}
+        onAssign={handleAssignSpecies}
+        onCreateAndAssign={handleCreateAndAssign}
+        bulkPhotos={bulkPhotos}
+        onBulkAssign={handleBulkAssignSpecies}
+        onBulkCreateAndAssign={handleBulkCreateAndAssign}
       />
 
       <UploadModal
@@ -480,24 +671,36 @@ function GalleryContent() {
         onSpeciesCreated={fetchSpecies}
       />
 
-      {/* Floating Action Button for mobile */}
-      <button
-        onClick={() => setShowUploadModal(true)}
-        className="fixed bottom-6 right-6 w-16 h-16
-          bg-gradient-to-br from-[var(--moss-500)] to-[var(--forest-600)]
-          text-white rounded-full
-          shadow-[var(--shadow-moss-lg)]
-          hover:shadow-[0_12px_32px_rgba(124,179,66,0.35)]
-          hover:scale-110 hover:-translate-y-1
-          active:scale-95
-          transition-all duration-[var(--timing-fast)]
-          flex items-center justify-center sm:hidden z-40"
-        aria-label="Upload photo"
-      >
-        <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-        </svg>
-      </button>
+      {/* Bulk action bar */}
+      {isSelectMode && selectedPhotoIds.size > 0 && (
+        <BulkActionBar
+          selectedCount={selectedPhotoIds.size}
+          onAssign={() => setShowBulkAssignModal(true)}
+          onCancel={toggleSelectMode}
+          isAssigning={bulkAssigning}
+        />
+      )}
+
+      {/* Floating Action Button for mobile (hidden during select mode) */}
+      {!isSelectMode && (
+        <button
+          onClick={() => setShowUploadModal(true)}
+          className="fixed bottom-6 right-6 w-16 h-16
+            bg-gradient-to-br from-[var(--moss-500)] to-[var(--forest-600)]
+            text-white rounded-full
+            shadow-[var(--shadow-moss-lg)]
+            hover:shadow-[0_12px_32px_rgba(124,179,66,0.35)]
+            hover:scale-110 hover:-translate-y-1
+            active:scale-95
+            transition-all duration-[var(--timing-fast)]
+            flex items-center justify-center sm:hidden z-40"
+          aria-label="Upload photo"
+        >
+          <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }

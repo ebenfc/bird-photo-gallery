@@ -45,6 +45,9 @@ Mobile views use collapsible filter panels (Feed, Species, Activity, Public Feed
 ### SpeciesCard (`species/SpeciesCard.tsx`)
 Shared card for auth and public views. `linkPrefix` prop for URL target, `onEdit` for auth-only edit button. `HeardBadge` only shows with Haikubox data. Photo count shows `"X of 8"` or `"Curated"` badge. Shows "First photographed" date when `species.firstPhotoDate` is set.
 
+### BulkActionBar (`gallery/BulkActionBar.tsx`)
+Fixed bottom bar for bulk photo operations. Appears when select mode is active and photos are selected. Shows count + "Assign Species" + "Cancel". Uses `role="toolbar"`, `aria-live="polite"` for count updates.
+
 ### SwapPicker (`species/SwapPicker.tsx`)
 4-column thumbnail grid for photo swaps (used in UploadModal and SpeciesAssignModal). Shows favorite indicator + warning.
 

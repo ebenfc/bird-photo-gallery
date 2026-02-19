@@ -110,6 +110,9 @@ interface SpeciesAssignModalProps {
   onSkip?: () => void;
   showSkip?: boolean;
   queuePosition?: { current: number; total: number };
+  bulkPhotos?: Photo[];
+  onBulkAssign?: (speciesId: number) => Promise<void>;
+  onBulkCreateAndAssign?: (speciesData: { commonName: string; scientificName?: string; rarity?: Rarity }) => Promise<void>;
 }
 
 export default function SpeciesAssignModal({
@@ -122,6 +125,9 @@ export default function SpeciesAssignModal({
   onSkip,
   showSkip = false,
   queuePosition,
+  bulkPhotos,
+  onBulkAssign,
+  onBulkCreateAndAssign,
 }: SpeciesAssignModalProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showNewForm, setShowNewForm] = useState(false);
@@ -143,6 +149,9 @@ export default function SpeciesAssignModal({
   const [lookupResult, setLookupResult] = useState<BirdLookupResult | null>(null);
   const [scientificNameAutoFilled, setScientificNameAutoFilled] = useState(false);
   const lookupTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const isBulkMode = Boolean(bulkPhotos && bulkPhotos.length > 0);
+  const bulkCount = bulkPhotos?.length || 0;
 
   // Fetch recent detections when modal opens
   useEffect(() => {
@@ -239,7 +248,8 @@ export default function SpeciesAssignModal({
     return recentDetections.find((d) => d.matchedSpeciesId === speciesId);
   };
 
-  if (!isOpen || !photo) return null;
+  if (!isOpen) return null;
+  if (!isBulkMode && !photo) return null;
 
   const filteredSpecies = species.filter(
     (s) =>
@@ -248,6 +258,19 @@ export default function SpeciesAssignModal({
   );
 
   const handleAssign = async (speciesId: number) => {
+    // Bulk mode — delegate to parent handler
+    if (isBulkMode && onBulkAssign) {
+      setLoading(true);
+      try {
+        await onBulkAssign(speciesId);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    if (!photo) return;
+
     // Check if species is at the photo limit
     const targetSpecies = species.find(s => s.id === speciesId);
     if (targetSpecies && (targetSpecies.photoCount || 0) >= SPECIES_PHOTO_LIMIT) {
@@ -279,7 +302,7 @@ export default function SpeciesAssignModal({
   };
 
   const handleSwapConfirm = async () => {
-    if (!swapSpeciesId || !swapSelectedId) return;
+    if (!photo || !swapSpeciesId || !swapSelectedId) return;
     setLoading(true);
     try {
       await onAssign(photo.id, swapSpeciesId, swapSelectedId);
@@ -295,11 +318,18 @@ export default function SpeciesAssignModal({
     if (!newCommonName.trim()) return;
     setLoading(true);
     try {
-      await onCreateAndAssign(photo.id, {
+      const speciesData = {
         commonName: newCommonName.trim(),
         scientificName: newScientificName.trim() || undefined,
         rarity: newRarity,
-      });
+      };
+
+      if (isBulkMode && onBulkCreateAndAssign) {
+        await onBulkCreateAndAssign(speciesData);
+      } else if (photo) {
+        await onCreateAndAssign(photo.id, speciesData);
+      }
+
       setNewCommonName("");
       setNewScientificName("");
       setNewRarity("common");
@@ -309,9 +339,69 @@ export default function SpeciesAssignModal({
     }
   };
 
+  // In bulk mode, calculate available slots for each species
+  const getAvailableSlots = (s: Species) => {
+    return SPECIES_PHOTO_LIMIT - (s.photoCount || 0);
+  };
+
+  const isSpeciesDisabledInBulk = (s: Species) => {
+    return isBulkMode && getAvailableSlots(s) === 0;
+  };
+
+  // Render the species count/status badge for a species row
+  const renderSpeciesBadge = (s: Species) => {
+    const availableSlots = getAvailableSlots(s);
+    const isFull = availableSlots === 0;
+
+    if (isBulkMode) {
+      if (isFull) {
+        return (
+          <span className="text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1 flex-shrink-0
+            bg-[var(--mist-100)] text-[var(--mist-400)]">
+            Gallery full
+          </span>
+        );
+      }
+      if (availableSlots < bulkCount) {
+        return (
+          <span className="text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1 flex-shrink-0
+            bg-[var(--amber-100)] text-[var(--amber-700)]">
+            {availableSlots} slot{availableSlots !== 1 ? "s" : ""} left
+          </span>
+        );
+      }
+      return (
+        <span className="text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1 flex-shrink-0
+          bg-[var(--mist-50)] text-[var(--mist-400)]">
+          {s.photoCount || 0} of {SPECIES_PHOTO_LIMIT}
+        </span>
+      );
+    }
+
+    // Single photo mode (original behavior)
+    return (
+      <span className={`text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1 flex-shrink-0 ${
+        isFull
+          ? "bg-[var(--moss-100)] text-[var(--moss-700)]"
+          : "bg-[var(--mist-50)] text-[var(--mist-400)]"
+      }`}>
+        {isFull ? (
+          <>
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+            </svg>
+            Curated
+          </>
+        ) : (
+          `${s.photoCount || 0} of ${SPECIES_PHOTO_LIMIT}`
+        )}
+      </span>
+    );
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Assign species">
-      <div className="absolute inset-0 bg-[var(--header-from)]/80 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={isBulkMode ? `Assign species to ${bulkCount} photos` : "Assign species"}>
+      <div className="absolute inset-0 bg-[var(--header-from)]/80 backdrop-blur-sm" onClick={loading ? undefined : onClose} aria-hidden="true" />
 
       <div className="relative bg-[var(--card-bg)] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col border border-[var(--mist-100)]">
         {/* Accent top border */}
@@ -322,9 +412,9 @@ export default function SpeciesAssignModal({
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-[var(--text-primary)]">
-                Assign Species
+                {isBulkMode ? `Assign ${bulkCount} Photo${bulkCount !== 1 ? "s" : ""}` : "Assign Species"}
               </h2>
-              {queuePosition && (
+              {!isBulkMode && queuePosition && (
                 <p className="text-sm text-[var(--mist-500)]">
                   Photo {queuePosition.current} of {queuePosition.total}
                 </p>
@@ -332,7 +422,8 @@ export default function SpeciesAssignModal({
             </div>
             <button
               onClick={onClose}
-              className="p-2 text-[var(--mist-400)] hover:text-[var(--mist-600)] hover:bg-[var(--card-bg)]/50 rounded-xl transition-all"
+              disabled={loading}
+              className="p-2 text-[var(--mist-400)] hover:text-[var(--mist-600)] hover:bg-[var(--card-bg)]/50 rounded-xl transition-all disabled:opacity-50"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -341,28 +432,58 @@ export default function SpeciesAssignModal({
           </div>
         </div>
 
-        {/* Photo preview */}
+        {/* Photo preview — single photo or bulk thumbnail grid */}
         <div className="p-4 bg-[var(--mist-50)]">
-          <div className="relative w-full h-48 rounded-xl overflow-hidden bg-[var(--card-bg)] shadow-inner">
-            <Image
-              src={photo.originalUrl}
-              alt="Photo to assign"
-              fill
-              className="object-contain"
-              sizes="(max-width: 672px) 100vw, 672px"
-            />
-          </div>
-          {photo.originalDateTaken && (
-            <p className="text-sm text-[var(--mist-500)] mt-2 text-center">
-              Taken: {new Date(photo.originalDateTaken).toLocaleDateString()}
-            </p>
-          )}
+          {isBulkMode && bulkPhotos ? (
+            <div>
+              <div className="flex flex-wrap gap-2 max-h-28 overflow-auto">
+                {bulkPhotos.slice(0, 11).map((p) => (
+                  <div key={p.id} className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 ring-1 ring-[var(--mist-200)]">
+                    <Image
+                      src={p.thumbnailUrl}
+                      alt={p.species?.commonName || "Bird photo"}
+                      fill
+                      className="object-cover"
+                      sizes="48px"
+                    />
+                  </div>
+                ))}
+                {bulkCount > 11 && (
+                  <div className="w-12 h-12 rounded-lg bg-[var(--mist-100)] flex items-center justify-center flex-shrink-0 ring-1 ring-[var(--mist-200)]">
+                    <span className="text-xs font-semibold text-[var(--mist-500)]">
+                      +{bulkCount - 11}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <p className="text-sm text-[var(--mist-500)] mt-2 text-center">
+                Select a species for {bulkCount} photo{bulkCount !== 1 ? "s" : ""}
+              </p>
+            </div>
+          ) : photo ? (
+            <>
+              <div className="relative w-full h-48 rounded-xl overflow-hidden bg-[var(--card-bg)] shadow-inner">
+                <Image
+                  src={photo.originalUrl}
+                  alt="Photo to assign"
+                  fill
+                  className="object-contain"
+                  sizes="(max-width: 672px) 100vw, 672px"
+                />
+              </div>
+              {photo.originalDateTaken && (
+                <p className="text-sm text-[var(--mist-500)] mt-2 text-center">
+                  Taken: {new Date(photo.originalDateTaken).toLocaleDateString()}
+                </p>
+              )}
+            </>
+          ) : null}
         </div>
 
         {/* Species selection */}
         <div className="flex-1 overflow-auto p-4">
-          {swapSpeciesId ? (
-            /* Swap picker view */
+          {!isBulkMode && swapSpeciesId ? (
+            /* Swap picker view (single photo mode only) */
             <div className="space-y-4">
               {/* Back button */}
               <button
@@ -424,8 +545,8 @@ export default function SpeciesAssignModal({
                 />
               </div>
 
-              {/* Recently Heard Section */}
-              {recentlyHeardSpecies.length > 0 && !searchQuery && (
+              {/* Recently Heard Section (hidden in bulk mode for cleaner UX) */}
+              {!isBulkMode && recentlyHeardSpecies.length > 0 && !searchQuery && (
                 <div className="mb-4">
                   <h4 className="text-xs font-medium text-[var(--sky-600)] uppercase tracking-wide mb-2 flex items-center gap-1.5">
                     <svg
@@ -519,60 +640,52 @@ export default function SpeciesAssignModal({
                       : "No species added yet"}
                   </p>
                 ) : (
-                  filteredSpecies.map((s) => (
-                    <button
-                      key={s.id}
-                      onClick={() => handleAssign(s.id)}
-                      disabled={loading}
-                      className="w-full flex items-center gap-3 p-3 rounded-xl border border-[var(--mist-200)] hover:border-[var(--moss-400)] hover:bg-[var(--surface-moss)] transition-all text-left disabled:opacity-50"
-                    >
-                      {s.latestPhoto ? (
-                        <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 ring-1 ring-[var(--mist-100)]">
-                          <Image
-                            src={s.latestPhoto.thumbnailUrl}
-                            alt={s.commonName}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[var(--surface-moss)] to-[var(--mist-50)] flex items-center justify-center flex-shrink-0">
-                          <svg className="w-6 h-6 text-[var(--mist-400)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium text-[var(--text-primary)] truncate">
-                            {s.commonName}
-                          </p>
-                          <RarityBadge rarity={s.rarity} size="sm" />
-                        </div>
-                        {s.scientificName && (
-                          <p className="text-sm text-[var(--mist-500)] italic truncate">
-                            {s.scientificName}
-                          </p>
-                        )}
-                      </div>
-                      <span className={`text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1 flex-shrink-0 ${
-                        (s.photoCount || 0) >= SPECIES_PHOTO_LIMIT
-                          ? "bg-[var(--moss-100)] text-[var(--moss-700)]"
-                          : "bg-[var(--mist-50)] text-[var(--mist-400)]"
-                      }`}>
-                        {(s.photoCount || 0) >= SPECIES_PHOTO_LIMIT ? (
-                          <>
-                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                            </svg>
-                            Curated
-                          </>
+                  filteredSpecies.map((s) => {
+                    const disabled = loading || isSpeciesDisabledInBulk(s);
+                    return (
+                      <button
+                        key={s.id}
+                        onClick={() => handleAssign(s.id)}
+                        disabled={disabled}
+                        className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left
+                          ${disabled
+                            ? "border-[var(--mist-100)] bg-[var(--mist-50)]/50 opacity-50 cursor-not-allowed"
+                            : "border-[var(--mist-200)] hover:border-[var(--moss-400)] hover:bg-[var(--surface-moss)]"
+                          }`}
+                      >
+                        {s.latestPhoto ? (
+                          <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 ring-1 ring-[var(--mist-100)]">
+                            <Image
+                              src={s.latestPhoto.thumbnailUrl}
+                              alt={s.commonName}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
                         ) : (
-                          `${s.photoCount || 0} of ${SPECIES_PHOTO_LIMIT}`
+                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[var(--surface-moss)] to-[var(--mist-50)] flex items-center justify-center flex-shrink-0">
+                            <svg className="w-6 h-6 text-[var(--mist-400)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                          </div>
                         )}
-                      </span>
-                    </button>
-                  ))
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-[var(--text-primary)] truncate">
+                              {s.commonName}
+                            </p>
+                            <RarityBadge rarity={s.rarity} size="sm" />
+                          </div>
+                          {s.scientificName && (
+                            <p className="text-sm text-[var(--mist-500)] italic truncate">
+                              {s.scientificName}
+                            </p>
+                          )}
+                        </div>
+                        {renderSpeciesBadge(s)}
+                      </button>
+                    );
+                  })
                 )}
               </div>
 
@@ -705,8 +818,8 @@ export default function SpeciesAssignModal({
           )}
         </div>
 
-        {/* Footer with skip */}
-        {showSkip && onSkip && !showNewForm && !swapSpeciesId && (
+        {/* Footer with skip (single photo mode only) */}
+        {!isBulkMode && showSkip && onSkip && !showNewForm && !swapSpeciesId && (
           <div className="p-4 border-t border-[var(--mist-100)] bg-[var(--mist-50)]">
             <button
               onClick={onSkip}

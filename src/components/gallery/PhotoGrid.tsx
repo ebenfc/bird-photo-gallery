@@ -8,6 +8,9 @@ interface PhotoGridProps {
   onPhotoClick: (photo: Photo) => void;
   loading?: boolean;
   showSpecies?: boolean;
+  isSelectMode?: boolean;
+  selectedPhotoIds?: Set<number>;
+  onSelectToggle?: (photoId: number) => void;
 }
 
 export default function PhotoGrid({
@@ -15,6 +18,9 @@ export default function PhotoGrid({
   onPhotoClick,
   loading = false,
   showSpecies = true,
+  isSelectMode = false,
+  selectedPhotoIds,
+  onSelectToggle,
 }: PhotoGridProps) {
   if (loading) {
     return (
@@ -68,6 +74,9 @@ export default function PhotoGrid({
           onClick={() => onPhotoClick(photo)}
           showSpecies={showSpecies}
           index={index}
+          isSelectMode={isSelectMode}
+          isSelected={selectedPhotoIds?.has(photo.id)}
+          onSelectToggle={() => onSelectToggle?.(photo.id)}
         />
       ))}
     </div>
