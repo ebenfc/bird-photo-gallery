@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Photo, Species, Rarity, HaikuboxDetection, PhotosResponse } from "@/types";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import RarityBadge from "@/components/ui/RarityBadge";
 import RarityPicker from "@/components/ui/RarityPicker";
 import HeardBadge from "@/components/ui/HeardBadge";
@@ -129,6 +130,7 @@ export default function SpeciesAssignModal({
   onBulkAssign,
   onBulkCreateAndAssign,
 }: SpeciesAssignModalProps) {
+  useScrollLock(isOpen);
   const [searchQuery, setSearchQuery] = useState("");
   const [showNewForm, setShowNewForm] = useState(false);
   const [newCommonName, setNewCommonName] = useState("");
@@ -403,7 +405,7 @@ export default function SpeciesAssignModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={isBulkMode ? `Assign species to ${bulkCount} photos` : "Assign species"}>
       <div className="absolute inset-0 bg-[var(--header-from)]/80 backdrop-blur-sm" onClick={loading ? undefined : onClose} aria-hidden="true" />
 
-      <div className="relative bg-[var(--card-bg)] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col border border-[var(--mist-100)]">
+      <div className="relative bg-[var(--card-bg)] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90dvh] overflow-hidden flex flex-col border border-[var(--mist-100)]">
         {/* Accent top border */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[var(--forest-600)] via-[var(--moss-500)] to-[var(--forest-600)]" />
 

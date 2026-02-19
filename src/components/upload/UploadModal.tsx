@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Species, Rarity, Photo, PhotosResponse } from "@/types";
 import Button from "@/components/ui/Button";
 import Select from "@/components/ui/Select";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import SpeciesForm from "@/components/species/SpeciesForm";
 import SwapPicker from "@/components/species/SwapPicker";
 import { SPECIES_PHOTO_LIMIT } from "@/config/limits";
@@ -57,6 +58,7 @@ export default function UploadModal({
 }: UploadModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState<UploadStep>("select");
+  useScrollLock(isOpen);
   const [fileUploadState, setFileUploadState] = useState<FileUploadState[]>([]);
   const [fileSelectionError, setFileSelectionError] = useState<string | null>(null);
   const [selectedSpeciesId, setSelectedSpeciesId] = useState<string>("");
@@ -519,7 +521,7 @@ export default function UploadModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-[var(--card-bg)] rounded-[var(--radius-2xl)] shadow-[var(--shadow-2xl)] w-full max-w-lg max-h-[90vh]
+      <div className="relative bg-[var(--card-bg)] rounded-[var(--radius-2xl)] shadow-[var(--shadow-2xl)] w-full max-w-lg max-h-[90dvh]
         overflow-hidden flex flex-col border border-[var(--mist-100)]
         animate-fade-in-scale">
         {/* Top accent border */}
