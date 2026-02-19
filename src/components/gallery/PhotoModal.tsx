@@ -19,6 +19,7 @@ interface PhotoModalProps {
   onNotesChange?: (id: number, notes: string | null) => Promise<void>;
   onDelete?: (id: number) => Promise<void>;
   onSetCoverPhoto?: (photoId: number, speciesId: number) => Promise<boolean>;
+  onDownload?: (id: number) => void;
   defaultToFullscreen?: boolean;
   /** When true, hides all edit controls (favorite, edit date, edit notes, delete, etc.) */
   readOnly?: boolean;
@@ -40,6 +41,7 @@ export default function PhotoModal({
   onNotesChange,
   onDelete,
   onSetCoverPhoto,
+  onDownload,
   defaultToFullscreen = false,
   readOnly = false,
   adjacentPhotos,
@@ -866,6 +868,25 @@ export default function PhotoModal({
             </button>
           )}
 
+          {/* Download original button - hidden in readOnly mode */}
+          {!readOnly && onDownload && (
+            <button
+              onClick={() => onDownload(photo.id)}
+              className="w-full mb-4 px-4 py-2.5 text-sm font-medium
+                text-[var(--forest-600)] bg-gradient-to-br from-[var(--surface-forest)] to-[var(--surface-moss)]
+                border border-[var(--forest-200)] hover:border-[var(--forest-300)]
+                rounded-[var(--radius-lg)]
+                hover:shadow-[var(--shadow-sm)]
+                active:scale-[0.98] transition-all
+                flex items-center justify-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Download original
+            </button>
+          )}
+
           <div className="space-y-3">
             {/* Notes card — prominent, above dates */}
             <div className="p-3.5 bg-gradient-to-br from-[var(--bark-50)] to-[var(--mist-50)]
@@ -1156,6 +1177,22 @@ export default function PhotoModal({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 {isSettingCover ? "Setting..." : coverPhotoSet ? "Cover Set!" : "Set as Cover"}
+              </button>
+            )}
+            {onDownload && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowOverflowMenu(false);
+                  onDownload(photo.id);
+                }}
+                className="w-full px-4 py-2.5 text-left text-sm text-[var(--forest-700)]
+                  hover:bg-[var(--surface-moss)] flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download Original
               </button>
             )}
             {onDelete && (

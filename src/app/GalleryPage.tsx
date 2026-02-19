@@ -307,6 +307,16 @@ function GalleryContent() {
     }
   };
 
+  // Handle download original photo
+  const handleDownload = (id: number) => {
+    const link = document.createElement("a");
+    link.href = `/api/photos/${id}/download`;
+    link.download = "";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Count active filters for the badge
   const activeFilterCount = (selectedSpecies ? 1 : 0) + (showFavoritesOnly ? 1 : 0) + selectedRarities.length;
 
@@ -447,6 +457,7 @@ function GalleryContent() {
         onNotesChange={handleNotesChange}
         onDelete={handleDelete}
         onSetCoverPhoto={handleSetCoverPhoto}
+        onDownload={handleDownload}
       />
 
       <SpeciesAssignModal
