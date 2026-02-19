@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { photos, species, Rarity } from "@/db/schema";
-import { eq, desc, asc, and, sql, inArray } from "drizzle-orm";
+import { eq, desc, asc, and, sql, inArray, ilike } from "drizzle-orm";
 import { getThumbnailUrl, getOriginalUrl } from "@/lib/storage";
 import { checkAndGetRateLimitResponse, RATE_LIMITS, addRateLimitHeaders } from "@/lib/rateLimit";
 import { logError } from "@/lib/logger";
@@ -33,6 +33,9 @@ export async function GET(request: NextRequest) {
     const speciesId = searchParams.get("speciesId");
     const favorites = searchParams.get("favorites");
     const rarityParam = searchParams.get("rarity"); // comma-separated: "rare" or "uncommon,rare"
+    const search = searchParams.get("search")?.trim() || null;
+    const dateFrom = searchParams.get("dateFrom") || null;
+    const dateTo = searchParams.get("dateTo") || null;
     const sort = (searchParams.get("sort") || "recent_upload") as SortOption;
 
     // Validate and parse pagination with bounds checking
@@ -73,6 +76,19 @@ export async function GET(request: NextRequest) {
     if (rarityFilter.length > 0) {
       conditions.push(inArray(species.rarity, rarityFilter));
     }
+    if (search) {
+      conditions.push(ilike(species.commonName, `%${search}%`));
+    }
+    if (dateFrom) {
+      conditions.push(
+        sql`COALESCE(${photos.originalDateTaken}, ${photos.uploadDate}) >= ${dateFrom}::timestamptz`
+      );
+    }
+    if (dateTo) {
+      conditions.push(
+        sql`COALESCE(${photos.originalDateTaken}, ${photos.uploadDate}) < (${dateTo}::date + interval '1 day')`
+      );
+    }
 
     const whereClause = and(...conditions);
 
@@ -81,8 +97,9 @@ export async function GET(request: NextRequest) {
       .select({ count: sql<number>`count(*)` })
       .from(photos);
 
-    // Add join if rarity filter is active
-    const countWithJoin = rarityFilter.length > 0
+    // Add join if filtering by species-level fields (rarity or search)
+    const needsSpeciesJoin = rarityFilter.length > 0 || search;
+    const countWithJoin = needsSpeciesJoin
       ? countQuery.leftJoin(species, eq(photos.speciesId, species.id))
       : countQuery;
 
