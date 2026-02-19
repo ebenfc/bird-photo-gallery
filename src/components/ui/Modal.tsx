@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useCallback, useRef, ReactNode } from "react";
+import { useScrollLock } from "@/hooks/useScrollLock";
 
 interface ModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export default function Modal({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
 }: ModalProps) {
+  useScrollLock(isOpen);
   const modalRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<Element | null>(null);
 
@@ -63,7 +65,6 @@ export default function Modal({
 
       document.addEventListener("keydown", handleEscape);
       document.addEventListener("keydown", handleTabTrap);
-      document.body.style.overflow = "hidden";
 
       // Move focus into the modal on next frame
       requestAnimationFrame(() => {
@@ -82,7 +83,6 @@ export default function Modal({
     return () => {
       document.removeEventListener("keydown", handleEscape);
       document.removeEventListener("keydown", handleTabTrap);
-      document.body.style.overflow = "unset";
     };
   }, [isOpen, handleEscape, handleTabTrap]);
 
@@ -125,7 +125,7 @@ export default function Modal({
         aria-labelledby={ariaLabelledby}
         tabIndex={-1}
         className={`
-          relative bg-[var(--card-bg)] rounded-[var(--radius-2xl)] w-full ${sizes[size]} max-h-[90vh] overflow-hidden
+          relative bg-[var(--card-bg)] rounded-[var(--radius-2xl)] w-full ${sizes[size]} max-h-[90dvh] overflow-hidden
           shadow-[var(--shadow-2xl)]
           border border-[var(--mist-100)]
           animate-fade-in-scale
@@ -136,7 +136,7 @@ export default function Modal({
         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[var(--forest-500)] via-[var(--moss-400)] to-[var(--forest-500)] rounded-t-[var(--radius-2xl)]" />
 
         {/* Content wrapper with subtle inner shadow */}
-        <div className="overflow-auto max-h-[90vh]">
+        <div className="overflow-auto max-h-[90dvh]">
           {children}
         </div>
       </div>

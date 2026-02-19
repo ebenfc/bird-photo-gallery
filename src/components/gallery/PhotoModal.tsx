@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Photo } from "@/types";
 import { useSwipeGesture, SPRING_BACK_DURATION, COMPLETION_DURATION } from "@/hooks/useSwipeGesture";
 import { usePinchZoom, ZOOM_ANIMATION_DURATION } from "@/hooks/usePinchZoom";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import AllAboutBirdsLink from "@/components/species/AllAboutBirdsLink";
 
 interface PhotoModalProps {
@@ -46,6 +47,7 @@ export default function PhotoModal({
   readOnly = false,
   adjacentPhotos,
 }: PhotoModalProps) {
+  useScrollLock(!!photo);
   const [isCameraInfoExpanded, setIsCameraInfoExpanded] = useState(false);
   const [isEditingDate, setIsEditingDate] = useState(false);
   const [editDateValue, setEditDateValue] = useState("");
@@ -63,7 +65,7 @@ export default function PhotoModal({
   const [isSettingCover, setIsSettingCover] = useState(false);
   const [coverPhotoSet, setCoverPhotoSet] = useState(false);
   const [showFullscreenUI, setShowFullscreenUI] = useState(false);
-  const [fullscreenUITimer, setFullscreenUITimer] = useState<NodeJS.Timeout | null>(null);
+  const fullscreenUITimerRef = useRef<NodeJS.Timeout | null>(null);
   const [showOverflowMenu, setShowOverflowMenu] = useState(false);
 
   // Track if we're navigating between photos (to preserve fullscreen/detail state)
@@ -93,42 +95,41 @@ export default function PhotoModal({
       setShowFullscreenUI(defaultToFullscreen);
     }
 
-    if (fullscreenUITimer) {
-      clearTimeout(fullscreenUITimer);
-      setFullscreenUITimer(null);
+    if (fullscreenUITimerRef.current) {
+      clearTimeout(fullscreenUITimerRef.current);
+      fullscreenUITimerRef.current = null;
     }
-  }, [photo?.id]);
+  }, [photo?.id, defaultToFullscreen]);
 
   // Clear fullscreen UI timer on unmount
   useEffect(() => {
     return () => {
-      if (fullscreenUITimer) {
-        clearTimeout(fullscreenUITimer);
+      if (fullscreenUITimerRef.current) {
+        clearTimeout(fullscreenUITimerRef.current);
       }
     };
-  }, [fullscreenUITimer]);
+  }, []);
 
   // Function to show fullscreen UI with auto-hide
   const showUITemporarily = useCallback(() => {
     setShowFullscreenUI(true);
-    if (fullscreenUITimer) {
-      clearTimeout(fullscreenUITimer);
+    if (fullscreenUITimerRef.current) {
+      clearTimeout(fullscreenUITimerRef.current);
     }
-    const timer = setTimeout(() => {
+    fullscreenUITimerRef.current = setTimeout(() => {
       setShowFullscreenUI(false);
-      setFullscreenUITimer(null);
+      fullscreenUITimerRef.current = null;
     }, 3000);
-    setFullscreenUITimer(timer);
-  }, [fullscreenUITimer]);
+  }, []);
 
   // Handle fullscreen tap to toggle UI
   const handleFullscreenTap = useCallback(() => {
     if (showFullscreenUI) {
       // UI is visible, hide it and exit fullscreen
       setShowFullscreenUI(false);
-      if (fullscreenUITimer) {
-        clearTimeout(fullscreenUITimer);
-        setFullscreenUITimer(null);
+      if (fullscreenUITimerRef.current) {
+        clearTimeout(fullscreenUITimerRef.current);
+        fullscreenUITimerRef.current = null;
       }
       // If opened with defaultToFullscreen, close modal entirely instead of showing detail view
       if (defaultToFullscreen) {
@@ -140,7 +141,7 @@ export default function PhotoModal({
       // UI is hidden, show it temporarily
       showUITemporarily();
     }
-  }, [showFullscreenUI, fullscreenUITimer, showUITemporarily, defaultToFullscreen, onClose]);
+  }, [showFullscreenUI, showUITemporarily, defaultToFullscreen, onClose]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -188,11 +189,9 @@ export default function PhotoModal({
   useEffect(() => {
     if (photo) {
       document.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden";
     }
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "unset";
     };
   }, [photo, handleKeyDown]);
 
