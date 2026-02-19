@@ -59,6 +59,7 @@ export async function GET(
       displayName,
       photoCount,
       speciesCount,
+      memberSince: user.createdAt.toISOString(),
     });
 
     return addRateLimitHeaders(response, rateCheck.result, RATE_LIMITS.read);
