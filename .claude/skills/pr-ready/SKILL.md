@@ -23,7 +23,7 @@ If ANY check fails, stop and fix the issues before proceeding. Do not create a P
 
 ## Step 2: Verify CLAUDE.md updates
 
-Check if the changes on this branch warrant CLAUDE.md updates:
+Documentation is a PR requirement. Verify that CLAUDE.md files have been updated for all changes on this branch:
 1. Run `git diff main...HEAD --name-only` to see all changed files
 2. If new API routes were added → update `src/app/api/CLAUDE.md` endpoint table
 3. If new components were added → update `src/components/CLAUDE.md` directory/component tables
@@ -31,6 +31,8 @@ Check if the changes on this branch warrant CLAUDE.md updates:
 5. If new DB tables/columns were added → update `src/db/CLAUDE.md`
 6. If the file structure changed → update the parent `CLAUDE.md`
 7. Enforce the 100-line limit per CLAUDE.md file — split if exceeded
+
+If CLAUDE.md updates are missing, make them now before proceeding to Step 3. A PR without updated documentation is not complete.
 
 ## Step 3: Review changes
 

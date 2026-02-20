@@ -8,6 +8,8 @@ argument-hint: [optional: summary of what was worked on]
 
 # Session Handoff
 
+> **Note:** `/wrapup` is the preferred end-of-session skill. It audits documentation first, then fills gaps. Use `/handoff` only if you need to skip the audit and go straight to updating.
+
 Prepare the codebase and documentation for handoff to the next Claude session.
 
 ## Step 1: Gather session context
