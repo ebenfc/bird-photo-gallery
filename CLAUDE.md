@@ -40,6 +40,7 @@ src/
   lib/              # Utilities and business logic (see lib/CLAUDE.md)
   types/            # TypeScript definitions
   config/           # App configuration (limits.ts, usStates.ts)
+  data/             # Static data (changelog.ts for What's New page)
 ```
 
 ## Deployment
@@ -61,7 +62,7 @@ Two-dimensional theming via HTML attributes on `<html>`:
 
 ## Public Pages
 
-Public pages (`/u/[username]`, `/about`) are accessible without authentication. Two layers handle this:
+Public pages (`/u/[username]`, `/about`, `/whats-new`) are accessible without authentication. Two layers handle this:
 
 1. **Clerk middleware** (`src/proxy.ts`) — marks these routes as public via `isPublicRoute` matcher, so Clerk doesn't require auth
 2. **`AuthenticatedLayout`** (`src/components/layout/AuthenticatedLayout.tsx`) — client component using `usePathname()` to skip onboarding gates (agreement form, display name) when authenticated users visit public pages
