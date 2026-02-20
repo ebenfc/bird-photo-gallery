@@ -91,10 +91,9 @@ Slash commands for common workflows. Invoke with `/skill-name`.
 | `/design-review` | Evaluate UI for hierarchy, spacing, consistency, theme compliance |
 | `/mobile-ux` | Review touch targets, gestures, responsive layout, mobile patterns |
 | `/a11y-check` | Audit ARIA, keyboard nav, contrast, screen reader compatibility |
-| `/handoff` | Update MEMORY.md, CLAUDE.md files, and create continuation prompt |
-| `/wrapup` | End-of-session audit — verify docs updated, fill gaps, update MEMORY.md, create continuation prompt |
+| `/handoff` | Prepare continuation prompt for resuming work across sessions |
 
-Personal skills (in `~/.claude/skills/`, not committed): `/explain`, `/debug-sentry`, `/check-deploy`
+Personal skills (in `~/.claude/skills/`, not committed): `/explain`, `/debug-sentry`, `/check-deploy`, `/wrapup`
 
 ## Key Files
 
