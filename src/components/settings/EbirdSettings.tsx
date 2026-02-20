@@ -124,9 +124,9 @@ export default function EbirdSettings() {
               rel="noopener noreferrer"
               className="text-[var(--moss-700)] underline hover:text-[var(--moss-800)]"
             >
-              My eBird Data
+              Download My Data
             </a>{" "}
-            and request a download
+            and select <strong>My Observations</strong>
           </li>
           <li>eBird will email you a link to download your data as a CSV</li>
           <li>Upload that CSV file here</li>
