@@ -112,8 +112,12 @@ export default function EbirdSettings() {
 
       {/* Instructions */}
       <div>
-        <p className="text-sm text-[var(--mist-600)] mb-3">
+        <p className="text-sm text-[var(--mist-600)] mb-2">
           Import your eBird life list to see which species you&apos;ve observed but haven&apos;t yet photographed.
+        </p>
+        <p className="text-sm text-[var(--mist-500)] mb-3">
+          New species will be added to your wish list. Existing data won&apos;t be affected.
+          Upload periodically &mdash; monthly or after a trip &mdash; to keep your wish list current.
         </p>
         <ol className="text-sm text-[var(--mist-600)] space-y-1 list-decimal list-inside mb-3">
           <li>
@@ -168,7 +172,7 @@ export default function EbirdSettings() {
             disabled:opacity-50 disabled:cursor-not-allowed
             transition-all duration-[var(--timing-fast)] active:scale-95"
         >
-          {importing ? "Importing..." : "Import Life List"}
+          {importing ? "Importing..." : status?.hasImport ? "Update Life List" : "Import Life List"}
         </button>
 
         {status?.hasImport && !showClearConfirm && (
@@ -216,8 +220,26 @@ export default function EbirdSettings() {
       {result && (
         <div className="p-3 rounded-[var(--radius-md)] bg-[var(--info-bg)] text-[var(--info-text)] border border-[var(--info-border)] text-sm font-medium">
           <p>
-            Imported {result.imported} species. {result.matched} matched to your BirdFeed species,{" "}
-            {result.unmatched} added to your wish list.
+            {result.newCount > 0 && result.updatedCount > 0 ? (
+              <>
+                Added {result.newCount} new species, {result.updatedCount} existing species refreshed.
+                {" "}{result.matched} matched to your collection, {result.unmatched} on your wish list.
+              </>
+            ) : result.newCount > 0 ? (
+              <>
+                Imported {result.newCount} species. {result.matched} matched to your collection,
+                {" "}{result.unmatched} added to your wish list.
+              </>
+            ) : result.updatedCount > 0 ? (
+              <>
+                All {result.updatedCount} species were already imported. Your data is up to date!
+              </>
+            ) : (
+              <>
+                Imported {result.imported} species. {result.matched} matched to your collection,
+                {" "}{result.unmatched} added to your wish list.
+              </>
+            )}
           </p>
           {result.errors && result.errors.length > 0 && (
             <p className="mt-1 text-xs opacity-75">

@@ -49,8 +49,16 @@ export async function POST(request: NextRequest) {
     const commonNames = parsed.species.map((s) => s.commonName);
     const codeMap = await batchLookupSpeciesCodes(commonNames);
 
+    // Query existing entries to distinguish new vs updated on import
+    const existingEntries = await db
+      .select({ speciesCode: ebirdLifeList.speciesCode })
+      .from(ebirdLifeList)
+      .where(eq(ebirdLifeList.userId, userId));
+    const existingCodes = new Set(existingEntries.map((e) => e.speciesCode));
+
     // Upsert into ebird_life_list
-    let imported = 0;
+    let newCount = 0;
+    let updatedCount = 0;
     const now = new Date();
 
     for (const sp of parsed.species) {
@@ -77,7 +85,12 @@ export async function POST(request: NextRequest) {
             importedAt: now,
           },
         });
-      imported++;
+
+      if (existingCodes.has(speciesCode)) {
+        updatedCount++;
+      } else {
+        newCount++;
+      }
     }
 
     // Backfill ebirdSpeciesCode on user's existing BirdFeed species
@@ -101,9 +114,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const imported = newCount + updatedCount;
     const result = {
       success: true,
       imported,
+      newCount,
+      updatedCount,
       matched,
       unmatched: imported - matched,
       errors: parsed.parseErrors.length > 0 ? parsed.parseErrors : undefined,

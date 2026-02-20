@@ -216,6 +216,8 @@ export interface EbirdWishlistResponse {
 export interface EbirdImportResult {
   success: boolean;
   imported: number;
+  newCount: number;
+  updatedCount: number;
   matched: number;
   unmatched: number;
   errors?: string[];
