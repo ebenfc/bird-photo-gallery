@@ -69,7 +69,7 @@ export default function GalleryFilters({
   };
 
   const dateInputClass = `
-    block w-full px-3 py-3
+    block w-full min-w-0 px-3 py-3
     bg-[var(--card-bg)] text-[var(--foreground)]
     border-2 border-[var(--mist-200)] rounded-[var(--radius-lg)]
     shadow-[var(--shadow-sm)]
@@ -155,9 +155,11 @@ export default function GalleryFilters({
 
         {/* Date range inputs (owner-only) */}
         {showAdvancedSearch && (
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <div className="relative flex-1 sm:w-40 sm:flex-none">
-              <label htmlFor="dateFrom" className="sr-only">From date</label>
+          <div className="flex items-end gap-2 w-full sm:w-auto">
+            <div className="relative flex-1 min-w-0 sm:w-40 sm:flex-none">
+              <label htmlFor="dateFrom" className="block text-xs font-semibold text-[var(--mist-500)] mb-1 sm:sr-only">
+                From
+              </label>
               <input
                 id="dateFrom"
                 type="date"
@@ -167,9 +169,11 @@ export default function GalleryFilters({
                 className={dateInputClass}
               />
             </div>
-            <span className="text-[var(--mist-400)] text-sm font-medium shrink-0">to</span>
-            <div className="relative flex-1 sm:w-40 sm:flex-none">
-              <label htmlFor="dateTo" className="sr-only">To date</label>
+            <span className="text-[var(--mist-400)] text-sm font-medium shrink-0 pb-3">to</span>
+            <div className="relative flex-1 min-w-0 sm:w-40 sm:flex-none">
+              <label htmlFor="dateTo" className="block text-xs font-semibold text-[var(--mist-500)] mb-1 sm:sr-only">
+                To
+              </label>
               <input
                 id="dateTo"
                 type="date"

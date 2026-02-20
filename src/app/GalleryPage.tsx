@@ -11,6 +11,7 @@ import UploadModal from "@/components/upload/UploadModal";
 import BulkActionBar from "@/components/gallery/BulkActionBar";
 import Button from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 
 function GalleryContent() {
   const router = useRouter();
@@ -20,6 +21,10 @@ function GalleryContent() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [species, setSpecies] = useState<Species[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [totalPhotos, setTotalPhotos] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const pageRef = useRef(1);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [photoToAssign, setPhotoToAssign] = useState<Photo | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -104,8 +109,12 @@ function GalleryContent() {
     setSearchInput(searchQuery);
   }, [searchQuery]);
 
-  const fetchPhotos = useCallback(async () => {
-    setLoading(true);
+  const fetchPhotos = useCallback(async (page: number, append: boolean) => {
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
     const params = new URLSearchParams();
     if (selectedSpecies) params.set("speciesId", selectedSpecies.toString());
     if (showFavoritesOnly) params.set("favorites", "true");
@@ -114,17 +123,29 @@ function GalleryContent() {
     if (dateFrom) params.set("dateFrom", dateFrom);
     if (dateTo) params.set("dateTo", dateTo);
     params.set("sort", sortOption);
+    params.set("page", page.toString());
+    params.set("limit", "50");
 
     try {
       const res = await fetch(`/api/photos?${params.toString()}`);
       const data: PhotosResponse = await res.json();
-      setPhotos(data.photos || []);
+      if (append) {
+        setPhotos(prev => [...prev, ...(data.photos || [])]);
+      } else {
+        setPhotos(data.photos || []);
+      }
+      pageRef.current = data.page;
+      setTotalPages(data.totalPages);
+      setTotalPhotos(data.total);
     } catch (err) {
       console.error(err);
-      setPhotos([]);
+      if (!append) {
+        setPhotos([]);
+      }
       showToast("Failed to load photos. Please try again.", "error");
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   }, [selectedSpecies, showFavoritesOnly, selectedRarities, searchQuery, dateFrom, dateTo, sortOption, showToast]);
 
@@ -136,7 +157,7 @@ function GalleryContent() {
     }
   };
 
-  const fetchSpecies = async () => {
+  const fetchSpecies = useCallback(async () => {
     try {
       const res = await fetch("/api/species");
       const data: SpeciesResponse = await res.json();
@@ -146,17 +167,24 @@ function GalleryContent() {
       setSpecies([]);
       showToast("Failed to load species filter.", "error");
     }
-  };
+  }, [showToast]);
 
   // Fetch species list
   useEffect(() => {
     fetchSpecies();
-  }, []);
+  }, [fetchSpecies]);
 
-  // Fetch photos based on filters
+  // Fetch photos based on filters (resets to page 1 when filters/sort change)
   useEffect(() => {
-    fetchPhotos();
+    fetchPhotos(1, false);
   }, [fetchPhotos]);
+
+  // Infinite scroll
+  const hasMore = pageRef.current < totalPages;
+  const loadMore = useCallback(() => {
+    fetchPhotos(pageRef.current + 1, true);
+  }, [fetchPhotos]);
+  const sentinelRef = useInfiniteScroll({ onLoadMore: loadMore, hasMore, loading: loadingMore });
 
   // Toggle select mode
   const toggleSelectMode = () => {
@@ -215,8 +243,8 @@ function GalleryContent() {
       }
     }
 
-    // Refresh data
-    await Promise.all([fetchPhotos(), fetchSpecies()]);
+    // Refresh data (reset to page 1)
+    await Promise.all([fetchPhotos(1, false), fetchSpecies()]);
 
     // Report results
     const speciesName = species.find((s) => s.id === speciesId)?.commonName || "species";
@@ -292,8 +320,8 @@ function GalleryContent() {
       body: JSON.stringify({ speciesId, ...(replacePhotoId ? { replacePhotoId } : {}) }),
     });
 
-    // Refresh photos and species
-    await Promise.all([fetchPhotos(), fetchSpecies()]);
+    // Refresh photos and species (reset to page 1)
+    await Promise.all([fetchPhotos(1, false), fetchSpecies()]);
 
     // Update selected photo if it was the one being assigned
     if (selectedPhoto?.id === photoId) {
@@ -334,18 +362,24 @@ function GalleryContent() {
     await handleAssignSpecies(photoId, newSpecies.id);
   };
 
-  // Photo navigation in modal
-  const handleNavigate = (direction: "prev" | "next") => {
+  // Photo navigation in modal (prefetches more photos near the end)
+  const handleNavigate = useCallback((direction: "prev" | "next") => {
     if (!selectedPhoto) return;
     const currentIndex = photos.findIndex((p) => p.id === selectedPhoto.id);
     const newIndex = direction === "prev" ? currentIndex - 1 : currentIndex + 1;
+
+    // Prefetch next page when approaching end of loaded photos
+    if (direction === "next" && currentIndex >= photos.length - 5 && hasMore && !loadingMore) {
+      loadMore();
+    }
+
     if (newIndex >= 0 && newIndex < photos.length) {
       const newPhoto = photos[newIndex];
       if (newPhoto) {
         setSelectedPhoto(newPhoto);
       }
     }
-  };
+  }, [selectedPhoto, photos, hasMore, loadingMore, loadMore]);
 
   const currentPhotoIndex = selectedPhoto
     ? photos.findIndex((p) => p.id === selectedPhoto.id)
@@ -354,7 +388,7 @@ function GalleryContent() {
   const canNavigate = selectedPhoto
     ? {
         prev: currentPhotoIndex > 0,
-        next: currentPhotoIndex < photos.length - 1,
+        next: currentPhotoIndex < photos.length - 1 || hasMore,
       }
     : { prev: false, next: false };
 
@@ -517,7 +551,7 @@ function GalleryContent() {
               <span className="text-sm font-semibold text-[var(--forest-700)] px-4 py-1.5
                 bg-gradient-to-br from-[var(--surface-moss)] to-[var(--surface-forest)]
                 rounded-full shadow-[var(--shadow-xs)] ring-1 ring-[var(--border)]">
-                {photos.length} photo{photos.length !== 1 ? "s" : ""}
+                {totalPhotos} photo{totalPhotos !== 1 ? "s" : ""}
               </span>
             </>
           )}
@@ -612,7 +646,7 @@ function GalleryContent() {
                 {species.filter(s => s.photoCount && s.photoCount > 0).length} species
               </button>
               <span>•</span>
-              <span>{photos.length} photo{photos.length !== 1 ? "s" : ""}</span>
+              <span>{totalPhotos} photo{totalPhotos !== 1 ? "s" : ""}</span>
             </>
           )}
         </div>
@@ -682,6 +716,33 @@ function GalleryContent() {
         onSelectToggle={handleSelectToggle}
       />
 
+      {/* Infinite scroll sentinel + loading indicator */}
+      {!loading && (
+        <>
+          {loadingMore && (
+            <div className="flex justify-center py-8">
+              <div className="flex items-center gap-2 text-sm text-[var(--mist-500)]">
+                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Loading more photos...
+              </div>
+            </div>
+          )}
+          {hasMore && !loadingMore && (
+            <div ref={sentinelRef} className="h-1" aria-hidden="true" />
+          )}
+          {!hasMore && totalPhotos > 50 && (
+            <div className="text-center py-6">
+              <p className="text-sm text-[var(--mist-400)]">
+                All {totalPhotos} photos loaded
+              </p>
+            </div>
+          )}
+        </>
+      )}
+
       <PhotoModal
         photo={selectedPhoto}
         onClose={() => setSelectedPhoto(null)}
@@ -729,7 +790,7 @@ function GalleryContent() {
         onClose={() => setShowUploadModal(false)}
         species={species}
         onUploadComplete={() => {
-          fetchPhotos();
+          fetchPhotos(1, false);
           fetchSpecies();
         }}
         onSpeciesCreated={fetchSpecies}
