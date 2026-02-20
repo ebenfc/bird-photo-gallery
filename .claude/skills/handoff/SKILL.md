@@ -1,85 +1,92 @@
 ---
 name: handoff
-description: Prepare session handoff — update MEMORY.md, update CLAUDE.md files, and save a continuation prompt to docs/next-session.md.
+description: Prepare a continuation prompt for resuming work in a new session. Use when spanning multiple sessions or approaching context limits.
 disable-model-invocation: true
 user-invocable: true
-argument-hint: [optional: summary of what was worked on]
+argument-hint: [optional: summary or topic focus for next session]
 ---
 
 # Session Handoff
 
-> **Note:** `/wrapup` is the preferred end-of-session skill. It audits documentation first, then fills gaps. Use `/handoff` only if you need to skip the audit and go straight to updating.
+Prepare documentation and a continuation prompt so work can be cleanly resumed in a new session (via "resume conversation" or a fresh context window).
 
-Prepare the codebase and documentation for handoff to the next Claude session.
+Use this when:
+- You're spanning multiple sessions on the same feature/task
+- You're approaching context limits and want to continue in a fresh window
+- You want a clean prompt to paste into a new session
 
 ## Step 1: Gather session context
 
-Understand what was accomplished in this session:
+Understand what was accomplished and what's in progress:
 ```bash
-git log main..HEAD --oneline
-git diff main...HEAD --stat
 git branch --show-current
+git log main..HEAD --oneline 2>/dev/null || git log --oneline -5
+git status --short
 ```
 
-If no branch diff is available (working on main), check the last few commits:
-```bash
-git log --oneline -5
-```
+If `$ARGUMENTS` was provided, use it to focus the handoff on a specific topic.
 
-## Step 2: Update MEMORY.md
+## Step 2: Update documentation
 
-Edit `~/.claude/projects/-Users-ebencarey-Documents-Bird-App/memory/MEMORY.md` to reflect:
-- **What was accomplished** — PRs created/merged, features shipped, bugs fixed
-- **Open issues** — anything that broke, needs follow-up, or was deferred
-- **Current branch state** — which branch, merged or still open, any uncommitted changes
+Ensure CLAUDE.md files and MEMORY.md reflect the current state before handing off:
 
-Keep entries concise (2-3 lines per topic). Remove or update stale entries.
-
-## Step 3: Update CLAUDE.md files
-
-Check if any new patterns or conventions were established during this session:
 1. Run `git diff main...HEAD --name-only` to see all changed files
-2. If new API routes, components, lib modules, or DB changes were made → update the relevant CLAUDE.md
-3. If a new CLAUDE.md file was created → update the File Structure listing in the root CLAUDE.md
-4. Enforce the 100-line limit per file
+2. If new patterns, routes, components, schema changes, or skills were introduced — update the relevant CLAUDE.md files
+3. Update MEMORY.md with what was accomplished and any open issues
+4. Remove or update stale entries
 
-## Step 4: Create continuation prompt
+This prevents the next session from working with outdated context.
 
-Write a continuation prompt that includes:
-- **What was completed** — brief summary of accomplishments
-- **What remains** — any unfinished items from the current plan or task
-- **Blockers or environment issues** — anything the next session should watch for (failing tests, env vars needed, deployment state)
-- **Suggested next steps** — what to work on next, in priority order
+## Step 3: Create continuation prompt
 
-If `$ARGUMENTS` was provided, incorporate it into the summary.
-
-## Step 5: Save to docs/next-session.md
-
-Save the continuation prompt to `docs/next-session.md` (overwrite if it exists). This file lives in a visible project directory so the user can find it easily.
+Write a continuation prompt designed to give the next session full context. Save to `docs/next-session.md` (overwrite if exists):
 
 ```bash
-# Ensure the docs directory exists
 mkdir -p docs
 ```
 
-Format the file as:
+The prompt should be **self-contained** — assume the next session starts with a fresh context window and only has CLAUDE.md + MEMORY.md for background. Include:
+
 ```markdown
 # Next Session — [date]
+
+## Context
+[1-2 sentences: what feature/task is being worked on and why]
+
+## Current state
+- Branch: `feature/...` [merged / open PR #N / in progress]
+- Last commit: [hash] [message]
+- [Any uncommitted changes or WIP state]
 
 ## What was completed
 - ...
 
 ## What remains
 - ...
+[Be specific: which files, which functions, which steps in the plan]
 
-## Blockers / Environment notes
-- ...
+## Key decisions made
+- [Any architectural or design decisions the next session needs to know]
+
+## Blockers / Watch out for
+- [Environment issues, failing tests, known bugs, deployment state]
+- [If none, say "No blockers."]
 
 ## Suggested next steps
 1. ...
 ```
 
+## Step 4: Present to user
+
+Show the user:
+1. The continuation prompt (so they can review it before the session ends)
+2. Where it was saved (`docs/next-session.md`)
+3. A reminder: "Paste this into your next session or use resume conversation to continue."
+
 ## Rules
-- Never save handoff files to hidden directories (`.claude/plans/`, etc.)
-- Keep the continuation prompt concise — aim for under 30 lines
-- If there are no open issues or blockers, say so explicitly rather than omitting the section
+
+- Keep the continuation prompt concise — aim for under 40 lines
+- Be specific about what remains (file names, function names, plan steps) — vague handoffs lose context
+- Never save to hidden directories (`.claude/plans/`, etc.)
+- If there are no open issues or blockers, say so explicitly
+- Always update CLAUDE.md and MEMORY.md before creating the prompt — the next session reads those first
