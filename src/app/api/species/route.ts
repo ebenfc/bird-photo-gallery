@@ -159,7 +159,17 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    const response = NextResponse.json({ species: speciesWithExtras });
+    // Compute photographed/unphotographed counts from full result
+    const photographedCount = speciesWithExtras.filter((s) => Number(s.photoCount) > 0).length;
+    const unphotographedCount = speciesWithExtras.filter((s) => Number(s.photoCount) === 0).length;
+
+    const response = NextResponse.json({
+      species: speciesWithExtras,
+      totalCounts: {
+        photographed: photographedCount,
+        unphotographed: unphotographedCount,
+      },
+    });
     return addRateLimitHeaders(response, rateCheck.result, RATE_LIMITS.read);
   } catch (error) {
     logError("Error fetching species", error instanceof Error ? error : new Error(String(error)), {
