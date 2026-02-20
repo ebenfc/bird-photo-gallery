@@ -53,6 +53,6 @@ Authenticated users visiting `/u/` pages skip onboarding gates (agreement form, 
 ## Files
 - `layout.tsx` - Server component: validates username, fetches counts, renders stats strip, generates metadata
 - `opengraph-image.tsx` - OG image card via `next/og` ImageResponse (1200x630, hardcoded colors)
-- `page.tsx` - Public feed with photos grid, filters, and read-only modal
+- `page.tsx` - Public feed with infinite-scrolling photos grid, filters, and read-only modal
 - `species/page.tsx` - Public species directory
 - `species/[id]/page.tsx` - Public species detail with photos

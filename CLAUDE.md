@@ -36,7 +36,7 @@ src/
   app/              # Pages and API routes (see api/CLAUDE.md)
   components/       # React components (see components/CLAUDE.md)
   db/               # Database schema (see db/CLAUDE.md)
-  hooks/            # Custom React hooks (useKonamiCode, useLogoTapUnlock, usePinchZoom, useSwipeGesture)
+  hooks/            # Custom React hooks (useInfiniteScroll, useKonamiCode, useLogoTapUnlock, usePinchZoom, useScrollLock, useSwipeGesture)
   lib/              # Utilities and business logic (see lib/CLAUDE.md)
   types/            # TypeScript definitions
   config/           # App configuration (limits.ts, usStates.ts)
@@ -91,6 +91,8 @@ Slash commands for common workflows. Invoke with `/skill-name`.
 | `/design-review` | Evaluate UI for hierarchy, spacing, consistency, theme compliance |
 | `/mobile-ux` | Review touch targets, gestures, responsive layout, mobile patterns |
 | `/a11y-check` | Audit ARIA, keyboard nav, contrast, screen reader compatibility |
+| `/handoff` | Update MEMORY.md, CLAUDE.md files, and create continuation prompt |
+| `/wrapup` | End-of-session audit — verify docs updated, fill gaps, update MEMORY.md, create continuation prompt |
 
 Personal skills (in `~/.claude/skills/`, not committed): `/explain`, `/debug-sentry`, `/check-deploy`
 

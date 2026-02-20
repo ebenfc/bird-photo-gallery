@@ -43,6 +43,9 @@ Components are organized by feature area.
 ### Collapsible Filters
 Mobile views use collapsible filter panels (Feed, Species, Activity, Public Feed). Desktop filters always visible.
 
+### Infinite Scroll (Feed + Public Gallery)
+Both the user's Feed (`GalleryPage.tsx`) and public gallery (`u/[username]/page.tsx`) use `useInfiniteScroll` hook with IntersectionObserver. Photos load in batches of 50. Filter/sort changes reset to page 1. Modal navigation prefetches next batch when within 5 photos of loaded boundary. The sentinel div sits below `PhotoGrid`; the hook is in `src/hooks/useInfiniteScroll.ts`.
+
 ### SpeciesCard (`species/SpeciesCard.tsx`)
 Shared card for auth and public views. `linkPrefix` prop for URL target, `onEdit` for auth-only edit button. `HeardBadge` only shows with Haikubox data. Photo count shows `"X of 8"` or `"Curated"` badge. Shows "First photographed" date when `species.firstPhotoDate` is set.
 
