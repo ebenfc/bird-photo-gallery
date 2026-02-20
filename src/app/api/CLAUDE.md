@@ -43,13 +43,13 @@ This is required for database access (pg driver) and sharp (image processing).
 | `/photos/[id]` | Single photo GET/PATCH/DELETE |
 | `/photos/[id]/download` | Download original photo (GET, owner-only) |
 | `/photos/unassigned` | List unassigned inbox photos |
-| `/species` | List (GET) / create (POST) species |
+| `/species` | List (GET, includes `totalCounts` for photographed/unphotographed) / create (POST) species |
 | `/species/[id]` | Species detail GET/PATCH/DELETE |
 | `/species/refresh` | Refresh Haikubox species data |
 | `/upload/browser` | Browser photo upload |
 | `/haikubox/*` | Haikubox device integration (see below) |
 | `/settings` | App settings (Haikubox serial) |
-| `/settings/profile` | User profile (username, public gallery toggle) |
+| `/settings/profile` | User profile (username — **immutable once set**, public gallery toggle) |
 | `/settings/profile/check-username` | Check username availability |
 | `/public/gallery/[username]/*` | Public gallery read-only APIs |
 | `/public/discover` | Browse directory-listed galleries |
@@ -57,7 +57,7 @@ This is required for database access (pg driver) and sharp (image processing).
 | `/bookmarks/[username]` | DELETE bookmark |
 | `/bookmarks/check/[username]` | Check if gallery is bookmarked |
 | `/activity/*` | Species activity data (current, heatmap, species/[name]) |
-| `/ebird/import` | eBird life list CSV import (POST) and clear (DELETE) |
+| `/ebird/import` | eBird life list CSV import (POST, returns `newCount`/`updatedCount`) and clear (DELETE) |
 | `/ebird/wishlist` | eBird species not yet photographed (GET) |
 | `/ebird/status` | eBird import status check (GET) |
 | `/timeline` | Unified timeline events (GET, 30-day windowed pagination) |
