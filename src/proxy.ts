@@ -11,6 +11,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/haikubox/sync', // Haikubox cron (auth handled in route via CRON_SECRET)
   '/api/health',    // Health check for monitoring tools
   '/about',         // About page (accessible pre-signup)
+  '/whats-new',     // What's New page (accessible pre-signup)
   '/u/(.*)',        // Public user galleries
   '/api/public/(.*)', // Public API endpoints
   '/monitoring',    // Sentry tunnel route

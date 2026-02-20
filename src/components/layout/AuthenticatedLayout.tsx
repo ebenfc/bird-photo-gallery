@@ -7,7 +7,7 @@ import DisplayNameGate from "@/components/onboarding/DisplayNameGate";
 import { ToastProvider } from "@/components/ui/Toast";
 import ReportIssueButton from "@/components/support/ReportIssueButton";
 
-const PUBLIC_PREFIXES = ["/u/", "/about"];
+const PUBLIC_PREFIXES = ["/u/", "/about", "/whats-new"];
 
 function isPublicPage(pathname: string): boolean {
   return PUBLIC_PREFIXES.some(
