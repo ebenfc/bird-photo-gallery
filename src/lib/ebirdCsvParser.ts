@@ -1,5 +1,5 @@
 // eBird CSV Parser
-// Parses the "My eBird Data" CSV export (tab-delimited, one row per observation)
+// Parses the "My eBird Data" CSV export (comma- or tab-delimited, one row per observation)
 // Extracts unique species with their earliest observation date
 
 const MAX_UNIQUE_SPECIES = 5000;
@@ -17,23 +17,66 @@ export interface ParsedEbirdData {
 }
 
 /**
+ * Split a CSV line respecting double-quoted fields.
+ * Handles fields like: `"eBird - Traveling Count"` or `"field with, comma"`
+ */
+function splitCsvLine(line: string, delimiter: string): string[] {
+  if (delimiter === "\t") {
+    return line.split("\t");
+  }
+
+  const fields: string[] = [];
+  let current = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    if (inQuotes) {
+      if (char === '"' && line[i + 1] === '"') {
+        current += '"';
+        i++; // skip escaped quote
+      } else if (char === '"') {
+        inQuotes = false;
+      } else {
+        current += char;
+      }
+    } else {
+      if (char === '"') {
+        inQuotes = true;
+      } else if (char === delimiter) {
+        fields.push(current);
+        current = "";
+      } else {
+        current += char;
+      }
+    }
+  }
+  fields.push(current);
+  return fields;
+}
+
+/**
  * Parse an eBird "My eBird Data" CSV export.
- * The file is tab-delimited with one row per observation.
+ * Supports both comma-delimited and tab-delimited formats.
  * Extracts unique species by common name, keeping the earliest observation date.
  */
 export function parseEbirdCsv(csvText: string): ParsedEbirdData {
   const errors: string[] = [];
 
+  // Strip UTF-8 BOM if present
+  const cleanText = csvText.replace(/^\uFEFF/, "");
+
   // Normalize line endings and split
-  const lines = csvText.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
+  const lines = cleanText.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
 
   if (lines.length < 2) {
     return { species: [], totalObservations: 0, parseErrors: ["File is empty or has no data rows"] };
   }
 
-  // Parse header row (tab-delimited)
+  // Auto-detect delimiter: if header contains tabs, use tab; otherwise comma
   const headerLine = lines[0] ?? "";
-  const headers = headerLine.split("\t").map((h) => h.trim());
+  const delimiter = headerLine.includes("\t") ? "\t" : ",";
+  const headers = splitCsvLine(headerLine, delimiter).map((h) => h.trim());
 
   // Find required column indices
   const commonNameIdx = headers.findIndex(
@@ -62,7 +105,7 @@ export function parseEbirdCsv(csvText: string): ParsedEbirdData {
     const line = (lines[i] ?? "").trim();
     if (!line) continue;
 
-    const fields = line.split("\t");
+    const fields = splitCsvLine(line, delimiter);
     const commonName = fields[commonNameIdx]?.trim();
     if (!commonName) continue;
 
