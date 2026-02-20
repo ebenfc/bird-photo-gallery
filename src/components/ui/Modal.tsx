@@ -58,15 +58,11 @@ export default function Modal({
     }
   }, []);
 
+  // Move focus into the modal when it first opens (only on isOpen transition)
   useEffect(() => {
     if (isOpen) {
-      // Remember the element that opened the modal so we can return focus later
       triggerRef.current = document.activeElement;
 
-      document.addEventListener("keydown", handleEscape);
-      document.addEventListener("keydown", handleTabTrap);
-
-      // Move focus into the modal on next frame
       requestAnimationFrame(() => {
         if (modalRef.current) {
           const firstFocusable = modalRef.current.querySelector<HTMLElement>(
@@ -80,6 +76,14 @@ export default function Modal({
         }
       });
     }
+  }, [isOpen]);
+
+  // Keyboard listeners (re-attaches when handlers update, without re-focusing)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    document.addEventListener("keydown", handleEscape);
+    document.addEventListener("keydown", handleTabTrap);
     return () => {
       document.removeEventListener("keydown", handleEscape);
       document.removeEventListener("keydown", handleTabTrap);
