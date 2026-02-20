@@ -270,3 +270,12 @@ export interface TimelineResponse {
     haikubox: number;
   };
 }
+
+export interface TimelineMonthSummary {
+  month: string; // "2026-02"
+  totalCount: number;
+}
+
+export interface TimelineMonthsResponse {
+  months: TimelineMonthSummary[];
+}
