@@ -9,11 +9,6 @@ import type {
   HaikuboxTimelineEvent,
 } from "@/types";
 
-const timeFormatter = new Intl.DateTimeFormat(undefined, {
-  hour: "numeric",
-  minute: "2-digit",
-});
-
 // --- Shared card wrapper ---
 
 function CardWrapper({
@@ -41,19 +36,18 @@ function CardWrapper({
 // --- Photo card ---
 
 function PhotoEventCard({ event }: { event: PhotoTimelineEvent }) {
-  const time = timeFormatter.format(new Date(event.eventDate));
   const href = event.speciesId ? `/species/${event.speciesId}` : undefined;
 
   return (
     <CardWrapper href={href}>
-      <div className="relative w-14 h-14 rounded-[var(--radius-md)] overflow-hidden
+      <div className="relative w-14 h-14 sm:w-20 sm:h-20 rounded-[var(--radius-md)] overflow-hidden
         flex-shrink-0 bg-[var(--mist-100)]">
         <Image
           src={event.thumbnailUrl}
           alt={event.speciesName || "Photo"}
           fill
           className="object-cover"
-          sizes="56px"
+          sizes="(min-width: 640px) 80px, 56px"
         />
       </div>
       <div className="flex-1 min-w-0">
@@ -81,13 +75,6 @@ function PhotoEventCard({ event }: { event: PhotoTimelineEvent }) {
           </svg>
           <span>Photo taken</span>
         </p>
-        <p className="text-xs text-[var(--text-tertiary)] mt-1">
-          {event.usedUploadDate ? (
-            <span className="italic">Uploaded {time}</span>
-          ) : (
-            time
-          )}
-        </p>
       </div>
     </CardWrapper>
   );
@@ -98,10 +85,10 @@ function PhotoEventCard({ event }: { event: PhotoTimelineEvent }) {
 function EbirdEventCard({ event }: { event: EbirdTimelineEvent }) {
   return (
     <CardWrapper>
-      <div className="w-14 h-14 rounded-[var(--radius-md)] flex-shrink-0
+      <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-[var(--radius-md)] flex-shrink-0
         bg-[var(--sky-100)] flex items-center justify-center">
         <svg
-          className="w-7 h-7 text-[var(--sky-700)]"
+          className="w-7 h-7 sm:w-9 sm:h-9 text-[var(--sky-700)]"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -156,10 +143,10 @@ function HaikuboxEventCard({ event }: { event: HaikuboxTimelineEvent }) {
 
   return (
     <CardWrapper href={href}>
-      <div className="w-14 h-14 rounded-[var(--radius-md)] flex-shrink-0
+      <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-[var(--radius-md)] flex-shrink-0
         bg-[var(--amber-100)] flex items-center justify-center">
         <svg
-          className="w-7 h-7 text-[var(--amber-700)]"
+          className="w-7 h-7 sm:w-9 sm:h-9 text-[var(--amber-700)]"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"

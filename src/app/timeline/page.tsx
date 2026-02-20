@@ -1,10 +1,16 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
-import type { TimelineEvent, TimelineResponse } from "@/types";
+import type {
+  TimelineEvent,
+  TimelineResponse,
+  TimelineMonthSummary,
+  TimelineMonthsResponse,
+} from "@/types";
 import TimelineDayHeader from "@/components/timeline/TimelineDayHeader";
 import TimelineEventCard from "@/components/timeline/TimelineEventCard";
+import TimelineMonthNav from "@/components/timeline/TimelineMonthNav";
 
 /** Group events by calendar day (local time), returning entries in insertion order (desc). */
 function groupByDay(events: TimelineEvent[]): Map<string, TimelineEvent[]> {
@@ -34,6 +40,27 @@ function getEventKey(event: TimelineEvent): string {
   }
 }
 
+/** Derive "YYYY-MM" from the first event's date (for active month tracking). */
+function deriveMonth(events: TimelineEvent[]): string | null {
+  const first = events[0];
+  if (!first) return null;
+  const d = new Date(first.eventDate);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+/** Get the number of days in a given "YYYY-MM" month. */
+function daysInMonth(monthStr: string): number {
+  const [year, month] = monthStr.split("-").map(Number);
+  // Day 0 of the next month = last day of this month
+  return new Date(year!, month!, 0).getDate();
+}
+
+/** Get an ISO string for the start of the next month (used as "before" cursor). */
+function nextMonthStart(monthStr: string): string {
+  const [year, month] = monthStr.split("-").map(Number);
+  return new Date(year!, month!, 1).toISOString();
+}
+
 export default function TimelinePage() {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,9 +69,23 @@ export default function TimelinePage() {
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
-  const fetchTimeline = useCallback(async (cursor?: string) => {
-    const isInitialLoad = !cursor;
-    if (isInitialLoad) {
+  // Month navigator state
+  const [months, setMonths] = useState<TimelineMonthSummary[]>([]);
+  const [monthsLoading, setMonthsLoading] = useState(true);
+  const [activeMonth, setActiveMonth] = useState<string | null>(null);
+
+  // Infinite scroll sentinel
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  // Track latest cursor in a ref so the IntersectionObserver callback sees the current value
+  const nextCursorRef = useRef<string | null>(null);
+  const loadingMoreRef = useRef(false);
+
+  nextCursorRef.current = nextCursor;
+  loadingMoreRef.current = loadingMore;
+
+  const fetchTimeline = useCallback(async (cursor?: string, options?: { days?: number; replace?: boolean }) => {
+    const isReplace = options?.replace ?? !cursor;
+    if (isReplace) {
       setLoading(true);
     } else {
       setLoadingMore(true);
@@ -52,7 +93,8 @@ export default function TimelinePage() {
     setError(null);
 
     try {
-      const params = new URLSearchParams({ days: "30" });
+      const days = options?.days ?? 30;
+      const params = new URLSearchParams({ days: String(days) });
       if (cursor) params.set("before", cursor);
 
       const res = await fetch(`/api/timeline?${params}`);
@@ -60,7 +102,7 @@ export default function TimelinePage() {
 
       const data: TimelineResponse = await res.json();
 
-      if (isInitialLoad) {
+      if (isReplace) {
         setEvents(data.events);
       } else {
         setEvents((prev) => [...prev, ...data.events]);
@@ -75,8 +117,59 @@ export default function TimelinePage() {
     }
   }, []);
 
+  // Fetch months summary and initial timeline events in parallel on mount
   useEffect(() => {
+    async function fetchMonths() {
+      try {
+        const res = await fetch("/api/timeline/months");
+        if (!res.ok) return;
+        const data: TimelineMonthsResponse = await res.json();
+        setMonths(data.months);
+      } catch {
+        // Non-critical — month nav just won't show
+      } finally {
+        setMonthsLoading(false);
+      }
+    }
+
+    fetchMonths();
     fetchTimeline();
+  }, [fetchTimeline]);
+
+  // Update active month when events change
+  useEffect(() => {
+    if (events.length > 0 && !activeMonth) {
+      setActiveMonth(deriveMonth(events));
+    }
+  }, [events, activeMonth]);
+
+  // Infinite scroll: observe sentinel element
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry?.isIntersecting && nextCursorRef.current && !loadingMoreRef.current) {
+          fetchTimeline(nextCursorRef.current);
+        }
+      },
+      { rootMargin: "200px" }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [fetchTimeline, hasLoadedOnce]);
+
+  // Handle month selection from nav
+  const handleSelectMonth = useCallback((monthStr: string) => {
+    setActiveMonth(monthStr);
+    const before = nextMonthStart(monthStr);
+    const days = daysInMonth(monthStr);
+    setEvents([]);
+    fetchTimeline(before, { days, replace: true });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [fetchTimeline]);
 
   // --- Loading skeleton ---
@@ -90,11 +183,17 @@ export default function TimelinePage() {
         <div className="sm:hidden mb-4">
           <div className="h-7 w-28 bg-[var(--mist-100)] rounded-[var(--radius-md)] animate-pulse" />
         </div>
-        <div className="max-w-2xl mx-auto space-y-3">
+        <div className="max-w-3xl mx-auto">
+          <TimelineMonthNav
+            months={months}
+            activeMonth={activeMonth}
+            onSelectMonth={handleSelectMonth}
+            loading={monthsLoading}
+          />
           {[1, 2, 3, 4, 5].map((i) => (
             <div
               key={i}
-              className="h-[88px] bg-[var(--mist-100)] rounded-[var(--radius-lg)] animate-pulse"
+              className="h-[88px] bg-[var(--mist-100)] rounded-[var(--radius-lg)] animate-pulse mb-3"
             />
           ))}
         </div>
@@ -114,7 +213,7 @@ export default function TimelinePage() {
         <div className="sm:hidden mb-4">
           <h1 className="text-xl font-bold text-[var(--text-primary)]">Timeline</h1>
         </div>
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-3xl mx-auto">
           <div className="bg-[var(--error-bg)] border border-[var(--error-border)]
             rounded-[var(--radius-lg)] p-6 text-center">
             <p className="text-[var(--error-text)] font-medium">{error}</p>
@@ -147,7 +246,15 @@ export default function TimelinePage() {
         <div className="sm:hidden mb-4">
           <h1 className="text-xl font-bold text-[var(--text-primary)]">Timeline</h1>
         </div>
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-3xl mx-auto">
+          {months.length > 0 && (
+            <TimelineMonthNav
+              months={months}
+              activeMonth={activeMonth}
+              onSelectMonth={handleSelectMonth}
+              loading={false}
+            />
+          )}
           <div className="bg-[var(--card-bg)] border border-[var(--border-light)]
             rounded-[var(--radius-lg)] p-8 text-center">
             <svg
@@ -160,47 +267,50 @@ export default function TimelinePage() {
                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
-              Your timeline is waiting
+              {months.length > 0 ? "No events this month" : "Your timeline is waiting"}
             </h2>
             <p className="text-sm text-[var(--text-secondary)] mb-6 max-w-md mx-auto">
-              As you build your birding life, events will appear here in
-              chronological order. Here&apos;s how to get started:
+              {months.length > 0
+                ? "Try selecting a different month above."
+                : "As you build your birding life, events will appear here in chronological order. Here\u2019s how to get started:"}
             </p>
-            <div className="space-y-3 text-left max-w-sm mx-auto">
-              <Link
-                href="/"
-                className="flex items-center gap-3 p-3 rounded-[var(--radius-md)]
-                  bg-[var(--mist-50)] hover:bg-[var(--mist-100)] transition-colors"
-              >
-                <span className="text-lg">📷</span>
-                <span className="text-sm text-[var(--text-secondary)]">
-                  <span className="font-medium text-[var(--text-primary)]">Upload photos</span>
-                  {" "}— they&apos;ll appear on your timeline by date taken
-                </span>
-              </Link>
-              <Link
-                href="/settings"
-                className="flex items-center gap-3 p-3 rounded-[var(--radius-md)]
-                  bg-[var(--mist-50)] hover:bg-[var(--mist-100)] transition-colors"
-              >
-                <span className="text-lg">📋</span>
-                <span className="text-sm text-[var(--text-secondary)]">
-                  <span className="font-medium text-[var(--text-primary)]">Import your eBird life list</span>
-                  {" "}— see when you first observed each species
-                </span>
-              </Link>
-              <Link
-                href="/settings"
-                className="flex items-center gap-3 p-3 rounded-[var(--radius-md)]
-                  bg-[var(--mist-50)] hover:bg-[var(--mist-100)] transition-colors"
-              >
-                <span className="text-lg">🎵</span>
-                <span className="text-sm text-[var(--text-secondary)]">
-                  <span className="font-medium text-[var(--text-primary)]">Connect a Haikubox</span>
-                  {" "}— detections show up automatically
-                </span>
-              </Link>
-            </div>
+            {months.length === 0 && (
+              <div className="space-y-3 text-left max-w-sm mx-auto">
+                <Link
+                  href="/"
+                  className="flex items-center gap-3 p-3 rounded-[var(--radius-md)]
+                    bg-[var(--mist-50)] hover:bg-[var(--mist-100)] transition-colors"
+                >
+                  <span className="text-lg">📷</span>
+                  <span className="text-sm text-[var(--text-secondary)]">
+                    <span className="font-medium text-[var(--text-primary)]">Upload photos</span>
+                    {" "}&mdash; they&apos;ll appear on your timeline by date taken
+                  </span>
+                </Link>
+                <Link
+                  href="/settings"
+                  className="flex items-center gap-3 p-3 rounded-[var(--radius-md)]
+                    bg-[var(--mist-50)] hover:bg-[var(--mist-100)] transition-colors"
+                >
+                  <span className="text-lg">📋</span>
+                  <span className="text-sm text-[var(--text-secondary)]">
+                    <span className="font-medium text-[var(--text-primary)]">Import your eBird life list</span>
+                    {" "}&mdash; see when you first observed each species
+                  </span>
+                </Link>
+                <Link
+                  href="/settings"
+                  className="flex items-center gap-3 p-3 rounded-[var(--radius-md)]
+                    bg-[var(--mist-50)] hover:bg-[var(--mist-100)] transition-colors"
+                >
+                  <span className="text-lg">🎵</span>
+                  <span className="text-sm text-[var(--text-secondary)]">
+                    <span className="font-medium text-[var(--text-primary)]">Connect a Haikubox</span>
+                    {" "}&mdash; detections show up automatically
+                  </span>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -228,7 +338,15 @@ export default function TimelinePage() {
       </div>
 
       {/* Event list grouped by day */}
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-3xl mx-auto">
+        {/* Month navigator */}
+        <TimelineMonthNav
+          months={months}
+          activeMonth={activeMonth}
+          onSelectMonth={handleSelectMonth}
+          loading={monthsLoading}
+        />
+
         {Array.from(grouped.entries()).map(([dayKey, dayEvents]) => (
           <div key={dayKey}>
             <TimelineDayHeader date={dayKey} />
@@ -240,35 +358,21 @@ export default function TimelinePage() {
           </div>
         ))}
 
-        {/* Load More / End of timeline */}
-        <div className="py-8 text-center">
-          {nextCursor ? (
-            <button
-              onClick={() => fetchTimeline(nextCursor)}
-              disabled={loadingMore}
-              className="px-6 py-2.5 rounded-[var(--radius-lg)]
-                bg-[var(--forest-600)] text-white text-sm font-semibold
-                hover:bg-[var(--forest-700)] transition-colors
-                disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loadingMore ? (
-                <span className="flex items-center gap-2">
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  Loading...
-                </span>
-              ) : (
-                "Load more"
-              )}
-            </button>
-          ) : (
-            hasLoadedOnce && events.length > 0 && (
-              <p className="text-sm text-[var(--text-tertiary)]">
-                You&apos;ve reached the beginning of your timeline.
-              </p>
-            )
+        {/* Infinite scroll sentinel + loading indicator */}
+        <div ref={sentinelRef} className="py-8 text-center">
+          {loadingMore && (
+            <div className="flex items-center justify-center gap-2 text-[var(--text-tertiary)]">
+              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              <span className="text-sm">Loading more...</span>
+            </div>
+          )}
+          {!nextCursor && hasLoadedOnce && events.length > 0 && !loadingMore && (
+            <p className="text-sm text-[var(--text-tertiary)]">
+              You&apos;ve reached the beginning of your timeline.
+            </p>
           )}
         </div>
       </div>
