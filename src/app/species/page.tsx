@@ -1,18 +1,19 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Species, SpeciesResponse, Rarity, EbirdLifeListEntry, EbirdWishlistResponse, EbirdImportStatus } from "@/types";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { Species, SpeciesResponse, Rarity, EbirdLifeListEntry, EbirdWishlistResponse, EbirdImportStatus, WishListItem } from "@/types";
 import SpeciesCard from "@/components/species/SpeciesCard";
 import SpeciesForm from "@/components/species/SpeciesForm";
 import WishListCard from "@/components/species/WishListCard";
 import Button from "@/components/ui/Button";
 
 type SpeciesSortOption = "alpha" | "photo_count" | "recent_added" | "recent_taken";
-type WishlistSortOption = "alpha" | "recent_observed";
+type WishlistSortOption = "alpha" | "recent";
 type ActiveTab = "species" | "wishlist";
 
 export default function SpeciesDirectory() {
-  const [species, setSpecies] = useState<Species[]>([]);
+  const [allSpecies, setAllSpecies] = useState<Species[]>([]);
+  const [speciesCounts, setSpeciesCounts] = useState<{ photographed: number; unphotographed: number }>({ photographed: 0, unphotographed: 0 });
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingSpecies, setEditingSpecies] = useState<Species | null>(null);
@@ -21,12 +22,66 @@ export default function SpeciesDirectory() {
   const [sortOption, setSortOption] = useState<SpeciesSortOption>("alpha");
   const [error, setError] = useState<string | null>(null);
 
-  // eBird wish list state
+  // Wish list state
   const [activeTab, setActiveTab] = useState<ActiveTab>("species");
   const [ebirdStatus, setEbirdStatus] = useState<EbirdImportStatus | null>(null);
-  const [wishlist, setWishlist] = useState<EbirdLifeListEntry[]>([]);
+  const [ebirdWishlist, setEbirdWishlist] = useState<EbirdLifeListEntry[]>([]);
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [wishlistSort, setWishlistSort] = useState<WishlistSortOption>("alpha");
+
+  // Split species by photo status
+  const photographedSpecies = useMemo(
+    () => allSpecies.filter((s) => (s.photoCount ?? 0) > 0),
+    [allSpecies]
+  );
+  const unphotographedSpecies = useMemo(
+    () => allSpecies.filter((s) => (s.photoCount ?? 0) === 0),
+    [allSpecies]
+  );
+
+  // Merge unphotographed BirdFeed species + unmatched eBird entries into unified wish list
+  const mergedWishList: WishListItem[] = useMemo(() => {
+    const manual: WishListItem[] = unphotographedSpecies.map((s) => ({
+      source: "manual" as const,
+      commonName: s.commonName,
+      scientificName: s.scientificName,
+      ebirdSpeciesCode: s.ebirdSpeciesCode ?? null,
+      speciesId: s.id,
+      rarity: s.rarity,
+      createdAt: s.createdAt,
+    }));
+
+    const ebird: WishListItem[] = ebirdWishlist.map((e) => ({
+      source: "ebird" as const,
+      commonName: e.commonName,
+      scientificName: e.scientificName,
+      ebirdSpeciesCode: e.speciesCode,
+      ebirdEntryId: e.id,
+      firstObservedDate: e.firstObservedDate,
+    }));
+
+    const combined = [...manual, ...ebird];
+
+    // Sort the merged list
+    if (wishlistSort === "alpha") {
+      combined.sort((a, b) => a.commonName.localeCompare(b.commonName));
+    } else {
+      // "recent" — sort by most recent date (firstObservedDate for eBird, createdAt for manual)
+      combined.sort((a, b) => {
+        const dateA = a.source === "ebird" ? a.firstObservedDate : a.createdAt;
+        const dateB = b.source === "ebird" ? b.firstObservedDate : b.createdAt;
+        if (!dateA && !dateB) return 0;
+        if (!dateA) return 1;
+        if (!dateB) return -1;
+        return new Date(dateB).getTime() - new Date(dateA).getTime();
+      });
+    }
+
+    return combined;
+  }, [unphotographedSpecies, ebirdWishlist, wishlistSort]);
+
+  // Wish list count for tab badge
+  const wishListCount = speciesCounts.unphotographed + ebirdWishlist.length;
 
   const fetchSpecies = useCallback(async () => {
     try {
@@ -38,7 +93,18 @@ export default function SpeciesDirectory() {
         return;
       }
       const data: SpeciesResponse = await res.json();
-      setSpecies(data.species || []);
+      setAllSpecies(data.species || []);
+
+      if (data.totalCounts) {
+        setSpeciesCounts(data.totalCounts);
+      } else {
+        // Fallback for backward compat
+        const all = data.species || [];
+        setSpeciesCounts({
+          photographed: all.filter((s) => (s.photoCount ?? 0) > 0).length,
+          unphotographed: all.filter((s) => (s.photoCount ?? 0) === 0).length,
+        });
+      }
     } catch (err) {
       console.error("Failed to fetch species:", err);
       setError("Failed to load species. Please try refreshing the page.");
@@ -67,27 +133,25 @@ export default function SpeciesDirectory() {
     checkEbirdStatus();
   }, []);
 
-  // Fetch wishlist when tab switches to wishlist
+  // Always fetch eBird wishlist on mount for count badge (returns empty if no import)
   const fetchWishlist = useCallback(async () => {
     setWishlistLoading(true);
     try {
-      const res = await fetch(`/api/ebird/wishlist?sort=${wishlistSort}`);
+      const res = await fetch(`/api/ebird/wishlist?sort=${wishlistSort === "recent" ? "recent_observed" : wishlistSort}`);
       if (res.ok) {
         const data: EbirdWishlistResponse = await res.json();
-        setWishlist(data.wishlist || []);
+        setEbirdWishlist(data.wishlist || []);
       }
     } catch {
-      console.error("Failed to fetch wishlist");
+      // Silent — wish list fetch is best-effort
     } finally {
       setWishlistLoading(false);
     }
   }, [wishlistSort]);
 
   useEffect(() => {
-    if (activeTab === "wishlist" && ebirdStatus?.hasImport) {
-      fetchWishlist();
-    }
-  }, [activeTab, fetchWishlist, ebirdStatus?.hasImport]);
+    fetchWishlist();
+  }, [fetchWishlist]);
 
   const handleCreateSpecies = async (data: {
     commonName: string;
@@ -105,8 +169,9 @@ export default function SpeciesDirectory() {
       throw new Error("Failed to create species");
     }
 
-    // Refresh the list
+    // Refresh both species and wishlist
     await fetchSpecies();
+    await fetchWishlist();
   };
 
   const handleEditSpecies = async (data: {
@@ -145,9 +210,18 @@ export default function SpeciesDirectory() {
       throw new Error("Failed to delete species");
     }
 
-    // Refresh the list
+    // Refresh both
     await fetchSpecies();
+    await fetchWishlist();
     setEditingSpecies(null);
+  };
+
+  // Find the Species record for a manual wish list item (to enable editing)
+  const findSpeciesForWishListItem = (item: WishListItem): Species | undefined => {
+    if (item.source === "manual" && item.speciesId) {
+      return allSpecies.find((s) => s.id === item.speciesId);
+    }
+    return undefined;
   };
 
   if (loading) {
@@ -178,8 +252,8 @@ export default function SpeciesDirectory() {
     );
   }
 
-  // Filter species by selected rarities
-  const filteredSpecies = species.filter((s) => {
+  // Filter photographed species by selected rarities
+  const filteredSpecies = photographedSpecies.filter((s) => {
     if (selectedRarities.length === 0) return true;
     return selectedRarities.includes(s.rarity);
   });
@@ -212,35 +286,66 @@ export default function SpeciesDirectory() {
             Your complete directory of bird species, from common backyard visitors to rare sightings.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <select
-            value={sortOption}
-            onChange={(e) => setSortOption(e.target.value as SpeciesSortOption)}
-            className="px-3 py-2 bg-[var(--card-bg)] border border-[var(--border-light)] rounded-[var(--radius-md)]
-              text-sm text-[var(--forest-700)] focus:outline-none focus:ring-2 focus:ring-[var(--moss-500)]"
-          >
-            <option value="alpha">A-Z</option>
-            <option value="photo_count">Most Photos</option>
-            <option value="recent_added">Recently Added</option>
-            <option value="recent_taken">Recently Photographed</option>
-          </select>
-          <Button onClick={() => setShowForm(true)}>
-            <svg
-              className="w-4 h-4 mr-2"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+        {activeTab === "species" && (
+          <div className="flex items-center gap-3">
+            <select
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value as SpeciesSortOption)}
+              className="px-3 py-2 bg-[var(--card-bg)] border border-[var(--border-light)] rounded-[var(--radius-md)]
+                text-sm text-[var(--forest-700)] focus:outline-none focus:ring-2 focus:ring-[var(--moss-500)]"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            Add Species
-          </Button>
-        </div>
+              <option value="alpha">A-Z</option>
+              <option value="photo_count">Most Photos</option>
+              <option value="recent_added">Recently Added</option>
+              <option value="recent_taken">Recently Photographed</option>
+            </select>
+            <Button onClick={() => setShowForm(true)}>
+              <svg
+                className="w-4 h-4 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              Add Species
+            </Button>
+          </div>
+        )}
+        {activeTab === "wishlist" && (
+          <div className="flex items-center gap-3">
+            <select
+              value={wishlistSort}
+              onChange={(e) => setWishlistSort(e.target.value as WishlistSortOption)}
+              className="px-3 py-2 bg-[var(--card-bg)] border border-[var(--border-light)] rounded-[var(--radius-md)]
+                text-sm text-[var(--forest-700)] focus:outline-none focus:ring-2 focus:ring-[var(--moss-500)]"
+            >
+              <option value="alpha">A-Z</option>
+              <option value="recent">Most Recent</option>
+            </select>
+            <Button onClick={() => setShowForm(true)}>
+              <svg
+                className="w-4 h-4 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              Add to Wish List
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Mobile header - compact with filter toggle */}
@@ -249,75 +354,75 @@ export default function SpeciesDirectory() {
           <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">
             Species
           </h1>
-          <button
-            onClick={() => setShowMobileFilters(!showMobileFilters)}
-            aria-label={`Toggle filters${activeFilterCount > 0 ? `, ${activeFilterCount} active` : ""}`}
-            aria-expanded={showMobileFilters}
-            className={`flex items-center gap-1.5 px-3 py-2 text-sm font-semibold
-              rounded-[var(--radius-lg)] border
-              transition-all duration-[var(--timing-fast)] active:scale-95
-              ${showMobileFilters || activeFilterCount > 0
-                ? "bg-gradient-to-b from-[var(--forest-500)] to-[var(--forest-600)] text-white border-[var(--forest-600)]"
-                : "bg-[var(--card-bg)] text-[var(--forest-700)] border-[var(--mist-200)] hover:border-[var(--moss-300)]"
-              }`}
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-            </svg>
-            Filter
-            {activeFilterCount > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full bg-[var(--card-bg)]/20">
-                {activeFilterCount}
-              </span>
-            )}
-            <svg
-              className={`w-4 h-4 transition-transform duration-200 ${showMobileFilters ? "rotate-180" : ""}`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+          {activeTab === "species" && (
+            <button
+              onClick={() => setShowMobileFilters(!showMobileFilters)}
+              aria-label={`Toggle filters${activeFilterCount > 0 ? `, ${activeFilterCount} active` : ""}`}
+              aria-expanded={showMobileFilters}
+              className={`flex items-center gap-1.5 px-3 py-2 text-sm font-semibold
+                rounded-[var(--radius-lg)] border
+                transition-all duration-[var(--timing-fast)] active:scale-95
+                ${showMobileFilters || activeFilterCount > 0
+                  ? "bg-gradient-to-b from-[var(--forest-500)] to-[var(--forest-600)] text-white border-[var(--forest-600)]"
+                  : "bg-[var(--card-bg)] text-[var(--forest-700)] border-[var(--mist-200)] hover:border-[var(--moss-300)]"
+                }`}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+              Filter
+              {activeFilterCount > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full bg-[var(--card-bg)]/20">
+                  {activeFilterCount}
+                </span>
+              )}
+              <svg
+                className={`w-4 h-4 transition-transform duration-200 ${showMobileFilters ? "rotate-180" : ""}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+          )}
         </div>
         <p className="text-xs text-[var(--mist-500)]">
-          {species.length} species in your directory
+          {speciesCounts.photographed} photographed, {wishListCount} on wish list
         </p>
       </div>
 
-      {/* Tab toggle — only shown if eBird import exists */}
-      {ebirdStatus?.hasImport && (
-        <div className="flex gap-1 p-1 mb-4 bg-[var(--mist-100)] rounded-[var(--radius-lg)] w-fit">
-          <button
-            onClick={() => setActiveTab("species")}
-            className={`px-4 py-2 text-sm font-semibold rounded-[var(--radius-md)]
-              transition-all duration-[var(--timing-fast)]
-              ${activeTab === "species"
-                ? "bg-[var(--card-bg)] text-[var(--text-primary)] shadow-[var(--shadow-sm)]"
-                : "text-[var(--mist-600)] hover:text-[var(--text-primary)]"
-              }`}
-          >
-            My Species ({species.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("wishlist")}
-            className={`px-4 py-2 text-sm font-semibold rounded-[var(--radius-md)]
-              transition-all duration-[var(--timing-fast)]
-              ${activeTab === "wishlist"
-                ? "bg-[var(--card-bg)] text-[var(--text-primary)] shadow-[var(--shadow-sm)]"
-                : "text-[var(--mist-600)] hover:text-[var(--text-primary)]"
-              }`}
-          >
-            Wish List {wishlist.length > 0 ? `(${wishlist.length})` : ""}
-          </button>
-        </div>
-      )}
+      {/* Tab toggle — always visible */}
+      <div className="flex gap-1 p-1 mb-4 bg-[var(--mist-100)] rounded-[var(--radius-lg)] w-fit">
+        <button
+          onClick={() => setActiveTab("species")}
+          className={`px-4 py-2 text-sm font-semibold rounded-[var(--radius-md)]
+            transition-all duration-[var(--timing-fast)]
+            ${activeTab === "species"
+              ? "bg-[var(--card-bg)] text-[var(--text-primary)] shadow-[var(--shadow-sm)]"
+              : "text-[var(--mist-600)] hover:text-[var(--text-primary)]"
+            }`}
+        >
+          My Species ({speciesCounts.photographed})
+        </button>
+        <button
+          onClick={() => setActiveTab("wishlist")}
+          className={`px-4 py-2 text-sm font-semibold rounded-[var(--radius-md)]
+            transition-all duration-[var(--timing-fast)]
+            ${activeTab === "wishlist"
+              ? "bg-[var(--card-bg)] text-[var(--text-primary)] shadow-[var(--shadow-sm)]"
+              : "text-[var(--mist-600)] hover:text-[var(--text-primary)]"
+            }`}
+        >
+          Wish List {wishListCount > 0 ? `(${wishListCount})` : ""}
+        </button>
+      </div>
 
       {/* Wish list view */}
-      {activeTab === "wishlist" && ebirdStatus?.hasImport ? (
+      {activeTab === "wishlist" ? (
         <>
-          {/* Wishlist sort */}
-          <div className="flex items-center gap-3 mb-4">
+          {/* Mobile sort for wish list */}
+          <div className="sm:hidden flex items-center gap-3 mb-4">
             <select
               value={wishlistSort}
               onChange={(e) => setWishlistSort(e.target.value as WishlistSortOption)}
@@ -325,11 +430,11 @@ export default function SpeciesDirectory() {
                 text-sm text-[var(--forest-700)] focus:outline-none focus:ring-2 focus:ring-[var(--moss-500)]"
             >
               <option value="alpha">A-Z</option>
-              <option value="recent_observed">Recently Observed</option>
+              <option value="recent">Most Recent</option>
             </select>
           </div>
 
-          {wishlistLoading ? (
+          {wishlistLoading && mergedWishList.length === 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div
@@ -344,24 +449,48 @@ export default function SpeciesDirectory() {
                 </div>
               ))}
             </div>
-          ) : wishlist.length === 0 ? (
+          ) : mergedWishList.length === 0 ? (
             <div className="text-center py-20 px-4">
               <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-[var(--moss-100)] to-[var(--forest-100)] flex items-center justify-center">
                 <svg className="w-10 h-10 text-[var(--forest-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
               </div>
               <h3 className="text-lg font-medium text-[var(--text-label)] mb-2">
-                All caught up!
+                Your wish list is empty
               </h3>
               <p className="text-[var(--mist-500)] mb-6 max-w-sm mx-auto">
-                Every species from your eBird life list is already in your BirdFeed collection.
+                Add species you&apos;d like to photograph, or import your eBird life list to populate your wish list automatically.
               </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <Button onClick={() => setShowForm(true)}>
+                  <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add to Wish List
+                </Button>
+                {!ebirdStatus?.hasImport && (
+                  <a
+                    href="/settings"
+                    className="text-sm text-[var(--moss-700)] hover:text-[var(--moss-800)] underline underline-offset-2"
+                  >
+                    Import from eBird
+                  </a>
+                )}
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {wishlist.map((entry) => (
-                <WishListCard key={entry.id} entry={entry} />
+              {mergedWishList.map((item) => (
+                <WishListCard
+                  key={item.source === "ebird" ? `ebird-${item.ebirdEntryId}` : `manual-${item.speciesId}`}
+                  item={item}
+                  onEdit={item.source === "manual" ? () => {
+                    const sp = findSpeciesForWishListItem(item);
+                    if (sp) setEditingSpecies(sp);
+                  } : undefined}
+                />
               ))}
             </div>
           )}
@@ -472,7 +601,7 @@ export default function SpeciesDirectory() {
               <p className="text-[var(--mist-500)] mb-6 max-w-sm mx-auto">{error}</p>
               <Button onClick={() => fetchSpecies()}>Try Again</Button>
             </div>
-          ) : species.length === 0 ? (
+          ) : photographedSpecies.length === 0 ? (
             <div className="text-center py-20 px-4">
               <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-[var(--moss-100)] to-[var(--forest-100)] flex items-center justify-center">
                 <svg className="w-10 h-10 text-[var(--forest-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -480,10 +609,10 @@ export default function SpeciesDirectory() {
                 </svg>
               </div>
               <h3 className="text-lg font-medium text-[var(--text-label)] mb-2">
-                No species yet
+                No photographed species yet
               </h3>
               <p className="text-[var(--mist-500)] mb-6 max-w-sm mx-auto">
-                Start building your bird collection by adding your first species
+                Upload photos and assign them to species to see them here.
               </p>
               <Button onClick={() => setShowForm(true)}>Add Species</Button>
             </div>
@@ -557,7 +686,7 @@ export default function SpeciesDirectory() {
           active:scale-95
           transition-all duration-[var(--timing-fast)]
           flex items-center justify-center sm:hidden z-40"
-        aria-label="Add species"
+        aria-label={activeTab === "wishlist" ? "Add to wish list" : "Add species"}
       >
         <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />

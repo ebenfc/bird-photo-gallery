@@ -79,6 +79,26 @@ export interface PhotosResponse {
 
 export interface SpeciesResponse {
   species: Species[];
+  totalCounts?: {
+    photographed: number;
+    unphotographed: number;
+  };
+}
+
+export type WishListSource = "ebird" | "manual";
+
+export interface WishListItem {
+  source: WishListSource;
+  commonName: string;
+  scientificName: string | null;
+  ebirdSpeciesCode: string | null;
+  // eBird-sourced fields
+  ebirdEntryId?: number;
+  firstObservedDate?: string | null;
+  // Manual-sourced fields (BirdFeed species with 0 photos)
+  speciesId?: number;
+  rarity?: Rarity;
+  createdAt?: string;
 }
 
 // Haikubox types
