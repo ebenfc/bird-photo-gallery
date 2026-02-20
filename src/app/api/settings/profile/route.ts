@@ -14,7 +14,7 @@ export const runtime = "nodejs";
  * GET /api/settings/profile
  * Get current user's profile settings (username, public gallery status)
  */
-export async function GET(_request: NextRequest) {
+export async function GET() {
   // Authentication
   const authResult = await requireAuth();
   if (isErrorResponse(authResult)) {
@@ -67,6 +67,9 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     const { username, isPublicGalleryEnabled, city, state, isDirectoryListed, displayName, showGearPublicly } = body;
 
+    // Fetch user once for all checks that need it
+    const currentUser = await getUserByClerkId(userId);
+
     // Build update object
     const updates: Partial<{
       username: string | null;
@@ -80,11 +83,20 @@ export async function PATCH(request: NextRequest) {
 
     // Handle username update
     if (username !== undefined) {
-      if (username === null || username === "") {
-        // Allow clearing username
-        updates.username = null;
+      // Username is immutable once set — reject changes or clearing
+      if (currentUser?.username) {
+        const normalizedInput = typeof username === "string" ? username.toLowerCase() : username;
+        if (normalizedInput !== currentUser.username) {
+          return NextResponse.json(
+            { error: "Username cannot be changed once set" },
+            { status: 400 }
+          );
+        }
+        // If sending the same username, just ignore it (no-op)
+      } else if (username === null || username === "") {
+        // No username set and trying to clear — no-op
       } else {
-        // Validate username format
+        // Setting username for the first time
         const validation = validateUsername(username);
         if (!validation.valid) {
           return NextResponse.json(
@@ -93,7 +105,6 @@ export async function PATCH(request: NextRequest) {
           );
         }
 
-        // Check if username is available (excluding current user)
         const normalizedUsername = username.toLowerCase();
         const available = await isUsernameAvailable(normalizedUsername, userId);
         if (!available) {
@@ -111,8 +122,7 @@ export async function PATCH(request: NextRequest) {
     if (typeof isPublicGalleryEnabled === "boolean") {
       // If enabling public gallery, ensure username is set
       if (isPublicGalleryEnabled) {
-        const user = await getUserByClerkId(userId);
-        const finalUsername = updates.username !== undefined ? updates.username : user?.username;
+        const finalUsername = updates.username !== undefined ? updates.username : currentUser?.username;
 
         if (!finalUsername) {
           return NextResponse.json(
@@ -180,10 +190,9 @@ export async function PATCH(request: NextRequest) {
     // Handle directory listing toggle
     if (typeof isDirectoryListed === "boolean") {
       if (isDirectoryListed) {
-        const user = await getUserByClerkId(userId);
         const finalPublicEnabled = updates.isPublicGalleryEnabled !== undefined
           ? updates.isPublicGalleryEnabled
-          : user?.isPublicGalleryEnabled;
+          : currentUser?.isPublicGalleryEnabled;
 
         if (!finalPublicEnabled) {
           return NextResponse.json(

@@ -25,3 +25,15 @@ export function generateBirdName(): string {
   const num = Math.floor(Math.random() * 90) + 10; // 10-99
   return `${adj}${bird}${num}`;
 }
+
+/**
+ * Generate a bird-themed username in lowercase-hyphenated format.
+ * Produces names like "curious-wren-42", "swift-heron-77".
+ * These pass validateUsername() rules (3-30 chars, lowercase, letters/numbers/hyphens).
+ */
+export function generateBirdUsername(): string {
+  const adj = adjectives[Math.floor(Math.random() * adjectives.length)] ?? "keen";
+  const bird = birds[Math.floor(Math.random() * birds.length)] ?? "wren";
+  const num = Math.floor(Math.random() * 90) + 10; // 10-99
+  return `${adj.toLowerCase()}-${bird.toLowerCase()}-${num}`;
+}
