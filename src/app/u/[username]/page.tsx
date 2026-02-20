@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import { Photo, PhotosResponse, Species } from "@/types";
 import PhotoGrid from "@/components/gallery/PhotoGrid";
 import PhotoModal from "@/components/gallery/PhotoModal";
 import GalleryFilters from "@/components/gallery/GalleryFilters";
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 
 type SortOption = "recent_upload" | "oldest_upload" | "species_alpha" | "recent_taken";
 type Rarity = "common" | "uncommon" | "rare";
@@ -18,6 +19,10 @@ export default function PublicFeedPage() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [speciesList, setSpeciesList] = useState<Species[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [totalPhotos, setTotalPhotos] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const pageRef = useRef(1);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
 
   // Filter state
@@ -33,10 +38,6 @@ export default function PublicFeedPage() {
   // Count active filters for the badge
   const activeFilterCount = (selectedSpecies ? 1 : 0) + (showFavoritesOnly ? 1 : 0) + selectedRarities.length;
   const hasActiveFilters = activeFilterCount > 0 || sortOption !== "recent_upload";
-
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
 
   // Fetch species for filter dropdown + recently added photos
   useEffect(() => {
@@ -68,57 +69,78 @@ export default function PublicFeedPage() {
     fetchRecentPhotos();
   }, [username]);
 
-  // Fetch photos
-  const fetchPhotos = useCallback(async () => {
-    setLoading(true);
+  // Fetch photos (page 1 = replace, page 2+ = append)
+  const fetchPhotos = useCallback(async (page: number, append: boolean) => {
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
     try {
       const params = new URLSearchParams();
       if (selectedSpecies) params.set("speciesId", selectedSpecies.toString());
       if (showFavoritesOnly) params.set("favorites", "true");
       if (selectedRarities.length > 0) params.set("rarity", selectedRarities.join(","));
       params.set("sort", sortOption);
-      params.set("page", currentPage.toString());
+      params.set("page", page.toString());
       params.set("limit", "50");
 
       const res = await fetch(`/api/public/gallery/${username}/photos?${params.toString()}`);
       if (res.ok) {
         const data: PhotosResponse = await res.json();
-        setPhotos(data.photos);
+        if (append) {
+          setPhotos(prev => [...prev, ...(data.photos || [])]);
+        } else {
+          setPhotos(data.photos || []);
+        }
+        pageRef.current = data.page;
         setTotalPages(data.totalPages);
+        setTotalPhotos(data.total);
       }
     } catch (error) {
       console.error("Failed to fetch photos:", error);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
-  }, [username, selectedSpecies, showFavoritesOnly, selectedRarities, sortOption, currentPage]);
+  }, [username, selectedSpecies, showFavoritesOnly, selectedRarities, sortOption]);
 
+  // Fetch page 1 when filters/sort change
   useEffect(() => {
-    fetchPhotos();
+    fetchPhotos(1, false);
   }, [fetchPhotos]);
 
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedSpecies, showFavoritesOnly, selectedRarities, sortOption]);
+  // Infinite scroll
+  const hasMore = pageRef.current < totalPages;
+  const loadMore = useCallback(() => {
+    fetchPhotos(pageRef.current + 1, true);
+  }, [fetchPhotos]);
+  const sentinelRef = useInfiniteScroll({ onLoadMore: loadMore, hasMore, loading: loadingMore });
 
   // Photo navigation
   const currentPhotoIndex = selectedPhoto
     ? photos.findIndex((p) => p.id === selectedPhoto.id)
     : -1;
 
-  const handleNavigate = (direction: "prev" | "next") => {
+  const handleNavigate = useCallback((direction: "prev" | "next") => {
     if (!selectedPhoto) return;
-    const newIndex = direction === "prev" ? currentPhotoIndex - 1 : currentPhotoIndex + 1;
+    const currentIndex = photos.findIndex((p) => p.id === selectedPhoto.id);
+    const newIndex = direction === "prev" ? currentIndex - 1 : currentIndex + 1;
+
+    // Prefetch next page when approaching end of loaded photos
+    if (direction === "next" && currentIndex >= photos.length - 5 && hasMore && !loadingMore) {
+      loadMore();
+    }
+
     const newPhoto = photos[newIndex];
     if (newIndex >= 0 && newIndex < photos.length && newPhoto) {
       setSelectedPhoto(newPhoto);
     }
-  };
+  }, [selectedPhoto, photos, hasMore, loadingMore, loadMore]);
 
   const canNavigate = {
     prev: currentPhotoIndex > 0,
-    next: currentPhotoIndex < photos.length - 1,
+    next: currentPhotoIndex < photos.length - 1 || hasMore,
   };
 
   const adjacentPhotos = selectedPhoto && currentPhotoIndex >= 0
@@ -281,31 +303,31 @@ export default function PublicFeedPage() {
         </div>
       )}
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-8">
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 bg-[var(--card-bg)] border border-[var(--border-light)] rounded-[var(--radius-md)]
-              text-sm font-medium text-[var(--forest-700)] hover:bg-[var(--mist-50)]
-              disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-          >
-            Previous
-          </button>
-          <span className="px-4 py-2 text-sm text-[var(--mist-600)]">
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 bg-[var(--card-bg)] border border-[var(--border-light)] rounded-[var(--radius-md)]
-              text-sm font-medium text-[var(--forest-700)] hover:bg-[var(--mist-50)]
-              disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-          >
-            Next
-          </button>
-        </div>
+      {/* Infinite scroll sentinel + loading indicator */}
+      {!loading && (
+        <>
+          {loadingMore && (
+            <div className="flex justify-center py-8">
+              <div className="flex items-center gap-2 text-sm text-[var(--mist-500)]">
+                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Loading more photos...
+              </div>
+            </div>
+          )}
+          {hasMore && !loadingMore && (
+            <div ref={sentinelRef} className="h-1" aria-hidden="true" />
+          )}
+          {!hasMore && totalPhotos > 50 && (
+            <div className="text-center py-6">
+              <p className="text-sm text-[var(--mist-400)]">
+                All {totalPhotos} photos loaded
+              </p>
+            </div>
+          )}
+        </>
       )}
 
       {/* Photo Modal - Read Only */}
