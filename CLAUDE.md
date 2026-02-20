@@ -36,7 +36,7 @@ src/
   app/              # Pages and API routes (see api/CLAUDE.md)
   components/       # React components (see components/CLAUDE.md)
   db/               # Database schema (see db/CLAUDE.md)
-  hooks/            # Custom React hooks (useKonamiCode, useLogoTapUnlock, usePinchZoom, useSwipeGesture)
+  hooks/            # Custom React hooks (useInfiniteScroll, useKonamiCode, useLogoTapUnlock, usePinchZoom, useScrollLock, useSwipeGesture)
   lib/              # Utilities and business logic (see lib/CLAUDE.md)
   types/            # TypeScript definitions
   config/           # App configuration (limits.ts, usStates.ts)
