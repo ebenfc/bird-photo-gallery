@@ -3,8 +3,8 @@
 import { Rarity } from "@/types";
 
 interface RarityPickerProps {
-  value: Rarity;
-  onChange: (rarity: Rarity) => void;
+  value: Rarity | null;
+  onChange: (rarity: Rarity | null) => void;
 }
 
 const rarities: Rarity[] = ["common", "uncommon", "rare"];
@@ -25,7 +25,7 @@ export default function RarityPicker({ value, onChange }: RarityPickerProps) {
         <button
           key={r}
           type="button"
-          onClick={() => onChange(r)}
+          onClick={() => onChange(value === r ? null : r)}
           className={`flex-1 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${
             value === r ? activeStyles[r] : inactiveStyle
           }`}

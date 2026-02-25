@@ -28,6 +28,7 @@ export default function SpeciesDirectory() {
   const [ebirdWishlist, setEbirdWishlist] = useState<EbirdLifeListEntry[]>([]);
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [wishlistSort, setWishlistSort] = useState<WishlistSortOption>("alpha");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Split species by photo status
   const photographedSpecies = useMemo(
@@ -82,6 +83,33 @@ export default function SpeciesDirectory() {
 
   // Wish list count for tab badge
   const wishListCount = speciesCounts.unphotographed + ebirdWishlist.length;
+
+  // Filter photographed species by selected rarities and search query
+  const filteredSpecies = useMemo(() => {
+    return photographedSpecies.filter((s) => {
+      if (selectedRarities.length > 0 && (s.rarity === null || !selectedRarities.includes(s.rarity))) {
+        return false;
+      }
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        return (
+          s.commonName.toLowerCase().includes(q) ||
+          s.scientificName?.toLowerCase().includes(q)
+        );
+      }
+      return true;
+    });
+  }, [photographedSpecies, selectedRarities, searchQuery]);
+
+  // Filter wish list by search query
+  const filteredWishList = useMemo(() => {
+    if (!searchQuery.trim()) return mergedWishList;
+    const q = searchQuery.toLowerCase();
+    return mergedWishList.filter((item) =>
+      item.commonName.toLowerCase().includes(q) ||
+      item.scientificName?.toLowerCase().includes(q)
+    );
+  }, [mergedWishList, searchQuery]);
 
   const fetchSpecies = useCallback(async () => {
     try {
@@ -157,7 +185,7 @@ export default function SpeciesDirectory() {
     commonName: string;
     scientificName?: string;
     description?: string;
-    rarity?: Rarity;
+    rarity?: Rarity | null;
   }) => {
     const res = await fetch("/api/species", {
       method: "POST",
@@ -178,7 +206,7 @@ export default function SpeciesDirectory() {
     commonName: string;
     scientificName?: string;
     description?: string;
-    rarity?: Rarity;
+    rarity?: Rarity | null;
     ebirdChecklistUrl?: string | null;
     inatObservationUrl?: string | null;
   }) => {
@@ -252,12 +280,6 @@ export default function SpeciesDirectory() {
     );
   }
 
-  // Filter photographed species by selected rarities
-  const filteredSpecies = photographedSpecies.filter((s) => {
-    if (selectedRarities.length === 0) return true;
-    return selectedRarities.includes(s.rarity);
-  });
-
   // Toggle rarity filter (single select)
   const toggleRarity = (rarity: Rarity) => {
     if (selectedRarities.includes(rarity)) {
@@ -274,7 +296,7 @@ export default function SpeciesDirectory() {
   ];
 
   // Count active filters for the badge
-  const activeFilterCount = selectedRarities.length;
+  const activeFilterCount = selectedRarities.length + (searchQuery.trim() ? 1 : 0);
 
   return (
     <div className="pnw-texture min-h-screen pb-24 sm:pb-0">
@@ -418,6 +440,47 @@ export default function SpeciesDirectory() {
         </button>
       </div>
 
+      {/* Search bar — filters both tabs */}
+      <div className="mb-4">
+        <div className="relative">
+          <svg
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--mist-400)]"
+            fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search species..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-10 py-2.5 border border-[var(--mist-200)]
+              rounded-[var(--radius-lg)] bg-[var(--card-bg)] text-[var(--foreground)]
+              placeholder-[var(--mist-400)] text-sm
+              focus:outline-none focus:ring-2 focus:ring-[var(--moss-400)]
+              focus:border-[var(--moss-400)] hover:border-[var(--mist-300)]
+              transition-colors"
+            aria-label="Search species by name"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2
+                text-[var(--mist-400)] hover:text-[var(--mist-600)]
+                transition-colors"
+              aria-label="Clear search"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Wish list view */}
       {activeTab === "wishlist" ? (
         <>
@@ -480,9 +543,13 @@ export default function SpeciesDirectory() {
                 )}
               </div>
             </div>
+          ) : filteredWishList.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-[var(--mist-500)]">No species match your search</p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mergedWishList.map((item) => (
+              {filteredWishList.map((item) => (
                 <WishListCard
                   key={item.source === "ebird" ? `ebird-${item.ebirdEntryId}` : `manual-${item.speciesId}`}
                   item={item}
@@ -627,9 +694,9 @@ export default function SpeciesDirectory() {
                 No species found
               </h3>
               <p className="text-[var(--mist-500)] mb-6 max-w-sm mx-auto">
-                No species match the selected rarity filter
+                No species match your {searchQuery.trim() && selectedRarities.length > 0 ? "search and filters" : searchQuery.trim() ? "search" : "filters"}
               </p>
-              <Button variant="secondary" onClick={() => setSelectedRarities([])}>Clear Filter</Button>
+              <Button variant="secondary" onClick={() => { setSelectedRarities([]); setSearchQuery(""); }}>Clear All</Button>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

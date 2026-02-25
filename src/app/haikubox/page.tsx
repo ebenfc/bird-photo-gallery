@@ -114,7 +114,7 @@ export default function ActivityPage() {
     commonName: string;
     scientificName?: string;
     description?: string;
-    rarity: Rarity;
+    rarity?: Rarity | null;
   }) => {
     // 1. Create the species
     const createResponse = await fetch("/api/species", {

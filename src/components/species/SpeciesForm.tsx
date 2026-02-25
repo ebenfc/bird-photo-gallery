@@ -21,7 +21,7 @@ interface SpeciesFormProps {
     commonName: string;
     scientificName?: string;
     description?: string;
-    rarity?: Rarity;
+    rarity?: Rarity | null;
     ebirdChecklistUrl?: string | null;
     inatObservationUrl?: string | null;
   }) => Promise<void>;
@@ -30,7 +30,7 @@ interface SpeciesFormProps {
     commonName: string;
     scientificName?: string;
     description?: string;
-    rarity?: Rarity;
+    rarity?: Rarity | null;
     ebirdChecklistUrl?: string | null;
     inatObservationUrl?: string | null;
   };
@@ -50,7 +50,7 @@ export default function SpeciesForm({
   const [commonName, setCommonName] = useState("");
   const [scientificName, setScientificName] = useState("");
   const [description, setDescription] = useState("");
-  const [rarity, setRarity] = useState<Rarity>("common");
+  const [rarity, setRarity] = useState<Rarity | null>(null);
   const [ebirdChecklistUrl, setEbirdChecklistUrl] = useState("");
   const [inatObservationUrl, setInatObservationUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -98,7 +98,7 @@ export default function SpeciesForm({
       setCommonName(initialData?.commonName || "");
       setScientificName(initialData?.scientificName || "");
       setDescription(initialData?.description || "");
-      setRarity(initialData?.rarity || "common");
+      setRarity(initialData?.rarity ?? null);
       setEbirdChecklistUrl(initialData?.ebirdChecklistUrl || "");
       setInatObservationUrl(initialData?.inatObservationUrl || "");
       setError("");
@@ -197,7 +197,7 @@ export default function SpeciesForm({
     setCommonName("");
     setScientificName("");
     setDescription("");
-    setRarity("common");
+    setRarity(null);
     setEbirdChecklistUrl("");
     setInatObservationUrl("");
     setError("");
@@ -315,7 +315,7 @@ export default function SpeciesForm({
 
           <div>
             <label className="block text-sm font-medium text-[var(--mist-700)] mb-1.5">
-              Rarity
+              Rarity <span className="text-[var(--mist-400)] font-normal">(optional)</span>
             </label>
             <RarityPicker value={rarity} onChange={setRarity} />
           </div>

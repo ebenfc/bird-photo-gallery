@@ -218,7 +218,7 @@ export default function UploadModal({
     commonName: string;
     scientificName?: string;
     description?: string;
-    rarity?: Rarity;
+    rarity?: Rarity | null;
   }) => {
     const res = await fetch("/api/species", {
       method: "POST",

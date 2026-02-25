@@ -41,7 +41,7 @@ export default function PublicSpeciesPage() {
 
   // Filter species by rarity (client-side)
   const filteredSpecies = selectedRarities.length > 0
-    ? speciesList.filter((s) => selectedRarities.includes(s.rarity))
+    ? speciesList.filter((s) => s.rarity !== null && selectedRarities.includes(s.rarity))
     : speciesList;
 
   // Single-select rarity toggle (matching authenticated view)

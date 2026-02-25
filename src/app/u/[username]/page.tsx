@@ -23,6 +23,7 @@ export default function PublicFeedPage() {
   const [totalPhotos, setTotalPhotos] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const pageRef = useRef(1);
+  const fetchInProgressRef = useRef(false);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
 
   // Filter state
@@ -71,6 +72,9 @@ export default function PublicFeedPage() {
 
   // Fetch photos (page 1 = replace, page 2+ = append)
   const fetchPhotos = useCallback(async (page: number, append: boolean) => {
+    if (fetchInProgressRef.current) return;
+    fetchInProgressRef.current = true;
+
     if (append) {
       setLoadingMore(true);
     } else {
@@ -100,6 +104,7 @@ export default function PublicFeedPage() {
     } catch (error) {
       console.error("Failed to fetch photos:", error);
     } finally {
+      fetchInProgressRef.current = false;
       setLoading(false);
       setLoadingMore(false);
     }
@@ -113,6 +118,7 @@ export default function PublicFeedPage() {
   // Infinite scroll
   const hasMore = pageRef.current < totalPages;
   const loadMore = useCallback(() => {
+    if (fetchInProgressRef.current) return;
     fetchPhotos(pageRef.current + 1, true);
   }, [fetchPhotos]);
   const sentinelRef = useInfiniteScroll({ onLoadMore: loadMore, hasMore, loading: loadingMore });

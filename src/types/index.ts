@@ -16,7 +16,7 @@ export interface Species {
   commonName: string;
   scientificName: string | null;
   description: string | null;
-  rarity: Rarity;
+  rarity: Rarity | null;
   createdAt: string;
   photoCount?: number;
   coverPhotoId?: number | null;
@@ -65,7 +65,7 @@ export interface Photo {
     commonName: string;
     scientificName: string | null;
     description?: string | null;
-    rarity: Rarity;
+    rarity: Rarity | null;
   } | null;
 }
 
@@ -97,7 +97,7 @@ export interface WishListItem {
   firstObservedDate?: string | null;
   // Manual-sourced fields (BirdFeed species with 0 photos)
   speciesId?: number;
-  rarity?: Rarity;
+  rarity?: Rarity | null;
   createdAt?: string;
 }
 
@@ -204,7 +204,7 @@ export interface Suggestion {
   id: number;
   commonName: string;
   scientificName: string | null;
-  rarity: Rarity;
+  rarity: Rarity | null;
   score: number;
   reason: string;
   yearlyCount: number;

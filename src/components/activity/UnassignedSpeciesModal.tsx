@@ -21,7 +21,7 @@ interface UnassignedSpeciesModalProps {
     commonName: string;
     scientificName?: string;
     description?: string;
-    rarity: Rarity;
+    rarity: Rarity | null;
   }) => Promise<void>;
   detectionCommonName: string;
 }
@@ -34,7 +34,7 @@ export default function UnassignedSpeciesModal({
 }: UnassignedSpeciesModalProps) {
   const [scientificName, setScientificName] = useState("");
   const [description, setDescription] = useState("");
-  const [rarity, setRarity] = useState<Rarity>("common");
+  const [rarity, setRarity] = useState<Rarity | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -129,7 +129,7 @@ export default function UnassignedSpeciesModal({
   const handleClose = () => {
     setScientificName("");
     setDescription("");
-    setRarity("common");
+    setRarity(null);
     setError("");
     setLookupResult(null);
     onClose();
@@ -228,7 +228,7 @@ export default function UnassignedSpeciesModal({
           {/* Rarity Selection */}
           <div>
             <label className="block text-sm font-medium text-[var(--mist-700)] mb-1.5">
-              Rarity *
+              Rarity <span className="text-[var(--mist-400)] font-normal">(optional)</span>
             </label>
             <p className="text-xs text-[var(--mist-500)] mb-2">
               How often do you see this species on your property?

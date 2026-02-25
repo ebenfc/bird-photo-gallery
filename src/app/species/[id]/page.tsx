@@ -2,11 +2,12 @@
 
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
-import { Photo, Species, PhotosResponse, HaikuboxDetection } from "@/types";
+import { Photo, Species, PhotosResponse, HaikuboxDetection, Rarity } from "@/types";
 import PhotoGrid from "@/components/gallery/PhotoGrid";
 import PhotoModal from "@/components/gallery/PhotoModal";
 import Button from "@/components/ui/Button";
 import RarityBadge from "@/components/ui/RarityBadge";
+import RarityPicker from "@/components/ui/RarityPicker";
 import HeardBadge from "@/components/ui/HeardBadge";
 import ActivityTimeline from "@/components/activity/ActivityTimeline";
 import AllAboutBirdsLink from "@/components/species/AllAboutBirdsLink";
@@ -30,6 +31,8 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
   const [editingNotes, setEditingNotes] = useState(false);
   const [notesValue, setNotesValue] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
+  const [editingRarity, setEditingRarity] = useState(false);
+  const [savingRarity, setSavingRarity] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -174,6 +177,30 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
     }
   };
 
+  const handleRarityChange = async (newRarity: Rarity | null) => {
+    if (!species) return;
+    setSavingRarity(true);
+    try {
+      const res = await fetch(`/api/species/${species.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rarity: newRarity }),
+      });
+      if (res.ok) {
+        setSpecies((prev) => prev ? { ...prev, rarity: newRarity } : null);
+        setEditingRarity(false);
+        showToast("Rarity updated", "success");
+      } else {
+        showToast("Failed to update rarity", "error");
+      }
+    } catch (err) {
+      console.error("Failed to update rarity:", err);
+      showToast("Failed to update rarity", "error");
+    } finally {
+      setSavingRarity(false);
+    }
+  };
+
   const handleSetCoverPhoto = async (photoId: number, speciesId: number): Promise<boolean> => {
     try {
       const res = await fetch(`/api/species/${speciesId}`, {
@@ -289,7 +316,14 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
                 {species.commonName}
               </h1>
               <div className="flex items-center gap-2 sm:hidden">
-                <RarityBadge rarity={species.rarity} />
+                <button
+                  onClick={() => setEditingRarity(!editingRarity)}
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                  aria-label="Edit rarity"
+                  disabled={savingRarity}
+                >
+                  <RarityBadge rarity={species.rarity} />
+                </button>
                 {detection && detection.yearlyCount > 0 && (
                   <HeardBadge
                     count={detection.yearlyCount}
@@ -311,7 +345,14 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
             )}
           </div>
           <div className="hidden sm:flex items-center gap-2">
-            <RarityBadge rarity={species.rarity} />
+            <button
+              onClick={() => setEditingRarity(!editingRarity)}
+              className="cursor-pointer hover:opacity-80 transition-opacity"
+              aria-label="Edit rarity"
+              disabled={savingRarity}
+            >
+              <RarityBadge rarity={species.rarity} />
+            </button>
             {detection && detection.yearlyCount > 0 && (
               <HeardBadge
                 count={detection.yearlyCount}
@@ -321,6 +362,23 @@ export default function SpeciesPhotos({ params }: SpeciesPageProps) {
             )}
           </div>
         </div>
+
+        {/* Inline rarity editor */}
+        {editingRarity && (
+          <div className="mt-3 p-3 bg-[var(--mist-50)] rounded-[var(--radius-lg)] border border-[var(--border-light)]">
+            <p className="text-xs text-[var(--mist-500)] mb-2">Tap to select rarity, or tap the current selection to clear it</p>
+            <RarityPicker
+              value={species.rarity}
+              onChange={(r) => handleRarityChange(r)}
+            />
+            <button
+              onClick={() => setEditingRarity(false)}
+              className="mt-2 text-xs text-[var(--mist-500)] hover:text-[var(--mist-700)] transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
 
         {/* Ecosystem links and metadata */}
         <div className="flex flex-wrap items-center gap-3 mt-3">
