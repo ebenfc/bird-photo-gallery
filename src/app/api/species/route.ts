@@ -216,7 +216,7 @@ export async function POST(request: NextRequest) {
         commonName,
         scientificName: scientificName || null,
         description: description || null,
-        rarity: rarity as Rarity,
+        rarity: (rarity as Rarity) ?? null,
       })
       .returning();
 

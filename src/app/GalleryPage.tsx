@@ -17,6 +17,8 @@ function GalleryContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { showToast } = useToast();
+  const showToastRef = useRef(showToast);
+  showToastRef.current = showToast;
 
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [species, setSpecies] = useState<Species[]>([]);
@@ -25,6 +27,7 @@ function GalleryContent() {
   const [totalPhotos, setTotalPhotos] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const pageRef = useRef(1);
+  const fetchInProgressRef = useRef(false);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [photoToAssign, setPhotoToAssign] = useState<Photo | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -110,6 +113,9 @@ function GalleryContent() {
   }, [searchQuery]);
 
   const fetchPhotos = useCallback(async (page: number, append: boolean) => {
+    if (fetchInProgressRef.current) return;
+    fetchInProgressRef.current = true;
+
     if (append) {
       setLoadingMore(true);
     } else {
@@ -142,12 +148,13 @@ function GalleryContent() {
       if (!append) {
         setPhotos([]);
       }
-      showToast("Failed to load photos. Please try again.", "error");
+      showToastRef.current("Failed to load photos. Please try again.", "error");
     } finally {
+      fetchInProgressRef.current = false;
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [selectedSpecies, showFavoritesOnly, selectedRarities, searchQuery, dateFrom, dateTo, sortOption, showToast]);
+  }, [selectedSpecies, showFavoritesOnly, selectedRarities, searchQuery, dateFrom, dateTo, sortOption]);
 
   // Handle sort change
   const handleSortChange = (newSort: string) => {
@@ -182,6 +189,7 @@ function GalleryContent() {
   // Infinite scroll
   const hasMore = pageRef.current < totalPages;
   const loadMore = useCallback(() => {
+    if (fetchInProgressRef.current) return;
     fetchPhotos(pageRef.current + 1, true);
   }, [fetchPhotos]);
   const sentinelRef = useInfiniteScroll({ onLoadMore: loadMore, hasMore, loading: loadingMore });
@@ -274,7 +282,7 @@ function GalleryContent() {
 
   // Bulk create species and assign
   const handleBulkCreateAndAssign = async (
-    speciesData: { commonName: string; scientificName?: string; rarity?: Rarity }
+    speciesData: { commonName: string; scientificName?: string; rarity?: Rarity | null }
   ) => {
     try {
       const createRes = await fetch("/api/species", {
@@ -348,7 +356,7 @@ function GalleryContent() {
 
   const handleCreateAndAssign = async (
     photoId: number,
-    speciesData: { commonName: string; scientificName?: string; rarity?: Rarity }
+    speciesData: { commonName: string; scientificName?: string; rarity?: Rarity | null }
   ) => {
     // Create species
     const createRes = await fetch("/api/species", {

@@ -19,7 +19,7 @@ export const SpeciesSchema = z.object({
     .transform(s => s.trim())
     .optional()
     .nullable(),
-  rarity: RarityEnum.optional().default('common'),
+  rarity: RarityEnum.optional().nullable().default(null),
   userNotes: z.string()
     .max(2000, 'Notes too long')
     .transform(s => s.trim())
@@ -62,7 +62,7 @@ export const SpeciesUpdateSchema = z.object({
     .transform(s => s.trim())
     .optional()
     .nullable(),
-  rarity: RarityEnum.optional(),
+  rarity: RarityEnum.optional().nullable(),
   coverPhotoId: z.number().int().positive().optional().nullable(),
   userNotes: z.string()
     .max(2000, 'Notes too long')

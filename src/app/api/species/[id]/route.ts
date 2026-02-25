@@ -96,7 +96,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       commonName: string;
       scientificName: string | null;
       description: string | null;
-      rarity: string;
+      rarity: string | null;
       coverPhotoId: number | null;
       userNotes: string | null;
       ebirdChecklistUrl: string | null;
@@ -120,9 +120,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       updateData.description = description?.trim() || null;
     }
     if (rarity !== undefined) {
-      if (!VALID_RARITIES.includes(rarity)) {
+      if (rarity !== null && !VALID_RARITIES.includes(rarity)) {
         return NextResponse.json(
-          { error: "Invalid rarity value. Must be 'common', 'uncommon', or 'rare'" },
+          { error: "Invalid rarity value. Must be 'common', 'uncommon', 'rare', or null" },
           { status: 400 }
         );
       }

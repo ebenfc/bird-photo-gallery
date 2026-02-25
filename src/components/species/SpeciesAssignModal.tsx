@@ -106,14 +106,14 @@ interface SpeciesAssignModalProps {
   onAssign: (photoId: number, speciesId: number, replacePhotoId?: number) => Promise<void>;
   onCreateAndAssign: (
     photoId: number,
-    speciesData: { commonName: string; scientificName?: string; rarity?: Rarity }
+    speciesData: { commonName: string; scientificName?: string; rarity?: Rarity | null }
   ) => Promise<void>;
   onSkip?: () => void;
   showSkip?: boolean;
   queuePosition?: { current: number; total: number };
   bulkPhotos?: Photo[];
   onBulkAssign?: (speciesId: number) => Promise<void>;
-  onBulkCreateAndAssign?: (speciesData: { commonName: string; scientificName?: string; rarity?: Rarity }) => Promise<void>;
+  onBulkCreateAndAssign?: (speciesData: { commonName: string; scientificName?: string; rarity?: Rarity | null }) => Promise<void>;
 }
 
 export default function SpeciesAssignModal({
@@ -135,7 +135,7 @@ export default function SpeciesAssignModal({
   const [showNewForm, setShowNewForm] = useState(false);
   const [newCommonName, setNewCommonName] = useState("");
   const [newScientificName, setNewScientificName] = useState("");
-  const [newRarity, setNewRarity] = useState<Rarity>("common");
+  const [newRarity, setNewRarity] = useState<Rarity | null>(null);
   const [loading, setLoading] = useState(false);
   const [recentDetections, setRecentDetections] = useState<HaikuboxDetection[]>([]);
 
@@ -334,7 +334,7 @@ export default function SpeciesAssignModal({
 
       setNewCommonName("");
       setNewScientificName("");
-      setNewRarity("common");
+      setNewRarity(null);
       setShowNewForm(false);
     } finally {
       setLoading(false);
@@ -788,7 +788,7 @@ export default function SpeciesAssignModal({
               </div>
               <div>
                 <label className="block text-sm font-medium text-[var(--forest-700)] mb-2">
-                  Rarity
+                  Rarity <span className="text-[var(--mist-400)] font-normal">(optional)</span>
                 </label>
                 <RarityPicker value={newRarity} onChange={setNewRarity} />
               </div>
@@ -799,7 +799,7 @@ export default function SpeciesAssignModal({
                     setShowNewForm(false);
                     setNewCommonName("");
                     setNewScientificName("");
-                    setNewRarity("common");
+                    setNewRarity(null);
                     setLookupResult(null);
                     setScientificNameAutoFilled(false);
                     setNameValidation({ isValid: true, suggestions: [], errors: [] });

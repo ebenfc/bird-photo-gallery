@@ -39,7 +39,7 @@ export const species = pgTable("species", {
   commonName: text("common_name").notNull(),
   scientificName: text("scientific_name"),
   description: text("description"),
-  rarity: text("rarity").notNull().default("common"), // 'common', 'uncommon', 'rare'
+  rarity: text("rarity"), // 'common', 'uncommon', 'rare', or null (unassigned)
   coverPhotoId: integer("cover_photo_id"),
   userNotes: text("user_notes"), // Personal notes about this species (separate from Wikipedia description)
   ebirdChecklistUrl: text("ebird_checklist_url"), // Optional eBird checklist link

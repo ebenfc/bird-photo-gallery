@@ -38,7 +38,7 @@ function calculatePriorityScore(
   yearlyCount: number,
   photoCount: number,
   lastHeard: Date | null,
-  rarity: string
+  rarity: string | null
 ): number {
   // Detection Score (0-40 points)
   // Scale: More detections = higher priority
@@ -168,7 +168,7 @@ export async function getPhotoSuggestions(userId: string, limit: number = 10): P
       id: r.id,
       commonName: r.commonName,
       scientificName: r.scientificName,
-      rarity: r.rarity as Rarity,
+      rarity: (r.rarity as Rarity) ?? null,
       score,
       reason,
       yearlyCount: r.yearlyCount,
