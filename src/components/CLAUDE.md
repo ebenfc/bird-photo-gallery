@@ -44,7 +44,7 @@ Components are organized by feature area.
 Mobile views use collapsible filter panels (Feed, Species, Activity, Public Feed). Desktop filters always visible.
 
 ### Infinite Scroll (Feed + Public Gallery)
-Both the user's Feed (`GalleryPage.tsx`) and public gallery (`u/[username]/page.tsx`) use `useInfiniteScroll` hook with IntersectionObserver. Photos load in batches of 50. Filter/sort changes reset to page 1. Modal navigation prefetches next batch when within 5 photos of loaded boundary. The sentinel div sits below `PhotoGrid`; the hook is in `src/hooks/useInfiniteScroll.ts`.
+Both the user's Feed (`GalleryPage.tsx`) and public gallery (`u/[username]/page.tsx`) use `useInfiniteScroll` hook with IntersectionObserver. Photos load in batches of 50. Filter/sort changes reset to page 1. Modal navigation prefetches next batch when within 5 photos of loaded boundary. The sentinel div sits below `PhotoGrid`; the hook is in `src/hooks/useInfiniteScroll.ts`. Both pages use a `fetchInProgressRef` guard to prevent concurrent fetches from overwriting each other (race condition fix). Feed also stabilizes `showToast` via a ref to avoid unnecessary `fetchPhotos` recreations.
 
 ### SpeciesCard (`species/SpeciesCard.tsx`)
 Shared card for auth and public views. `linkPrefix` prop for URL target, `onEdit` for auth-only edit button. `HeardBadge` only shows with Haikubox data. Photo count shows `"X of 8"` or `"Curated"` badge. Shows "First photographed" date when `species.firstPhotoDate` is set.
@@ -89,7 +89,7 @@ Reusable primitives: buttons, inputs, modals, badges, loading states, toast noti
 Use these instead of creating one-off styled elements.
 
 ### RarityPicker (`ui/RarityPicker.tsx`)
-Toggle buttons for common/uncommon/rare selection. Props: `value: Rarity`, `onChange: (rarity: Rarity) => void`. Used in SpeciesForm, SpeciesAssignModal, and UnassignedSpeciesModal.
+Toggle buttons for common/uncommon/rare selection with toggle-off support (click selected rarity to clear to null). Props: `value: Rarity | null`, `onChange: (rarity: Rarity | null) => void`. Used in SpeciesForm, SpeciesAssignModal, UnassignedSpeciesModal, and inline on species detail page.
 
 ### Accessibility Patterns (WCAG 2.1 AA)
 - **Modal** has built-in focus trap (Tab/Shift+Tab cycling), focus restore on close, `role="dialog"`, `aria-modal="true"`. Pass `aria-label` or `aria-labelledby` prop to every Modal usage.

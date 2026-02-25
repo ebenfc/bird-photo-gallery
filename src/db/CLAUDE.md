@@ -71,9 +71,10 @@ Use `src/lib/user.ts` functions for user operations:
 
 ```typescript
 type Rarity = "common" | "uncommon" | "rare";
+// Column is nullable — null means "unassigned" (user hasn't categorized yet)
 ```
 
-Rarity is user-defined, not auto-assigned. Unassigned Haikubox detections show as "Unassigned" in the UI.
+Rarity is user-defined, optional, and nullable. New species default to `null` (shown as "Unassigned" in UI). Users can set or clear rarity via inline editing on the species detail page.
 
 ## Query Patterns
 
